@@ -1,0 +1,22 @@
+
+  ::ng-deep ngx-datatable .datatable-header {
+    font-weight: 600;
+    text-align: center;
+    background-color: #f8f9fa;
+    color: #333;
+  }
+  
+  ::ng-deep ngx-datatable .datatable-body-cell {
+    text-align: center;
+    vertical-align: middle;
+  }
+  
+  ::ng-deep ngx-datatable .datatable-row-group-header {
+    background-color: #e9ecef;
+    font-weight: 500;
+  }
+  
+  ::ng-deep ngx-datatable .datatable-body-row:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
