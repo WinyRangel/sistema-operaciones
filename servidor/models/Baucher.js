@@ -1,18 +1,17 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const baucherSchema = new mongoose.Schema({
   coordinacion: { 
-    type: String, 
+    type: Schema.Types.ObjectId, 
+    ref: 'Coordinacion', // ← Aquí le dices de qué colección viene
     required: true 
   },
   ejecutiva: { 
-    type: String, 
-    required: false 
+    type: String, // O un objeto si prefieres
+    required: true 
   },
-  coordinador: { 
-    type: String, 
-    required: false 
-  },
+
   fechaBaucher: {
     type: Date,
     required: false
@@ -21,20 +20,19 @@ const baucherSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
-  // En el modelo:
   diasDiferencia: {
     type: Number,
     required: false
-  },  
-  grupo:{
+  },
+  grupo: {
     type: String,
     required: false
   },
-  concepto:{
+  concepto: {
     type: String,
     required: false
   },
-  titular:{
+  titular: {
     type: String,
     required: false
   }

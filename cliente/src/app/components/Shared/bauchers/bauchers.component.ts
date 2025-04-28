@@ -49,27 +49,32 @@ export class BauchersComponent implements OnInit{
       });
     }
 
-    obtenerNombresEjecutivas(coordinacion: Coordinacion): string {
-      return coordinacion.ejecutivas.map(e => e.nombre).join(', ');
-    }
+    obtenerNombresEjecutivas(coordinacionInput: Coordinacion | string): string {
+      let coordinacion: Coordinacion | undefined;
     
-    obtenerEjecutivasPorNombre(nombreCoordinacion: string): string {
-      const coordinacion = this.coordinaciones.find(c => c.nombre === nombreCoordinacion);
+      if (typeof coordinacionInput === 'string') {
+        coordinacion = this.coordinaciones.find(c => c.nombre === coordinacionInput);
+      } else {
+        coordinacion = coordinacionInput;
+      }
+    
       return coordinacion ? coordinacion.ejecutivas.map(e => e.nombre).join(', ') : '—';
     }
     
-
     agregarBaucher(): void {
       if (this.baucherForm.valid) {
+        const coordinacionSeleccionada: Coordinacion = this.baucherForm.get('coordinacion')?.value;
+        const ejecutivaSeleccionada: Persona = this.baucherForm.get('ejecutiva')?.value;
+    
         const BAUCHER: Baucher = {
-          coordinacion: this.baucherForm.get('coordinacion')?.value,
-          ejecutiva: this.baucherForm.get('ejecutiva')?.value,
+          coordinacion: coordinacionSeleccionada._id,  // Solo el id de la coordinación
+          ejecutiva: ejecutivaSeleccionada.nombre,     // Solo el nombre de la ejecutiva
           fechaBaucher: this.baucherForm.get('fechaBaucher')?.value,
           fechaReporte: this.baucherForm.get('fechaReporte')?.value,
           grupo: this.baucherForm.get('grupo')?.value,
           concepto: this.baucherForm.get('concepto')?.value,
           titular: this.baucherForm.get('titular')?.value,
-        }
+        };
     
         this._pagosService.agregarBaucher(BAUCHER).subscribe(
           (response) => {
@@ -88,30 +93,21 @@ export class BauchersComponent implements OnInit{
               icon: "success",
               title: "Guardado exitosamente"
             });
-          },
-          (error) => {
-            const Toast = Swal.mixin({
-              toast: true,
-              position: "top-end",
-              showConfirmButton: false,
-              timer: 2000,
-              timerProgressBar: true,
-              didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
+            this._pagosService.agregarBaucher(BAUCHER).subscribe(
+              (response) => {
+                Toast.fire({ icon: "success", title: "Guardado exitosamente" });
+                this.obtenerBauchers();
+              },
+              (error) => {
+                Toast.fire({ icon: "error", title: "Ocurrió un error" });
               }
-            });
-            Toast.fire({
-              icon: "error",
-              title: "Ocurrió un error"
-            });
-          }
+            );
+
+          },
         );
-      } else {
-        console.log('Formulario inválido');
-        console.log(this.baucherForm)
       }
     }
+    
     
 
 
