@@ -16,7 +16,8 @@ export class BauchersComponent implements OnInit{
   listarBauchers: any[] = []; // Cambiado a any[] para incluir la coordinación.
   coordinaciones: Coordinacion[] = [];  // Asegúrate de que coordinaciones sea de tipo Coordinacion[]
   baucherForm: FormGroup;
-  ejecutivasFiltradas: Persona[] = [];
+  personasFiltradas: Persona[] = [];
+
 
   constructor(
     private fb: FormBuilder,
@@ -33,15 +34,22 @@ export class BauchersComponent implements OnInit{
       });      
     }
   
-    filtrarEjecutivas() {
+    filtrarPersonas() {
       const coord: Coordinacion = this.baucherForm.get('coordinacion')?.value;
       if (coord) {
-        this.ejecutivasFiltradas = coord.ejecutivas;
-        this.baucherForm.get('ejecutiva')?.setValue(null); // Resetea si ya había una ejecutiva seleccionada
+        this.personasFiltradas = [
+          ...(coord.ejecutivas || []).map(e => ({ ...e, tipo: 'Ejecutiva' })),
+          ...(coord.coordinador || []).map(c => ({ ...c, tipo: 'Coordinador' }))
+        ];
+        
+        this.baucherForm.get('ejecutiva')?.setValue(null); // Resetea la selección
       } else {
-        this.ejecutivasFiltradas = [];
+        this.personasFiltradas = [];
       }
     }
+
+    
+
     ngOnInit(): void {
       this.obtenerBauchers();
       this._coordinacionService.obtenerCoordinacion().subscribe(data => {
@@ -49,18 +57,7 @@ export class BauchersComponent implements OnInit{
       });
     }
 
-    obtenerNombresEjecutivas(coordinacionInput: Coordinacion | string): string {
-      let coordinacion: Coordinacion | undefined;
-    
-      if (typeof coordinacionInput === 'string') {
-        coordinacion = this.coordinaciones.find(c => c.nombre === coordinacionInput);
-      } else {
-        coordinacion = coordinacionInput;
-      }
-    
-      return coordinacion ? coordinacion.ejecutivas.map(e => e.nombre).join(', ') : '—';
-    }
-    
+
     agregarBaucher(): void {
       if (this.baucherForm.valid) {
         const coordinacionSeleccionada: Coordinacion = this.baucherForm.get('coordinacion')?.value;

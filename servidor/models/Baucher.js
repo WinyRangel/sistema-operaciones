@@ -9,9 +9,12 @@ const baucherSchema = new mongoose.Schema({
   },
   ejecutiva: { 
     type: String, // O un objeto si prefieres
-    required: true 
+    required: false 
   },
-
+  coordinador: { 
+    type: String, // O un objeto si prefieres
+    required: false 
+  },
   fechaBaucher: {
     type: Date,
     required: false

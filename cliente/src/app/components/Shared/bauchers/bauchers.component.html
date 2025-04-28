@@ -1,150 +1,144 @@
-<div class="container py-5">
-  <div class="card shadow-lg rounded-4 border-0">
-    <form class="p-4 p-md-5" [formGroup]="baucherForm" (ngSubmit)="agregarBaucher()">
+<div class="container py-5 max-w-1200 mx-auto">
+  <div class="card shadow-lg-hover rounded-4 overflow-hidden border-0 transition-all">
+    
+    <form class="p-3 p-md-4" [formGroup]="baucherForm" (ngSubmit)="agregarBaucher()">
       
-      <h2 class="text-center mb-5 text-primary fw-bold display-5">Registro de Bauchers</h2>
+      <h4 class="text-center mb-4 fw-bold fs-2 ">Registro de Bauchers</h4>
 
       <!-- Información del Baucher -->
-      <section class="mb-5">
-        <div class="d-flex align-items-center gap-2 mb-4">
-          <div class="section-badge bg-primary"></div>
-          <h3 class="h5 fw-bold text-dark m-0">Información del Baucher</h3>
+      <section class="mb-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="section-divider bg-primary"></div>
+          <h2 class="h4 fw-semibold text-dark mb-0">Información del Baucher</h2>
         </div>
 
-        <div class="row g-4">
-          <div class="col-md-6">
-            <div class="form-floating">
-              <select class="form-select" id="coordinacion" formControlName="coordinacion" (change)="filtrarEjecutivas()">
+        <section class="mb-4">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label for="coordinacion" class="form-label fw-medium">Coordinación</label>
+              <select class="form-select shadow-sm focus-ring-primary" id="coordinacion" formControlName="coordinacion" (change)="filtrarPersonas()">
                 <option selected disabled value="">Seleccionar coordinación</option>
                 <option *ngFor="let coord of coordinaciones" [ngValue]="coord">
                   {{ coord.municipio }} - {{ coord.nombre }}
                 </option>
               </select>
-              <label for="coordinacion">Coordinación</label>
             </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="form-floating">
-              <select class="form-select" id="ejecutiva" formControlName="ejecutiva">
-                <option selected disabled value="">Seleccionar ejecutiva</option>
-                <option *ngFor="let ejecutiva of ejecutivasFiltradas" [ngValue]="ejecutiva">
-                  {{ ejecutiva.nombre }}
+        
+            <div class="col-12 col-md-6">
+              <label for="ejecutiva" class="form-label fw-medium">Ejecutiva / Coordinador</label>
+              <select class="form-select shadow-sm focus-ring-primary" id="ejecutiva" formControlName="ejecutiva">
+                <option selected disabled value="">Seleccionar persona</option>
+                <option *ngFor="let persona of personasFiltradas" [ngValue]="persona">
+                  {{ persona.nombre }} 
                 </option>
+                
               </select>
-              <label for="ejecutiva">Ejecutiva</label>
+            </div>
+            
+        
+            <div class="col-12 col-md-6">
+              <label for="fechaBaucher" class="form-label fw-medium">Fecha y Hora de Pago</label>
+              <input type="datetime-local" class="form-control shadow-sm focus-ring-primary" id="fechaBaucher" formControlName="fechaBaucher">
             </div>
           </div>
+        </section>
+        
+        <hr class="my-4 opacity-10" />
+        
+        <!-- Reporte de Pago -->
+        <section>
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="section-divider bg-primary"></div>
+            <h2 class="h4 fw-semibold text-dark mb-0">Reporte de Pago</h2>
+          </div>
+        
+          <div class="row g-3">
+            <div class="col-12 col-md-6 col-lg-4">
+              <label for="fechaReporte" class="form-label fw-medium">Fecha de Reporte</label>
+              <input type="datetime-local" class="form-control shadow-sm focus-ring-primary" id="fechaReporte" formControlName="fechaReporte">
+            </div>
+        
+            <div class="col-6 col-md-3 col-lg-2">
+              <label for="grupo" class="form-label fw-medium">Grupo</label>
+              <input type="text" class="form-control shadow-sm focus-ring-primary" id="grupo" placeholder="Ej: Grupo 5" formControlName="grupo">
+            </div>
+        
+            <div class="col-6 col-md-3 col-lg-3">
+              <label for="concepto" class="form-label fw-medium">Concepto</label>
+              <input type="text" class="form-control shadow-sm focus-ring-primary" id="concepto" placeholder="Ej: Pago mensual" formControlName="concepto">
+            </div>
+        
+            <div class="col-12 col-md-6 col-lg-3">
+              <label for="titular" class="form-label fw-medium">Titular</label>
+              <input type="text" class="form-control shadow-sm focus-ring-primary" id="titular" placeholder="Ej: Juan Pérez" formControlName="titular">
+            </div>
+          </div>
+        </section>        
 
-          <div class="col-md-6">
-            <div class="form-floating">
-              <input type="datetime-local" class="form-control" id="fechaBaucher" formControlName="fechaBaucher">
-              <label for="fechaBaucher">Fecha y Hora de Pago</label>
-            </div>
-          </div>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+          <button type="button" class="btn btn-outline-info me-md-2">
+            <i class="fa-solid fa-plus" style="color: #0008ff;"></i> Añadir Baucher
+          </button>    
+          <button class="btn btn-primary" type="submit">
+            <i class="fas fa-save me-2"></i>Guardar
+          </button>      
         </div>
+
       </section>
-
-      <hr class="my-5 opacity-25" />
-
-      <!-- Reporte de Pago -->
-      <section>
-        <div class="d-flex align-items-center gap-2 mb-4">
-          <div class="section-badge bg-primary"></div>
-          <h3 class="h5 fw-bold text-dark m-0">Reporte de Pago</h3>
-        </div>
-
-        <div class="row g-4">
-          <div class="col-md-4">
-            <div class="form-floating">
-              <input type="datetime-local" class="form-control" id="fechaReporte" formControlName="fechaReporte">
-              <label for="fechaReporte">Fecha de Reporte</label>
-            </div>
-          </div>
-
-          <div class="col-md-2">
-            <div class="form-floating">
-              <input type="text" class="form-control" id="grupo" placeholder="Grupo" formControlName="grupo">
-              <label for="grupo">Grupo</label>
-            </div>
-          </div>
-
-          <div class="col-md-3">
-            <div class="form-floating">
-              <input type="text" class="form-control" id="concepto" placeholder="Concepto" formControlName="concepto">
-              <label for="concepto">Concepto</label>
-            </div>
-          </div>
-
-          <div class="col-md-3">
-            <div class="form-floating">
-              <input type="text" class="form-control" id="titular" placeholder="Titular" formControlName="titular">
-              <label for="titular">Titular</label>
-            </div>
-          </div>
-        </div>
-
-        <div class="text-end mt-5">
-          <button class="btn btn-success btn-lg fw-bold" type="submit">
-            Guardar
-          </button>
-        </div>
-      </section>
-
     </form>
   </div>
 
   <!-- Tabla de Reportes -->
-  <div class="card shadow rounded-4 p-4 mt-5 border-0">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-      <h3 class="h5 fw-bold mb-0">Reportes Registrados</h3>
+  <div class="bg-light rounded-3 p-3 p-md-4 mt-4 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <h3 class="h5 fw-semibold mb-0 text-dark">Bauchers Registrados</h3>
 
-      <div class="col-md-4">
-        <div class="input-group">
-          <span class="input-group-text bg-white border-end-0">
-            <i class="bi bi-search text-secondary"></i>
+      <div class="col-12 col-md-5">
+        <div class="input-group shadow-sm rounded-2">
+          <span class="input-group-text bg-white border-end-0 pe-1">
+            <i class="bi bi-search text-secondary fs-5"></i>
           </span>
-          <input type="search" class="form-control border-start-0" placeholder="Buscar...">
+          <input type="search" class="form-control border-start-0 ps-2 focus-ring-primary" placeholder="Buscar reporte...">
         </div>
       </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-hover align-middle text-center">
-        <thead class="table-light">
+    <div class="table-responsive rounded-3 overflow-hidden border shadow-sm">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-primary text-white" style="text-align: center;">
           <tr>
-            <th>Coordinación</th>
-            <th>Ejecutiva</th>
-            <th>Fecha Pago</th>
-            <th>Hora</th>
-            <th>Fecha Reporte</th>
-            <th>Hora</th>
-            <th>Días diferencia</th>
-            <th>Grupo</th>
-            <th>Concepto</th>
-            <th>Titular</th>
-            <th>Acciones</th>
+            <th class="fw-medium py-3">Coordinación</th>
+            <th class="fw-medium py-3">Ejecutiva</th>
+            <th class="fw-medium py-3">Fecha Pago</th>
+            <th class="fw-medium py-3">Hora</th>
+            <th class="fw-medium py-3">Fecha Reporte</th>
+            <th class="fw-medium py-3">Hora</th>
+            <th class="fw-medium py-3">Días diferencia</th>
+            <th class="fw-medium py-3">Grupo</th>
+            <th class="fw-medium py-3">Concepto</th>
+            <th class="fw-medium py-3">Titular</th>
+            <th class="fw-medium py-3">Acciones</th>
           </tr>
         </thead>
         <tbody class="table-group-divider">
-          <tr *ngFor="let baucher of listarBauchers" class="cursor-pointer">
-            <td>{{ baucher.coordinacion.municipio }}</td>
-            <td>{{ baucher.ejecutiva }}</td>
+          <tr *ngFor="let baucher of listarBauchers" class="transition-all" style="text-align: center;">
+            <td class="py-2">{{ baucher.coordinacion.municipio }}</td>
+            <td>{{ baucher.ejecutiva || baucher.coordinador }} </td>
             <td>{{ baucher.fechaBaucher | date: 'dd-MM-yy' }}</td>
-            <td>{{ baucher.fechaBaucher | date: 'HH:mm:ss' }}</td>
+            <td>{{ baucher.fechaBaucher | date: 'HH:mm' }}</td>
             <td>{{ baucher.fechaReporte | date: 'dd-MM-yy' }}</td>
-            <td>{{ baucher.fechaReporte | date: 'HH:mm:ss' }}</td>
-            <td>{{ baucher.diasDiferencia }}</td>
+            <td>{{ baucher.fechaReporte | date: 'HH:mm' }}</td>
+            <td><span class="badge bg-danger">{{ baucher.diasDiferencia }}</span></td>
             <td>{{ baucher.grupo }}</td>
             <td>{{ baucher.concepto }}</td>
             <td>{{ baucher.titular }}</td>
             <td>
               <div class="d-flex justify-content-center gap-2">
-                <button class="btn btn-light p-2">
-                  <i class="fa-solid fa-pen text-success"></i>
+                <button class="btn btn-sm btn-outline-success hover-bg-success hover-text-white">
+                  <i class="fa-regular fa-pen-to-square"></i>
                 </button>
-                <button class="btn btn-light p-2">
-                  <i class="fa-solid fa-trash text-danger"></i>
+                <button class="btn btn-sm btn-outline-danger hover-bg-danger hover-text-white">
+                  <i class="fa-regular fa-trash-can"></i>
                 </button>
               </div>
             </td>

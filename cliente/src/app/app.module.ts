@@ -15,13 +15,15 @@ import { InicioComponent } from './components/inicio/inicio.component';
 import { HeaderComponent } from './components/Shared/layout/header/header.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { FooterComponent } from './components/Shared/layout/footer/footer.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     BauchersComponent,
     InicioComponent,
-    HeaderComponent
+    HeaderComponent,
+    FooterComponent
   ],
   imports: [
     BrowserModule,
