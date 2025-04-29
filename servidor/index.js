@@ -15,9 +15,6 @@ app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-
-app.use('/', require('./routes/coordinacion.routes'));
 app.use('/', require('./routes/ejecutivas.routes'));
 
 
