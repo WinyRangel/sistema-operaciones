@@ -38,7 +38,12 @@ const baucherSchema = new mongoose.Schema({
   titular: {
     type: String,
     required: false
+  },
+  fechaCreacion: {
+    type: Date,
+    default: Date.now
   }
+  
 });
 
 module.exports = mongoose.model('Baucher', baucherSchema);

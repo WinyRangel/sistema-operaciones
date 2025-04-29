@@ -6,6 +6,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { TableModule } from 'primeng/table'
+import { FormsModule } from '@angular/forms';
 
 
 import { AppRoutingModule } from './app-routing.module';
@@ -16,6 +17,7 @@ import { HeaderComponent } from './components/Shared/layout/header/header.compon
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FooterComponent } from './components/Shared/layout/footer/footer.component';
+import { BaucherPipe } from './pipes/baucher.pipe';
 
 @NgModule({
   declarations: [
@@ -23,7 +25,8 @@ import { FooterComponent } from './components/Shared/layout/footer/footer.compon
     BauchersComponent,
     InicioComponent,
     HeaderComponent,
-    FooterComponent
+    FooterComponent,
+    BaucherPipe
   ],
   imports: [
     BrowserModule,
@@ -32,6 +35,7 @@ import { FooterComponent } from './components/Shared/layout/footer/footer.compon
     HttpClientModule,
     NgxDatatableModule,
     TableModule,
+    FormsModule
     
   ],
   providers: [

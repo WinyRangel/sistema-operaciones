@@ -1,92 +1,105 @@
-<div class="container py-5 max-w-1200 mx-auto">
-  <div class="card shadow-lg-hover rounded-4 overflow-hidden border-0 transition-all">
-    
-    <form class="p-3 p-md-4" [formGroup]="baucherForm" (ngSubmit)="agregarBaucher()">
-      
-      <h4 class="text-center mb-4 fw-bold fs-2 ">Registro de Bauchers</h4>
-
-      <!-- Información del Baucher -->
-      <section class="mb-4">
-        <div class="d-flex align-items-center gap-3 mb-3">
-          <div class="section-divider bg-primary"></div>
-          <h2 class="h4 fw-semibold text-dark mb-0">Información del Baucher</h2>
-        </div>
-
-        <section class="mb-4">
-          <div class="row g-3">
-            <div class="col-12 col-md-6">
-              <label for="coordinacion" class="form-label fw-medium">Coordinación</label>
-              <select class="form-select shadow-sm focus-ring-primary" id="coordinacion" formControlName="coordinacion" (change)="filtrarPersonas()">
-                <option selected disabled value="">Seleccionar coordinación</option>
-                <option *ngFor="let coord of coordinaciones" [ngValue]="coord">
-                  {{ coord.municipio }} - {{ coord.nombre }}
-                </option>
-              </select>
-            </div>
+<div class="accordion" id="accordionFormBaucher">
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+        Registro de Bauchers
+      </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionFormBaucher">
+      <div class="accordion-body">
+        <form class="p-3 p-md-4" [formGroup]="baucherForm" (ngSubmit)="agregarBaucher()">
+          <h4 class="text-center mb-4 fw-bold fs-2">Registro de Bauchers</h4>
         
-            <div class="col-12 col-md-6">
-              <label for="ejecutiva" class="form-label fw-medium">Ejecutiva / Coordinador</label>
-              <select class="form-select shadow-sm focus-ring-primary" id="ejecutiva" formControlName="ejecutiva">
-                <option selected disabled value="">Seleccionar persona</option>
-                <option *ngFor="let persona of personasFiltradas" [ngValue]="persona">
-                  {{ persona.nombre }} 
-                </option>
-                
-              </select>
-            </div>
-            
+          <div class="container overflow-hidden">
+            <div class="row gx-5">
+              <!-- Primera columna -->
+              <div class="col-12 col-lg-6 mb-4">
+                <section class="p-3">
+                  <div class="d-flex align-items-center gap-2 mb-4">
+                    <div class="section-divider bg-primary"></div>
+                    <h5 class="mb-0 fw-semibold text-primary">Datos de Coordinación</h5>
+                  </div>
         
-            <div class="col-12 col-md-6">
-              <label for="fechaBaucher" class="form-label fw-medium">Fecha y Hora de Pago</label>
-              <input type="datetime-local" class="form-control shadow-sm focus-ring-primary" id="fechaBaucher" formControlName="fechaBaucher">
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <label for="coordinacion" class="form-label fw-medium">Coordinación</label>
+                      <select class="form-select shadow-sm" id="coordinacion" formControlName="coordinacion" (change)="filtrarPersonas()">
+                        <option selected disabled value="">Seleccionar coordinación</option>
+                        <option *ngFor="let coord of coordinaciones" [ngValue]="coord">
+                          {{ coord.municipio }} - {{ coord.nombre }}
+                        </option>
+                      </select>
+                    </div>
+        
+                    <div class="col-12 col-md-6">
+                      <label for="ejecutiva" class="form-label fw-medium">Ejecutiva / Coordinador</label>
+                      <select class="form-select shadow-sm" id="ejecutiva" formControlName="ejecutiva">
+                        <option selected disabled value="">Seleccionar persona</option>
+                        <option *ngFor="let persona of personasFiltradas" [ngValue]="persona">
+                          {{ persona.nombre }}
+                        </option>
+                      </select>
+                    </div>
+        
+                    <div class="col-12">
+                      <label for="fechaBaucher" class="form-label fw-medium">Fecha y Hora de Pago</label>
+                      <input type="datetime-local" class="form-control shadow-sm" id="fechaBaucher" formControlName="fechaBaucher">
+                    </div>
+                  </div>
+                </section>
+              </div>
+        
+              <!-- Segunda columna -->
+              <div class="col-12 col-lg-6 mb-4 border-start">
+                <section class="p-3 ">
+                  <div class="d-flex align-items-center gap-2 mb-4">
+                    <div class="section-divider bg-primary"></div>
+                    <h5 class="mb-0 fw-semibold text-primary">Reporte de Pago</h5>
+                  </div>
+        
+                  <div class="row g-3">
+                    <div class="col-12 col-md-2 col-lg-8">
+                      <label for="fechaReporte" class="form-label fw-medium">Fecha de Reporte</label>
+                      <input type="datetime-local" class="form-control shadow-sm" id="fechaReporte" formControlName="fechaReporte">
+                    </div>
+        
+                    <div class="col-6 col-md-1 col-lg-4">
+                      <label for="grupo" class="form-label fw-medium">Grupo</label>
+                      <input type="text" class="form-control shadow-sm" id="grupo" placeholder="Ej: Grupo 5" formControlName="grupo">
+                    </div>
+        
+                    <div class="col-6 col-md-2 col-lg-4">
+                      <label for="concepto" class="form-label fw-medium">Concepto</label>
+                      <input type="text" class="form-control shadow-sm" id="concepto" placeholder="Ej: Pago mensual" formControlName="concepto">
+                    </div>
+        
+                    <div class="col-12 col-md-6 col-lg-3">
+                      <label for="titular" class="form-label fw-medium">Titular</label>
+                      <input type="text" class="form-control shadow-sm" id="titular" placeholder="Ej: Juan Pérez" formControlName="titular">
+                    </div>
+        
+                    <!-- <button type="button" class="btn btn-outline-info">
+                      <i class="fa-solid fa-plus me-2"></i>Añadir Baucher
+                    </button> -->
+                  </div>
+                </section>
+              </div>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>
+                  {{ editingBaucherId ? 'Actualizar' : 'Guardar' }}
+              </button>
             </div>
           </div>
-        </section>
-        
-        <hr class="my-4 opacity-10" />
-        
-        <!-- Reporte de Pago -->
-        <section>
-          <div class="d-flex align-items-center gap-3 mb-3">
-            <div class="section-divider bg-primary"></div>
-            <h2 class="h4 fw-semibold text-dark mb-0">Reporte de Pago</h2>
-          </div>
-        
-          <div class="row g-3">
-            <div class="col-12 col-md-6 col-lg-4">
-              <label for="fechaReporte" class="form-label fw-medium">Fecha de Reporte</label>
-              <input type="datetime-local" class="form-control shadow-sm focus-ring-primary" id="fechaReporte" formControlName="fechaReporte">
-            </div>
-        
-            <div class="col-6 col-md-3 col-lg-2">
-              <label for="grupo" class="form-label fw-medium">Grupo</label>
-              <input type="text" class="form-control shadow-sm focus-ring-primary" id="grupo" placeholder="Ej: Grupo 5" formControlName="grupo">
-            </div>
-        
-            <div class="col-6 col-md-3 col-lg-3">
-              <label for="concepto" class="form-label fw-medium">Concepto</label>
-              <input type="text" class="form-control shadow-sm focus-ring-primary" id="concepto" placeholder="Ej: Pago mensual" formControlName="concepto">
-            </div>
-        
-            <div class="col-12 col-md-6 col-lg-3">
-              <label for="titular" class="form-label fw-medium">Titular</label>
-              <input type="text" class="form-control shadow-sm focus-ring-primary" id="titular" placeholder="Ej: Juan Pérez" formControlName="titular">
-            </div>
-          </div>
-        </section>        
-
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-          <button type="button" class="btn btn-outline-info me-md-2">
-            <i class="fa-solid fa-plus" style="color: #0008ff;"></i> Añadir Baucher
-          </button>    
-          <button class="btn btn-primary" type="submit">
-            <i class="fas fa-save me-2"></i>Guardar
-          </button>      
-        </div>
-
-      </section>
-    </form>
+        </form>
+      </div>
+    </div>
   </div>
+</div>
+
+    
 
   <!-- Tabla de Reportes -->
   <div class="bg-light rounded-3 p-3 p-md-4 mt-4 shadow-sm">
@@ -98,8 +111,14 @@
           <span class="input-group-text bg-white border-end-0 pe-1">
             <i class="bi bi-search text-secondary fs-5"></i>
           </span>
-          <input type="search" class="form-control border-start-0 ps-2 focus-ring-primary" placeholder="Buscar reporte...">
+          <input
+          type="search"
+          class="form-control"
+          [(ngModel)]="filtrarBaucher"
+          placeholder="Buscar reporte..."
+        />
         </div>
+        
       </div>
     </div>
 
@@ -121,7 +140,7 @@
           </tr>
         </thead>
         <tbody class="table-group-divider">
-          <tr *ngFor="let baucher of listarBauchers" class="transition-all" style="text-align: center;">
+          <tr *ngFor="let baucher of paginatedBauchers" style="text-align: center;">
             <td class="py-2">{{ baucher.coordinacion.municipio }}</td>
             <td>{{ baucher.ejecutiva || baucher.coordinador }} </td>
             <td>{{ baucher.fechaBaucher | date: 'dd-MM-yy' }}</td>
@@ -134,17 +153,36 @@
             <td>{{ baucher.titular }}</td>
             <td>
               <div class="d-flex justify-content-center gap-2">
-                <button class="btn btn-sm btn-outline-success hover-bg-success hover-text-white">
-                  <i class="fa-regular fa-pen-to-square"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger hover-bg-danger hover-text-white">
+                <button class="btn btn-sm btn-outline-success hover-bg-success hover-text-white" 
+                (click)="cargarBaucherParaEditar(baucher)">
+                <i class="fa-regular fa-pen-to-square"></i>
+              </button>
+                 <button (click)="eliminarBaucher(baucher._id)" class="btn btn-sm btn-outline-danger hover-bg-danger hover-text-white">
                   <i class="fa-regular fa-trash-can"></i>
-                </button>
+                </button> 
               </div>
             </td>
           </tr>
         </tbody>
       </table>
+      <nav aria-label="Page navigation example" class="mt-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <a class="page-link"  (click)="changePage(currentPage - 1)">Anterior</a>
+          </li>
+      
+          <li 
+            class="page-item" 
+            *ngFor="let page of [].constructor(totalPages); let i = index" 
+            [class.active]="currentPage === (i + 1)">
+            <a class="page-link"  (click)="changePage(i + 1)">{{ i + 1 }}</a>
+          </li>
+      
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <a class="page-link"  (click)="changePage(currentPage + 1)">Siguiente</a>
+          </li>
+        </ul>
+      </nav>
+      
     </div>
   </div>
-</div>
