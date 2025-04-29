@@ -2,6 +2,7 @@ export interface Persona {
     _id: string;  // Agrega el campo _id aquí
     nombre: string;
     ejecutivas: string;
+    coordinadores: string;
   }
   
   export class Coordinacion {
