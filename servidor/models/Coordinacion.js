@@ -13,4 +13,4 @@ const coordinacionSchema = new mongoose.Schema({
   }] 
 });
 
-module.exports = mongoose.model('Coordinacion', coordinacionSchema);
+module.exports = mongoose.model('coordinacion', coordinacionSchema);

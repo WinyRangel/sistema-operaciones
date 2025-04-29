@@ -14,4 +14,5 @@ export class CoordinacionService {
   obtenerCoordinacion(): Observable<Coordinacion[]> {
     return this.http.get<Coordinacion[]>(this.url);
   }
+  
 }

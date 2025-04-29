@@ -1,11 +1,11 @@
 export interface Persona {
-    _id: string;  // Agrega el campo _id aquí
+    _id: string;  
     nombre: string;
     ejecutivas: string;
   }
   
   export class Coordinacion {
-    _id?: string; // MongoDB usa ObjectId como string
+    _id?: string; 
     municipio: string;
     ejecutivas: Persona[];
     coordinador: Persona[];

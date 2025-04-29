@@ -7,22 +7,27 @@ import { AppComponent } from './app.component';
 import { BauchersComponent } from './components/Shared/bauchers/bauchers.component';
 import { InicioComponent } from './components/inicio/inicio.component';
 import { HeaderComponent } from './components/Shared/layout/header/header.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { EjecutivasComponent } from './components/Shared/ejecutivas/ejecutivas.component';
+
+
 
 @NgModule({
   declarations: [
     AppComponent,
     BauchersComponent,
     InicioComponent,
-    HeaderComponent
+    HeaderComponent,
+    EjecutivasComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
     HttpClientModule,
-    NgxDatatableModule
+    NgxDatatableModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
