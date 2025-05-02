@@ -129,7 +129,7 @@ throw new Error('Method not implemented.');
               title: 'Actividad guardada correctamente'
             });
             
-            // 🔥 RECARGAR LOS REGISTROS
+            // RECARGAR LOS REGISTROS
             this.ejecutivasService.obtenerRegistros().subscribe((data: any[]) => {
               this.registros = data;
               this.filtrarRegistros(); // Para volver a aplicar el filtro

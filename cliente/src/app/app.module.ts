@@ -4,7 +4,6 @@ import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { BauchersComponent } from './components/Shared/bauchers/bauchers.component';
 import { InicioComponent } from './components/inicio/inicio.component';
 import { HeaderComponent } from './components/Shared/layout/header/header.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -16,7 +15,6 @@ import { EjecutivasComponent } from './components/Shared/ejecutivas/ejecutivas.c
 @NgModule({
   declarations: [
     AppComponent,
-    BauchersComponent,
     InicioComponent,
     HeaderComponent,
     EjecutivasComponent
