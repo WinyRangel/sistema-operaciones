@@ -1,0 +1,1069 @@
+<div class="container mt-4 mb-4">
+  <div class="card shadow-sm bg-body-tertiary rounded">
+    <div class="card-body p-0">
+      <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+          <button class="nav-link active" id="nav-ismael-tab" data-bs-toggle="tab" data-bs-target="#nav-ismael" type="button" role="tab" aria-controls="nav-ismael" aria-selected="true" (click)="mostrarDiv('Ismael')">Ismael</button>
+          <button class="nav-link" id="nav-martha-tab" data-bs-toggle="tab" data-bs-target="#nav-martha" type="button" role="tab" aria-controls="nav-martha" aria-selected="false" (click)="mostrarDiv('Martha')">Martha</button>
+          <button class="nav-link" id="nav-magda-tab" data-bs-toggle="tab" data-bs-target="#nav-magda" type="button" role="tab" aria-controls="nav-magda" aria-selected="false" (click)="mostrarDiv('Magda')">Magda</button>
+          <button class="nav-link" id="nav-jimena-tab" data-bs-toggle="tab" data-bs-target="#nav-jimena" type="button" role="tab" aria-controls="nav-jimena" aria-selected="false" (click)="mostrarDiv('Jimena')">Jimena</button>
+          <button class="nav-link" id="nav-victor-tab" data-bs-toggle="tab" data-bs-target="#nav-victor" type="button" role="tab" aria-controls="nav-victor" aria-selected="false" (click)="mostrarDiv('Victor')">Victor</button>
+          <button class="nav-link" id="nav-mayra-tab" data-bs-toggle="tab" data-bs-target="#nav-mayra" type="button" role="tab" aria-controls="nav-mayra" aria-selected="false" (click)="mostrarDiv('Mayra')">Mayra</button>
+          <button class="nav-link" id="nav-fernanda-tab" data-bs-toggle="tab" data-bs-target="#nav-fernanda" type="button" role="tab" aria-controls="nav-fernanda" aria-selected="false" (click)="mostrarDiv('Fernanda')">Fernanda</button>
+        </div>
+      </nav>
+      
+  <div class="container bi-text-left">
+  <!--ASESOR ISMAEL-->
+    <div class="tab-content" id="nav-tabContent">
+      <div *ngIf="coordinadorVisible === 'Ismael'" class="tab-pane fade show active" id="nav-ismael" role="tabpanel">
+      <div class="row">
+        <div class="col-12 col-md-6 col-lg-4" *ngIf="isFormVisible" id="Ismael">
+        <div class="shadow p-3 mb-5 bg-body-tertiary rounded mt-4">
+           <!-- Form Content -->
+            <div class="p-4">
+              <form [formGroup]="registrarAgenda" (ngSubmit)="RegistrarAgenda()">
+                <h3>Registro de Agenda Ismael</h3>
+                <br>
+                <select class="form-select" id="semana" formControlName="semana">
+                  <option disabled selected>SEMANA</option>
+                  <option *ngFor="let semana of semanas" [value]="semana">{{ semana }}</option>
+                </select>
+                                
+                <div class="mb-3">
+                  <label for="fecha" class="form-label">Fecha</label>
+                  <input type="date" class="form-control" id="fecha" formControlName="fecha">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="hora" class="form-label">Hora</label>
+                  <input type="time" class="form-control" id="hora" formControlName="hora">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="domicilio" class="form-label">Domicilio</label>
+                  <input type="text" class="form-control" id="domicilio" formControlName="domicilio">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="actividad" class="form-label">Actividad</label>
+                  <input type="text" class="form-control" id="actividad" formControlName="actividad">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="codigo" class="form-label">Código</label>
+                  <select class="form-select" id="codigo" formControlName="codigo">
+                    <option selected disabled>Código</option>
+                    <option value="R">Pago</option>
+                    <option value="R/P">Pago/Levantamiento de Papeleria</option>
+                    <option value="C">Cobranza</option>
+                    <option value="VTA">Promoción</option>
+                    <option value="R/EC">Pago/Entrega/Cambio de Ciclo</option>
+                    <option value="R/ER">Pago/Entrega/Refill</option>
+                    <option value="GN">Grupo Nuevo</option>
+                    <option value="Sup">Supervisión</option>
+                    <option value="Aten">Atenciones</option>
+                    <option value="E">Desembolso o Entregas</option>
+                    <option value="R/A">Realizando Agendas</option>
+                    <option value="D">Domiciliar</option>
+                  </select>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="form-label d-block">Traslado</label>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" formControlName="traslado" value="SI" id="traslado-si">
+                    <label class="form-check-label" for="traslado-si">SÍ</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" formControlName="traslado" value="NO" id="traslado-no">
+                    <label class="form-check-label" for="traslado-no">NO</label>
+                  </div>
+                </div>                
+                <div class="mb-3" *ngIf="registrarAgenda.get('traslado')?.value === 'SI'">
+                  <label for="kmRecorrido" class="form-label">KM Recorridos</label>
+                  <input type="number" class="form-control" id="kmRecorrido" formControlName="kmRecorrido">
+                </div>                                
+                <button type="submit" class="btn btn-primary">Guardar Agenda</button>                
+              </form>
+
+            </div>
+          </div>
+          </div>
+          <div [class.col-12]="!isFormVisible" [class.col-md-6]="isFormVisible" [class.col-lg-8]="isFormVisible" 
+          class="mt-4">        
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <!-- Botón para mostrar/ocultar el formulario -->
+                <button type="button" class="btn btn-outline-warning" (click)="toggleFormVisibility()">
+                  <i *ngIf="!isFormVisible" class="fa-solid fa-chevron-left"></i>
+                  <i *ngIf="isFormVisible" class="fa-solid fa-chevron-left"></i>
+                </button>                
+                       
+            <div class="table-responsive mt-4">
+              <h4>Segumiento de Agenda</h4>
+              <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <select class="form-select" aria-label="Default select example">
+                  <option selected>SEMANA</option>
+                  <option value="R">SEMANA 1</option>
+                  <option value="2">SEMANA 2</option>
+                  <option value="3">SEMANA 3</option>
+                </select>
+              </div>
+              <div class="row mt-4">
+                <div class="col">
+                  <label for="lunes-km" class="form-label">KM Recorridos</label>
+                  <input type="text" class="form-control" placeholder="First name" aria-label="First name" disabled>
+                </div>
+                <div class="col">
+                  <label for="lunes-km" class="form-label">Gasolina</label>
+                  <input type="text" class="form-control" placeholder="Last name" aria-label="Last name" disabled>
+                </div>
+              </div>
+              <table class="table table-bordered table-hover align-middle mt-4">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col">Asesor</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Hora</th>
+                    <th scope="col">Domicilio</th>
+                    <th scope="col">Actividad</th>
+                    <th scope="col">Código</th>
+                    <th scope="col">Actividad Reportada</th>
+                    <th scope="col">Hora Reportada</th>
+                    <th scope="col">Hora Cierre</th>
+                    <th scope="col">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Ismael</th>
+                    <td>12/04/2025</td>
+                    <td>11:11 a.m.</td>
+                    <td>Lazaro Cárdenas, Calle Lazaro #12</td>
+                    <td>Ventas con Monarcas</td>
+                    <td>VTA</td>
+                    <td>Esperando a doña Marisol</td>
+                    <td>12:00 p.m.</td>
+                    <td>01:00 p.m.</td>
+                    <td>
+                      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button class="btn btn-warning me-md-2" type="button">
+                          <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn btn-success" type="button">
+                          <i class="fa-solid fa-check"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>  
+        </div>
+      </div>
+    </div>
+     </div>
+     <!--ASESOR FERNANDA-->
+    <div class="tab-content" id="nav-tabContent">
+      <div *ngIf="coordinadorVisible === 'Fernanda'" class="tab-pane fade show active" id="nav-fernanda" role="tabpanel">
+        <div class="row">
+          <div class="col-4" *ngIf="isFormVisible" id="Fernanda">
+        <div class="shadow p-3 mb-5 bg-body-tertiary rounded mt-4">
+        <!-- Form Content -->
+        <div class="p-4">
+          <form [formGroup]="registrarAgenda" (ngSubmit)="RegistrarAgenda()">
+            <h3>Registro de Agenda Martha</h3>
+            <br>
+            <input type="hidden" formControlName="coordinador">
+            <select class="form-select" id="semana" formControlName="semana">
+              <option disabled selected>SEMANA</option>
+              <option *ngFor="let semana of semanas" [value]="semana">{{ semana }}</option>
+            </select>
+            
+            <div class="mb-3">
+              <label for="fecha" class="form-label">Fecha</label>
+              <input type="date" class="form-control" id="fecha" formControlName="fecha">
+            </div>
+            
+            <div class="mb-3">
+              <label for="hora" class="form-label">Hora</label>
+              <input type="time" class="form-control" id="hora" formControlName="hora">
+            </div>
+            
+            <div class="mb-3">
+              <label for="domicilio" class="form-label">Domicilio</label>
+              <input type="text" class="form-control" id="domicilio" formControlName="domicilio">
+            </div>
+            
+            <div class="mb-3">
+              <label for="actividad" class="form-label">Actividad</label>
+              <input type="text" class="form-control" id="actividad" formControlName="actividad">
+            </div>
+            
+            <div class="mb-3">
+              <label for="codigo" class="form-label">Código</label>
+              <select class="form-select" id="codigo" formControlName="codigo">
+                <option selected disabled>Código</option>
+                <option value="R">Pago</option>
+                <option value="R/P">Pago/Levantamiento de Papeleria</option>
+                <option value="C">Cobranza</option>
+                <option value="VTA">Promoción</option>
+                <option value="R/EC">Pago/Entrega/Cambio de Ciclo</option>
+                <option value="R/ER">Pago/Entrega/Refill</option>
+                <option value="GN">Grupo Nuevo</option>
+                <option value="Sup">Supervisión</option>
+                <option value="Aten">Atenciones</option>
+                <option value="E">Desembolso o Entregas</option>
+                <option value="R/A">Realizando Agendas</option>
+                <option value="D">Domiciliar</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label d-block">Traslado</label>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="traslado" value="SI" id="traslado-si">
+                <label class="form-check-label" for="traslado-si">SÍ</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="traslado" value="NO" id="traslado-no">
+                <label class="form-check-label" for="traslado-no">NO</label>
+              </div>
+            </div>                
+            <div class="mb-3" *ngIf="registrarAgenda.get('traslado')?.value === 'SI'">
+              <label for="kmRecorrido" class="form-label">KM Recorridos</label>
+              <input type="number" class="form-control" id="kmRecorrido" formControlName="kmRecorrido">
+            </div>                                
+            <button type="submit" class="btn btn-primary">Guardar Agenda</button>                
+          </form>
+
+        </div>
+      </div>
+      </div>
+        <div [class.col-12]="!isFormVisible" [class.col-lg-8]="isFormVisible" [class.col-lg-12]="!isFormVisible" class="mt-4">
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <!-- Botón para mostrar/ocultar el formulario -->
+            <button type="button" class="btn btn-outline-warning" (click)="toggleFormVisibility()">
+              <i *ngIf="!isFormVisible" class="fa-solid fa-chevron-left"></i>
+              <i *ngIf="isFormVisible" class="fa-solid fa-chevron-left"></i>
+            </button>                
+                    
+        <div class="table-responsive mt-4">
+          <h4>Segumiento de Agenda</h4>
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <select class="form-select" aria-label="Default select example">
+              <option selected>SEMANA</option>
+              <option value="R">SEMANA 1</option>
+              <option value="2">SEMANA 2</option>
+              <option value="3">SEMANA 3</option>
+            </select>
+          </div>
+          <div class="row mt-4">
+            <div class="col">
+              <label for="lunes-km" class="form-label">KM Recorridos</label>
+              <input type="text" class="form-control" placeholder="First name" aria-label="First name" disabled>
+            </div>
+            <div class="col">
+              <label for="lunes-km" class="form-label">Gasolina</label>
+              <input type="text" class="form-control" placeholder="Last name" aria-label="Last name" disabled>
+            </div>
+          </div>
+          <table class="table table-bordered table-hover align-middle mt-4">
+            <thead class="table-light">
+              <tr>
+                <th scope="col">Asesor</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Hora</th>
+                <th scope="col">Domicilio</th>
+                <th scope="col">Actividad</th>
+                <th scope="col">Código</th>
+                <th scope="col">Actividad Reportada</th>
+                <th scope="col">Hora Reportada</th>
+                <th scope="col">Hora Cierre</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Ismael</th>
+                <td>12/04/2025</td>
+                <td>11:11 a.m.</td>
+                <td>Lazaro Cárdenas, Calle Lazaro #12</td>
+                <td>Ventas con Monarcas</td>
+                <td>VTA</td>
+                <td>Esperando a doña Marisol</td>
+                <td>12:00 p.m.</td>
+                <td>01:00 p.m.</td>
+                <td>
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button class="btn btn-warning me-md-2" type="button">
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="btn btn-success" type="button">
+                      <i class="fa-solid fa-check"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div> 
+    </div>
+  </div>
+      </div>
+    <!--ASESOR MARTHA-->
+  <div class="tab-content" id="nav-tabContent">
+    <div *ngIf="coordinadorVisible === 'Martha'" class="tab-pane fade show active" id="nav-martha" role="tabpanel">
+    <div class="row">
+        <div class="col-4" *ngIf="isFormVisible" id="Martha">
+        <div class="shadow p-3 mb-5 bg-body-tertiary rounded mt-4">
+       <!-- Form Content -->
+          <div class="p-4">
+            <form [formGroup]="registrarAgenda"(ngSubmit)="RegistrarAgenda()">
+              <h4>Registro de Agenda </h4>
+              <br>
+              <input type="hidden" formControlName="coordinador">
+
+              <select class="form-select" id="semana" formControlName="semana">
+                <option disabled selected>SEMANA</option>
+                <option *ngFor="let semana of semanas" [value]="semana">{{ semana }}</option>
+              </select>
+              
+          
+          <div class="mb-3">
+            <label for="fecha" class="form-label">Fecha</label>
+            <input type="date" class="form-control" id="fecha" formControlName="fecha">
+          </div>
+          
+          <div class="mb-3">
+            <label for="hora" class="form-label">Hora</label>
+            <input type="time" class="form-control" id="hora" formControlName="hora">
+          </div>
+          
+          <div class="mb-3">
+            <label for="domicilio" class="form-label">Domicilio</label>
+            <input type="text" class="form-control" id="domicilio" formControlName="domicilio">
+          </div>
+          
+          <div class="mb-3">
+            <label for="actividad" class="form-label">Actividad</label>
+            <input type="text" class="form-control" id="actividad" formControlName="actividad">
+          </div>
+          
+          <div class="mb-3">
+            <label for="codigo" class="form-label">Código</label>
+            <select class="form-select" id="codigo" formControlName="codigo">
+              <option selected disabled>Código</option>
+              <option value="R">Pago</option>
+              <option value="R/P">Pago/Levantamiento de Papeleria</option>
+              <option value="C">Cobranza</option>
+              <option value="VTA">Promoción</option>
+              <option value="R/EC">Pago/Entrega/Cambio de Ciclo</option>
+              <option value="R/ER">Pago/Entrega/Refill</option>
+              <option value="GN">Grupo Nuevo</option>
+              <option value="Sup">Supervisión</option>
+              <option value="Aten">Atenciones</option>
+              <option value="E">Desembolso o Entregas</option>
+              <option value="R/A">Realizando Agendas</option>
+              <option value="D">Domiciliar</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label d-block">Traslado</label>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" formControlName="traslado" value="SI" id="traslado-si">
+              <label class="form-check-label" for="traslado-si">SÍ</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" formControlName="traslado" value="NO" id="traslado-no">
+              <label class="form-check-label" for="traslado-no">NO</label>
+            </div>
+          </div>                
+          <div class="mb-3" *ngIf="registrarAgenda.get('traslado')?.value === 'SI'">
+            <label for="kmRecorrido" class="form-label">KM Recorridos</label>
+            <input type="number" class="form-control" id="kmRecorrido" formControlName="kmRecorrido">
+          </div>                                
+          <button type="submit" class="btn btn-primary">Guardar Agenda</button>                
+        </form>
+        </div>
+    </div>
+  </div>
+      <div [class.col-12]="!isFormVisible" [class.col-lg-8]="isFormVisible" [class.col-lg-12]="!isFormVisible" class="mt-4">
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+          <!-- Botón para mostrar/ocultar el formulario -->
+          <button type="button" class="btn btn-outline-warning" (click)="toggleFormVisibility()">
+            <i *ngIf="!isFormVisible" class="fa-solid fa-chevron-left"></i>
+            <i *ngIf="isFormVisible" class="fa-solid fa-chevron-left"></i>
+          </button>                
+                  
+      <div class="table-responsive mt-4">
+        <h4>Segumiento de Agenda</h4>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+          <select class="form-select" aria-label="Default select example">
+            <option selected>SEMANA</option>
+            <option value="R">SEMANA 1</option>
+            <option value="2">SEMANA 2</option>
+            <option value="3">SEMANA 3</option>
+          </select>
+        </div>
+        <div class="row mt-4">
+          <div class="col">
+            <label for="lunes-km" class="form-label">KM Recorridos</label>
+            <input type="text" class="form-control" placeholder="First name" aria-label="First name" disabled>
+          </div>
+          <div class="col">
+            <label for="lunes-km" class="form-label">Gasolina</label>
+            <input type="text" class="form-control" placeholder="Last name" aria-label="Last name" disabled>
+          </div>
+        </div>
+        <table class="table table-bordered table-hover align-middle mt-4">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">Asesor</th>
+              <th scope="col">Fecha</th>
+              <th scope="col">Hora</th>
+              <th scope="col">Domicilio</th>
+              <th scope="col">Actividad</th>
+              <th scope="col">Código</th>
+              <th scope="col">Actividad Reportada</th>
+              <th scope="col">Hora Reportada</th>
+              <th scope="col">Hora Cierre</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Ismael</th>
+              <td>12/04/2025</td>
+              <td>11:11 a.m.</td>
+              <td>Lazaro Cárdenas, Calle Lazaro #12</td>
+              <td>Ventas con Monarcas</td>
+              <td>VTA</td>
+              <td>Esperando a doña Marisol</td>
+              <td>12:00 p.m.</td>
+              <td>01:00 p.m.</td>
+              <td>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button class="btn btn-warning me-md-2" type="button">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button class="btn btn-success" type="button">
+                    <i class="fa-solid fa-check"></i>
+                  </button>
+                  </div>
+                </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+    </div>
+    <!--ASESOR MAGDA-->
+    <div class="tab-content" id="nav-tabContent">
+      <div *ngIf="coordinadorVisible === 'Magda'" class="tab-pane fade show active" id="nav-magda" role="tabpanel">
+        <div class="row">
+      <div class="col-4" *ngIf="isFormVisible">
+        <div class="shadow p-3 mb-5 bg-body-tertiary rounded mt-4">
+        <!-- Form Content -->
+        <div class="p-4">
+          <form [formGroup]="registrarAgenda" (ngSubmit)="RegistrarAgenda()">
+            <h4>Registro de Agendas</h4>
+            <br>
+            <input type="hidden" formControlName="coordinador">
+            <select class="form-select" id="semana" formControlName="semana">
+              <option disabled selected>SEMANA</option>
+              <option *ngFor="let semana of semanas" [value]="semana">{{ semana }}</option>
+            </select>
+            
+            <div class="mb-3">
+              <label for="fecha" class="form-label">Fecha</label>
+              <input type="date" class="form-control" id="fecha" formControlName="fecha">
+            </div>
+            
+            <div class="mb-3">
+              <label for="hora" class="form-label">Hora</label>
+              <input type="time" class="form-control" id="hora" formControlName="hora">
+            </div>
+            
+            <div class="mb-3">
+              <label for="domicilio" class="form-label">Domicilio</label>
+              <input type="text" class="form-control" id="domicilio" formControlName="domicilio">
+            </div>
+            
+            <div class="mb-3">
+              <label for="actividad" class="form-label">Actividad</label>
+              <input type="text" class="form-control" id="actividad" formControlName="actividad">
+            </div>
+            
+            <div class="mb-3">
+              <label for="codigo" class="form-label">Código</label>
+              <select class="form-select" id="codigo" formControlName="codigo">
+                <option selected disabled>Código</option>
+                <option value="R">Pago</option>
+                <option value="R/P">Pago/Levantamiento de Papeleria</option>
+                <option value="C">Cobranza</option>
+                <option value="VTA">Promoción</option>
+                <option value="R/EC">Pago/Entrega/Cambio de Ciclo</option>
+                <option value="R/ER">Pago/Entrega/Refill</option>
+                <option value="GN">Grupo Nuevo</option>
+                <option value="Sup">Supervisión</option>
+                <option value="Aten">Atenciones</option>
+                <option value="E">Desembolso o Entregas</option>
+                <option value="R/A">Realizando Agendas</option>
+                <option value="D">Domiciliar</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label d-block">Traslado</label>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="traslado" value="SI" id="traslado-si">
+                <label class="form-check-label" for="traslado-si">SÍ</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="traslado" value="NO" id="traslado-no">
+                <label class="form-check-label" for="traslado-no">NO</label>
+              </div>
+            </div>                
+            <div class="mb-3" *ngIf="registrarAgenda.get('traslado')?.value === 'SI'">
+              <label for="kmRecorrido" class="form-label">KM Recorridos</label>
+              <input type="number" class="form-control" id="kmRecorrido" formControlName="kmRecorrido">
+            </div>                                
+            <button type="submit" class="btn btn-primary">Guardar Agenda</button>                
+          </form>
+
+        </div>
+      </div>
+      </div>
+        <div [class.col-12]="!isFormVisible" [class.col-lg-8]="isFormVisible" [class.col-lg-12]="!isFormVisible" class="mt-4">
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <!-- Botón para mostrar/ocultar el formulario -->
+            <button type="button" class="btn btn-outline-warning" (click)="toggleFormVisibility()">
+              <i *ngIf="!isFormVisible" class="fa-solid fa-chevron-left"></i>
+              <i *ngIf="isFormVisible" class="fa-solid fa-chevron-left"></i>
+            </button>                
+                    
+        <div class="table-responsive mt-4">
+          <h4>Segumiento de Agenda</h4>
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <select class="form-select" aria-label="Default select example">
+              <option selected>SEMANA</option>
+              <option value="R">SEMANA 1</option>
+              <option value="2">SEMANA 2</option>
+              <option value="3">SEMANA 3</option>
+            </select>
+          </div>
+          <div class="row mt-4">
+            <div class="col">
+              <label for="lunes-km" class="form-label">KM Recorridos</label>
+              <input type="text" class="form-control" placeholder="First name" aria-label="First name" disabled>
+            </div>
+            <div class="col">
+              <label for="lunes-km" class="form-label">Gasolina</label>
+              <input type="text" class="form-control" placeholder="Last name" aria-label="Last name" disabled>
+            </div>
+          </div>
+          <table class="table table-bordered table-hover align-middle mt-4">
+            <thead class="table-light">
+              <tr>
+                <th scope="col">Asesor</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Hora</th>
+                <th scope="col">Domicilio</th>
+                <th scope="col">Actividad</th>
+                <th scope="col">Código</th>
+                <th scope="col">Actividad Reportada</th>
+                <th scope="col">Hora Reportada</th>
+                <th scope="col">Hora Cierre</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Ismael</th>
+                <td>12/04/2025</td>
+                <td>11:11 a.m.</td>
+                <td>Lazaro Cárdenas, Calle Lazaro #12</td>
+                <td>Ventas con Monarcas</td>
+                <td>VTA</td>
+                <td>Esperando a doña Marisol</td>
+                <td>12:00 p.m.</td>
+                <td>01:00 p.m.</td>
+                <td>
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button class="btn btn-warning me-md-2" type="button">
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="btn btn-success" type="button">
+                      <i class="fa-solid fa-check"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    </div>
+        </div>
+    </div>
+      <!--ASESOR JIMENA-->
+      <div class="tab-content" id="nav-tabContent">
+        <div *ngIf="coordinadorVisible === 'Jimena'" class="tab-pane fade show active" id="nav-jimena" role="tabpanel">
+          <div class="row">
+      <div class="col-4" *ngIf="isFormVisible">
+        <div class="shadow p-3 mb-5 bg-body-tertiary rounded mt-4">
+        <!-- Form Content -->
+        <div class="p-4">
+          <form [formGroup]="registrarAgenda"   (ngSubmit)="RegistrarAgenda()" id="Jimena">
+            <h4>Registro de Agendas</h4>
+            <br>
+            <input type="hidden" formControlName="coordinador">
+            <select class="form-select" id="semana" formControlName="semana">
+              <option disabled selected>SEMANA</option>
+              <option *ngFor="let semana of semanas" [value]="semana">{{ semana }}</option>
+            </select>
+            
+            <div class="mb-3">
+              <label for="fecha" class="form-label">Fecha</label>
+              <input type="date" class="form-control" id="fecha" formControlName="fecha">
+            </div>
+            
+            <div class="mb-3">
+              <label for="hora" class="form-label">Hora</label>
+              <input type="time" class="form-control" id="hora" formControlName="hora">
+            </div>
+            
+            <div class="mb-3">
+              <label for="domicilio" class="form-label">Domicilio</label>
+              <input type="text" class="form-control" id="domicilio" formControlName="domicilio">
+            </div>
+            
+            <div class="mb-3">
+              <label for="actividad" class="form-label">Actividad</label>
+              <input type="text" class="form-control" id="actividad" formControlName="actividad">
+            </div>
+            
+            <div class="mb-3">
+              <label for="codigo" class="form-label">Código</label>
+              <select class="form-select" id="codigo" formControlName="codigo">
+                <option selected disabled>Código</option>
+                <option value="R">Pago</option>
+                <option value="R/P">Pago/Levantamiento de Papeleria</option>
+                <option value="C">Cobranza</option>
+                <option value="VTA">Promoción</option>
+                <option value="R/EC">Pago/Entrega/Cambio de Ciclo</option>
+                <option value="R/ER">Pago/Entrega/Refill</option>
+                <option value="GN">Grupo Nuevo</option>
+                <option value="Sup">Supervisión</option>
+                <option value="Aten">Atenciones</option>
+                <option value="E">Desembolso o Entregas</option>
+                <option value="R/A">Realizando Agendas</option>
+                <option value="D">Domiciliar</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label d-block">Traslado</label>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="traslado" value="SI" id="traslado-si">
+                <label class="form-check-label" for="traslado-si">SÍ</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="traslado" value="NO" id="traslado-no">
+                <label class="form-check-label" for="traslado-no">NO</label>
+              </div>
+            </div>                
+            <div class="mb-3" *ngIf="registrarAgenda.get('traslado')?.value === 'SI'">
+              <label for="kmRecorrido" class="form-label">KM Recorridos</label>
+              <input type="number" class="form-control" id="kmRecorrido" formControlName="kmRecorrido">
+            </div>                                
+            <button type="submit" class="btn btn-primary">Guardar Agenda</button>                
+          </form>
+
+        </div>
+      </div>
+      </div>
+        <div [class.col-12]="!isFormVisible" [class.col-lg-8]="isFormVisible" [class.col-lg-12]="!isFormVisible" class="mt-4">
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <!-- Botón para mostrar/ocultar el formulario -->
+            <button type="button" class="btn btn-outline-warning" (click)="toggleFormVisibility()">
+              <i *ngIf="!isFormVisible" class="fa-solid fa-chevron-left"></i>
+              <i *ngIf="isFormVisible" class="fa-solid fa-chevron-left"></i>
+            </button>                
+                    
+        <div class="table-responsive mt-4">
+          <h4>Segumiento de Agenda</h4>
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <select class="form-select" aria-label="Default select example">
+              <option selected>SEMANA</option>
+              <option value="R">SEMANA 1</option>
+              <option value="2">SEMANA 2</option>
+              <option value="3">SEMANA 3</option>
+            </select>
+          </div>
+          <div class="row mt-4">
+            <div class="col">
+              <label for="lunes-km" class="form-label">KM Recorridos</label>
+              <input type="text" class="form-control" placeholder="First name" aria-label="First name" disabled>
+            </div>
+            <div class="col">
+              <label for="lunes-km" class="form-label">Gasolina</label>
+              <input type="text" class="form-control" placeholder="Last name" aria-label="Last name" disabled>
+            </div>
+          </div>
+          <table class="table table-bordered table-hover align-middle mt-4">
+            <thead class="table-light">
+              <tr>
+                <th scope="col">Asesor</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Hora</th>
+                <th scope="col">Domicilio</th>
+                <th scope="col">Actividad</th>
+                <th scope="col">Código</th>
+                <th scope="col">Actividad Reportada</th>
+                <th scope="col">Hora Reportada</th>
+                <th scope="col">Hora Cierre</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Ismael</th>
+                <td>12/04/2025</td>
+                <td>11:11 a.m.</td>
+                <td>Lazaro Cárdenas, Calle Lazaro #12</td>
+                <td>Ventas con Monarcas</td>
+                <td>VTA</td>
+                <td>Esperando a doña Marisol</td>
+                <td>12:00 p.m.</td>
+                <td>01:00 p.m.</td>
+                <td>
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button class="btn btn-warning me-md-2" type="button">
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="btn btn-success" type="button">
+                      <i class="fa-solid fa-check"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+      </div>
+        <!--ASESOR VICTOR-->
+        <div class="tab-content" id="nav-tabContent">
+          <div *ngIf="coordinadorVisible === 'Victor'" class="tab-pane fade show active" id="nav-victor" role="tabpanel">
+            <div class="row">
+        <div class="col-4" *ngIf="isFormVisible">
+          <div class="shadow p-3 mb-5 bg-body-tertiary rounded mt-4">
+          <!-- Form Content -->
+          <div class="p-4">
+            <form [formGroup]="registrarAgenda"   (ngSubmit)="RegistrarAgenda()"  id="Victor">
+              <h4>Registro de Agendas</h4>
+              <br>
+              <input type="hidden" formControlName="coordinador">
+              <select class="form-select" id="semana" formControlName="semana">
+                <option disabled selected>SEMANA</option>
+                <option *ngFor="let semana of semanas" [value]="semana">{{ semana }}</option>
+              </select>
+              
+              <div class="mb-3">
+                <label for="fecha" class="form-label">Fecha</label>
+                <input type="date" class="form-control" id="fecha" formControlName="fecha">
+              </div>
+              
+              <div class="mb-3">
+                <label for="hora" class="form-label">Hora</label>
+                <input type="time" class="form-control" id="hora" formControlName="hora">
+              </div>
+              
+              <div class="mb-3">
+                <label for="domicilio" class="form-label">Domicilio</label>
+                <input type="text" class="form-control" id="domicilio" formControlName="domicilio">
+              </div>
+              
+              <div class="mb-3">
+                <label for="actividad" class="form-label">Actividad</label>
+                <input type="text" class="form-control" id="actividad" formControlName="actividad">
+              </div>
+              
+              <div class="mb-3">
+                <label for="codigo" class="form-label">Código</label>
+                <select class="form-select" id="codigo" formControlName="codigo">
+                  <option selected disabled>Código</option>
+                  <option value="R">Pago</option>
+                  <option value="R/P">Pago/Levantamiento de Papeleria</option>
+                  <option value="C">Cobranza</option>
+                  <option value="VTA">Promoción</option>
+                  <option value="R/EC">Pago/Entrega/Cambio de Ciclo</option>
+                  <option value="R/ER">Pago/Entrega/Refill</option>
+                  <option value="GN">Grupo Nuevo</option>
+                  <option value="Sup">Supervisión</option>
+                  <option value="Aten">Atenciones</option>
+                  <option value="E">Desembolso o Entregas</option>
+                  <option value="R/A">Realizando Agendas</option>
+                  <option value="D">Domiciliar</option>
+                </select>
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label d-block">Traslado</label>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" formControlName="traslado" value="SI" id="traslado-si">
+                  <label class="form-check-label" for="traslado-si">SÍ</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" formControlName="traslado" value="NO" id="traslado-no">
+                  <label class="form-check-label" for="traslado-no">NO</label>
+                </div>
+              </div>                
+              <div class="mb-3" *ngIf="registrarAgenda.get('traslado')?.value === 'SI'">
+                <label for="kmRecorrido" class="form-label">KM Recorridos</label>
+                <input type="number" class="form-control" id="kmRecorrido" formControlName="kmRecorrido">
+              </div>                                
+              <button type="submit" class="btn btn-primary">Guardar Agenda</button>                
+            </form>
+
+          </div>
+        </div>
+        </div>
+          <div [class.col-12]="!isFormVisible" [class.col-lg-8]="isFormVisible" [class.col-lg-12]="!isFormVisible" class="mt-4">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <!-- Botón para mostrar/ocultar el formulario -->
+              <button type="button" class="btn btn-outline-warning" (click)="toggleFormVisibility()">
+                <i *ngIf="!isFormVisible" class="fa-solid fa-chevron-left"></i>
+                <i *ngIf="isFormVisible" class="fa-solid fa-chevron-left"></i>
+              </button>                
+                      
+          <div class="table-responsive mt-4">
+            <h4>Segumiento de Agenda</h4>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <select class="form-select" aria-label="Default select example">
+                <option selected>SEMANA</option>
+                <option value="R">SEMANA 1</option>
+                <option value="2">SEMANA 2</option>
+                <option value="3">SEMANA 3</option>
+              </select>
+            </div>
+            <div class="row mt-4">
+              <div class="col">
+                <label for="lunes-km" class="form-label">KM Recorridos</label>
+                <input type="text" class="form-control" placeholder="First name" aria-label="First name" disabled>
+              </div>
+              <div class="col">
+                <label for="lunes-km" class="form-label">Gasolina</label>
+                <input type="text" class="form-control" placeholder="Last name" aria-label="Last name" disabled>
+              </div>
+            </div>
+            <table class="table table-bordered table-hover align-middle mt-4">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col">Asesor</th>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Hora</th>
+                  <th scope="col">Domicilio</th>
+                  <th scope="col">Actividad</th>
+                  <th scope="col">Código</th>
+                  <th scope="col">Actividad Reportada</th>
+                  <th scope="col">Hora Reportada</th>
+                  <th scope="col">Hora Cierre</th>
+                  <th scope="col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Ismael</th>
+                  <td>12/04/2025</td>
+                  <td>11:11 a.m.</td>
+                  <td>Lazaro Cárdenas, Calle Lazaro #12</td>
+                  <td>Ventas con Monarcas</td>
+                  <td>VTA</td>
+                  <td>Esperando a doña Marisol</td>
+                  <td>12:00 p.m.</td>
+                  <td>01:00 p.m.</td>
+                  <td>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                      <button class="btn btn-warning me-md-2" type="button">
+                        <i class="fa-solid fa-pen"></i>
+                      </button>
+                      <button class="btn btn-success" type="button">
+                        <i class="fa-solid fa-check"></i>
+                      </button>
+                    </div>
+                  </td>
+                 </tr>
+                </tbody>
+             </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+        </div>
+        <!--ASESOR MAYRA-->
+        <div class="tab-content" id="nav-tabContent">
+          <div *ngIf="coordinadorVisible === 'Mayra'" class="tab-pane fade show active" id="nav-mayra" role="tabpanel">
+            <div class="row">
+        <div class="col-4" *ngIf="isFormVisible">
+          <div class="shadow p-3 mb-5 bg-body-tertiary rounded mt-4">
+          <!-- Form Content -->
+          <div class="p-4">
+            <form [formGroup]="registrarAgenda" (ngSubmit)="RegistrarAgenda()" id="Mayra">
+              <h4>Registro de Agendas</h4>
+              <br>
+              <input type="hidden" formControlName="coordinador">
+              <select class="form-select" id="semana" formControlName="semana">
+                <option disabled selected>SEMANA</option>
+                <option *ngFor="let semana of semanas" [value]="semana">{{ semana }}</option>
+              </select>
+              
+              <div class="mb-3">
+                <label for="fecha" class="form-label">Fecha</label>
+                <input type="date" class="form-control" id="fecha" formControlName="fecha">
+              </div>
+              
+              <div class="mb-3">
+                <label for="hora" class="form-label">Hora</label>
+                <input type="time" class="form-control" id="hora" formControlName="hora">
+              </div>
+              
+              <div class="mb-3">
+                <label for="domicilio" class="form-label">Domicilio</label>
+                <input type="text" class="form-control" id="domicilio" formControlName="domicilio">
+              </div>
+              
+              <div class="mb-3">
+                <label for="actividad" class="form-label">Actividad</label>
+                <input type="text" class="form-control" id="actividad" formControlName="actividad">
+              </div>
+              
+              <div class="mb-3">
+                <label for="codigo" class="form-label">Código</label>
+                <select class="form-select" id="codigo" formControlName="codigo">
+                  <option selected disabled>Código</option>
+                  <option value="R">Pago</option>
+                  <option value="R/P">Pago/Levantamiento de Papeleria</option>
+                  <option value="C">Cobranza</option>
+                  <option value="VTA">Promoción</option>
+                  <option value="R/EC">Pago/Entrega/Cambio de Ciclo</option>
+                  <option value="R/ER">Pago/Entrega/Refill</option>
+                  <option value="GN">Grupo Nuevo</option>
+                  <option value="Sup">Supervisión</option>
+                  <option value="Aten">Atenciones</option>
+                  <option value="E">Desembolso o Entregas</option>
+                  <option value="R/A">Realizando Agendas</option>
+                  <option value="D">Domiciliar</option>
+                </select>
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label d-block">Traslado</label>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" formControlName="traslado" value="SI" id="traslado-si">
+                  <label class="form-check-label" for="traslado-si">SÍ</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" formControlName="traslado" value="NO" id="traslado-no">
+                  <label class="form-check-label" for="traslado-no">NO</label>
+                </div>
+              </div>                
+              <div class="mb-3" *ngIf="registrarAgenda.get('traslado')?.value === 'SI'">
+                <label for="kmRecorrido" class="form-label">KM Recorridos</label>
+                <input type="number" class="form-control" id="kmRecorrido" formControlName="kmRecorrido">
+              </div>                                
+              <button type="submit" class="btn btn-primary">Guardar Agenda</button>                
+            </form>
+
+          </div>
+        </div>
+        </div>
+          <div [class.col-12]="!isFormVisible" [class.col-lg-8]="isFormVisible" [class.col-lg-12]="!isFormVisible" class="mt-4">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <!-- Botón para mostrar/ocultar el formulario -->
+              <button type="button" class="btn btn-outline-warning" (click)="toggleFormVisibility()">
+                <i *ngIf="!isFormVisible" class="fa-solid fa-chevron-left"></i>
+                <i *ngIf="isFormVisible" class="fa-solid fa-chevron-left"></i>
+              </button>                
+                      
+          <div class="table-responsive mt-4">
+            <h4>Segumiento de Agenda</h4>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <select class="form-select" aria-label="Default select example">
+                <option selected>SEMANA</option>
+                <option value="R">SEMANA 1</option>
+                <option value="2">SEMANA 2</option>
+                <option value="3">SEMANA 3</option>
+              </select>
+            </div>
+            <div class="row mt-4">
+              <div class="col">
+                <label for="lunes-km" class="form-label">KM Recorridos</label>
+                <input type="text" class="form-control" placeholder="First name" aria-label="First name" disabled>
+              </div>
+              <div class="col">
+                <label for="lunes-km" class="form-label">Gasolina</label>
+                <input type="text" class="form-control" placeholder="Last name" aria-label="Last name" disabled>
+              </div>
+            </div>
+            <table class="table table-bordered table-hover align-middle mt-4">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col">Asesor</th>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Hora</th>
+                  <th scope="col">Domicilio</th>
+                  <th scope="col">Actividad</th>
+                  <th scope="col">Código</th>
+                  <th scope="col">Actividad Reportada</th>
+                  <th scope="col">Hora Reportada</th>
+                  <th scope="col">Hora Cierre</th>
+                  <th scope="col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Ismael</th>
+                  <td>12/04/2025</td>
+                  <td>11:11 a.m.</td>
+                  <td>Lazaro Cárdenas, Calle Lazaro #12</td>
+                  <td>Ventas con Monarcas</td>
+                  <td>VTA</td>
+                  <td>Esperando a doña Marisol</td>
+                  <td>12:00 p.m.</td>
+                  <td>01:00 p.m.</td>
+                  <td>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                      <button class="btn btn-warning me-md-2" type="button">
+                        <i class="fa-solid fa-pen"></i>
+                      </button>
+                      <button class="btn btn-success" type="button">
+                        <i class="fa-solid fa-check"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>  
+</div>

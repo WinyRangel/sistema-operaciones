@@ -18,6 +18,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FooterComponent } from './components/Shared/layout/footer/footer.component';
 import { BaucherPipe } from './pipes/baucher.pipe';
+import { RecorridoAgendaComponent } from './components/Coordinadoras/recorrido-agenda/recorrido-agenda.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { BaucherPipe } from './pipes/baucher.pipe';
     InicioComponent,
     HeaderComponent,
     FooterComponent,
-    BaucherPipe
+    BaucherPipe,
+    RecorridoAgendaComponent
   ],
   imports: [
     BrowserModule,
