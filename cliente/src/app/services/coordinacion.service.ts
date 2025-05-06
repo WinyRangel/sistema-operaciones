@@ -28,4 +28,9 @@ export class CoordinacionService {
   obtenerAgenda(coordinador: string): Observable<any> {
     return this.http.get(this.url2 + coordinador);
   }
+
+  actualizarAgenda(id: string, datos: any): Observable<any> {
+    return this.http.put(`http://localhost:4000/agenda/${id}`, datos);
+  }
+  
 }

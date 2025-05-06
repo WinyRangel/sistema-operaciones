@@ -45,10 +45,67 @@ const obtenerAgendasPorCoordinador = async (req, res) => {
     }
 };
 
+const actualizarAgenda = async (req, res) => {
+    console.info('Seguimiento Agenda');
 
+    try {
+        const { id } = req.params;
+        const { codigo, actividadReportada, reportado, horaReporte, horaCierre } = req.body;
+
+        const agendaActualizada = await Agenda.findByIdAndUpdate(
+            id,
+            { codigo, actividadReportada, reportado, horaReporte, horaCierre },
+            { new: true }
+        );
+
+        if (!agendaActualizada) {
+            return res.status(404).json({ msg: 'No se ha registrado esta agenda.' });
+        }
+
+        res.json(agendaActualizada);
+    } catch (error) {
+        console.error('Error al actualizar la agenda:', error);
+        res.status(500).send('Hubo un error');
+    }
+};
+
+  
+
+const actualizarKmRecorridoSemana = async (req, res) => {
+    try {
+      const resumen = await Agenda.aggregate([
+        {
+          $group: {
+            _id: { coordinador: "$coordinador", semana: "$semana" },
+            totalKm: { $sum: "$kmRecorrido" }
+          }
+        }
+      ]);
+  
+      for (const grupo of resumen) {
+        await Agenda.updateMany(
+          {
+            coordinador: grupo._id.coordinador,
+            semana: grupo._id.semana
+          },
+          {
+            $set: { kmRecorridoSemana: grupo.totalKm }
+          }
+        );
+      }
+  
+      res.json({ mensaje: 'Kilómetros por semana actualizados correctamente' });
+    } catch (error) {
+      console.error("Error al actualizar los km recorridos por semana:", error);
+      res.status(500).json({ mensaje: 'Error al actualizar los kilómetros' });
+    }
+  };
+  
 
 module.exports = {
     registrarAgenda,
     obtenerAgenda,
-    obtenerAgendasPorCoordinador
+    obtenerAgendasPorCoordinador,
+    actualizarAgenda,
+    actualizarKmRecorridoSemana
 }

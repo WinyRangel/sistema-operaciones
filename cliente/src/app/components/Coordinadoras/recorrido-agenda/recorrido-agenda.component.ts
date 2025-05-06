@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Coordinacion, Persona } from '../../../models/coordinacion';
 import { CoordinacionService } from '../../../services/coordinacion.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -12,29 +13,23 @@ import Swal from 'sweetalert2';
   styleUrls: ['./recorrido-agenda.component.css']
 })
 export class RecorridoAgendaComponent implements OnInit {
+  //Variables
   coordinaciones: Coordinacion[] = [];
+  agendas: any[] = []; // Lista completa de agendas
   isFormVisible: boolean = true;
   registrarAgenda: FormGroup;
   selectedCoord: Coordinacion | null = null;
   coordinadorVisible: string = 'Ismael'; // por defecto
   coordinadorSeleccionado: string = '';
   semanas: string[] = [];
+  totalKm: number = 0;
+  precioPorLitro: number = 0; // este valor lo tomarás desde el input
 
 
-
-  mostrarIsmael = false;
-  mostrarFernanda = false;
-  mostrarMartha = false;
-  mostrarMayra = false;
-  mostrarMagda = false;
-  mostrarVictor = false;
-  mostrarJimena = false;
-
-
-  
   constructor(
     private fb: FormBuilder,
-    private _coordinacionService: CoordinacionService
+    private _coordinacionService: CoordinacionService,
+    private http: HttpClient
   ) {
     this.registrarAgenda = this.fb.group({
       coordinador: [''],
@@ -49,6 +44,8 @@ export class RecorridoAgendaComponent implements OnInit {
     });
   }
 
+
+  //Obtener 
   ngOnInit(): void {
     this._coordinacionService.obtenerCoordinacion().subscribe(data => {
       this.coordinaciones = data;
@@ -64,20 +61,15 @@ export class RecorridoAgendaComponent implements OnInit {
         }
       });
     });
+    this._coordinacionService.obtenerAgendas().subscribe(data =>{
+      this.agendas = data;
+    })
     for (let i = 1; i <= 52; i++) {
       this.semanas.push(`SEMANA ${i}`);
     }
   }
 
-  private ocultarTodos(): void {
-    this.mostrarIsmael = false;
-    this.mostrarFernanda = false;
-    this.mostrarJimena = false;
-    this.mostrarMagda = false;
-    this.mostrarMayra = false;
-    this.mostrarVictor = false;
-    this.mostrarMartha = false;
-  }
+
 
   mostrarDiv(nombre: string): void {
     this.coordinadorVisible = nombre;
@@ -161,11 +153,64 @@ export class RecorridoAgendaComponent implements OnInit {
     }
   }
 
+  //Botón para ocultar agenda
   toggleFormVisibility(): void {
     this.isFormVisible = !this.isFormVisible;
   }
 
-  // : Agregar métodos para obtener
+
   
+  // : Agregar métodos para obtener
+  get agendasFiltradasPorCoordinador() {
+  return this.agendas.filter(agenda => agenda.coordinador === this.coordinadorVisible);
+}
+
   //TODO: editar y eliminar agendas
+
+  guardarCambios(agenda: any) {
+    this._coordinacionService.actualizarAgenda(agenda._id, {
+      codigo: agenda.codigo,
+      actividadReportada: agenda.actividadReportada,
+      reportado: agenda.reportado,
+      horaReporte: agenda.horaReporte,
+      horaCierre: agenda.horaCierre,
+      semana: '',
+      coordinador: '',
+      hora: ''
+    }).subscribe({
+      next: (respuesta) => {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 900,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          }
+        });
+        Toast.fire({
+          icon: "success",
+          title: "Guardado correctamente."
+        });
+      },
+      error: (error) => {
+        console.error('Error al actualizar agenda:', error);
+      }
+    });
+  }
+
+  get totalKmRecorridos(): number {
+    return this.agendasFiltradasPorCoordinador.reduce((acc, curr) => acc + (curr.kmRecorrido || 0), 0);
+  }
+  get litrosGasolina(): number {
+    const rendimiento = 14;
+    const totalKm = this.totalKmRecorridos;
+    return totalKm > 0 ? +(totalKm / rendimiento).toFixed(2) : 0;
+  }
+  get costoTotalGasolina(): number {
+    return +(this.litrosGasolina * this.precioPorLitro).toFixed(2);
+  }
+  
 }
