@@ -6,6 +6,5 @@ router.post('/agenda', AgendaController.registrarAgenda);
 router.get('/agenda', AgendaController.obtenerAgenda);
 router.get('/agenda/:coordinador', AgendaController.obtenerAgendasPorCoordinador);
 router.put('/agenda/:id', AgendaController.actualizarAgenda);
-router.put('/agenda/km-semana', AgendaController.actualizarKmRecorridoSemana);
-
 module.exports = router;
+

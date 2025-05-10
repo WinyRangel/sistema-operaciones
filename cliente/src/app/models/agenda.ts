@@ -1,4 +1,5 @@
 export interface Agenda {
+    _id?: string;
     semana: string;
     coordinador: string;
     fecha?: Date;
@@ -7,10 +8,11 @@ export interface Agenda {
     actividad?: string;
     codigo?: string;
     actividadReportada?: string;
-    reportado?: string;
+    reportado?: boolean;
     horaReporte?: string;
     horaCierre?: string;
     traslado?: string;
     kmRecorrido?: number;
+    cumplimientoAgenda?: boolean;
   }
   

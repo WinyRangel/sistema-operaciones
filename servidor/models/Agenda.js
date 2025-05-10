@@ -15,7 +15,7 @@ const AgendaSchema = new mongoose.Schema({
   },
   hora: {
     type: String,
-    required: true
+    required: false
   },
   domicilio: {
     type: String,
@@ -48,31 +48,15 @@ const AgendaSchema = new mongoose.Schema({
   traslado: {
     type: String,
     enum: ['SI', 'NO'],
-    required: true
+    required: false
   },
   kmRecorrido: { 
     type: Number,
     default: 0
   },
-  kmRecorridoDia: { //SUMA DE KM RECORRIDOS EN UN DIA ASUMIENDO QUE SE REGISTRAN ACTIVIDADES POR HORA DE 9 A 18 HORAS
-    type: Number,
-    default: 0
-  },
-  kmRecorridoSemana: { // SUMA TOTAL DE KM RECORRIDOS EN LA SEMANA ES LA SUMA DE LOS 6 DÍAS RECORRIDOS
-    type: Number,
-    default: 0
-  },
-  precioGasolina: {
-    type: Number,
-    default: 24
-  },
-  rendimientoGasolina: {  // Rendimiento de la gasolina (km por litro)
-    type: Number,
+  cumplimientoAgenda: { 
+    type: Boolean,
     required: false
-  },
-  costoGasolina: {  // Cálculo del costo de la gasolina
-    type: Number,
-    default: 0
   }
 });
 

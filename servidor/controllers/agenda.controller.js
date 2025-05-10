@@ -4,12 +4,16 @@ const Agenda = require ('../models/Agenda');
 const registrarAgenda = async (req, res) => {
     try {
         const nuevaAgenda = new Agenda(req.body);
+        console.log(req.body);
         const agendaGuardada = await nuevaAgenda.save();
+        
         res.status(201).json({ mensaje: 'Agenda creada exitosamente', agenda: agendaGuardada });
+        
     } catch (error) {
         console.error('Error al crear empresa:', error);
         res.status(500).json({ mensaje: 'Hubo un error al crear la empresa' });
     }
+    
 }
 
 
@@ -50,11 +54,11 @@ const actualizarAgenda = async (req, res) => {
 
     try {
         const { id } = req.params;
-        const { codigo, actividadReportada, reportado, horaReporte, horaCierre } = req.body;
+        const { codigo, actividadReportada, reportado, horaReporte, horaCierre, cumplimientoAgenda } = req.body;
 
         const agendaActualizada = await Agenda.findByIdAndUpdate(
             id,
-            { codigo, actividadReportada, reportado, horaReporte, horaCierre },
+            { codigo, actividadReportada, reportado, horaReporte, horaCierre, cumplimientoAgenda },
             { new: true }
         );
 
@@ -69,9 +73,19 @@ const actualizarAgenda = async (req, res) => {
     }
 };
 
-  
 
-const actualizarKmRecorridoSemana = async (req, res) => {
+
+
+module.exports = {
+    registrarAgenda,
+    obtenerAgenda,
+    obtenerAgendasPorCoordinador,
+    actualizarAgenda,
+}
+
+
+/**
+ * const actualizarKmRecorridoSemana = async (req, res) => {
     try {
       const resumen = await Agenda.aggregate([
         {
@@ -101,11 +115,5 @@ const actualizarKmRecorridoSemana = async (req, res) => {
     }
   };
   
-
-module.exports = {
-    registrarAgenda,
-    obtenerAgenda,
-    obtenerAgendasPorCoordinador,
-    actualizarAgenda,
-    actualizarKmRecorridoSemana
-}
+ * 
+ */

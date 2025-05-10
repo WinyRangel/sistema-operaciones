@@ -7,6 +7,7 @@ import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { TableModule } from 'primeng/table'
 import { FormsModule } from '@angular/forms';
+import { BaseChartDirective } from 'ng2-charts';
 
 
 import { AppRoutingModule } from './app-routing.module';
@@ -37,7 +38,8 @@ import { RecorridoAgendaComponent } from './components/Coordinadoras/recorrido-a
     HttpClientModule,
     NgxDatatableModule,
     TableModule,
-    FormsModule
+    FormsModule,
+    BaseChartDirective
     
   ],
   providers: [
