@@ -69,6 +69,7 @@ const crearBaucher = async (req, res) => {
   }
 };
 
+
 module.exports = {
   crearBaucher,
   obtenerBauchers
