@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { InicioComponent } from './components/inicio/inicio.component';
-import { BauchersComponent } from './components/Shared/bauchers/bauchers.component';
+import { ReporteFichasComponent } from './components/reporte-fichas/reporte-fichas.component';
 
 const routes: Routes = [
-  { path: 'baucher', component: BauchersComponent },
+  { path: 'reportefichas', component: ReporteFichasComponent},
   { path: '**', component: InicioComponent }
 ];
 
