@@ -8,8 +8,9 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { InicioComponent } from './components/inicio/inicio.component';
 import { HeaderComponent } from './components/Shared/layout/header/header.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { EjecutivasComponent } from './components/Shared/ejecutivas/ejecutivas.component';
 import { DepositosComponent } from './components/Shared/depositos/depositos.component';
 
 @NgModule({
@@ -17,8 +18,10 @@ import { DepositosComponent } from './components/Shared/depositos/depositos.comp
     AppComponent,
     InicioComponent,
     HeaderComponent,
+    EjecutivasComponent
     DepositosComponent,
   ],
+  
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -26,7 +29,8 @@ import { DepositosComponent } from './components/Shared/depositos/depositos.comp
     HttpClientModule,
     NgxDatatableModule,
     FormsModule,
-  ],
+   ],
+  
   providers: [],
   bootstrap: [AppComponent]
 })
