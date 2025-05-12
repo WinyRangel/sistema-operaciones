@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
+import { FormsModule } from '@angular/forms';
+
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -9,8 +11,7 @@ import { HeaderComponent } from './components/Shared/layout/header/header.compon
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { EjecutivasComponent } from './components/Shared/ejecutivas/ejecutivas.component';
-
-
+import { DepositosComponent } from './components/Shared/depositos/depositos.component';
 
 @NgModule({
   declarations: [
@@ -18,15 +19,18 @@ import { EjecutivasComponent } from './components/Shared/ejecutivas/ejecutivas.c
     InicioComponent,
     HeaderComponent,
     EjecutivasComponent
+    DepositosComponent,
   ],
+  
   imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
     HttpClientModule,
     NgxDatatableModule,
-    FormsModule
-  ],
+    FormsModule,
+   ],
+  
   providers: [],
   bootstrap: [AppComponent]
 })

@@ -16,6 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/', require('./routes/ejecutivas.routes'));
+app.use('/', require('./routes/depositos.routes'));
 
 
 
