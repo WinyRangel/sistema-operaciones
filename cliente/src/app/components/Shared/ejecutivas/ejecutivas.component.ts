@@ -94,57 +94,107 @@ throw new Error('Method not implemented.');
     
     }
 
-    guardarActividad() {
-      const actividad = this.actividades.find(a => a.nombre === this.actividadSeleccionada);
+    // guardarActividad() {
+    //   const actividad = this.actividades.find(a => a.nombre === this.actividadSeleccionada);
     
-      if (actividad) {
-        const registro = {
-          nombre: this.nombreSeleccionado,
-          ejecutiva: this.ejecutivaSeleccionada,
-          fecha: this.fecha,
-          actividad: this.actividadSeleccionada,
-          frecuencia: actividad.frecuencia,
-          hora: actividad.hora,
-          actRealizada: this.codigoSeleccionado,
-          horaReporte: this.horaReporte || '-'
-        };
+    //   if (actividad) {
+    //     const registro = {
+    //       nombre: this.nombreSeleccionado,
+    //       ejecutiva: this.ejecutivaSeleccionada,
+    //       fecha: this.fecha,
+    //       actividad: this.actividadSeleccionada,
+    //       frecuencia: actividad.frecuencia,
+    //       hora: actividad.hora,
+    //       actRealizada: this.codigoSeleccionado,
+    //       horaReporte: this.horaReporte || '-'
+    //     };
     
-        this.ejecutivasService.guardarRegistro(registro).subscribe({
-          next: (response) => {
-            console.log('Registro guardado correctamente:', response);
-            const Toast = Swal.mixin({
-              toast: true,
-              position: 'top-end',
-              showConfirmButton: false,
-              timer: 3000,
-              timerProgressBar: true,
-              didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-              }
-            });
+    //     this.ejecutivasService.guardarRegistro(registro).subscribe({
+    //       next: (response) => {
+    //         console.log('Registro guardado correctamente:', response);
+    //         const Toast = Swal.mixin({
+    //           toast: true,
+    //           position: 'top-end',
+    //           showConfirmButton: false,
+    //           timer: 3000,
+    //           timerProgressBar: true,
+    //           didOpen: (toast) => {
+    //             toast.onmouseenter = Swal.stopTimer;
+    //             toast.onmouseleave = Swal.resumeTimer;
+    //           }
+    //         });
 
-            Toast.fire({
-              icon: 'success',
-              title: 'Actividad guardada correctamente'
-            });
+    //         Toast.fire({
+    //           icon: 'success',
+    //           title: 'Actividad guardada correctamente'
+    //         });
             
-            // RECARGAR LOS REGISTROS
-            this.ejecutivasService.obtenerRegistros().subscribe((data: any[]) => {
-              this.registros = data;
-              this.filtrarRegistros(); // Para volver a aplicar el filtro
-              // this.cerrarFormulario();
-            });
+    //         // RECARGAR LOS REGISTROS
+    //         this.ejecutivasService.obtenerRegistros().subscribe((data: any[]) => {
+    //           this.registros = data;
+    //           this.filtrarRegistros(); // Para volver a aplicar el filtro
+    //           // this.cerrarFormulario();
+    //         });
     
-          },
-          error: (error) => {
-            console.error('Error al guardar actividad:', error);
-            alert('Error al guardar actividad.');
-          }
-        });
-      }
+    //       },
+    //       error: (error) => {
+    //         console.error('Error al guardar actividad:', error);
+    //         alert('Error al guardar actividad.');
+    //       }
+    //     });
+    //   }
+    // }
+    guardarActividad() {
+    const actividad = this.actividades.find(a => a.nombre === this.actividadSeleccionada);
+
+    if (actividad) {
+      const registro = {
+        nombre: this.nombreSeleccionado,
+        ejecutiva: this.ejecutivaSeleccionada,
+        fecha: this.fecha,
+        actividad: this.actividadSeleccionada,
+        frecuencia: actividad.frecuencia,
+        hora: actividad.hora,
+        actRealizada: this.codigoSeleccionado,
+        horaReporte: this.horaReporte || '-'
+      };
+
+      this.ejecutivasService.guardarRegistro(registro).subscribe({
+        next: (response) => {
+          // Nuevo Toast de éxito
+          const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.onmouseenter = Swal.stopTimer;
+              toast.onmouseleave = Swal.resumeTimer;
+            }
+          });
+          Toast.fire({
+            icon: 'success',
+            title: 'Actividad Registrada'
+          });
+
+          // Recarga y limpieza de campos...
+          this.ejecutivasService.obtenerRegistros().subscribe((data: any[]) => {
+            this.registros = data;
+            this.filtrarRegistros();
+            this.actividadSeleccionada = '';
+            this.codigoSeleccionado   = '';
+            this.horaReporte          = '';
+          });
+        },
+        error: (error) => {
+          // ...
+        }
+      });
+
     }
-    
+    }
+
     cerrarFormulario() {
       this.mostrarForm = false;
     }

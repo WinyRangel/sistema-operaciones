@@ -6,10 +6,11 @@ import { DepositosComponent } from './components/Shared/depositos/depositos.comp
 
 const routes: Routes = [
 
+  // { path: 'inicio', component: InicioComponent },
   { path: 'ejecutivas', component: EjecutivasComponent },
-  { path: 'inicio', component: InicioComponent },
   { path: 'depositos', component: DepositosComponent },
   { path: '**', component: InicioComponent },
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
