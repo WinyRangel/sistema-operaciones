@@ -25,89 +25,153 @@ export class ReporteFichasComponent {
   excelDataBySheet: { [sheetName: string]: any[][] } = {};
   
 
-  onFileChange(event: any): void {
-    const target: DataTransfer = <DataTransfer>(event.target);
 
-    if (target.files.length !== 1) {
-      alert('Por favor, selecciona un solo archivo.');
-      return;
-    }
-
-    const file = target.files[0];
-    const reader: FileReader = new FileReader();
-
-    reader.onload = (e: any) => {
-      const bstr: string = e.target.result;
-      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
-
-      const cleanedSheets: { [sheetName: string]: any[][] } = {};
-
-      wb.SheetNames.forEach(sheetName => {
-        const ws = wb.Sheets[sheetName];
-        let data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
-
-        // Eliminar filas con "Total"
-        data = data.filter(row => !row.some(cell => typeof cell === 'string' && cell.toLowerCase().includes('total')));
-        // Eliminar filas vacías
-        data = data.filter(row => row.some(cell => cell !== null && cell !== undefined && cell !== ''));
-        // Eliminar filas con palabra Grupo
-        data = data.filter(row => !row.some(cell => typeof cell === 'string' && cell.toLowerCase().includes('grupo')));
-        // Eliminar columnas A (0), D (3), E (4)
-        const columnsToRemove = [0, 3, 4];
-        data = data.map(row => row.filter((_, idx) => !columnsToRemove.includes(idx)));
-
-        cleanedSheets[sheetName] = data;
-      });
-
-      this.excelDataBySheet = cleanedSheets;
-    };
-
-    reader.readAsBinaryString(file);
-  }
-
-  // Generar el reporte
-  // generarReporte() {
-  //   const resumen = [];
-
-  //   let totalAgendadas = 0;
-  //   let totalReportadas = 0;
-
-  //   for (const sheet of this.objectKeys(this.excelDataBySheet)) {
-  //     const data = this.excelDataBySheet[sheet];
-
-  //     let agendadas = 0;
-  //     let reportadas = 0;
-
-  //     data.forEach(row => {
-  //       if (row[0] !== null && row[0] !== undefined && row[0] !== '') {
-  //         agendadas++;
-  //       }
-
-  //       if ((row[1] || '').toString().trim().toUpperCase() === 'SI') {
-  //         reportadas++;
-  //       }
-  //     });
-
-  //     const noReportadas = agendadas - reportadas;
-
-  //     resumen.push({ sheet, agendadas, reportadas, noReportadas });
-
-  //     // Sumar al total general
-  //     totalAgendadas += agendadas;
-  //     totalReportadas += reportadas;
+  // onFileChange(event: any): void {
+  //   const files: FileList = event.target.files;
+  //   if (!files || files.length === 0) {
+  //     return;
   //   }
 
-  //   const totalNoReportadas = totalAgendadas - totalReportadas;
+  //   // limpiamos antes de procesar
+  //   this.excelDataBySheet = {};
 
-  //   resumen.push({
-  //     sheet: 'TOTAL GENERAL',
-  //     agendadas: totalAgendadas,
-  //     reportadas: totalReportadas,
-  //     noReportadas: totalNoReportadas
-  //   });
+  //   const readFile = (file: File): Promise<void> => {
+  //     return new Promise((resolve, reject) => {
+  //       const reader = new FileReader();
+  //       reader.onload = (e: any) => {
+  //         try {
+  //           const bstr: string = e.target.result;
+  //           const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
 
-  //   this.crearPDF(resumen); // Generar PDF 
+  //           wb.SheetNames.forEach(sheetName => {
+  //             const ws = wb.Sheets[sheetName];
+  //             let data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
+
+  //             // limpieza idéntica a la tuya
+  //             data = data.filter(row =>
+  //               !row.some(cell =>
+  //                 typeof cell === 'string' && (
+  //                   cell.toLowerCase().includes('total') ||
+  //                   cell.toLowerCase().includes('grupo')
+  //                 )
+  //               )
+  //             );
+  //             data = data.filter(row =>
+  //               row.some(cell => cell !== null && cell !== undefined && cell !== '')
+  //             );
+  //             const colsToRemove = [0, 3, 4];
+  //             data = data.map(row => row.filter((_, idx) => !colsToRemove.includes(idx)));
+
+  //             // **Si ya existe esta hoja en excelDataBySheet, concateno filas**
+  //             if (!this.excelDataBySheet[sheetName]) {
+  //               this.excelDataBySheet[sheetName] = [];
+  //             }
+  //             this.excelDataBySheet[sheetName].push(...data);
+  //           });
+
+  //           resolve();
+  //         } catch (err) {
+  //           reject(err);
+  //         }
+  //       };
+  //       reader.onerror = err => reject(err);
+  //       reader.readAsBinaryString(file);
+  //     });
+  //   };
+
+  //   // leo todos los ficheros en paralelo y luego actualizo la vista
+  //   const promises: Promise<void>[] = [];
+  //   for (let i = 0; i < files.length; i++) {
+  //     promises.push(readFile(files[i]));
+  //   }
+
+  //   Promise.all(promises)
+  //     .then(() => {
+  //       // ya tienes excelDataBySheet con todas las hojas fusionadas
+  //       console.log('Todos los archivos procesados', this.excelDataBySheet);
+  //     })
+  //     .catch(err => {
+  //       console.error('Error leyendo archivos', err);
+  //       Swal.fire('Error', 'No se pudieron leer todos los archivos.', 'error');
+  //     });
   // }
+  onFileChange(event: any): void {
+    const files: FileList = event.target.files;
+    if (!files || files.length === 0) return;
+
+    this.excelDataBySheet = {}; // limpiar antes
+
+    const readFile = (file: File): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          try {
+            const bstr: string = e.target.result;
+            const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+
+            wb.SheetNames.forEach(sheetName => {
+              const ws = wb.Sheets[sheetName];
+              let data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
+
+              // FILTRO 1: eliminar filas con "TOTAL" o "No."
+              data = data.filter(row =>
+                !row.some(cell =>
+                  typeof cell === 'string' && (
+                    cell.toLowerCase().includes('total') ||
+                    cell.toLowerCase().includes('no.')
+                  )
+                )
+              );
+
+              // FILTRO 3: eliminar columnas A, D y E (índices 0, 3 y 4)
+              const colsToRemove = [0, 3, 4];
+              data = data.map(row =>
+                row.filter((_, idx) => !colsToRemove.includes(idx))
+              );
+              
+              // FILTRO 2: eliminar filas donde columna B sea "-"
+              data = data.filter(row =>
+                !(row[0] && row[0].toString().trim() === '-')
+              );
+
+              // Limpieza adicional: remover filas completamente vacías
+              data = data.filter(row =>
+                row.some(cell => cell !== null && cell !== undefined && cell !== '')
+              );
+
+              // Fusionar hojas con el mismo nombre
+              const cleanName = sheetName.trim();
+              if (!this.excelDataBySheet[cleanName]) {
+                this.excelDataBySheet[cleanName] = [];
+              }
+              this.excelDataBySheet[cleanName].push(...data);
+            });
+
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = err => reject(err);
+        reader.readAsBinaryString(file);
+      });
+    };
+
+    const promises: Promise<void>[] = [];
+    for (let i = 0; i < files.length; i++) {
+      promises.push(readFile(files[i]));
+    }
+
+    Promise.all(promises)
+      .then(() => {
+        console.log('Archivos limpios y fusionados por hoja:', this.excelDataBySheet);
+      })
+      .catch(err => {
+        console.error('Error leyendo archivos', err);
+        Swal.fire('Error', 'No se pudieron leer todos los archivos.', 'error');
+      });
+  }
+
   async generarReporte() {
     const resumen = [];
 
@@ -230,6 +294,13 @@ export class ReporteFichasComponent {
     });
   }
 
+  limpiarTodo(): void {
+    this.excelDataBySheet = {};
+  }
+
+
 
 
 }
+
+
