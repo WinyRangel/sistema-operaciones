@@ -20,6 +20,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FooterComponent } from './components/Shared/layout/footer/footer.component';
 import { BaucherPipe } from './pipes/baucher.pipe';
 import { RecorridoAgendaComponent } from './components/Coordinadoras/recorrido-agenda/recorrido-agenda.component';
+import { ReporteAgendaComponent } from './components/Coordinadoras/reporte-agenda/reporte-agenda.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { RecorridoAgendaComponent } from './components/Coordinadoras/recorrido-a
     HeaderComponent,
     FooterComponent,
     BaucherPipe,
-    RecorridoAgendaComponent
+    RecorridoAgendaComponent,
+    ReporteAgendaComponent
   ],
   imports: [
     BrowserModule,

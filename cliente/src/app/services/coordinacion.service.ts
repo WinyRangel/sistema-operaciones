@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Coordinacion } from '../models/coordinacion';
-import { Agenda } from '../models/agenda';
+import { Agenda, Domicilio } from '../models/agenda';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +23,10 @@ export class CoordinacionService {
 
   obtenerAgendas(): Observable<any> {
     return this.http.get(this.url2);
+  }
+
+  getDomicilios(): Observable<Domicilio[]> {
+  return this.http.get<Domicilio[]>('http://localhost:4000/domicilios');
   }
 
   obtenerAgenda(coordinador: string): Observable<any> {

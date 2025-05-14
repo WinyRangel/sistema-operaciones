@@ -1,20 +1,48 @@
 const Agenda = require ('../models/Agenda');
+const Domicilio = require('../models/Domicilio'); // ajusta la ruta si es necesario
 
 
-const registrarAgenda = async (req, res) => {
+  const registrarAgenda = async (req, res) => {
     try {
-        const nuevaAgenda = new Agenda(req.body);
-        console.log(req.body);
-        const agendaGuardada = await nuevaAgenda.save();
-        
-        res.status(201).json({ mensaje: 'Agenda creada exitosamente', agenda: agendaGuardada });
-        
+      const { domicilio, ...datosAgenda } = req.body;
+
+      // Si viene un domicilio, guárdalo en su propio modelo
+      let domicilioGuardado = null;
+      if (domicilio) {
+        const nuevoDomicilio = new Domicilio({ nombre: domicilio });
+        domicilioGuardado = await nuevoDomicilio.save();
+      }
+
+      // Guarda la agenda
+      const nuevaAgenda = new Agenda({
+        ...datosAgenda,
+        domicilio: domicilioGuardado ? domicilioGuardado._id : undefined // guarda la referencia si existe
+      });
+
+      const agendaGuardada = await nuevaAgenda.save();
+
+      res.status(201).json({
+        mensaje: 'Agenda y domicilio registrados correctamente',
+        agenda: agendaGuardada,
+        domicilio: domicilioGuardado
+      });
+
     } catch (error) {
-        console.error('Error al crear empresa:', error);
-        res.status(500).json({ mensaje: 'Hubo un error al crear la empresa' });
+      console.error('Error al crear agenda y domicilio:', error);
+      res.status(500).json({ mensaje: 'Hubo un error al crear la agenda y domicilio' });
     }
-    
-}
+  };
+
+  const obtenerDomicilios = async (req, res) => {
+  try {
+    const domicilios = await Domicilio.find().sort({ nombre: 1 }); // opcional: ordena alfabéticamente
+    res.status(200).json(domicilios);
+  } catch (error) {
+    console.error('Error al obtener domicilios:', error);
+    res.status(500).json({ mensaje: 'Hubo un error al obtener los domicilios' });
+  }
+};
+
 
 
 // Controlador para obtener todos los bauchers
@@ -81,6 +109,7 @@ module.exports = {
     obtenerAgenda,
     obtenerAgendasPorCoordinador,
     actualizarAgenda,
+    obtenerDomicilios
 }
 
 

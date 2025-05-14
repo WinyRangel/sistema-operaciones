@@ -16,7 +16,7 @@ const AgendaSchema = new mongoose.Schema({
   hora: {
     type: String,
     required: false
-  },
+  }, 
   domicilio: {
     type: String,
     required: false

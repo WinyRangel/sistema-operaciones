@@ -1,3 +1,6 @@
 <app-header></app-header>
+<div *ngIf="!isOnline" class="alert alert-danger text-center">
+  🔌 Sin conexión a internet
+</div>
 <router-outlet></router-outlet>
 <app-footer></app-footer>

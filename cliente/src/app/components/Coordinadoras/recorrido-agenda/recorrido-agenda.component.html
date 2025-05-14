@@ -25,12 +25,12 @@
     <div class="btn-group" role="group">
       <button type="button" class="btn btn-outline-primary d-flex align-items-center gap-2" (click)="toggleFormVisibility()">
         <i class="fa-solid" [class.fa-eye]="!isFormVisible" [class.fa-eye-slash]="isFormVisible"></i>
-        {{ isFormVisible ? 'Ocultar Formulario' : 'Mostrar Formulario' }}
+        {{ isFormVisible ? 'Ocultar Formulario' : 'Registrar agenda' }}
       </button>
   
       <button type="button" class="btn btn-outline-success d-flex align-items-center gap-2" (click)="toggleTableVisibility()">
         <i class="fa-solid" [class.fa-eye]="!isTableVisible" [class.fa-eye-slash]="isTableVisible"></i>
-        {{ isTableVisible ? 'Ocultar Tabla' : 'Mostrar Tabla' }}
+        {{ isTableVisible ? 'Ocultar Tabla' : 'Seguimiento Agenda' }}
       </button>
   
       <button *ngIf="isFormVisible" type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" (click)="toggleFormSize()">
@@ -41,20 +41,17 @@
   </div>
   
   <!-- Controles de visibilidad -->
-    <hr class="m-0">
-    <div class="d-flex justify-content-end p-3 bg-light border-bottom">
-
-      <!--FORMULARIO Y TABLA-->
-      <div class="container">
-        <!-- FORMULARIO Y TABLA -->
-        <div class="tab-content" id="nav-tabContent">
-          <div *ngIf="coordinadorVisible" class="tab-pane fade show active p-4">
-            <div class="row g-4">
-              <!-- Formulario -->
-              <div *ngIf="isFormVisible"
-                [class.col-12]="isFormExpanded || !isTableVisible"
-                [class.col-lg-4]="isFormExpanded && isTableVisible"
-                [class.col-lg-4]="!isFormExpanded && isTableVisible">
+        <div class="d-flex justify-content-end p-3 bg-light border-bottom">
+          <div class="container">
+           <!-- FORMULARIO Y TABLA -->
+            <div class="tab-content" id="nav-tabContent">
+              <div *ngIf="coordinadorVisible" class="tab-pane fade show active p-4">
+                <div class="row g-4">
+                  <!-- Formulario -->
+                  <div *ngIf="isFormVisible"
+                        [class.col-12]="isFormExpanded || !isTableVisible"
+                        [class.col-lg-4]="isFormExpanded && isTableVisible"
+                        [class.col-lg-4]="!isFormExpanded && isTableVisible">
                 <div class="p-2">
                   <!--FORMULARIO REGISTRAR AGENDA-->
                   <form [formGroup]="registrarAgenda" (ngSubmit)="RegistrarAgenda()" class="agenda-form">
@@ -123,13 +120,20 @@
                               <div class="col-md-3">
                                 <label class="form-label">Hora</label>
                                 <input type="time" class="form-control" formControlName="hora">
-                              </div>
-                              
+                              </div> 
                               <div class="col-md-9">
                                 <label class="form-label">Domicilio</label>
-                                <input type="text" class="form-control" formControlName="domicilio" placeholder="Ingrese la dirección">
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  list="listaDomicilios"
+                                  formControlName="domicilio"
+                                  placeholder="Ingrese la dirección"
+                                />
+                                <datalist id="listaDomicilios">
+                                  <option *ngFor="let d of domicilios" [value]="d"></option>
+                                </datalist>
                               </div>
-                              
                               <div class="col-md-6">
                                 <label class="form-label">Actividad</label>
                                 <input type="text" class="form-control" formControlName="actividad" placeholder="Descripción de la actividad">
@@ -297,15 +301,75 @@
                         </div>
                       </div>
                     </div>
+
+                       <div class="row g-3">
+                      <!-- KM Recorridos -->
+                      <div class="col-md-3">
+                        <label for="horaMes" class="form-label fw-bold">Horas de trabajo al mes</label>
+                        <div class="input-group">
+                          <span class="input-group-text">Horas</span>
+                          <input type="number" 
+                                class="form-control" 
+                                id="horasMensuales"
+                                [(ngModel)]="horasTrabajo"
+                                placeholder="200" 
+                                min="140"
+                                step="200">
+                          <span class="input-group-text">mes</span>
+                        </div>
+                      </div>
+                
+                      <!-- Litros Gasolina -->
+                      <div class="col-md-3">
+                        <label for="litros-gas" class="form-label fw-bold">Horas agendadas</label>
+                        <div class="input-group">
+                          <input type="text" 
+                                class="form-control" 
+                                id="horas-agenda"
+                                placeholder="0" 
+                                [value]="horasAgendadas"
+                                disabled>
+                          <span class="input-group-text">Horas</span>
+                        </div>
+                      </div>      
+                      <!-- Total -->
+                      <div class="col-md-3">
+                        <label for="horas-reportadas" class="form-label fw-bold">Horas reportadas</label>
+                        <div class="input-group">
+                          <input type="text" 
+                                class="form-control fw-bold"
+                                id="horaReporte"
+                                placeholder="0" 
+                                [value]="horasReportadas"
+                                disabled>
+                          <span class="input-group-text">Horas</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                     
                   </div>
                   <!-- Tabla... -->                 
                   <div class="card shadow-sm border-0">
                     <div class="card-body p-0">
-                      <div class="table-responsive">
+                      
+                      <div class="table-responsive mt-3">
+                        <div class="d-grid d-md-flex justify-content-md-end">
+                          <button
+                            class="btn btn-outline-dark d-flex align-items-center gap-2 px-3 py-2"
+                            type="button"
+                            title="Refrescar Tabla"
+                            (click)="refrescarAgendas()"
+                            style="border-radius: 1.5rem; transition: all 0.3s ease;"
+                          >
+                            <i class="fa-solid fa-rotate-right fa-lg"></i>
+                            <span class="d-none d-sm-inline">Refrescar</span>
+                          </button>
+                        </div>
                         <table class="table table-hover align-middle mb-0" id="tabla-agenda">
+                          
                           <thead class="bg-primary text-white sticky-top">
+                            
                             <tr>
                               <th scope="col" class="text-center">Fecha</th>
                               <th scope="col" class="text-center">Hora</th>
@@ -324,7 +388,7 @@
                           <tbody>
                             <tr *ngFor="let agenda of agendasFiltradasPorCoordinador" class="hover-highlight">
                               <td class="text-center">
-                            {{ agenda.fecha | date:'dd-MM-yy':'UTC' }}
+                            {{ agenda.fecha | date:'dd-MM-yy' }}
                               </td>                              
                               <td class="text-center">{{ agenda.hora | slice:0:5 }}</td>
                               <td>
@@ -368,21 +432,13 @@
                             </tr>
                             <!-- Fila de acciones -->
                             <tr>
-                              <td colspan="10"></td>
-                              <td class="text-center">
-                                <button type="button" 
-                                        class="btn btn-danger btn-sm"
-                                        (click)="generarPDFConGrafica()"
-                                        title="Generar reporte PDF">
-                                  <i class="fas fa-file-pdf me-1"></i> Generar reporte
-                                </button>
-                              </td>
-                              <td>
-                                <button type="button" 
-                                        class="btn btn-warning btn-sm"
-                                        (click)="dibujarGraficaPorCodigo()"
-                                        title="Generar reporte de Códigos">
-                                  <i class="fas fa-file-pdf me-1"></i> Generar reporte codigos
+                              <td colspan="9"></td>
+                              <td colspan="3" class="text-center">
+                                <button style="background-color: rgb(140, 0, 255); color: aliceblue;" type="button" 
+                                  class="btn btn"
+                                    (click)="mostrarGraficas()"
+                                    title="Generar reporte de Códigos">
+                                    <i class="fa-solid fa-chart-simple"></i> Generar reporte
                                 </button>
                               </td>
                             </tr>
@@ -391,21 +447,38 @@
                       </div>
                     </div>
                   </div>
-                    <div #reportePDF>
-                    <canvas #graficaHoras style="max-width: 600px; margin: 0 auto;"></canvas> 
+                    <!--GRAFICAS-->
+                     <div class="row shadow-lg p-3 mb-5 mt-4 bg-body-tertiary rounded" *ngIf="mostrarContenedorGraficas">
+                      <div #reportePDF>
+                      <div class="mb-3">
+                      <h5>Coordinador: {{coordinadorVisible}}</h5>
+                      <h6>Horas de Trabajo: {{horasTrabajo}}</h6>
+                      <h6>Horas Agendadas: {{ horasAgendadas }}</h6>
+                      <h6>Horas Reportadas: {{ horasReportadas }}</h6>
+                    </div>
 
-                    <canvas #graficaCodigo></canvas>
-
+                      <div class="col-12">
+                        <canvas #graficaCodigo></canvas>
+                      </div>
+                      <div class="col-12">
+                          <canvas #graficaHoras></canvas> 
+                        </div>
+                      </div>
+                        <button type="button" 
+                            class="btn btn-danger"
+                            (click)="generarPDFConGrafica()"
+                            title="Generar reporte PDF">
+                            <i class="fas fa-file-pdf"></i> Descargar reporte
+                      </button>
+                      <br>
+                    </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </div>      
             </div>
-          </div>
-        </div>      
+          </div>  
+        </div>
       </div>
-    </div>  
-  </div>
+    </div>
 </div>
-</div>
-
-
-

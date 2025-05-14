@@ -16,3 +16,8 @@ export interface Agenda {
     cumplimientoAgenda?: boolean;
   }
   
+
+  export interface Domicilio {
+  _id: string;
+  nombre: string;
+}

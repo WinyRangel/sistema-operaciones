@@ -136,3 +136,14 @@ td { font-family: "Century Gothic";
 .form-switch-lg .form-check-input::before {
   transform: scale(1.5);
 }
+
+
+/* En tu archivo de estilos CSS o SCSS */
+.row.shadow-lg {
+  transition: all 0.3s ease;
+}
+
+canvas {
+  max-width: 100%;
+  height: auto !important;
+}
