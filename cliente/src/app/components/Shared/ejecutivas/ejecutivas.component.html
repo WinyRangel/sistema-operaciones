@@ -1,0 +1,125 @@
+<div class="container my-5">
+
+  <!-- MOSTRAR TARJETAS SI NO HA SELECCIONADO -->
+  <div *ngIf="!mostrarForm" class="card shadow-lg rounded-6 border-0">
+    <div class="row g-4 align-items-center justify-content-center" style="background-color: rgb(197, 206, 255);">
+      <h2 class="text-center mb-5 text-primary fw-bold display-6">Registro de Ejecutivas</h2>
+
+      <div class="col-md-3" *ngFor="let card of cards">
+        <div class="card h-100 shadow-sm border-0 hover-shadow transition-all"
+          (click)="mostrarFormulario(card.nombre, card.ejecutiva)">
+          <div class="card-body text-center p-4">
+            <h5 class="card-title fw-semibold mb-3">{{ card.nombre }}</h5>
+            <p class="card-text text-muted mb-2">
+              <i class="fas fa-user me-2"></i>{{ card.ejecutiva }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+  </div>
+
+  <!-- MOSTRAR FORMULARIO SI SELECCIONO UNA TARJETA -->
+  <div *ngIf="mostrarForm" class="card p-4 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h4 class="fw-bold text-primary">{{ nombreSeleccionado }}</h4>
+        <p class="text-muted"><i class="fas fa-user me-2"></i>{{ ejecutivaSeleccionada }}</p>
+      </div>
+      <button class="btn btn-outline-secondary" (click)="cerrarFormulario()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" style="position: center;" height="16"><path d="M7.78 12.53a.75.75 0 0 1-1.06 0L2.47 8.28a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L4.81 7h7.44a.75.75 0 0 1 0 1.5H4.81l2.97 2.97a.75.75 0 0 1 0 1.06Z"></path></svg>
+      </button>
+    </div>
+
+
+    <!-- FORMULARIO DE REGISTRO -->
+    <div class="d-flex justify-content-between mx-3">
+      <div>
+        <div class="card shadow rounded-4 mb-4 border-0" style="width: 310px;">
+          <div class="card-body p-4">
+            <form (ngSubmit)="guardarActividad()" class="row g-4" style="width: 300px;">
+              <div class="mb-3">
+                <label class="form-label">Fecha</label>
+                <input type="date" class="form-control" [(ngModel)]="fecha" name="fecha" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Actividad</label>
+                <select class="form-select" [(ngModel)]="actividadSeleccionada" name="actividad"
+                  (change)="actualizarHora()" required>
+                  <option *ngFor="let act of actividades" [value]="act.nombre">{{ act.nombre }}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Act. Realizada</label>
+                <select class="form-select" [(ngModel)]="codigoSeleccionado" name="codigo" required>
+                  <option *ngFor="let cod of codigos" [value]="cod.codigo">{{ cod.codigo }}</option>
+                </select>
+              </div>
+              
+
+              <div class="mb-3">
+                <label class="form-label">Hora Reporte</label>
+                <input type="time" class="form-control" [(ngModel)]="horaReporte" name="hora">
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <!-- <button type="button" class="btn btn-secondary me-2" (click)="cerrarFormulario()">Cancelar</button> -->
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save me-1"></i> Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div>
+      
+        <!-- Tabla de Actividades -->
+      <div class="card shadow rounded-4 border-0 mx-3 rounded-4 mb-4 border-0">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr class="table-primary" style="text-align: center;">
+                  <th >Fecha</th>
+                  <th>Actividad</th>
+                  <th>Período</th>
+                  <th>Hora límite</th>
+                  <th>Act. Realizada</th>
+                  <th>Hora Reporte</th>
+                  <th>Puntual</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let registro of registrosFiltrados">
+                  <td>{{ registro.fecha }}</td>
+                  <td>{{ registro.actividad }}</td>
+                  <td>{{ registro.frecuencia }}</td>
+                  <td>{{ registro.hora }}</td>
+                  <td>{{ registro.actRealizada}}</td>
+                  <td>{{ registro.horaReporte }}</td>
+                  <td>
+                    <button class="btn btn-sm" [ngClass]="{
+                                          'btn-danger': registro.horaReporte > registro.hora,
+                                          'btn-success': registro.horaReporte <= registro.hora
+                                        }">
+                    <i class="fas" [ngClass]="{
+                      'fa-times': registro.horaReporte > registro.hora,
+                      'fa-check': registro.horaReporte <= registro.hora
+                    }"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
