@@ -21,8 +21,9 @@ export class EjecutivasService {
   obtenerRegistros(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }
-  // getEjecutivas(): Observable<Ejecutivas[]> {
-  //   return this.http.get<Ejecutivas[]>(this.apiUrl); 
-  // }
 
+
+  getReporteMensual(mes: number) {
+  return this.http.get<any[]>(`${this.apiUrl}`); // suponiendo que esta ruta da todos los registros
+}
 }

@@ -6,7 +6,6 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { TableModule } from 'primeng/table'
-import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { NgOptimizedImage } from '@angular/common';
 
@@ -15,7 +14,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { InicioComponent } from './components/inicio/inicio.component';
 import { HeaderComponent } from './components/Shared/layout/header/header.component';
-import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FooterComponent } from './components/Shared/layout/footer/footer.component';
 import { BaucherPipe } from './pipes/baucher.pipe';
@@ -37,7 +35,6 @@ import { BauchersComponent } from './components/Shared/bauchers/bauchers.compone
     ReporteAgendaComponent,
     EjecutivasComponent,
     DepositosComponent,
-
   ],
   
   imports: [
