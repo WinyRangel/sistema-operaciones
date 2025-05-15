@@ -6,7 +6,6 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { TableModule } from 'primeng/table'
-import { BaseChartDirective } from 'ng2-charts';
 import { NgOptimizedImage } from '@angular/common';
 
 
@@ -22,6 +21,7 @@ import { ReporteAgendaComponent } from './components/Coordinadoras/reporte-agend
 import { EjecutivasComponent } from './components/Shared/ejecutivas/ejecutivas.component';
 import { DepositosComponent } from './components/Shared/depositos/depositos.component';
 import { BauchersComponent } from './components/Shared/bauchers/bauchers.component';
+import { ReporteFichasComponent } from './components/reporte-fichas/reporte-fichas.component';
 
 @NgModule({
   declarations: [
@@ -35,6 +35,7 @@ import { BauchersComponent } from './components/Shared/bauchers/bauchers.compone
     ReporteAgendaComponent,
     EjecutivasComponent,
     DepositosComponent,
+    ReporteFichasComponent
   ],
   
   imports: [
@@ -42,14 +43,13 @@ import { BauchersComponent } from './components/Shared/bauchers/bauchers.compone
     AppRoutingModule,
     ReactiveFormsModule,
     HttpClientModule,
-    
     NgxDatatableModule,
     TableModule,
     FormsModule,
-    BaseChartDirective,
     NgOptimizedImage 
     
   ],
+
   providers: [
     provideAnimationsAsync(),
         providePrimeNG({
