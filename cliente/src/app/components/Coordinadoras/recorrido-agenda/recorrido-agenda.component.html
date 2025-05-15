@@ -1,0 +1,555 @@
+<div class="container mt-4 mb-4">
+  <div class="card shadow-sm bg-body-tertiary rounded">
+    <div class="card-body p-0">
+      <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+          <button 
+            *ngFor="let c of coordinaciones; let i = index"
+            class="nav-link"
+            [class.active]="coordinadorVisible === c.coordinador[0].nombre"
+            [id]="'nav-' + c.coordinador[0].nombre + '-tab'"
+            data-bs-toggle="tab"
+            [attr.data-bs-target]="'#nav-' + c.coordinador[0].nombre"
+            type="button"
+            role="tab"
+            [attr.aria-controls]="'nav-' + c.coordinador[0].nombre"
+            [attr.aria-selected]="coordinadorVisible === c.coordinador[0].nombre"
+            (click)="mostrarDiv(c.coordinador[0].nombre)">
+            {{ c.coordinador[0].nombre }}
+          </button>
+        </div>
+      </nav>
+
+  <!-- Controles de visibilidad -->
+  <div class="d-flex justify-content-end p-3 bg-white shadow-sm rounded mb-3">
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-outline-primary d-flex align-items-center gap-2" (click)="toggleFormVisibility()">
+        <i class="fa-solid" [class.fa-eye]="!isFormVisible" [class.fa-eye-slash]="isFormVisible"></i>
+        {{ isFormVisible ? 'Ocultar Formulario' : 'Registrar agenda' }}
+      </button>
+  
+      <button type="button" class="btn btn-outline-success d-flex align-items-center gap-2" (click)="toggleTableVisibility()">
+        <i class="fa-solid" [class.fa-eye]="!isTableVisible" [class.fa-eye-slash]="isTableVisible"></i>
+        {{ isTableVisible ? 'Ocultar Tabla' : 'Seguimiento Agenda' }}
+      </button>
+  
+      <button *ngIf="isFormVisible" type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" (click)="toggleFormSize()">
+        <i class="fa-solid" [class.fa-expand]="!isFormExpanded" [class.fa-compress]="isFormExpanded"></i>
+        {{ isFormExpanded ? 'Reducir Formulario' : 'Expandir Formulario' }}
+      </button>
+    </div>
+  </div>
+  
+  <!-- Controles de visibilidad -->
+        <div class="d-flex justify-content-end p-3 bg-light border-bottom">
+          <div class="container">
+           <!-- FORMULARIO Y TABLA -->
+            <div class="tab-content" id="nav-tabContent">
+              <div *ngIf="coordinadorVisible" class="tab-pane fade show active p-4">
+                <div class="row g-4">
+                  <!-- Formulario -->
+                  <div *ngIf="isFormVisible"
+                        [class.col-12]="isFormExpanded || !isTableVisible"
+                        [class.col-lg-4]="isFormExpanded && isTableVisible"
+                        [class.col-lg-4]="!isFormExpanded && isTableVisible">
+                <div class="p-2">
+                  <!--FORMULARIO REGISTRAR AGENDA-->
+                  <form [formGroup]="registrarAgenda" (ngSubmit)="RegistrarAgenda()" class="agenda-form">
+                    <div class="card shadow-sm">
+                      <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-calendar-plus me-2"></i>Registro de Agenda</h4>
+                      </div>
+                      
+                      <div class="card-body">
+                        <div class="card mb-4 shadow-sm">
+                          <div class="card-body">
+                            <div class="row g-3 align-items-end">
+                              <!-- Selector de Semana -->
+                              <div class="col-md-6">
+                                <div class="form-floating">
+                                  <select class="form-select" id="semana" formControlName="semana">
+                                    <option disabled selected value="">Seleccione una semana</option>
+                                    <option *ngFor="let semana of semanas" [value]="semana"> {{ semana }}</option>
+                                  </select>
+                                  <label for="semana" class="fw-bold">Semana</label>
+                                </div>
+                              </div>
+                              
+                              <!-- Selector de Fecha -->
+                              <div class="col-md-6">
+                                <div class="form-floating">
+                                  <input type="date" class="form-control" id="fecha" formControlName="fecha">
+                                  <label for="fecha" class="fw-bold">Fecha</label>
+                                </div>
+                              </div>
+                              <br>
+                              <div class="col-md-2">
+                                <div class="d-flex flex-column h-100 justify-content-end">
+                                  <div class="form-check form-switch ps-0">
+                                    <div class="d-flex align-items-center">
+                                      <label class="form-check-label fw-bold" for="switchAgenda">Agenda en tiempo</label>
+                                        <br>
+                                      <input 
+                                        type="checkbox" 
+                                        class="form-check-input ms-0 me-2" 
+                                        role="switch" 
+                                        style="width: 3rem; height: 1.5rem;"
+                                        formControlName="cumplimientoAgenda"
+                                        id="switchAgenda"
+                                      >
+                                    </div>
+                                    
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Actividades -->
+                        <div formArrayName="actividades">
+                          <div *ngFor="let actividad of actividades.controls; let i = index" [formGroupName]="i" class="actividad-bloque mb-4 p-3 border rounded">
+                            <h5 class="d-flex justify-content-between align-items-center">
+                              <span class="badge bg-secondary">Actividad {{ i + 1 }}</span>
+                              <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminarActividad(i)" *ngIf="actividades.length > 1">
+                                <i class="bi bi-trash"></i> Eliminar
+                              </button>
+                            </h5>
+                            
+                            <div class="row g-3">
+                              <div class="col-md-3">
+                                <label class="form-label">Hora</label>
+                                <input type="time" class="form-control" formControlName="hora">
+                              </div> 
+                                <div class="col-md-9">
+                                  <label class="form-label">Domicilio</label>
+                                  <input
+                                    type="text"
+                                    class="form-control"
+                                    list="listaDomicilios"
+                                    formControlName="domicilio"
+                                    placeholder="Ingrese la dirección"
+                                  />
+                                  <datalist id="listaDomicilios">
+                                    <option *ngFor="let d of domicilios" [value]="d"></option>
+                                  </datalist>
+                                </div>
+
+                              <div class="col-md-6">
+                                <label class="form-label">Actividad</label>
+                                <input type="text" class="form-control" formControlName="actividad" placeholder="Descripción de la actividad">
+                              </div>
+                              
+                              <div class="col-md-6">
+                                <label class="form-label">Código</label>
+                                <select class="form-select" formControlName="codigo">
+                                  <option disabled selected value="">Seleccione un código</option>
+                                  <option *ngFor="let opcion of opcionesCodigo" [value]="opcion.value">{{ opcion.texto }}</option>
+                                </select>
+                              </div>
+                              
+                              <div class="col-md-6">
+                                <label class="form-label d-block">Traslado</label>
+                                <div class="btn-group" role="group">
+                                  <input type="radio" class="btn-check" [attr.name]="'traslado' + i" formControlName="traslado" value="SI" id="trasladoSi{{i}}">
+                                  <label class="btn btn-outline-success" for="trasladoSi{{i}}"><i class="bi bi-check-circle"></i> Sí</label>
+                                  
+                                  <input type="radio" class="btn-check" [attr.name]="'traslado' + i" formControlName="traslado" value="NO" id="trasladoNo{{i}}">
+                                  <label class="btn btn-outline-secondary" for="trasladoNo{{i}}"><i class="bi bi-x-circle"></i> No</label>
+                                </div>
+                              </div>
+                              
+                              <div class="col-md-6" *ngIf="actividad.get('traslado')?.value === 'SI'">
+                                <label class="form-label">KM Recorridos</label>
+                                <div class="input-group">
+                                  <input type="number" class="form-control" formControlName="kmRecorrido" min="0" step="0.1">
+                                  <span class="input-group-text">km</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                          <button type="button" class="btn btn-outline-primary" (click)="agregarActividad()">
+                            <i class="bi bi-plus-circle"></i> Agregar otra actividad
+                          </button>
+                          
+                          <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save"></i> Guardar Agenda
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+            </div>
+              <!-- Tabla -->
+                <div *ngIf="isTableVisible"
+                [class.col-lg-12]="!isFormVisible"
+                [class.col-lg-8]="isFormVisible && !isFormExpanded"
+                [class.col-lg-6]="isFormVisible && isFormExpanded">
+                <!-- Contenido tabla (igual) -->
+              <div class="table-responsive mt-8 p-4">
+                <div class="card-header bg-primary text-white">
+                  <h4 class="mb-0"> <i class="fa-regular fa-rectangle-list"></i>Seguimiento de Agenda</h4>
+                  </div>
+                  <!-- Filtro de semana -->
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3 mb-4">
+                  <!--MES-->
+                  <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-calendar3 me-2"></i>Selección de Periodo</h5>
+                  </div>
+                  
+                  <div class="card-body">
+                    <div class="row g-3">
+                      <!-- Mes -->
+                      <div class="col-md-4">
+                        <label for="mesSelect" class="form-label fw-bold">Mes</label>
+                        <select class="form-select" id="mesSelect" [(ngModel)]="mesSeleccionado">
+                          <option value="" disabled selected>Seleccione un mes</option>
+                          <option *ngFor="let mes of ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                                                     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']" 
+                                  [value]="mes">{{ mes }}</option>
+                        </select>
+                      </div>
+                
+                      <!-- Semana -->
+                      <div class="col-md-4">
+                        <label for="semanaSelect" class="form-label fw-bold">Semana</label>
+                        <select class="form-select" id="semanaSelect" [(ngModel)]="semanaSeleccionada">
+                          <option value="" disabled selected>Seleccione semana</option>
+                          <option *ngFor="let semana of semanas" [value]="semana"> {{ semana }}</option>
+                        </select>
+                      </div>
+                
+                      <!-- Día -->
+                      <div class="col-md-4">
+                        <label for="diaSelect" class="form-label fw-bold">Día</label>
+                        <select class="form-select" id="diaSelect" [(ngModel)]="diaSeleccionado">
+                          <option value="" disabled selected>Seleccione día</option>
+                          <option *ngFor="let dia of ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']" 
+                                  [value]="dia">{{ dia }}</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Sección de Gastos -->
+                <div class="card shadow-sm">
+                  <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-fuel-pump me-2"></i>Registro de Gastos</h5>
+                  </div>
+                  
+                  <div class="card-body">
+                    <div class="row g-3">
+                      <!-- KM Recorridos -->
+                      <div class="col-md-3">
+                        <label for="km-semana-coordinador" class="form-label fw-bold">KM Recorridos</label>
+                        <div class="input-group">
+                          <input type="text" 
+                                class="form-control" 
+                                id="km-semana-coordinador"
+                                placeholder="0" 
+                                [value]="totalKmRecorridos"
+                                disabled>
+                          <span class="input-group-text">km</span>
+                        </div>
+                      </div>
+                
+                      <!-- Litros Gasolina -->
+                      <div class="col-md-3">
+                        <label for="litros-gas" class="form-label fw-bold">Litros Gasolina</label>
+                        <div class="input-group">
+                          <input type="text" 
+                                class="form-control" 
+                                id="litros-gas"
+                                placeholder="0" 
+                                [value]="litrosGasolina"
+                                disabled>
+                          <span class="input-group-text">L</span>
+                        </div>
+                      </div>
+                
+                      <!-- Costo Gasolina -->
+                      <div class="col-md-3">
+                        <label for="costoGasolina" class="form-label fw-bold">Costo Gasolina</label>
+                        <div class="input-group">
+                          <span class="input-group-text">$</span>
+                          <input type="number" 
+                                class="form-control" 
+                                id="costoGasolina"
+                                [(ngModel)]="precioPorLitro"
+                                placeholder="0.00" 
+                                min="0"
+                                step="0.01">
+                          <span class="input-group-text">por litro</span>
+                        </div>
+                      </div>
+                
+                      <!-- Total -->
+                      <div class="col-md-3">
+                        <label for="total" class="form-label fw-bold">Total</label>
+                        <div class="input-group">
+                          <span class="input-group-text">$</span>
+                          <input type="text" 
+                                class="form-control fw-bold"
+                                id="total"
+                                placeholder="0.00" 
+                                [value]="costoTotalGasolina"
+                                disabled>
+                        </div>
+                      </div>
+                    </div>
+
+                       <div class="row g-3">
+                      <!-- KM Recorridos -->
+                      <div class="col-md-3">
+                        <label for="horaMes" class="form-label fw-bold">Horas de trabajo al mes</label>
+                        <div class="input-group">
+                          <span class="input-group-text">Horas</span>
+                          <input type="number" 
+                                class="form-control" 
+                                id="horasMensuales"
+                                [(ngModel)]="horasTrabajo"
+                                placeholder="200" 
+                                min="140"
+                                step="200">
+                          <span class="input-group-text">mes</span>
+                        </div>
+                      </div>
+                
+                      <!-- Litros Gasolina -->
+                      <div class="col-md-3">
+                        <label for="litros-gas" class="form-label fw-bold">Horas agendadas</label>
+                        <div class="input-group">
+                          <input type="text" 
+                                class="form-control" 
+                                id="horas-agenda"
+                                placeholder="0" 
+                                [value]="horasAgendadas"
+                                disabled>
+                          <span class="input-group-text">Horas</span>
+                        </div>
+                      </div>      
+                      <!-- Total -->
+                      <div class="col-md-3">
+                        <label for="horas-reportadas" class="form-label fw-bold">Horas reportadas</label>
+                        <div class="input-group">
+                          <input type="text" 
+                                class="form-control fw-bold"
+                                id="horaReporte"
+                                placeholder="0" 
+                                [value]="horasReportadas"
+                                disabled>
+                          <span class="input-group-text">Horas</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                    
+                  </div>
+                  <!-- Tabla... -->                 
+                  <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                      
+                      <div class="table-responsive mt-3">
+                        <div class="d-grid d-md-flex justify-content-md-end">
+                          <button
+                            class="btn btn-outline-dark d-flex align-items-center gap-2 px-3 py-2"
+                            type="button"
+                            title="Refrescar Tabla"
+                            (click)="refrescarAgendas()"
+                            style="border-radius: 1.5rem; transition: all 0.3s ease;"
+                          >
+                            <i class="fa-solid fa-rotate-right fa-lg"></i>
+                            <span class="d-none d-sm-inline">Refrescar</span>
+                          </button>
+                        </div>
+                        <table class="table table-hover align-middle table-striped border rounded-3 overflow-hidden shadow-sm" id="tabla-agenda">
+                          <thead class="bg-primary-gradient text-white sticky-top">
+                            <tr>
+                              <th scope="col" class="text-center py-3">Fecha</th>
+                              <th scope="col" class="text-center py-3">Hora</th>
+                              <th scope="col" class="text-center py-3">Domicilio</th>
+                              <th scope="col" class="text-center py-3">Actividad</th>
+                              <th scope="col" class="text-center py-3">Código</th>
+                              <th scope="col" class="text-center py-3">Actividad Realizada</th>
+                              <th scope="col" class="text-center py-3">Reportado</th>
+                              <th scope="col" class="text-center py-3">Hora Reporte</th>
+                              <th scope="col" class="text-center py-3">Hora Cierre</th>
+                              <th scope="col" class="text-center py-3">KM Recorridos</th>
+                              <th scope="col" class="text-center py-3">Cumplimiento</th>
+                              <th scope="col" class="text-center py-3">Acciones</th>
+                            </tr>
+                          </thead>
+                          
+                          <tbody>
+                            <tr *ngFor="let agenda of agendasFiltradasPorCoordinador" class="hover-highlight">
+                              <!-- Campos de datos -->
+                              <td class="text-center fw-semibold">{{ agenda.fecha | date:'dd-MM-yy': 'UTC' }}</td>
+                              <td class="text-center text-muted">{{ agenda.hora | slice:0:5 }}</td>
+                              <td>
+                                <span class="badge rounded-pill bg-opacity-10 bg-success text-success">
+                                  {{ agenda.domicilio?.nombre }}
+                                </span>
+                              </td>
+                              <td class="text-truncate" style="max-width: 150px;">{{ agenda.actividad }}</td>
+                              
+                              <!-- Campos editables -->
+                              <td>
+                                <input [(ngModel)]="agenda.codigo" 
+                                      class="form-control form-control-sm border-primary border-opacity-25">
+                              </td>
+                              <td>
+                                <input [(ngModel)]="agenda.actividadReportada" 
+                                      class="form-control form-control-sm border-primary border-opacity-25">
+                              </td>
+                              <td>
+                                <select [(ngModel)]="agenda.reportado" 
+                                        class="form-select form-select-sm border-primary border-opacity-25">
+                                  <option [value]="true" class="text-success fw-semibold">✓ Reportado</option>
+                                  <option [value]="false" class="text-danger fw-semibold">✗ No Reportado</option>
+                                </select>
+                              </td>
+                              <td>
+                                <input type="time" [(ngModel)]="agenda.horaReporte" 
+                                      class="form-control form-control-sm border-primary border-opacity-25">
+                              </td>
+                              <td>
+                                <input type="time" [(ngModel)]="agenda.horaCierre" 
+                                      class="form-control form-control-sm border-primary border-opacity-25">
+                              </td>
+                              
+                              <!-- Campos de solo lectura -->
+                              <td class="text-center text-info fw-bold">{{ agenda.kmRecorrido || '0' }}</td>
+                              <td class="text-center">
+                                <span class="badge rounded-pill bg-opacity-10" 
+                                      [ngClass]="agenda.cumplimientoAgenda ? 'bg-success text-success' : 'bg-danger text-danger'">
+                                  {{ agenda.cumplimientoAgenda ? 'Cumplido' : 'Pendiente' }}
+                                </span>
+                              </td>
+                              
+                              <!-- Acciones -->
+                              <td class="text-center">
+                                <button class="btn btn-sm btn-hover-primary" 
+                                        type="button" 
+                                        (click)="guardarCambios(agenda)"
+                                        title="Guardar cambios">
+                                  <i class="fas fa-save fs-6 text-primary"></i>
+                                </button>
+                              </td>
+                            </tr>
+                            
+                            <!-- Fila de acciones -->
+                            <tr class="bg-light">
+                              <td colspan="9"></td>
+                              <td colspan="3" class="text-center py-3">
+                                <button type="button" 
+                                        class="btn btn-purple-gradient rounded-pill px-4"
+                                        (click)="mostrarGraficas()"
+                                        title="Generar reporte de Códigos">
+                                  <i class="fa-solid fa-chart-simple me-2"></i>Generar Reporte
+                                </button>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                    <!--GRAFICAS-->
+                      <div class="row custom-report-container p-4 mt-4" *ngIf="mostrarContenedorGraficas">
+                        <div #reportePDF class="position-relative">
+                          <!-- Encabezado del reporte -->
+                          <div class="report-header mb-4 border-bottom pb-3">
+                            <h4 class="fw-bold text-primary mb-3">
+                              <i class="fas fa-chart-line me-2"></i>Reporte de Actividades
+                            </h4>
+                            <div class="row stats-grid">
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Coordinador</h6>
+                                  <h5 class="fw-bold text-dark">{{coordinadorVisible}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Horas Trabajo</h6>
+                                  <h5 class="fw-bold text-info">{{horasTrabajo}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Horas Agendadas</h6>
+                                  <h5 class="fw-bold text-warning">{{horasAgendadas}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Horas Reportadas</h6>
+                                  <h5 class="fw-bold text-success">{{horasReportadas}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Entregas Agendadas</h6>
+                                  <h5 class="fw-bold text-primary">{{horasEntregas}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Entregas Reportadas</h6>
+                                  <h5 class="fw-bold text-success">{{horasEntregasReportadas}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Entregas No Reportadas</h6>
+                                  <h5 class="fw-bold text-danger">{{horasEntregasNoReportadas}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Productividad</h6>
+                                  <h5 class="fw-bold text-danger">{{horasProductividad}}%</h5>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Gráficas -->
+                          <div class="row chart-section g-4">
+                            <div class="col-12 chart-container mb-4 p-3 bg-white rounded-3 shadow-sm">
+                              <h6 class="fw-bold text-secondary mb-3"><i class="fas fa-chart-bar me-2"></i>Gráfico por Código</h6>
+                              <canvas #graficaCodigo class="chart-canvas"></canvas>
+                            </div>
+                            
+                            <div class="col-12 chart-container p-3 bg-white rounded-3 shadow-sm">
+                              <h6 class="fw-bold text-secondary mb-3"><i class="fas fa-clock me-2"></i>Distribución de Horas</h6>
+                              <canvas #graficaHoras class="chart-canvas"></canvas>
+                            </div>
+                          </div>
+                        </div>
+                                                  <!-- Botón de acción -->
+                          <div class="text-end mt-4">
+                            <button type="button" 
+                                    class="btn btn-danger btn-download-pdf"
+                                    (click)="generarPDFConGrafica()"
+                                    title="Generar reporte PDF">
+                              <i class="fas fa-file-pdf me-2"></i>Descargar Reporte
+                            </button>
+                          </div>
+                          
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>      
+            </div>
+          </div>  
+        </div>
+      </div>
+    </div>
+</div>

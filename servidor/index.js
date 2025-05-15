@@ -15,6 +15,9 @@ app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/', require('./routes/baucher.routes'));
+app.use('/', require('./routes/coordinacion.routes'));
+app.use('/', require('./routes/agenda.routes'));
 app.use('/', require('./routes/ejecutivas.routes'));
 app.use('/', require('./routes/depositos.routes'));
 

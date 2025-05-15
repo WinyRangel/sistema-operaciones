@@ -1,0 +1,251 @@
+a { font-family: "Century Gothic", 
+        CenturyGothic, 
+        AppleGothic, 
+        sans-serif; 
+        font-size: 12px; 
+        font-style: normal; 
+        font-variant: normal; 
+        font-weight: 700; 
+        line-height: 22.8px; 
+}
+
+
+option { font-family: "Century Gothic", 
+  CenturyGothic, 
+  AppleGothic, 
+  sans-serif; 
+  font-size: 12px; 
+  font-style: normal; 
+  font-variant: normal; 
+  font-weight: 700; 
+  line-height: 22.8px; 
+}
+
+select { font-family: "Century Gothic", 
+  CenturyGothic, 
+  AppleGothic, 
+  sans-serif; 
+  font-size: 12px; 
+  font-style: normal; 
+  font-variant: normal; 
+  font-weight: 700; 
+  line-height: 22.8px; 
+}
+
+input  { font-family: "Century Gothic", 
+  CenturyGothic, 
+  AppleGothic, 
+  sans-serif; 
+  font-size: 12px; 
+  font-style: normal; 
+  font-variant: normal; 
+  font-weight: 700; 
+  line-height: 22.8px; 
+}
+/* Agrega esto a tu archivo CSS */
+
+  
+  .btn-group .btn {
+    transition: all 0.3s ease;
+  }
+  
+
+  
+  .shadow {
+    transition: all 0.3s ease;
+  }
+
+
+  h5 { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
+    font-size: 20px; 
+    font-style: normal; 
+    font-variant: normal; 
+    font-weight: 700; 
+    line-height: 26.4px; 
+} 
+
+
+h4 { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
+    font-size: 24px; 
+    font-style: normal; 
+    font-variant: normal; 
+    font-weight: 700; 
+    line-height: 26.4px; 
+} 
+
+h3 { font-family: "Century Gothic"; 
+    font-size: 20px; 
+    font-style: normal; 
+    font-variant: normal; 
+    font-weight: 400; 
+    line-height: 11px; } 
+
+.form-label{
+    font-family: Century Gothic,CenturyGothic,AppleGothic,sans-serif; 
+}
+
+.form-select{
+    font-family: Century Gothic,CenturyGothic,AppleGothic,sans-serif; 
+}
+
+th { 
+    font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
+    font-size: 13px; 
+    font-style: normal; 
+    font-variant: normal; 
+    font-weight: 700; 
+    line-height: 22.1px;
+}
+
+
+td { font-family: "Century Gothic"; 
+    font-size: 13px; 
+    font-style: normal; 
+    font-variant: normal; 
+    font-weight: 400; 
+    line-height: 18.7px; }
+
+
+/* Custom Styles */
+.max-w-1200 { max-width: 1200px; }
+.shadow-lg-hover { box-shadow: 0 1rem 3rem rgba(0,0,0,.1)!important; }
+.shadow-lg-hover:hover { box-shadow: 0 1rem 3rem rgba(0,0,0,.15)!important; }
+.section-divider {
+  width: 4px;
+  height: 28px;
+  border-radius: 2px;
+}
+.focus-ring-primary:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+}
+.hover-bg-success:hover { background: #198754!important; }
+.hover-bg-danger:hover { background: #dc3545!important; }
+.hover-text-white:hover { color: white!important; }
+.transition-all { transition: all 0.2s ease; }
+
+.form-switch-lg .form-check-input {
+  width: 3rem;
+  height: 1.5rem;
+}
+
+.form-switch-lg .form-check-input:checked {
+  background-color: #0d6efd;
+}
+
+.form-switch-lg .form-check-input::before {
+  transform: scale(1.5);
+}
+
+
+/* En tu archivo de estilos CSS o SCSS */
+.row.shadow-lg {
+  transition: all 0.3s ease;
+}
+
+canvas {
+  max-width: 100%;
+  height: auto !important;
+}
+
+.custom-report-container {
+  background: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.report-header h4 {
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+}
+
+.stat-card {
+  transition: transform 0.2s ease;
+  border: 1px solid rgba(0,0,0,0.03);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+}
+
+.chart-container {
+  border: 1px solid rgba(0,0,0,0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+.chart-container:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+}
+
+.chart-canvas {
+  height: 400px;
+  width: 100%;
+}
+
+.btn-download-pdf {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  border: none;
+}
+
+.btn-download-pdf:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(220,53,69,0.3);
+}
+
+@media (max-width: 768px) {
+  .chart-canvas {
+    height: 250px;
+  }
+  
+  .stats-grid .col-md-3 {
+    width: 50%;
+  }
+  
+  .report-header h4 {
+    font-size: 1.25rem;
+  }
+}
+
+
+.bg-primary-gradient {
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+  }
+  
+  .hover-highlight:hover {
+    background-color: rgba(13, 110, 253, 0.03) !important;
+  }
+  
+  .btn-purple-gradient {
+    background: linear-gradient(135deg, #8c00ff, #6a00cc);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-purple-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(140, 0, 255, 0.25);
+  }
+  
+  .btn-hover-primary:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+  }
+  
+  @media (max-width: 768px) {
+    #tabla-agenda {
+      font-size: 0.875rem;
+    }
+    
+    th, td {
+      padding: 0.5rem !important;
+    }
+    
+    .badge {
+      font-size: 0.75rem;
+    }
+  }

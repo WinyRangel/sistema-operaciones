@@ -1,15 +1,18 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { InicioComponent } from './components/inicio/inicio.component';
+import { BauchersComponent } from './components/Shared/bauchers/bauchers.component';
+import { RecorridoAgendaComponent } from './components/Coordinadoras/recorrido-agenda/recorrido-agenda.component';
 import { EjecutivasComponent } from './components/Shared/ejecutivas/ejecutivas.component';
 import { DepositosComponent } from './components/Shared/depositos/depositos.component';
 
 const routes: Routes = [
-
-  // { path: 'inicio', component: InicioComponent },
+  { path: 'baucher', component: BauchersComponent },
+  { path: 'recorrido-agenda', component:RecorridoAgendaComponent },
   { path: 'ejecutivas', component: EjecutivasComponent },
   { path: 'depositos', component: DepositosComponent },
-  { path: '**', component: InicioComponent },
+  { path: 'inicio', component: InicioComponent },
+  { path: '**', component: InicioComponent }
 ];
 
 @NgModule({
