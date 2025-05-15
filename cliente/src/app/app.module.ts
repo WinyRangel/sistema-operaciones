@@ -13,6 +13,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { InicioComponent } from './components/inicio/inicio.component';
 import { HeaderComponent } from './components/Shared/layout/header/header.component';
+import { LegalesComponent } from './components/Shared/legales/legales.component';
+import { ToggleButtonModule } from 'primeng/togglebutton';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FooterComponent } from './components/Shared/layout/footer/footer.component';
 import { BaucherPipe } from './pipes/baucher.pipe';
@@ -29,6 +31,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     AppComponent,
     InicioComponent,
     HeaderComponent,
+    LegalesComponent,
     FooterComponent,
     BaucherPipe,
     BauchersComponent,
@@ -45,10 +48,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule,
     HttpClientModule,
     NgxDatatableModule,
+    TagModule,
+    ToggleButtonModule
     TableModule,
     FormsModule,
     NgOptimizedImage 
-    
+
   ],
 
   providers: [
