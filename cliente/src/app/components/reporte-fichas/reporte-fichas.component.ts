@@ -109,7 +109,7 @@ export class ReporteFichasComponent {
             const bstr: string = e.target.result;
             const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
 
-            wb.SheetNames.forEach(sheetName => {
+            wb.SheetNames.forEach((sheetName: string) => {
               const ws = wb.Sheets[sheetName];
               let data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
 
