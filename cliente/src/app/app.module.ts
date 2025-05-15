@@ -25,6 +25,8 @@ import { DepositosComponent } from './components/Shared/depositos/depositos.comp
 import { BauchersComponent } from './components/Shared/bauchers/bauchers.component';
 import { ReporteFichasComponent } from './components/reporte-fichas/reporte-fichas.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { TagModule } from 'primeng/tag';
+
 
 @NgModule({
   declarations: [
@@ -48,8 +50,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule,
     HttpClientModule,
     NgxDatatableModule,
-    // TagModule,
-    
+    TagModule,
     ToggleButtonModule,
     TableModule,
     FormsModule,

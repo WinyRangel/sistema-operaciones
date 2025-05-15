@@ -220,15 +220,17 @@ export class ReporteFichasComponent {
       allowOutsideClick: false,
       allowEscapeKey: false,
       didOpen: () => {
-        Swal.getPopup()?.querySelector('.swal2-loader') || Swal.getHtmlContainer()?.classList.add('swal2-loading');
-        Swal.getHtmlContainer()?.classList.add('swal2-loading');
-        const b = Swal.getHtmlContainer()?.querySelector('b');
-        timerInterval = setInterval(() => {
-          if (b) {
-            b.textContent = `${Swal.getTimerLeft()}`;
-          }
-        }, 100);
-      },
+      const confirmButton = Swal.getConfirmButton();
+      Swal.showLoading(confirmButton); // ✅ solución al error TS2554
+
+      const b = Swal.getHtmlContainer()?.querySelector('b');
+      timerInterval = setInterval(() => {
+        if (b) {
+          b.textContent = `${Swal.getTimerLeft()}`;
+        }
+      }, 100);
+    },
+
       willClose: () => {
         clearInterval(timerInterval);
       }
