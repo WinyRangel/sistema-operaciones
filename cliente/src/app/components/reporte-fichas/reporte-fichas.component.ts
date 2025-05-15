@@ -220,7 +220,8 @@ export class ReporteFichasComponent {
       allowOutsideClick: false,
       allowEscapeKey: false,
       didOpen: () => {
-        Swal.showLoading();
+        Swal.getPopup()?.querySelector('.swal2-loader') || Swal.getHtmlContainer()?.classList.add('swal2-loading');
+        Swal.getHtmlContainer()?.classList.add('swal2-loading');
         const b = Swal.getHtmlContainer()?.querySelector('b');
         timerInterval = setInterval(() => {
           if (b) {

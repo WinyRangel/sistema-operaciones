@@ -48,8 +48,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule,
     HttpClientModule,
     NgxDatatableModule,
-    TagModule,
-    ToggleButtonModule
+    // TagModule,
+    
+    ToggleButtonModule,
     TableModule,
     FormsModule,
     NgOptimizedImage 
