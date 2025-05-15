@@ -22,6 +22,7 @@ import { EjecutivasComponent } from './components/Shared/ejecutivas/ejecutivas.c
 import { DepositosComponent } from './components/Shared/depositos/depositos.component';
 import { BauchersComponent } from './components/Shared/bauchers/bauchers.component';
 import { ReporteFichasComponent } from './components/reporte-fichas/reporte-fichas.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
