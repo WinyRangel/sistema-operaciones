@@ -169,7 +169,7 @@ export class BauchersComponent implements OnInit{
     this.mostrarExito('Actualizado exitosamente');
   }
 
-  private resetForm() {
+  public resetForm() {
     this.baucherForm.reset();
     this.editingBaucherId = null;
     this.isEditing = false;

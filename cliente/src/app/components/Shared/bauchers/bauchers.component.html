@@ -1,96 +1,137 @@
-<div class="accordion" id="accordionFormBaucher">
-  <div class="accordion-item">
+<div class="accordion custom-accordion" id="accordionFormBaucher">
+  <div class="accordion-item border-0 shadow-sm">
     <h2 class="accordion-header">
-      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+      <button class="accordion-button rounded-top-3 bg-primary text-white fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+        <i class="fas fa-file-invoice-dollar me-2"></i>
         Registro de Bauchers
       </button>
     </h2>
     <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionFormBaucher">
-      <div class="accordion-body">
-        <form class="p-3 p-md-4" [formGroup]="baucherForm" (ngSubmit)="agregarBaucher()">
-          <h4 class="text-center mb-4 fw-bold fs-2">Registro de Bauchers</h4>
+      <div class="accordion-body bg-light">
+        <form class="p-3 p-md-4 bg-white rounded-bottom-3 shadow-sm" [formGroup]="baucherForm" (ngSubmit)="agregarBaucher()">
+          <h4 class="text-center mb-4 fw-bold text-primary">
+            <i class="fas fa-file-alt me-2"></i>
+            Registro de Bauchers
+          </h4>
         
-          <div class="container overflow-hidden">
-            <div class="row gx-5">
+          <div class="container-fluid px-0">
+            <div class="row g-4">
               <!-- Primera columna -->
-              <div class="col-12 col-lg-6 mb-4">
-                <section class="p-3">
-                  <div class="d-flex align-items-center gap-2 mb-4">
-                    <div class="section-divider bg-primary"></div>
-                    <h5 class="mb-0 fw-semibold text-primary">Datos de Coordinación</h5>
+              <div class="col-12 col-lg-6">
+                <section class="p-3 border-end-lg">
+                  <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="icon-container bg-primary-light">
+                      <i class="fas fa-users-cog text-primary"></i>
+                    </div>
+                    <h5 class="mb-0 fw-bold text-primary">Datos de Coordinación</h5>
                   </div>
         
                   <div class="row g-3">
                     <div class="col-12 col-md-6">
-                      <label for="coordinacion" class="form-label fw-medium">Coordinación</label>
+                      <label for="coordinacion" class="form-label fw-medium">Coordinación <span class="text-danger">*</span></label>
                       <select class="form-select shadow-sm" id="coordinacion" formControlName="coordinacion" (change)="filtrarPersonas()">
                         <option selected disabled value="">Seleccionar coordinación</option>
                         <option *ngFor="let coord of coordinaciones" [ngValue]="coord">
                           {{ coord.municipio }} - {{ coord.nombre }}
                         </option>
                       </select>
+                      <div class="invalid-feedback d-block" *ngIf="baucherForm.get('coordinacion')?.invalid && baucherForm.get('coordinacion')?.touched">
+                        Por favor seleccione una coordinación
+                      </div>
                     </div>
         
                     <div class="col-12 col-md-6">
-                      <label for="ejecutiva" class="form-label fw-medium">Ejecutiva / Coordinador</label>
+                      <label for="ejecutiva" class="form-label fw-medium">Ejecutiva/Coordinador <span class="text-danger">*</span></label>
                       <select class="form-select shadow-sm" id="ejecutiva" formControlName="ejecutiva">
                         <option selected disabled value="">Seleccionar persona</option>
                         <option *ngFor="let persona of personasFiltradas" [ngValue]="persona">
                           {{ persona.nombre }}
                         </option>
                       </select>
+                      <div class="invalid-feedback d-block" *ngIf="baucherForm.get('ejecutiva')?.invalid && baucherForm.get('ejecutiva')?.touched">
+                        Por favor seleccione una persona
+                      </div>
                     </div>
         
                     <div class="col-12">
-                      <label for="fechaBaucher" class="form-label fw-medium">Fecha y Hora de Pago</label>
-                      <input type="datetime-local" class="form-control shadow-sm" id="fechaBaucher" formControlName="fechaBaucher">
+                      <label for="fechaBaucher" class="form-label fw-medium">Fecha y Hora de Pago <span class="text-danger">*</span></label>
+                      <div class="input-group">
+                        <span class="input-group-text bg-primary-light border-primary-light">
+                          <i class="fas fa-calendar-alt text-primary"></i>
+                        </span>
+                        <input type="datetime-local" class="form-control shadow-sm" id="fechaBaucher" formControlName="fechaBaucher">
+                      </div>
                     </div>
                   </div>
                 </section>
               </div>
         
               <!-- Segunda columna -->
-              <div class="col-12 col-lg-6 mb-4 border-start">
-                <section class="p-3 ">
-                  <div class="d-flex align-items-center gap-2 mb-4">
-                    <div class="section-divider bg-primary"></div>
-                    <h5 class="mb-0 fw-semibold text-primary">Reporte de Pago</h5>
+              <div class="col-12 col-lg-6">
+                <section class="p-3">
+                  <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="icon-container bg-primary-light">
+                      <i class="fas fa-file-invoice-dollar text-primary"></i>
+                    </div>
+                    <h5 class="mb-0 fw-bold text-primary">Reporte de Pago</h5>
                   </div>
         
                   <div class="row g-3">
-                    <div class="col-12 col-md-2 col-lg-8">
+                    <div class="col-12 col-md-6">
                       <label for="fechaReporte" class="form-label fw-medium">Fecha de Reporte</label>
-                      <input type="datetime-local" class="form-control shadow-sm" id="fechaReporte" formControlName="fechaReporte">
+                      <div class="input-group">
+                        <span class="input-group-text bg-primary-light border-primary-light">
+                          <i class="fas fa-calendar-check text-primary"></i>
+                        </span>
+                        <input type="datetime-local" class="form-control shadow-sm" id="fechaReporte" formControlName="fechaReporte">
+                      </div>
                     </div>
         
-                    <div class="col-6 col-md-1 col-lg-4">
+                    <div class="col-12 col-md-6">
                       <label for="grupo" class="form-label fw-medium">Grupo</label>
-                      <input type="text" class="form-control shadow-sm" id="grupo" placeholder="Ej: Grupo 5" formControlName="grupo">
+                      <div class="input-group">
+                        <span class="input-group-text bg-primary-light border-primary-light">
+                          <i class="fas fa-users text-primary"></i>
+                        </span>
+                        <input type="text" class="form-control shadow-sm" id="grupo" placeholder="Ej: Grupo 5" formControlName="grupo">
+                      </div>
                     </div>
         
-                    <div class="col-6 col-md-2 col-lg-4">
-                      <label for="concepto" class="form-label fw-medium">Concepto</label>
-                      <input type="text" class="form-control shadow-sm" id="concepto" placeholder="Ej: Pago mensual" formControlName="concepto">
+                    <div class="col-12">
+                      <label for="concepto" class="form-label fw-medium">Concepto <span class="text-danger">*</span></label>
+                      <div class="input-group">
+                        <span class="input-group-text bg-primary-light border-primary-light">
+                          <i class="fas fa-comment-dollar text-primary"></i>
+                        </span>
+                        <input type="text" class="form-control shadow-sm" id="concepto" placeholder="Ej: Pago mensual" formControlName="concepto">
+                      </div>
                     </div>
         
-                    <div class="col-12 col-md-6 col-lg-3">
-                      <label for="titular" class="form-label fw-medium">Titular</label>
-                      <input type="text" class="form-control shadow-sm" id="titular" placeholder="Ej: Juan Pérez" formControlName="titular">
+                    <div class="col-12">
+                      <label for="titular" class="form-label fw-medium">Titular <span class="text-danger">*</span></label>
+                      <div class="input-group">
+                        <span class="input-group-text bg-primary-light border-primary-light">
+                          <i class="fas fa-user-tie text-primary"></i>
+                        </span>
+                        <input type="text" class="form-control shadow-sm" id="titular" placeholder="Ej: Juan Pérez" formControlName="titular">
+                      </div>
                     </div>
-        
-                    <!-- <button type="button" class="btn btn-outline-info">
-                      <i class="fa-solid fa-plus me-2"></i>Añadir Baucher
-                    </button> -->
                   </div>
                 </section>
               </div>
             </div>
-            <hr>
-            <div class="d-flex justify-content-end gap-2 mt-4">
-              <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save me-2"></i>
+            
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">              
+              <div class="d-flex gap-3">
+                <button type="button" class="btn btn-outline-secondary" (click)="resetForm()">
+                  <i class="fas fa-eraser me-2"></i>
+                  Limpiar
+                </button>
+                <button type="submit" class="btn btn-primary px-4" [disabled]="baucherForm.invalid">
+                  <i class="fas fa-save me-2"></i>
                   {{ editingBaucherId ? 'Actualizar' : 'Guardar' }}
-              </button>
+                </button>
+              </div>
             </div>
           </div>
         </form>
@@ -98,7 +139,6 @@
     </div>
   </div>
 </div>
-
     
 
   <!-- Tabla de Reportes -->

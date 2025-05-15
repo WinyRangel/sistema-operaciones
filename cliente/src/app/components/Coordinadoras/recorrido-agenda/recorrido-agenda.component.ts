@@ -479,7 +479,8 @@ Swal.fire({
   allowOutsideClick: false,
   allowEscapeKey: false,
   didOpen: () => {
-    Swal.showLoading();
+    Swal.showLoading;
+    
   }
 });
 
