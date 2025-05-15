@@ -121,19 +121,20 @@
                                 <label class="form-label">Hora</label>
                                 <input type="time" class="form-control" formControlName="hora">
                               </div> 
-                              <div class="col-md-9">
-                                <label class="form-label">Domicilio</label>
-                                <input
-                                  type="text"
-                                  class="form-control"
-                                  list="listaDomicilios"
-                                  formControlName="domicilio"
-                                  placeholder="Ingrese la dirección"
-                                />
-                                <datalist id="listaDomicilios">
-                                  <option *ngFor="let d of domicilios" [value]="d"></option>
-                                </datalist>
-                              </div>
+                                <div class="col-md-9">
+                                  <label class="form-label">Domicilio</label>
+                                  <input
+                                    type="text"
+                                    class="form-control"
+                                    list="listaDomicilios"
+                                    formControlName="domicilio"
+                                    placeholder="Ingrese la dirección"
+                                  />
+                                  <datalist id="listaDomicilios">
+                                    <option *ngFor="let d of domicilios" [value]="d"></option>
+                                  </datalist>
+                                </div>
+
                               <div class="col-md-6">
                                 <label class="form-label">Actividad</label>
                                 <input type="text" class="form-control" formControlName="actividad" placeholder="Descripción de la actividad">
@@ -388,11 +389,11 @@
                           <tbody>
                             <tr *ngFor="let agenda of agendasFiltradasPorCoordinador" class="hover-highlight">
                               <td class="text-center">
-                            {{ agenda.fecha | date:'dd-MM-yy' }}
+                            {{ agenda.fecha | date:'dd-MM-yy': 'UTC' }}
                               </td>                              
                               <td class="text-center">{{ agenda.hora | slice:0:5 }}</td>
                               <td>
-                                <span class="badge rounded-pill text-bg-success"> {{ agenda.domicilio }}</span>
+                                <span class="badge rounded-pill text-bg-success">   {{ agenda.domicilio?.nombre }} </span>
                                </td>
                               <td>{{ agenda.actividad }}</td>
                               <td>

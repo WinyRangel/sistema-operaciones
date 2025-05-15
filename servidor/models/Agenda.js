@@ -18,8 +18,10 @@ const AgendaSchema = new mongoose.Schema({
     required: false
   }, 
   domicilio: {
-    type: String,
-    required: false
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Domicilio',
+        required: false
+
   },
   actividad: {
     type: String,

@@ -47,14 +47,15 @@ const Domicilio = require('../models/Domicilio'); // ajusta la ruta si es necesa
 
 // Controlador para obtener todos los bauchers
 const obtenerAgenda = async (req, res) => {
-    try {
-        const agendas = await Agenda.find({});
-        res.json(agendas);
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Error');
-    }
+  try {
+    const agendas = await Agenda.find().populate('domicilio');
+    res.status(200).json(agendas);
+  } catch (error) {
+    console.error('Error al obtener agendas:', error);
+    res.status(500).json({ mensaje: 'Hubo un error al obtener las agendas' });
+  }
 };
+
 
 
 

@@ -69,7 +69,7 @@ export class RecorridoAgendaComponent implements OnInit {
 
       //Obtener 
       ngOnInit(): void {
-        
+       
         this._coordinacionService.obtenerCoordinacion().subscribe(data => {
           this.coordinaciones = data;
           this.registrarAgenda.get('kmRecorrido')?.disable();
@@ -88,13 +88,13 @@ export class RecorridoAgendaComponent implements OnInit {
            ...agenda,
           fecha: this.fixUTCDateToLocal(agenda.fecha)
           }));
-           this._coordinacionService.getDomicilios().subscribe((res: Domicilio[]) => {
-           this.domicilios = res.map(d => d.nombre); // 🔑 extraer solo el campo nombre
-          });
         })
         for (let i = 1; i <= 52; i++) {
           this.semanas.push(` SEMANA ${i}`);
         }
+          this._coordinacionService.getDomicilios().subscribe((res: Domicilio[]) => {
+            this.domicilios = res.map(d => d.nombre); // 🔑 extraer solo el campo nombre
+          });
       }
 
       mostrarDiv(nombre: string): void {
@@ -225,32 +225,20 @@ export class RecorridoAgendaComponent implements OnInit {
 
 
       // : Agregar métodos para obtener
-      get agendasFiltradasPorCoordinador() {
-      return this.agendas.filter(agenda => {
-        const fechaUTC = new Date(agenda.fecha);
-        // Forzar conversión a fecha local SIN hora para evitar desfase
-        const fecha = new Date(
-          fechaUTC.getFullYear(),
-          fechaUTC.getMonth(),
-          fechaUTC.getDate()
-        );
-
-        const mes = fecha.toLocaleString('es-MX', { month: 'long' });
-        const dia = fecha.toLocaleString('es-MX', { weekday: 'long' });
-
-        return (
-          agenda.coordinador === this.coordinadorVisible &&
-          (!this.mesSeleccionado || mes.toLowerCase() === this.mesSeleccionado.toLowerCase()) &&
-          (!this.semanaSeleccionada || agenda.semana === this.semanaSeleccionada) &&
-          (!this.diaSeleccionado || dia.toLowerCase() === this.diaSeleccionado.toLowerCase())
-
+          get agendasFiltradasPorCoordinador() {
+            return this.agendas.filter(agenda => {
+              const fecha = new Date(agenda.fecha);
+              const mes = fecha.toLocaleString('es-MX', { month: 'long' });
+              const dia = fecha.toLocaleString('es-MX', { weekday: 'long' });
           
-        );
-        
-      });
-      
-    }
-      
+              return (
+                agenda.coordinador === this.coordinadorVisible &&
+                (!this.mesSeleccionado || mes.toLowerCase() === this.mesSeleccionado.toLowerCase()) &&
+                (!this.semanaSeleccionada || agenda.semana === this.semanaSeleccionada) &&
+                (!this.diaSeleccionado || dia.toLowerCase() === this.diaSeleccionado.toLowerCase())
+              );
+            });
+          }
       guardarCambios(agenda: any) {
       this._coordinacionService.actualizarAgenda(agenda._id, {
         codigo: agenda.codigo,
@@ -503,5 +491,4 @@ setTimeout(() => {
   });
 }, 500); // Delay para esperar a que se renderice correctamente la gráfica
     }
-    
 }

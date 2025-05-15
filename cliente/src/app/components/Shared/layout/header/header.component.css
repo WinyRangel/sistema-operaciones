@@ -1,10 +1,24 @@
-/* Fijar el header */
-.navbar {
-    position: fixed;
-    top: 0;
+.hover-effect {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.hover-effect:hover {
+    color: #0d6efd !important;
+    transform: translateY(-2px);
+}
+
+.hover-effect::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -4px;
     left: 0;
+    background-color: #0d6efd;
+    transition: width 0.3s ease;
+}
+
+.hover-effect:hover::after {
     width: 100%;
-    z-index: 1000; 
-    background-color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
