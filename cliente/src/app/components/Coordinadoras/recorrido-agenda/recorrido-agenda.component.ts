@@ -239,39 +239,39 @@ export class RecorridoAgendaComponent implements OnInit {
               );
             });
           }
-      guardarCambios(agenda: any) {
-      this._coordinacionService.actualizarAgenda(agenda._id, {
-        codigo: agenda.codigo,
-        actividadReportada: agenda.actividadReportada,
-        reportado: agenda.reportado,
-        horaReporte: agenda.horaReporte,
-        horaCierre: agenda.horaCierre,
-        semana: '',
-        coordinador: '',
-        hora: ''
-      }).subscribe({
-        next: (respuesta) => {
-          const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 900,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-              toast.onmouseenter = Swal.stopTimer;
-              toast.onmouseleave = Swal.resumeTimer;
+          guardarCambios(agenda: any) {
+          this._coordinacionService.actualizarAgenda(agenda._id, {
+            codigo: agenda.codigo,
+            actividadReportada: agenda.actividadReportada,
+            reportado: agenda.reportado,
+            horaReporte: agenda.horaReporte,
+            horaCierre: agenda.horaCierre,
+            semana: '',
+            coordinador: '',
+            hora: ''
+          }).subscribe({
+            next: (respuesta) => {
+              const Toast = Swal.mixin({
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 900,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                  toast.onmouseenter = Swal.stopTimer;
+                  toast.onmouseleave = Swal.resumeTimer;
+                }
+              });
+              Toast.fire({
+                icon: "success",
+                title: "Guardado correctamente."
+              });
+            },
+            error: (error) => {
+              console.error('Error al actualizar agenda:', error);
             }
           });
-          Toast.fire({
-            icon: "success",
-            title: "Guardado correctamente."
-          });
-        },
-        error: (error) => {
-          console.error('Error al actualizar agenda:', error);
-        }
-      });
-      }
+          }
 
       get totalKmRecorridos(): number {
       return this.agendasFiltradasPorCoordinador.reduce((acc, curr) => acc + (curr.kmRecorrido || 0), 0);
@@ -295,6 +295,28 @@ export class RecorridoAgendaComponent implements OnInit {
           a => a.horaReporte && a.reportado === true
         ).length;
       }
+
+      get horasEntregas(): number{
+        return this.agendasFiltradasPorCoordinador.filter(
+          a => a.hora && a.codigo === 'E'
+        ).length;
+      }
+
+      get horasEntregasReportadas(): number {
+        return this.agendasFiltradasPorCoordinador.filter(
+          a => a.horaReporte && a.reportado === true && a.codigo === 'E'
+        ).length;
+      }
+
+       get horasEntregasNoReportadas(): number {
+        return((this.horasEntregas) - (this.horasEntregasReportadas) )
+      }
+
+get horasProductividad(): number {
+  return this.horasTrabajo > 0
+    ? parseFloat(((this.horasAgendadas / this.horasTrabajo)).toFixed(2))
+    : 0;
+}
 
 
 

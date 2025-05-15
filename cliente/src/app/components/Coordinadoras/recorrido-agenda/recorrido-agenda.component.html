@@ -367,79 +367,90 @@
                             <span class="d-none d-sm-inline">Refrescar</span>
                           </button>
                         </div>
-                        <table class="table table-hover align-middle mb-0" id="tabla-agenda">
-                          
-                          <thead class="bg-primary text-white sticky-top">
-                            
+                        <table class="table table-hover align-middle table-striped border rounded-3 overflow-hidden shadow-sm" id="tabla-agenda">
+                          <thead class="bg-primary-gradient text-white sticky-top">
                             <tr>
-                              <th scope="col" class="text-center">Fecha</th>
-                              <th scope="col" class="text-center">Hora</th>
-                              <th scope="col" class="text-center">Domicilio</th>
-                              <th scope="col" class="text-center">Actividad</th>
-                              <th scope="col" class="text-center">Código</th>
-                              <th scope="col" class="text-center">Actividad Realizada</th>
-                              <th scope="col" class="text-center">Reportado</th>
-                              <th scope="col" class="text-center">Hora Reporte</th>
-                              <th scope="col" class="text-center">Hora Cierre</th>
-                              <th scope="col" class="text-center">KM Recorridos</th>
-                              <th scope="col" class="text-center">cumplimiento Agenda</th>
-                              <th scope="col" class="text-center">Acciones</th>
+                              <th scope="col" class="text-center py-3">Fecha</th>
+                              <th scope="col" class="text-center py-3">Hora</th>
+                              <th scope="col" class="text-center py-3">Domicilio</th>
+                              <th scope="col" class="text-center py-3">Actividad</th>
+                              <th scope="col" class="text-center py-3">Código</th>
+                              <th scope="col" class="text-center py-3">Actividad Realizada</th>
+                              <th scope="col" class="text-center py-3">Reportado</th>
+                              <th scope="col" class="text-center py-3">Hora Reporte</th>
+                              <th scope="col" class="text-center py-3">Hora Cierre</th>
+                              <th scope="col" class="text-center py-3">KM Recorridos</th>
+                              <th scope="col" class="text-center py-3">Cumplimiento</th>
+                              <th scope="col" class="text-center py-3">Acciones</th>
                             </tr>
                           </thead>
+                          
                           <tbody>
                             <tr *ngFor="let agenda of agendasFiltradasPorCoordinador" class="hover-highlight">
-                              <td class="text-center">
-                            {{ agenda.fecha | date:'dd-MM-yy': 'UTC' }}
-                              </td>                              
-                              <td class="text-center">{{ agenda.hora | slice:0:5 }}</td>
+                              <!-- Campos de datos -->
+                              <td class="text-center fw-semibold">{{ agenda.fecha | date:'dd-MM-yy': 'UTC' }}</td>
+                              <td class="text-center text-muted">{{ agenda.hora | slice:0:5 }}</td>
                               <td>
-                                <span class="badge rounded-pill text-bg-success">   {{ agenda.domicilio?.nombre }} </span>
-                               </td>
-                              <td>{{ agenda.actividad }}</td>
+                                <span class="badge rounded-pill bg-opacity-10 bg-success text-success">
+                                  {{ agenda.domicilio?.nombre }}
+                                </span>
+                              </td>
+                              <td class="text-truncate" style="max-width: 150px;">{{ agenda.actividad }}</td>
+                              
+                              <!-- Campos editables -->
                               <td>
-                                <input [(ngModel)]="agenda.codigo" class="form-control form-control-sm" />
+                                <input [(ngModel)]="agenda.codigo" 
+                                      class="form-control form-control-sm border-primary border-opacity-25">
                               </td>
                               <td>
-                                <input [(ngModel)]="agenda.actividadReportada" class="form-control form-control-sm" />
+                                <input [(ngModel)]="agenda.actividadReportada" 
+                                      class="form-control form-control-sm border-primary border-opacity-25">
                               </td>
-                              <td class="text-center">
-                                <select [(ngModel)]="agenda.reportado" class="form-select form-select-sm">
-                                  <option [value]="true" class="text-success">✓ Reportado</option>
-                                  <option [value]="false" class="text-danger">✗ No Reportado</option>
+                              <td>
+                                <select [(ngModel)]="agenda.reportado" 
+                                        class="form-select form-select-sm border-primary border-opacity-25">
+                                  <option [value]="true" class="text-success fw-semibold">✓ Reportado</option>
+                                  <option [value]="false" class="text-danger fw-semibold">✗ No Reportado</option>
                                 </select>
                               </td>
                               <td>
-                                <input type="time" [(ngModel)]="agenda.horaReporte" class="form-control form-control-sm" />
+                                <input type="time" [(ngModel)]="agenda.horaReporte" 
+                                      class="form-control form-control-sm border-primary border-opacity-25">
                               </td>
                               <td>
-                                <input type="time" [(ngModel)]="agenda.horaCierre" class="form-control form-control-sm" />
+                                <input type="time" [(ngModel)]="agenda.horaCierre" 
+                                      class="form-control form-control-sm border-primary border-opacity-25">
                               </td>
-                              <td class="text-center">{{ agenda.kmRecorrido || '0' }}</td>
+                              
+                              <!-- Campos de solo lectura -->
+                              <td class="text-center text-info fw-bold">{{ agenda.kmRecorrido || '0' }}</td>
                               <td class="text-center">
-                                <span [ngClass]="agenda.cumplimientoAgenda ? 'text-success' : 'text-danger'">
-                                  {{ agenda.cumplimientoAgenda ? '✔️' : '❌' }}
+                                <span class="badge rounded-pill bg-opacity-10" 
+                                      [ngClass]="agenda.cumplimientoAgenda ? 'bg-success text-success' : 'bg-danger text-danger'">
+                                  {{ agenda.cumplimientoAgenda ? 'Cumplido' : 'Pendiente' }}
                                 </span>
                               </td>
                               
+                              <!-- Acciones -->
                               <td class="text-center">
-                                <button class="btn btn-sm btn-outline-success hover-effect" 
+                                <button class="btn btn-sm btn-hover-primary" 
                                         type="button" 
                                         (click)="guardarCambios(agenda)"
                                         title="Guardar cambios">
-                                  <i class="fas fa-save"></i>
+                                  <i class="fas fa-save fs-6 text-primary"></i>
                                 </button>
                               </td>
-                              
                             </tr>
+                            
                             <!-- Fila de acciones -->
-                            <tr>
+                            <tr class="bg-light">
                               <td colspan="9"></td>
-                              <td colspan="3" class="text-center">
-                                <button style="background-color: rgb(140, 0, 255); color: aliceblue;" type="button" 
-                                  class="btn btn"
-                                    (click)="mostrarGraficas()"
-                                    title="Generar reporte de Códigos">
-                                    <i class="fa-solid fa-chart-simple"></i> Generar reporte
+                              <td colspan="3" class="text-center py-3">
+                                <button type="button" 
+                                        class="btn btn-purple-gradient rounded-pill px-4"
+                                        (click)="mostrarGraficas()"
+                                        title="Generar reporte de Códigos">
+                                  <i class="fa-solid fa-chart-simple me-2"></i>Generar Reporte
                                 </button>
                               </td>
                             </tr>
@@ -449,30 +460,89 @@
                     </div>
                   </div>
                     <!--GRAFICAS-->
-                     <div class="row shadow-lg p-3 mb-5 mt-4 bg-body-tertiary rounded" *ngIf="mostrarContenedorGraficas">
-                      <div #reportePDF>
-                      <div class="mb-3">
-                      <h5>Coordinador: {{coordinadorVisible}}</h5>
-                      <h6>Horas de Trabajo: {{horasTrabajo}}</h6>
-                      <h6>Horas Agendadas: {{ horasAgendadas }}</h6>
-                      <h6>Horas Reportadas: {{ horasReportadas }}</h6>
-                    </div>
+                      <div class="row custom-report-container p-4 mt-4" *ngIf="mostrarContenedorGraficas">
+                        <div #reportePDF class="position-relative">
+                          <!-- Encabezado del reporte -->
+                          <div class="report-header mb-4 border-bottom pb-3">
+                            <h4 class="fw-bold text-primary mb-3">
+                              <i class="fas fa-chart-line me-2"></i>Reporte de Actividades
+                            </h4>
+                            <div class="row stats-grid">
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Coordinador</h6>
+                                  <h5 class="fw-bold text-dark">{{coordinadorVisible}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Horas Trabajo</h6>
+                                  <h5 class="fw-bold text-info">{{horasTrabajo}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Horas Agendadas</h6>
+                                  <h5 class="fw-bold text-warning">{{horasAgendadas}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Horas Reportadas</h6>
+                                  <h5 class="fw-bold text-success">{{horasReportadas}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Entregas Agendadas</h6>
+                                  <h5 class="fw-bold text-primary">{{horasEntregas}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Entregas Reportadas</h6>
+                                  <h5 class="fw-bold text-success">{{horasEntregasReportadas}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Entregas No Reportadas</h6>
+                                  <h5 class="fw-bold text-danger">{{horasEntregasNoReportadas}}</h5>
+                                </div>
+                              </div>
+                              <div class="col-md-3 mb-2">
+                                <div class="stat-card bg-light p-3 rounded">
+                                  <h6 class="text-muted mb-1">Productividad</h6>
+                                  <h5 class="fw-bold text-danger">{{horasProductividad}}%</h5>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
 
-                      <div class="col-12">
-                        <canvas #graficaCodigo></canvas>
-                      </div>
-                      <div class="col-12">
-                          <canvas #graficaHoras></canvas> 
+                          <!-- Gráficas -->
+                          <div class="row chart-section g-4">
+                            <div class="col-12 chart-container mb-4 p-3 bg-white rounded-3 shadow-sm">
+                              <h6 class="fw-bold text-secondary mb-3"><i class="fas fa-chart-bar me-2"></i>Gráfico por Código</h6>
+                              <canvas #graficaCodigo class="chart-canvas"></canvas>
+                            </div>
+                            
+                            <div class="col-12 chart-container p-3 bg-white rounded-3 shadow-sm">
+                              <h6 class="fw-bold text-secondary mb-3"><i class="fas fa-clock me-2"></i>Distribución de Horas</h6>
+                              <canvas #graficaHoras class="chart-canvas"></canvas>
+                            </div>
+                          </div>
                         </div>
+                                                  <!-- Botón de acción -->
+                          <div class="text-end mt-4">
+                            <button type="button" 
+                                    class="btn btn-danger btn-download-pdf"
+                                    (click)="generarPDFConGrafica()"
+                                    title="Generar reporte PDF">
+                              <i class="fas fa-file-pdf me-2"></i>Descargar Reporte
+                            </button>
+                          </div>
+                          
                       </div>
-                        <button type="button" 
-                            class="btn btn-danger"
-                            (click)="generarPDFConGrafica()"
-                            title="Generar reporte PDF">
-                            <i class="fas fa-file-pdf"></i> Descargar reporte
-                      </button>
-                      <br>
-                    </div>
                     </div>
                   </div>
                 </div>

@@ -8,6 +8,7 @@ import Aura from '@primeng/themes/aura';
 import { TableModule } from 'primeng/table'
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
+import { NgOptimizedImage } from '@angular/common';
 
 
 import { AppRoutingModule } from './app-routing.module';
@@ -48,7 +49,8 @@ import { BauchersComponent } from './components/Shared/bauchers/bauchers.compone
     NgxDatatableModule,
     TableModule,
     FormsModule,
-    BaseChartDirective
+    BaseChartDirective,
+    NgOptimizedImage 
     
   ],
   providers: [
