@@ -8,22 +8,40 @@
     <div class="row g-4 align-items-center justify-content-center">
       <h2 class="text-center mb-5 text-primary fw-bold display-6">Registro de Ejecutivas</h2>
     </div>
-    
+
 
     <!-- NAV DE COORDINACIONES SIEMPRE VISIBLE -->
     <div class="container mb-2">
-        <!-- Botón alineado a la derecha -->
-      <div class="d-flex justify-content-end">
-        <button type="button"  style="background-color: rgb(140, 0, 255); color: aliceblue;" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reporteModal">
-        Generar Reporte
+      <!-- AGREGAR UN FILTRO PARA MOSTRAR LOS REGISTROS DEL MES SELECCIONADO -->
+      <div class="d-flex justify-content-end align-items-center gap-2 mt-3 mb-2">
+        <!-- Select del mes -->
+        <select class="form-select w-auto" [(ngModel)]="mesSeleccionado" (change)="filtrarRegistros()">
+          <option value="">Filtrar por mes</option>
+          <option value="01">Enero</option>
+          <option value="02">Febrero</option>
+          <option value="03">Marzo</option>
+          <option value="04">Abril</option>
+          <option value="05">Mayo</option>
+          <option value="06">Junio</option>
+          <option value="07">Julio</option>
+          <option value="08">Agosto</option>
+          <option value="09">Septiembre</option>
+          <option value="10">Octubre</option>
+          <option value="11">Noviembre</option>
+          <option value="12">Diciembre</option>
+        </select>
+
+        <!-- Botón de reporte -->
+        <button type="button" class="btn btn-primary" style="background-color: rgb(140, 0, 255); color: aliceblue;"
+          data-bs-toggle="modal" data-bs-target="#reporteModal">
+          Generar Reporte
           <i class="fas fa-file-alt"></i>
         </button>
       </div>
+
       <nav class="nav nav-pills nav-justified">
-        <a class="nav-item nav-link"
-           *ngFor="let card of cards"
-           [class.active]="card.nombre === nombreSeleccionado"
-           (click)="mostrarFormulario(card.nombre, card.ejecutiva)">
+        <a class="nav-item nav-link" *ngFor="let card of cards" [class.active]="card.nombre === nombreSeleccionado"
+          (click)="mostrarFormulario(card.nombre, card.ejecutiva)">
           {{ card.nombre }}
         </a>
       </nav>
@@ -49,7 +67,8 @@
 
               <div class="">
                 <label class="form-label">Actividad</label>
-                <select class="form-select" [(ngModel)]="actividadSeleccionada" name="actividad" (change)="actualizarHora()" required>
+                <select class="form-select" [(ngModel)]="actividadSeleccionada" name="actividad"
+                  (change)="actualizarHora()" required>
                   <option *ngFor="let act of actividades" [value]="act.nombre">{{ act.nombre }}</option>
                 </select>
               </div>
@@ -126,36 +145,6 @@
 
 
 <!-- Modal -->
-<!-- <div class="modal fade" id="reporteModal" tabindex="-1" aria-labelledby="reporteModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">GENERAR REPORTE MENSUAL</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="col-md-4">
-          <label for="mesSelect" class="form-label fw-bold">Mes</label>
-          <select class="form-select my-2" id="mesSelect" [(ngModel)]="mesSeleccionado">
-            <option value="" disabled selected>Seleccione un mes</option>
-            <option
-              *ngFor="let mes of ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                                  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']"
-              [value]="mes">{{ mes }}</option>
-          </select>
-        </div>
-        </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger">
-          <i class="fas fa-file-pdf"></i> Descargar Reporte
-        </button>
-      </div>
-    </div>
-  </div>
-</div> -->
-
-<!-- Modal -->
 <div class="modal fade" id="reporteModal" tabindex="-1" aria-labelledby="reporteModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -183,7 +172,8 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary" (click)="generarReporteMensual()">Generar</button>
+        <button type="button" class="btn btn-danger" (click)="generarReporteMensual()">
+          <i class="fas fa-file-pdf"></i>Descargar Reporte</button>
       </div>
     </div>
   </div>

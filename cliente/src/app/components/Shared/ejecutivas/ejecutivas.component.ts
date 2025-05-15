@@ -157,20 +157,40 @@ export class EjecutivasComponent implements OnInit {
     });
   }
 
+  // filtrarRegistros() {
+  //   this.registrosFiltrados = this.registros
+  //     .filter(registro =>
+  //       registro.nombre === this.nombreSeleccionado &&
+  //       registro.ejecutiva === this.ejecutivaSeleccionada &&
+  //       // mantén el filtro del día actual
+  //       registro.fecha === this.fecha
+  //     )
+  //     .filter(registro =>
+  //       // si no hay mes seleccionado, deja pasar todo; si hay, que coincida
+  //       !this.mesSeleccionado ||
+  //       this.obtenerMesDeFecha(registro.fecha) === this.mesSeleccionado
+  //     );
+  // }
   filtrarRegistros() {
-    this.registrosFiltrados = this.registros
-      .filter(registro =>
+  if (!this.mesSeleccionado) {
+    // Si no hay mes seleccionado, mostrar todos los registros de la ejecutiva seleccionada
+    this.registrosFiltrados = this.registros.filter(registro =>
+      registro.nombre === this.nombreSeleccionado
+    );
+  } else {
+    this.registrosFiltrados = this.registros.filter(registro => {
+      const fecha = new Date(registro.fecha);
+      const mesRegistro = (fecha.getMonth() + 1).toString().padStart(2, '0');
+      const anioRegistro = fecha.getFullYear();
+
+      return (
         registro.nombre === this.nombreSeleccionado &&
-        registro.ejecutiva === this.ejecutivaSeleccionada &&
-        // mantén el filtro del día actual
-        registro.fecha === this.fecha
-      )
-      .filter(registro =>
-        // si no hay mes seleccionado, deja pasar todo; si hay, que coincida
-        !this.mesSeleccionado ||
-        this.obtenerMesDeFecha(registro.fecha) === this.mesSeleccionado
+        mesRegistro === this.mesSeleccionado &&
+        anioRegistro === new Date().getFullYear() // Filtra también por año actual si es necesario
       );
+    });
   }
+}
 
   actualizarHora() {
     const actividad = this.actividades.find(a => a.nombre === this.actividadSeleccionada);
@@ -178,56 +198,6 @@ export class EjecutivasComponent implements OnInit {
 
   }
 
-
-  // guardarActividad() {
-  //   const actividad = this.actividades.find(a => a.nombre === this.actividadSeleccionada);
-
-  //   if (actividad) {
-  //     const registro = {
-  //       nombre: this.nombreSeleccionado,
-  //       ejecutiva: this.ejecutivaSeleccionada,
-  //       fecha: this.fecha,
-  //       actividad: this.actividadSeleccionada,
-  //       frecuencia: actividad.frecuencia,
-  //       hora: actividad.hora,
-  //       actRealizada: this.codigoSeleccionado,
-  //       horaReporte: this.horaReporte || '-'
-  //     };
-
-  //     this.ejecutivasService.guardarRegistro(registro).subscribe({
-  //       next: (response) => {
-  //         // Nuevo Toast de éxito
-  //         const Toast = Swal.mixin({
-  //           toast: true,
-  //           position: 'top-end',
-  //           showConfirmButton: false,
-  //           timer: 3000,
-  //           timerProgressBar: true,
-  //           didOpen: (toast) => {
-  //             toast.onmouseenter = Swal.stopTimer;
-  //             toast.onmouseleave = Swal.resumeTimer;
-  //           }
-  //         });
-  //         Toast.fire({
-  //           icon: 'success',
-  //           title: 'Actividad Registrada'
-  //         });
-
-  //         // Recarga y limpieza de campos...
-  //         this.ejecutivasService.obtenerRegistros().subscribe((data: any[]) => {
-  //           this.registros = data;
-  //           this.filtrarRegistros();
-  //           this.actividadSeleccionada = '';
-  //           this.codigoSeleccionado = '';
-  //           this.horaReporte = '';
-  //         });
-  //       },
-  //       error: (error) => {
-  //       }
-  //     });
-
-  //   }
-  // }
   guardarActividad() {
     // Validación de campos vacíos
     if (
@@ -474,74 +444,24 @@ export class EjecutivasComponent implements OnInit {
     });
 
     // Totales generales
-    doc.setFontSize(14);
-    doc.text('Totales general de todas las sucursales', 10, y);
-    y += 6;
-    autoTable(doc, {
-      head: [['Tipo', 'Cantidad']],
-      body: [
-        ['Total R', totalR.toString()],
-        ['Total NR', totalNR.toString()]
-      ],
-      startY: y,
-      margin: { horizontal: 10 }
-    });
+    // doc.setFontSize(14);
+    // doc.text('Totales general de todas las sucursales', 10, y);
+    // y += 6;
+    // autoTable(doc, {
+    //   head: [['Tipo', 'Cantidad']],
+    //   body: [
+    //     ['Total R', totalR.toString()],
+    //     ['Total NR', totalNR.toString()]
+    //   ],
+    //   startY: y,
+    //   margin: { horizontal: 10 }
+    // });
 
     // DESCARGA
     doc.save(`reporte_mensual_${this.mesSeleccionado}.pdf`);
   }
 
 
-
-  // generarGraficaCanvas(reportadas: number, noReportadas: number): Promise<HTMLCanvasElement> {
-  //   return new Promise((resolve) => {
-  //     const canvas = document.createElement('canvas');
-  //     canvas.width = 400;
-  //     canvas.height = 300;
-
-  //     const ctx = canvas.getContext('2d');
-  //     if (!ctx) return;
-
-  //     const chart = new Chart(ctx, {
-  //       type: 'bar',
-  //       data: {
-  //         labels: ['Reportadas', 'No Reportadas'],
-  //         datasets: [
-  //           {
-  //             type: 'bar',
-  //             label: 'Actividades',
-  //             data: [reportadas, noReportadas],
-  //             backgroundColor: ['#4caf50', '#f44336']
-  //           },
-  //           {
-  //             type: 'line', // Especifica que este dataset es de tipo línea
-  //             label: 'Tendencia',
-  //             data: [reportadas, noReportadas],
-  //             borderColor: '#2196f3',
-  //             borderWidth: 2,
-  //             fill: false,
-  //             tension: 0.1 // Suaviza la línea
-  //           }
-  //         ]
-  //       },
-  //       options: {
-  //         responsive: false,
-  //         plugins: {
-  //           legend: {
-  //             position: 'top'
-  //           }
-  //         },
-  //         scales: {
-  //           y: {
-  //             beginAtZero: true
-  //           }
-  //         }
-  //       }
-  //     });
-
-  //     setTimeout(() => resolve(canvas), 500);
-  //   });
-  // }
   /**
  * Devuelve un canvas con una gráfica de barras.
  * @param labels  Etiquetas
