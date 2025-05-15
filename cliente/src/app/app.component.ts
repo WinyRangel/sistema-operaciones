@@ -8,4 +8,11 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'cliente';
+      isOnline: boolean = navigator.onLine;
+
+    ngOnInit() {
+      window.addEventListener('online',  () => this.isOnline = true);
+      window.addEventListener('offline', () => this.isOnline = false);
+    }
+
 }

@@ -4,8 +4,8 @@ const Baucher = require('../models/Baucher');
 const obtenerBauchers = async (req, res) => {
   try {
     const bauchers = await Baucher.find()
-      .populate('coordinacion', 'coordinacion') // Solo traer el campo 'coordinacion' de la colección Coordinacion
-      .sort({ fechaReporte: -1 });
+      .populate('coordinacion') // Solo traer el campo 'coordinacion' de la colección Coordinacion
+      .sort({ fechaCreacion: -1 });
 
     res.status(200).json(bauchers);
   } catch (error) {
@@ -13,7 +13,6 @@ const obtenerBauchers = async (req, res) => {
     res.status(500).json({ mensaje: 'Error al obtener los bauchers' });
   }
 };
-
 
 // Crear un nuevo baucher
 const crearBaucher = async (req, res) => {
@@ -51,7 +50,9 @@ const crearBaucher = async (req, res) => {
       grupo: grupo || '',
       concepto: concepto || '',
       titular: titular || '',
-      diasDiferencia: calcularDiasDiferencia(fechaReporte, fechaBaucher)
+      diasDiferencia: calcularDiasDiferencia(fechaReporte, fechaBaucher),
+      fechaCreacion: new Date() // ← aquí agregas la fecha y hora actual
+
     });
 
     // Guardar en base de datos
@@ -69,8 +70,51 @@ const crearBaucher = async (req, res) => {
   }
 };
 
+// Actualizar baucher
+const actualizarBaucher = async (req, res) =>{
+  try {
+    const {coordinacion, ejecutiva, coordinador, fechaBaucher, fechaReporte, grupo, concepto, titular} = req.body;
+    let rbaucher = await Baucher.findById(req.params.id);
+    if(!rbaucher){
+      res.status(404).json({msg: 'No existe'})
+    }
+
+    rbaucher.coordinacion = coordinacion;
+    rbaucher.ejecutiva = ejecutiva;
+    rbaucher.coordinador = coordinador;
+    rbaucher.fechaBaucher = fechaBaucher;
+    rbaucher.fechaReporte = fechaReporte;
+    rbaucher.grupo = grupo;
+    rbaucher.concepto = concepto;
+    rbaucher.titular = titular;
+
+    rbaucher = await Baucher.findOneAndUpdate({_id: req.params.id}, rbaucher, {new: true})
+    res.json(rbaucher);
+  } catch(error){
+    console.log(error);
+    res.status(500).send('Hubo un error');
+  }
+}
+
+// Eliminar baucher
+const eliminarBaucher = async (req, res) => {
+  try {
+    let rbaucher = await Baucher.findById(req.params.id);
+    if(!rbaucher){
+      res.status(404).json({msg: 'No existe el registro'})
+    }
+    await Baucher.findOneAndDelete({ _id: req.params.id })
+        res.json({msg: 'Baucher eliminado con exito'});
+  }
+  catch (error) {
+    console.log(error);
+    res.status(500).send('Hubo un error');
+}
+}
 
 module.exports = {
   crearBaucher,
-  obtenerBauchers
+  obtenerBauchers,
+  actualizarBaucher,
+  eliminarBaucher
 };

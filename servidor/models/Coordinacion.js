@@ -9,7 +9,9 @@ const coordinacionSchema = new mongoose.Schema({
     }
   ],
   coordinador: [{
-    nombre: String
+    nombre: String,
+    coche: String,
+    rendimiento: Number // ✅ Corregido de 'float' a 'Number'
   }] 
 });
 

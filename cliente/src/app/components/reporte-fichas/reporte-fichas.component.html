@@ -1,0 +1,59 @@
+<div class="container my-4">
+  <div class="card text-center shadow">
+    <div class="card-header bg-primary text-white">
+      <h5 class="card-title mb-0">Generar Reporte Mensual de Fichas</h5>
+    </div>
+    <div class="card-body">
+      <img src="https://cdn-icons-png.flaticon.com/512/732/732220.png" alt="Ícono Excel" width="64" height="64"
+        class="mb-3" />
+
+      <p class="card-text">Elige los archivos para generar el reporte de fichas mensual</p>
+      <div class="mb-3">
+        <input type="file" class="form-control-file mx-auto d-block" id="inputGroupFile04" multiple
+          (change)="onFileChange($event)" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container" *ngIf="objectKeys(excelDataBySheet).length > 0">
+  <br>
+
+  <div class="d-flex justify-content-end mb-2 gap-2">
+    <button class="btn btn-secondary" (click)="limpiarTodo()">
+      <i class="fa-solid fa-broom me-2"></i>
+      Limpiar y crear nuevo reporte
+    </button>
+    <button type="button" class="btn btn-danger" title="Generar reporte PDF" (click)="generarReporte()">
+      <i class="fas fa-file-pdf me-2"></i>
+      Descargar Reporte
+    </button>
+  </div>
+
+  <br>
+
+  <div *ngFor="let sheet of objectKeys(excelDataBySheet)" class="col-md-12 mb-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-dark text-white">
+        <h6 class="mb-0">{{ sheet }}</h6>
+      </div>
+      <div class="card-body p-2">
+        <div class="table-responsive">
+          <table class="table table-bordered table-sm">
+            <thead class="table table-info">
+              <tr>
+                <th scope="col">NOMBRE DEL GRUPO O INDIVIDUAL</th>
+                <th scope="col">CERRADA</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of excelDataBySheet[sheet]">
+                <td *ngFor="let cell of row">{{ cell }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

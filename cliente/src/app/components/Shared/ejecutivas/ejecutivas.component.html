@@ -1,0 +1,180 @@
+<br>
+<br>
+<br>
+<br>
+<div class="container my-8">
+  <div class="card shadow-lg rounded-6 border-0">
+    <!-- HEADER -->
+    <div class="row g-4 align-items-center justify-content-center">
+      <h2 class="text-center mb-5 text-primary fw-bold display-6">Registro de Ejecutivas</h2>
+    </div>
+
+
+    <!-- NAV DE COORDINACIONES SIEMPRE VISIBLE -->
+    <div class="container mb-2">
+      <!-- AGREGAR UN FILTRO PARA MOSTRAR LOS REGISTROS DEL MES SELECCIONADO -->
+      <div class="d-flex justify-content-end align-items-center gap-2 mt-3 mb-2">
+        <!-- Select del mes -->
+        <select class="form-select w-auto" [(ngModel)]="mesSeleccionado" (change)="filtrarRegistros()">
+          <option value="">Filtrar por mes</option>
+          <option value="01">Enero</option>
+          <option value="02">Febrero</option>
+          <option value="03">Marzo</option>
+          <option value="04">Abril</option>
+          <option value="05">Mayo</option>
+          <option value="06">Junio</option>
+          <option value="07">Julio</option>
+          <option value="08">Agosto</option>
+          <option value="09">Septiembre</option>
+          <option value="10">Octubre</option>
+          <option value="11">Noviembre</option>
+          <option value="12">Diciembre</option>
+        </select>
+
+        <!-- Botón de reporte -->
+        <button type="button" class="btn btn-primary" style="background-color: rgb(140, 0, 255); color: aliceblue;"
+          data-bs-toggle="modal" data-bs-target="#reporteModal">
+          Generar Reporte
+          <i class="fas fa-file-alt"></i>
+        </button>
+      </div>
+
+      <nav class="nav nav-pills nav-justified">
+        <a class="nav-item nav-link" *ngFor="let card of cards" [class.active]="card.nombre === nombreSeleccionado"
+          (click)="mostrarFormulario(card.nombre, card.ejecutiva)">
+          {{ card.nombre }}
+        </a>
+      </nav>
+    </div>
+
+    <!-- FORMULARIO Y TABLA DE ABAJO DEL NAV -->
+    <div class="row mx-3" *ngIf="mostrarForm">
+      <!-- Formulario -->
+      <div class="col-md-4 mb-4">
+        <div class="card shadow rounded-4 border-0">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h4 class="fw-bold text-primary">{{ nombreSeleccionado }}</h4>
+                <p class="text-muted"><i class="fas fa-user me-2"></i>{{ ejecutivaSeleccionada }}</p>
+              </div>
+            </div>
+            <form (ngSubmit)="guardarActividad()" class="row g-4">
+              <div class="">
+                <label class="form-label">Fecha</label>
+                <input type="date" class="form-control" [(ngModel)]="fecha" name="fecha" required>
+              </div>
+
+              <div class="">
+                <label class="form-label">Actividad</label>
+                <select class="form-select" [(ngModel)]="actividadSeleccionada" name="actividad"
+                  (change)="actualizarHora()" required>
+                  <option *ngFor="let act of actividades" [value]="act.nombre">{{ act.nombre }}</option>
+                </select>
+              </div>
+
+              <div class="">
+                <label class="form-label">Act. Realizada</label>
+                <select class="form-select" [(ngModel)]="codigoSeleccionado" name="codigo" required>
+                  <option *ngFor="let cod of codigos" [value]="cod.codigo">{{ cod.codigo }}</option>
+                </select>
+              </div>
+
+              <div class="">
+                <label class="form-label">Hora Reporte</label>
+                <input type="time" class="form-control" [(ngModel)]="horaReporte" name="horaReporte" required>
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save me-1"></i> Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div class="col-md-8 mb-4">
+        <div class="card shadow rounded-4 border-0 h-100">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0 text-center">
+                <thead class="table-light">
+                  <tr class="table-primary">
+                    <th>Fecha</th>
+                    <th>Actividad</th>
+                    <th>Período</th>
+                    <th>Hora límite</th>
+                    <th>Act. Realizada</th>
+                    <th>Hora Reporte</th>
+                    <th>Puntual</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let registro of registrosFiltrados">
+                    <td>{{ registro.fecha | date:'dd-MM-yyyy':'UTC' }}</td>
+                    <td>{{ registro.actividad }}</td>
+                    <td>{{ registro.frecuencia }}</td>
+                    <td>{{ registro.hora }}</td>
+                    <td>{{ registro.actRealizada }}</td>
+                    <td>{{ registro.horaReporte }}</td>
+                    <td>
+                      <button class="btn btn-sm" [ngClass]="{
+                        'btn-danger': registro.horaReporte > registro.hora,
+                        'btn-success': registro.horaReporte <= registro.hora
+                      }">
+                        <i class="fas" [ngClass]="{
+                          'fa-times': registro.horaReporte > registro.hora,
+                          'fa-check': registro.horaReporte <= registro.hora
+                        }"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="reporteModal" tabindex="-1" aria-labelledby="reporteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reporteModalLabel">Generar Reporte Mensual</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <label for="mes" class="form-label">Selecciona un mes:</label>
+        <select class="form-select" id="mes" [(ngModel)]="mesSeleccionado" name="mes">
+          <option value="">-- Selecciona mes --</option>
+          <option value="01">Enero</option>
+          <option value="02">Febrero</option>
+          <option value="03">Marzo</option>
+          <option value="04">Abril</option>
+          <option value="05">Mayo</option>
+          <option value="06">Junio</option>
+          <option value="07">Julio</option>
+          <option value="08">Agosto</option>
+          <option value="09">Septiembre</option>
+          <option value="10">Octubre</option>
+          <option value="11">Noviembre</option>
+          <option value="12">Diciembre</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-danger" (click)="generarReporteMensual()">
+          <i class="fas fa-file-pdf"></i>Descargar Reporte</button>
+      </div>
+    </div>
+  </div>
+</div>

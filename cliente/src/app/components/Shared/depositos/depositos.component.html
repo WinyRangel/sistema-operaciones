@@ -1,0 +1,87 @@
+<br>
+<br>
+<div class="container my-8" *ngIf="true">
+  <div class="card shadow-lg rounded-6 border-0">
+    <div class="row g-4 align-items-center justify-content-center">
+      <h2 class="text-center mb-5 text-primary fw-bold display-6">Registro de Depositos</h2>
+    </div>
+
+    <!-- SELECCIÓN DE COORDINACIONES  -->
+    <div class="container mb-4">
+      <nav class="nav nav-pills nav-justified">
+        <a class="nav-item nav-link"
+           *ngFor="let c of coordinaciones"
+           [class.active]="c === coordinacionSeleccionada"
+           (click)="seleccionarCoordinacion(c)">
+          {{ c }}
+        </a>
+      </nav>
+    </div>
+
+    <!-- FORMULARIO Y TABLA -->
+    <div class="row mx-3" *ngIf="coordinacionSeleccionada">
+      <!-- Formulario -->
+      <div class="col-md-4 mb-4">
+        <div class="card shadow rounded-4 border-0">
+          <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h4 class="fw-bold text-primary">{{ nombreSeleccionado }}</h4>
+            </div>
+          </div>
+            <!-- se puede agregar el m-3 o mb-4 para espaciar -->
+            <form (ngSubmit)="guardarDeposito()" class="row g-4">
+              <div class="">
+                <label class="form-label">¿Quién reporta?</label>
+                <input type="text" class="form-control" [(ngModel)]="nombre" name="responsable" required>
+              </div>
+
+              <div class="">
+                <label class="form-label">Hora Reporte</label>
+                <input type="time" class="form-control" [(ngModel)]="horaReporte" name="hora" required>
+              </div>
+
+              <div class="">
+                <label class="form-label">Fecha</label>
+                <input type="date" class="form-control" [(ngModel)]="fechaReporte" name="fecha" required>
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save me-1"></i> Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div class="col-md-8 mb-4">
+        <div class="card shadow rounded-4 border-0 h-100">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0 text-center">
+                <thead class="table-light">
+                  <tr class="table-primary">
+                    <th>¿Quién reporta?</th>
+                    <th>Hora de Reporte</th>
+                    <th>Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let deposito of depositos">
+                    <td>{{deposito.nombre}}</td>
+                    <td>{{deposito.horaReporte}}</td>
+                    <td>{{deposito.fechaReporte | date:'dd-MM-yyyy':'UTC'}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div> 
+  </div> 
+</div> 

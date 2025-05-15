@@ -1,41 +1,44 @@
+
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">
-        <img src="https://static.wixstatic.com/media/0bf950_155f8cd81f6d4fe5ac3419b8e0397b40~mv2.png/v1/crop/x_0,y_260,w_6000,h_2480/fill/w_381,h_158,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/LOGO%20SIN%20FONDO%20OFICIAL.png" alt="Inicio" height="60" width="120">
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Inicio</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Coordinadores
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Agendas</a></li>
-            </ul>
-          </li>
-          <li class="nav-item" routerLink="/baucher">
-            <a class="nav-link">Bauchers</a>
-          </li>
-          <li class="nav-item" href="#">
-            <a class="nav-link">Depositos</a>
-          </li>
-          <li class="nav-item" href="#">
-            <a class="nav-link">Fichas</a>
-          </li>
-          <li class="nav-item">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">
+      <img src="https://static.wixstatic.com/media/0bf950_155f8cd81f6d4fe5ac3419b8e0397b40~mv2.png/v1/crop/x_0,y_260,w_6000,h_2480/fill/w_381,h_158,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/LOGO%20SIN%20FONDO%20OFICIAL.png" alt="Logo de la organización" height="65" width="155">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+
+        <li class="nav-item">
+          <a class="nav-link" aria-current="page" routerLink="/inicio">Inicio</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" aria-current="page" routerLink="/recorrido-agenda">Agendas</a>
+        </li>
+
+
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/baucher">Bauchers</a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" routerLink="/depositos">Depositos</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" routerLink="/reportefichas">Reporte de Fichas</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/ejecutivas">Ejecutivas</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" routerLink="/legales">Legales</a>
           </li>
-        </ul>
-        <form class="d-flex" role="buscar">
-          <input class="form-control me-2" type="buscar" placeholder="Buscar" aria-label="Buscar">
-          <button class="btn btn-outline-success" type="submit">Buscar</button>
-        </form>
-      </div>
+
+      </ul>
     </div>
-  </nav>
+  </div>
+</nav>
