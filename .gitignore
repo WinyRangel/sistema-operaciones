@@ -142,6 +142,8 @@ dist
 # Archivos generados por Firebase
 /firebase/
 .firebase/
+.firebaserc
+firebase.json
 firebase-debug.log
 
 # Node modules en funciones de Cloud Functions

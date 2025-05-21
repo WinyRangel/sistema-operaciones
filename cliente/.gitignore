@@ -42,3 +42,7 @@ testem.log
 Thumbs.db
 
 
+
+# Archivos firebase
+.firebaserc
+firebase.json

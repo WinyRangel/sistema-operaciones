@@ -40,8 +40,8 @@ export class EjecutivasComponent implements OnInit {
     { nombre: 'DH - Fuerza de Venta', ejecutiva: 'Veronica' },
     { nombre: 'SMA - Lealtad', ejecutiva: 'Elisa' },
     { nombre: 'SF - San Felipe', ejecutiva: 'Dulce' },
-    { nombre: 'SLPZ - Mejorando Familias', ejecutiva: 'Vero' },
-    { nombre: 'SDU - De Corazón', ejecutiva: 'Evelyn' },
+    { nombre: 'SLPZ - Mejorando Familias', ejecutiva: 'Cristina' },
+    { nombre: 'SDU - De Corazón', ejecutiva: 'Araceli' },
     { nombre: 'VIC - Cumpliendo Sueños', ejecutiva: 'Claudia' }
   ];
 
