@@ -1,37 +1,45 @@
 const Agenda = require ('../models/Agenda');
-const Domicilio = require('../models/Domicilio'); // ajusta la ruta si es necesario
+const Domicilio = require('../models/Domicilio'); 
 
 
-  const registrarAgenda = async (req, res) => {
-    try {
-      const { domicilio, ...datosAgenda } = req.body;
+const registrarAgenda = async (req, res) => {
+  try {
+    const { domicilio, ...datosAgenda } = req.body;
 
-      // Si viene un domicilio, guárdalo en su propio modelo
-      let domicilioGuardado = null;
-      if (domicilio) {
+    let domicilioGuardado = null;
+
+    if (domicilio) {
+      // Buscar si ya existe un domicilio con ese nombre
+      domicilioGuardado = await Domicilio.findOne({ nombre: domicilio });
+
+      // Si no existe, lo crea
+      if (!domicilioGuardado) {
         const nuevoDomicilio = new Domicilio({ nombre: domicilio });
         domicilioGuardado = await nuevoDomicilio.save();
       }
-
-      // Guarda la agenda
-      const nuevaAgenda = new Agenda({
-        ...datosAgenda,
-        domicilio: domicilioGuardado ? domicilioGuardado._id : undefined // guarda la referencia si existe
-      });
-
-      const agendaGuardada = await nuevaAgenda.save();
-
-      res.status(201).json({
-        mensaje: 'Agenda y domicilio registrados correctamente',
-        agenda: agendaGuardada,
-        domicilio: domicilioGuardado
-      });
-
-    } catch (error) {
-      console.error('Error al crear agenda y domicilio:', error);
-      res.status(500).json({ mensaje: 'Hubo un error al crear la agenda y domicilio' });
+    } else {
+      // Si no se envía domicilio, usar "SIN AGENDAR"
+      domicilioGuardado = await Domicilio.findOne({ nombre: 'SIN AGENDAR' });
     }
-  };
+
+    const nuevaAgenda = new Agenda({
+      ...datosAgenda,
+      domicilio: domicilioGuardado ? domicilioGuardado._id : undefined
+    });
+
+    const agendaGuardada = await nuevaAgenda.save();
+
+    res.status(201).json({
+      mensaje: 'Agenda y domicilio registrados correctamente',
+      agenda: agendaGuardada,
+      domicilio: domicilioGuardado
+    });
+
+  } catch (error) {
+    console.error('Error al crear agenda y domicilio:', error);
+    res.status(500).json({ mensaje: 'Hubo un error al crear la agenda y domicilio' });
+  }
+};
 
   const obtenerDomicilios = async (req, res) => {
   try {
@@ -42,23 +50,19 @@ const Domicilio = require('../models/Domicilio'); // ajusta la ruta si es necesa
     res.status(500).json({ mensaje: 'Hubo un error al obtener los domicilios' });
   }
 };
-
-
-
 // Controlador para obtener todos los bauchers
 const obtenerAgenda = async (req, res) => {
   try {
-    const agendas = await Agenda.find().populate('domicilio');
+    const agendas = await Agenda.find()
+      .populate('domicilio')
+      .sort({ fecha: 1, hora: 1 }); // fecha descendente, luego hora descendente
+
     res.status(200).json(agendas);
   } catch (error) {
     console.error('Error al obtener agendas:', error);
     res.status(500).json({ mensaje: 'Hubo un error al obtener las agendas' });
   }
 };
-
-
-
-
 
 // Controlador para obtener agendas por coordinador
 const obtenerAgendasPorCoordinador = async (req, res) => {
@@ -83,11 +87,11 @@ const actualizarAgenda = async (req, res) => {
 
     try {
         const { id } = req.params;
-        const { codigo, actividadReportada, reportado, horaReporte, horaCierre, cumplimientoAgenda } = req.body;
+        const { fecha, hora, domicilio, codigo, actividadReportada, reportado, horaReporte, horaCierre, cumplimientoAgenda } = req.body;
 
         const agendaActualizada = await Agenda.findByIdAndUpdate(
             id,
-            { codigo, actividadReportada, reportado, horaReporte, horaCierre, cumplimientoAgenda },
+            { fecha, hora, domicilio, codigo, actividadReportada, reportado, horaReporte, horaCierre, cumplimientoAgenda },
             { new: true }
         );
 
@@ -102,6 +106,26 @@ const actualizarAgenda = async (req, res) => {
     }
 };
 
+const eliminarAgenda = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Buscar la agenda por ID
+    const agenda = await Agenda.findById(id);
+
+    if (!agenda) {
+      return res.status(404).json({ mensaje: 'Agenda no encontrada' });
+    }
+
+    // Eliminar la agenda
+    await Agenda.findByIdAndDelete(id);
+
+    res.status(200).json({ mensaje: 'Agenda eliminada correctamente' });
+  } catch (error) {
+    console.error('Error al eliminar la agenda:', error);
+    res.status(500).json({ mensaje: 'Hubo un error al eliminar la agenda' });
+  }
+};
 
 
 
@@ -110,7 +134,8 @@ module.exports = {
     obtenerAgenda,
     obtenerAgendasPorCoordinador,
     actualizarAgenda,
-    obtenerDomicilios
+    obtenerDomicilios,
+    eliminarAgenda
 }
 
 

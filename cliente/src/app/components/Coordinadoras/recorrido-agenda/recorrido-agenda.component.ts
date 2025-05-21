@@ -26,12 +26,13 @@ export class RecorridoAgendaComponent implements OnInit {
   isFormExpanded: boolean = false;
   registrarAgenda: FormGroup;
   selectedCoord: Coordinacion | null = null;
-  coordinadorVisible: string = 'Ismael'; // por defecto
+  coordinadorVisible: string = ''; // por defecto
   coordinadorSeleccionado: string = '';
   semanas: string[] = [];
   totalKm: number = 0;
   precioPorLitro: number = 0; // este valor lo tomarás desde el input
-  domicilios: string[] = [];
+  domicilios: string[] = ["NA"];
+
 
   //HORAS
   horasAgenda: number = 0;
@@ -129,66 +130,115 @@ export class RecorridoAgendaComponent implements OnInit {
   
 
       RegistrarAgenda(): void {
-      if (this.registrarAgenda.invalid) {
-      const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 1000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.onmouseenter = Swal.stopTimer;
-          toast.onmouseleave = Swal.resumeTimer;
+        if (this.registrarAgenda.invalid) {
+          const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 1000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.onmouseenter = Swal.stopTimer;
+              toast.onmouseleave = Swal.resumeTimer;
+            }
+          });
+
+          Toast.fire({
+            icon: "error",
+            title: "Error en el formulario"
+          });
+
+          console.log('Formulario inválido', this.registrarAgenda);
+          return;
         }
-      });
-        Toast.fire({
-          icon: "error",
-          title: "Error en el formulario"
-        });
-        console.log('Formulario inválido', this.RegistrarAgenda);
-        return;
-      } else{
-        const datos = this.registrarAgenda.value;
-        console.log('¿Cumplimiento?', datos.cumplimientoAgenda); // true o false
-        const Toast = Swal.mixin({
-          toast: true,
-          position: "top-end",
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-          didOpen: (toast) => {
-            toast.onmouseenter = Swal.stopTimer;
-            toast.onmouseleave = Swal.resumeTimer;
+
+        // Confirmación antes de guardar
+        Swal.fire({
+          title: '¿Estás seguro?',
+          text: '¿Deseas registrar esta(s) actividad(es)?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, registrar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            const datos = this.registrarAgenda.value;
+            console.log('¿Cumplimiento?', datos.cumplimientoAgenda); // true o false
+
+            const actividades = this.actividades.value;
+            actividades.forEach((actividad: any) => {
+              const AGENDA: Agenda = {
+                coordinador: this.registrarAgenda.get('coordinador')?.value,
+                semana: this.registrarAgenda.get('semana')?.value,
+                fecha: this.registrarAgenda.get('fecha')?.value,
+                cumplimientoAgenda: this.registrarAgenda.get('cumplimientoAgenda')?.value,
+                hora: actividad.hora,
+                domicilio: actividad.domicilio,
+                actividad: actividad.actividad,
+                codigo: actividad.codigo,
+                traslado: actividad.traslado,
+                kmRecorrido: actividad.kmRecorrido
+              };
+
+              this._coordinacionService.registrarAgenda(AGENDA).subscribe({
+                next: () => {
+                  console.log('Actividad registrada');
+                  this.agendasFiltradasPorCoordinador.push(AGENDA);
+                }
+              });
+            });
+
+            const Toast = Swal.mixin({
+              toast: true,
+              position: "top-end",
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+              }
+            });
+
+            Toast.fire({
+              icon: "success",
+              title: "Actividad registrada con éxito"
+            });
+          } else {
+            console.log('Registro cancelado por el usuario');
           }
         });
-        Toast.fire({
-          icon: "success",
-          title: "Actividad registrada con éxito"
-        });
-      
       }
-      const actividades = this.actividades.value;
-      actividades.forEach((actividad: any) => {
-        const AGENDA: Agenda = {
-          coordinador: this.registrarAgenda.get('coordinador')?.value,
-          semana: this.registrarAgenda.get('semana')?.value,
-          fecha: this.registrarAgenda.get('fecha')?.value,
-          cumplimientoAgenda: this.registrarAgenda.get('cumplimientoAgenda')?.value,
-          hora: actividad.hora,
-          domicilio: actividad.domicilio,
-          actividad: actividad.actividad,
-          codigo: actividad.codigo,
-          traslado: actividad.traslado,
-          kmRecorrido: actividad.kmRecorrido
-        };
-        this._coordinacionService.registrarAgenda(AGENDA).subscribe({
-          next: () => {
-                console.log('Actividad registrada');
-                this.agendasFiltradasPorCoordinador.push(AGENDA);
-          }
-        });
-      });    
-      }
+
+      eliminarRegistro(id: any) {
+          Swal.fire({
+            title: "¿Estás seguro de querer eliminar este registro?",
+            text: "Esta acción no puede ser revertida",
+            icon: "warning",
+            showCancelButton: true,
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, estoy seguro."
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Si el usuario confirma, entonces llama a eliminarUsuario
+              this._coordinacionService.eliminarAgenda(id).subscribe(
+                data => {
+                  Swal.fire({
+                    title: "Eliminado",
+                    text: "Esta agenda ha sido eliminado.",
+                    icon: "success"
+                  });
+                  this.obtenerAgendas();
+                },
+                error => {
+                  console.log(error);
+                }
+              );
+            }
+          });
+        }
 
       seleccionarCoordinador(coord: Coordinacion | null): void {
       this.selectedCoord = coord;
@@ -223,58 +273,59 @@ export class RecorridoAgendaComponent implements OnInit {
       this.isFormExpanded = !this.isFormExpanded;
       }
 
-
       // : Agregar métodos para obtener
-          get agendasFiltradasPorCoordinador() {
-            return this.agendas.filter(agenda => {
-              const fecha = new Date(agenda.fecha);
-              const mes = fecha.toLocaleString('es-MX', { month: 'long' });
-              const dia = fecha.toLocaleString('es-MX', { weekday: 'long' });
-          
-              return (
-                agenda.coordinador === this.coordinadorVisible &&
-                (!this.mesSeleccionado || mes.toLowerCase() === this.mesSeleccionado.toLowerCase()) &&
-                (!this.semanaSeleccionada || agenda.semana === this.semanaSeleccionada) &&
-                (!this.diaSeleccionado || dia.toLowerCase() === this.diaSeleccionado.toLowerCase())
-              );
-            });
-          }
-          guardarCambios(agenda: any) {
-          this._coordinacionService.actualizarAgenda(agenda._id, {
-            codigo: agenda.codigo,
-            actividadReportada: agenda.actividadReportada,
-            reportado: agenda.reportado,
-            horaReporte: agenda.horaReporte,
-            horaCierre: agenda.horaCierre,
-            semana: '',
-            coordinador: '',
-            hora: ''
-          }).subscribe({
-            next: (respuesta) => {
-              const Toast = Swal.mixin({
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 900,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                  toast.onmouseenter = Swal.stopTimer;
-                  toast.onmouseleave = Swal.resumeTimer;
-                }
-              });
-              Toast.fire({
-                icon: "success",
-                title: "Guardado correctamente."
-              });
-            },
-            error: (error) => {
-              console.error('Error al actualizar agenda:', error);
+      get agendasFiltradasPorCoordinador() {
+        return this.agendas.filter(agenda => {
+          const fecha = new Date(agenda.fecha);
+          const mes = fecha.toLocaleString('es-MX', { month: 'long' });
+          const dia = fecha.toLocaleString('es-MX', { weekday: 'long' });
+      
+          return (
+            agenda.coordinador === this.coordinadorVisible &&
+            (!this.mesSeleccionado || mes.toLowerCase() === this.mesSeleccionado.toLowerCase()) &&
+            (!this.semanaSeleccionada || agenda.semana === this.semanaSeleccionada) &&
+            (!this.diaSeleccionado || dia.toLowerCase() === this.diaSeleccionado.toLowerCase())
+          );
+        });
+      }
+      guardarCambios(agenda: any) {
+      this._coordinacionService.actualizarAgenda(agenda._id, {
+        domicilio: agenda.domicilio,
+        actividad: agenda.actividad,
+        hora: agenda.hora,
+        codigo: agenda.codigo,
+        actividadReportada: agenda.actividadReportada,
+        reportado: agenda.reportado,
+        horaReporte: agenda.horaReporte,
+        horaCierre: agenda.horaCierre,
+        semana: '',
+        coordinador: '',
+      }).subscribe({
+        next: (respuesta) => {
+          const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 900,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.onmouseenter = Swal.stopTimer;
+              toast.onmouseleave = Swal.resumeTimer;
             }
           });
-          }
+          Toast.fire({
+            icon: "success",
+            title: "Guardado correctamente."
+          });
+        },
+        error: (error) => {
+          console.error('Error al actualizar agenda:', error);
+        }
+      });
+      }
 
       get totalKmRecorridos(): number {
-      return this.agendasFiltradasPorCoordinador.reduce((acc, curr) => acc + (curr.kmRecorrido || 0), 0);
+      return this.agendasFiltradasPorCoordinador.reduce((acc, curr) => acc + (curr.kmRecorrido || 0), 0).toFixed(2);
       }
 
       get litrosGasolina(): number {
@@ -282,6 +333,7 @@ export class RecorridoAgendaComponent implements OnInit {
       const totalKm = this.totalKmRecorridos;
       return totalKm > 0 ? +(totalKm / rendimiento).toFixed(2) : 0;
       }
+      
       get costoTotalGasolina(): number {
       return +(this.litrosGasolina * this.precioPorLitro).toFixed(2);
       }
@@ -312,13 +364,11 @@ export class RecorridoAgendaComponent implements OnInit {
         return((this.horasEntregas) - (this.horasEntregasReportadas) )
       }
 
-get horasProductividad(): number {
-  return this.horasTrabajo > 0
-    ? parseFloat(((this.horasAgendadas / this.horasTrabajo)).toFixed(2))
-    : 0;
-}
-
-
+      get horasProductividad(): number {
+        return this.horasTrabajo > 0
+          ? parseFloat(((this.horasAgendadas / this.horasTrabajo)).toFixed(2))
+          : 0;
+      }
 
       opcionesCodigo = [
       {value: 'R', texto: 'Pago'},
@@ -335,6 +385,7 @@ get horasProductividad(): number {
       {value: 'D', texto: 'Domiciliar'},
       {value: 'Sin Codigo', texto: 'Sin codigo'}
       ];
+
     @ViewChild('graficaCodigo') graficaCodigo!: ElementRef<HTMLCanvasElement>;
 
     dibujarGraficaPorCodigo() {
@@ -470,48 +521,47 @@ get horasProductividad(): number {
       this.dibujarGraficaReporteadasVsNoReportadas();
     }
     //Generar reporte
-
     generarPDFConGrafica() {
 
-Swal.fire({
-  title: 'Generando PDF...',
-  text: 'Por favor espere',
-  allowOutsideClick: false,
-  allowEscapeKey: false,
-  didOpen: () => {
-    Swal.showLoading;
-    
-  }
-});
-
-setTimeout(() => {
-  const element = this.reportePDF.nativeElement;
-
-  html2canvas(element).then(canvas => {
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgData = canvas.toDataURL('image/png');
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-    pdf.text(`Coordinador: ${this.coordinadorVisible}`, 10, 10);
-    pdf.text(`Fecha: ${new Date().toLocaleDateString()}`, 10, 18);
-
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`reporte_${this.coordinadorVisible}.pdf`);
-
-    // Cerrar el spinner
-    Swal.close();
-
-    // Mensaje de éxito opcional
     Swal.fire({
-      icon: 'success',
-      title: 'PDF generado',
-      text: 'El archivo fue guardado correctamente.',
-      timer: 2000,
-      showConfirmButton: false
+      title: 'Generando PDF...',
+      text: 'Por favor espere',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading;
+        
+      }
     });
-  });
-}, 500); // Delay para esperar a que se renderice correctamente la gráfica
-    }
+
+    setTimeout(() => {
+      const element = this.reportePDF.nativeElement;
+
+      html2canvas(element).then(canvas => {
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgData = canvas.toDataURL('image/png');
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        pdf.text(`Coordinador: ${this.coordinadorVisible}`, 10, 10);
+        pdf.text(`Fecha: ${new Date().toLocaleDateString()}`, 10, 18);
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`reporte_${this.coordinadorVisible}.pdf`);
+
+        // Cerrar el spinner
+        Swal.close();
+
+        // Mensaje de éxito opcional
+        Swal.fire({
+          icon: 'success',
+          title: 'PDF generado',
+          text: 'El archivo fue guardado correctamente.',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      });
+    }, 500); // Delay para esperar a que se renderice correctamente la gráfica
+        }
 }

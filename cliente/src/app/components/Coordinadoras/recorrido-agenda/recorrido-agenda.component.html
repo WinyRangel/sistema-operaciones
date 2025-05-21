@@ -1,5 +1,5 @@
-<div class="container mt-4 mb-4">
-  <div class="card shadow-sm bg-body-tertiary rounded">
+<div class="container-fluid mt-4 mb-4">
+  <div class="card shadow-sm bg-body-tertiary rounded w-100">
     <div class="card-body p-0">
       <nav>
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -14,35 +14,34 @@
             role="tab"
             [attr.aria-controls]="'nav-' + c.coordinador[0].nombre"
             [attr.aria-selected]="coordinadorVisible === c.coordinador[0].nombre"
-            (click)="mostrarDiv(c.coordinador[0].nombre)">
+            (click)="mostrarDiv(c.coordinador[0].nombre)"
+          >
             {{ c.coordinador[0].nombre }}
           </button>
         </div>
       </nav>
+      <div class="d-flex justify-content-end p-3 bg-white shadow-sm rounded mb-3">
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-outline-primary d-flex align-items-center gap-2" (click)="toggleFormVisibility()">
+            <i class="fa-solid" [class.fa-eye]="!isFormVisible" [class.fa-eye-slash]="isFormVisible"></i>
+            {{ isFormVisible ? 'Ocultar Formulario' : 'Registrar agenda' }}
+          </button>
+      
+          <button type="button" class="btn btn-outline-success d-flex align-items-center gap-2" (click)="toggleTableVisibility()">
+            <i class="fa-solid" [class.fa-eye]="!isTableVisible" [class.fa-eye-slash]="isTableVisible"></i>
+            {{ isTableVisible ? 'Ocultar Tabla' : 'Seguimiento Agenda' }}
+          </button>
+      
+          <button *ngIf="isFormVisible" type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" (click)="toggleFormSize()">
+            <i class="fa-solid" [class.fa-expand]="!isFormExpanded" [class.fa-compress]="isFormExpanded"></i>
+            {{ isFormExpanded ? 'Reducir Formulario' : 'Expandir Formulario' }}
+          </button>
+        </div>
+      </div>
 
   <!-- Controles de visibilidad -->
-  <div class="d-flex justify-content-end p-3 bg-white shadow-sm rounded mb-3">
-    <div class="btn-group" role="group">
-      <button type="button" class="btn btn-outline-primary d-flex align-items-center gap-2" (click)="toggleFormVisibility()">
-        <i class="fa-solid" [class.fa-eye]="!isFormVisible" [class.fa-eye-slash]="isFormVisible"></i>
-        {{ isFormVisible ? 'Ocultar Formulario' : 'Registrar agenda' }}
-      </button>
-  
-      <button type="button" class="btn btn-outline-success d-flex align-items-center gap-2" (click)="toggleTableVisibility()">
-        <i class="fa-solid" [class.fa-eye]="!isTableVisible" [class.fa-eye-slash]="isTableVisible"></i>
-        {{ isTableVisible ? 'Ocultar Tabla' : 'Seguimiento Agenda' }}
-      </button>
-  
-      <button *ngIf="isFormVisible" type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" (click)="toggleFormSize()">
-        <i class="fa-solid" [class.fa-expand]="!isFormExpanded" [class.fa-compress]="isFormExpanded"></i>
-        {{ isFormExpanded ? 'Reducir Formulario' : 'Expandir Formulario' }}
-      </button>
-    </div>
-  </div>
-  
-  <!-- Controles de visibilidad -->
-        <div class="d-flex justify-content-end p-3">
-          <div class="container">
+        <div class="d-flex justify-content-end">
+          <div class="container-fluid mt-4 mb-lg-4">
            <!-- FORMULARIO Y TABLA -->
             <div class="tab-content" id="nav-tabContent">
               <div *ngIf="coordinadorVisible" class="tab-pane fade show active p-4">
@@ -52,7 +51,6 @@
                         [class.col-12]="isFormExpanded || !isTableVisible"
                         [class.col-lg-4]="isFormExpanded && isTableVisible"
                         [class.col-lg-4]="!isFormExpanded && isTableVisible">
-                <div class="p-2">
                   <!--FORMULARIO REGISTRAR AGENDA-->
                   <form [formGroup]="registrarAgenda" (ngSubmit)="RegistrarAgenda()" class="agenda-form">
                     <div class="card shadow-sm">
@@ -138,8 +136,7 @@
                               <div class="col-md-6">
                                 <label class="form-label">Actividad</label>
                                 <input type="text" class="form-control" formControlName="actividad" placeholder="Descripción de la actividad">
-                              </div>
-                              
+                              </div>                             
                               <div class="col-md-6">
                                 <label class="form-label">Código</label>
                                 <select class="form-select" formControlName="codigo">
@@ -182,7 +179,6 @@
                       </div>
                     </div>
                   </form>
-                </div>
             </div>
               <!-- Tabla -->
                 <div *ngIf="isTableVisible"
@@ -190,9 +186,9 @@
                 [class.col-lg-8]="isFormVisible && !isFormExpanded"
                 [class.col-lg-6]="isFormVisible && isFormExpanded">
                 <!-- Contenido tabla (igual) -->
-              <div class="table-responsive mt-8 p-4">
+              <div class="table-responsive bg-light" >
                 <div class="card-header bg-primary text-white">
-                  <h4 class="mb-0"> <i class="fa-regular fa-rectangle-list"></i>Seguimiento de Agenda</h4>
+                  <h4 class="mb-0"> <i class="fa-regular fa-rectangle-list"></i> Seguimiento de Agenda</h4>
                   </div>
                   <!-- Filtro de semana -->
                   <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3 mb-4">
@@ -389,22 +385,32 @@
                             <tr *ngFor="let agenda of agendasFiltradasPorCoordinador" class="hover-highlight">
                               <!-- Campos de datos -->
                               <td class="text-center fw-semibold">{{ agenda.fecha | date:'dd-MM-yy': 'UTC' }}</td>
-                              <td class="text-center text-muted">{{ agenda.hora | slice:0:5 }}</td>
-                              <td>
-                                <span class="badge rounded-pill bg-opacity-10 bg-success text-success">
-                                  {{ agenda.domicilio?.nombre }}
-                                </span>
-                              </td>
-                              <td class="text-truncate" style="max-width: 150px;">{{ agenda.actividad }}</td>
-                              
+                              <!-- Hora (editable) -->
+                                <td class="text-center">
+                                  <input type="time" [(ngModel)]="agenda.hora"
+                                        class="form-control form-control-sm border-primary border-opacity-25">
+                                </td>
+
+                                <!-- Domicilio (editable) -->
+                                <td>
+                                      <input [(ngModel)]="agenda.domicilio.nombre"
+                                            class="form-control form-control-sm border-success border-opacity-25">
+                                    </td>
+
+                                <!-- Actividad (editable) -->
+                                <td>
+                                  <textarea [(ngModel)]="agenda.actividad"
+                                        class="form-control form-control-sm border-primary border-opacity-25"></textarea>
+                                </td>                              
                               <!-- Campos editables -->
                               <td>
                                 <input [(ngModel)]="agenda.codigo" 
                                       class="form-control form-control-sm border-primary border-opacity-25">
                               </td>
                               <td>
-                                <input [(ngModel)]="agenda.actividadReportada" 
+                                <textarea [(ngModel)]="agenda.actividadReportada" 
                                       class="form-control form-control-sm border-primary border-opacity-25">
+                                </textarea>
                               </td>
                               <td>
                                 <select [(ngModel)]="agenda.reportado" 
@@ -427,18 +433,24 @@
                               <td class="text-center">
                                 <span class="badge rounded-pill bg-opacity-10" 
                                       [ngClass]="agenda.cumplimientoAgenda ? 'bg-success text-success' : 'bg-danger text-danger'">
-                                  {{ agenda.cumplimientoAgenda ? 'Cumplido' : 'Pendiente' }}
+                                  {{ agenda.cumplimientoAgenda ? 'Cumplido' : 'Destiempo' }}
                                 </span>
                               </td>
                               
                               <!-- Acciones -->
-                              <td class="text-center">
+                              <td>
                                 <button class="btn btn-sm btn-hover-primary" 
                                         type="button" 
                                         (click)="guardarCambios(agenda)"
                                         title="Guardar cambios">
                                   <i class="fas fa-save fs-6 text-primary"></i>
                                 </button>
+                                 <button class="btn btn-sm btn-hover-danger"
+                                          type="button"
+                                          title="Eliminar Registro"
+                                          (click)="eliminarRegistro(agenda._id)">
+                                      <i class="fa-solid fa-trash text-danger"></i>
+                              </button> 
                               </td>
                             </tr>
                             

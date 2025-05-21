@@ -235,17 +235,43 @@ canvas {
   .btn-hover-primary:hover {
     background-color: rgba(13, 110, 253, 0.1);
   }
-  
-  @media (max-width: 768px) {
-    #tabla-agenda {
-      font-size: 0.875rem;
-    }
-    
-    th, td {
-      padding: 0.5rem !important;
-    }
-    
-    .badge {
-      font-size: 0.75rem;
-    }
+
+    .btn-hover-danger:hover {
+    background-color: rgba(253, 13, 37, 0.1)
   }
+  
+ @media (max-width: 768px) {
+  #tabla-agenda {
+    font-size: 0.75rem;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  #tabla-agenda thead,
+  #tabla-agenda tbody,
+  #tabla-agenda th,
+  #tabla-agenda td,
+  #tabla-agenda tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  #tabla-agenda th,
+  #tabla-agenda td {
+    padding: 0.4rem !important;
+    text-align: center;
+  }
+
+  .badge {
+    font-size: 0.7rem;
+  }
+
+  .btn,
+  .form-control,
+  .form-select {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+  }
+}

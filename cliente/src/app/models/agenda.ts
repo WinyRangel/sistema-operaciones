@@ -3,6 +3,7 @@ export interface Agenda {
     semana: string;
     coordinador: string;
     fecha?: Date;
+    objetivo?: string;
     hora: string;
     domicilio?: string;
     actividad?: string;

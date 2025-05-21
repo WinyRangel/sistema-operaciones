@@ -230,7 +230,7 @@ export class BauchersComponent implements OnInit{
           data => {
             Swal.fire({
               title: "Eliminado",
-              text: "Este empleado ha sido eliminado.",
+              text: "Esta agenda ha sido eliminado.",
               icon: "success"
             });
             // Llama a obtenerUsuarios1 después de eliminar exitosamente

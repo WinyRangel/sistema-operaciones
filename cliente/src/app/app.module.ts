@@ -19,13 +19,13 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FooterComponent } from './components/Shared/layout/footer/footer.component';
 import { BaucherPipe } from './pipes/baucher.pipe';
 import { RecorridoAgendaComponent } from './components/Coordinadoras/recorrido-agenda/recorrido-agenda.component';
-import { ReporteAgendaComponent } from './components/Coordinadoras/reporte-agenda/reporte-agenda.component';
 import { EjecutivasComponent } from './components/Shared/ejecutivas/ejecutivas.component';
 import { DepositosComponent } from './components/Shared/depositos/depositos.component';
 import { BauchersComponent } from './components/Shared/bauchers/bauchers.component';
 import { ReporteFichasComponent } from './components/reporte-fichas/reporte-fichas.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TagModule } from 'primeng/tag';
+import { FechaFormatPipe } from './pipes/fecha-format.pipe';
 
 
 @NgModule({
@@ -38,10 +38,10 @@ import { TagModule } from 'primeng/tag';
     BaucherPipe,
     BauchersComponent,
     RecorridoAgendaComponent,
-    ReporteAgendaComponent,
     EjecutivasComponent,
     DepositosComponent,
-    ReporteFichasComponent
+    ReporteFichasComponent,
+    FechaFormatPipe
   ],
   
   imports: [
