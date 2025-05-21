@@ -7,7 +7,7 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class LegalesService {
-  private url = 'http://localhost:4000/legales'; 
+  private url = 'https://servidor-operaciones.onrender.com/legales'; 
 
   constructor(private http: HttpClient) {}
 

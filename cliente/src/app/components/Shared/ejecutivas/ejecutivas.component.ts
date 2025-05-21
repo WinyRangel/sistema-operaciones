@@ -1,80 +1,48 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { EjecutivasService } from '../../../services/ejecutivas.service';
 import Swal from 'sweetalert2';
 import autoTable from 'jspdf-autotable';
-import html2canvas from 'html2canvas';
-import { Chart } from 'chart.js';
+import Chart from 'chart.js/auto';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-    lastAutoTable: {
-      finalY: number;
-    };
-  }
-}
-
-import {
-  BarController,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend,
-  LineController,
-  LineElement,
-  PointElement
-} from 'chart.js';
-
-// REGISTRO DE LOS COMPONENTES DE GRÁFICO NECESARIOS
-Chart.register(
-  BarController,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend,
-  LineController,
-  LineElement,
-  PointElement
-);
-
-
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { Ejecutivas } from '../../../models/ejecutivas';
 
 @Component({
   selector: 'app-ejecutivas',
   standalone: false,
   templateUrl: './ejecutivas.component.html',
-  styleUrl: './ejecutivas.component.css'
+  styleUrls: ['./ejecutivas.component.css']
 })
 export class EjecutivasComponent implements OnInit {
-  getSeverity(arg0: any) {
-    throw new Error('Method not implemented.');
-  }
-
-  constructor(private ejecutivasService: EjecutivasService) { }
+  @ViewChild('previewChart', { static: false }) previewChart!: ElementRef;
+  chartInstance: any;
+  totales: {
+    totalR: number;
+    totalNR: number;
+    esperadas: number;
+    puntualidad: number
+  } | null = null;
 
   mostrarForm = false;
   nombreSeleccionado = '';
   ejecutivaSeleccionada = '';
-  codigoSeleccionado: string = '';
-  fecha: string = '';
-  actividadSeleccionada: string = '';
-  horaReporte: string = '';
-  hora: string = '';
-  mesSeleccionado: string = '';
+  codigoSeleccionado = '';
+  fecha = '';
+  actividadSeleccionada = '';
+  horaReporte = '';
+  mesSeleccionado = '';
+
 
   cards = [
     { nombre: 'DH - Experiencias', ejecutiva: 'Guadalupe' },
     { nombre: 'DH - Triunfadoras', ejecutiva: 'Veronica' },
     { nombre: 'DH - Fuerza de Venta', ejecutiva: 'Veronica' },
-    { nombre: 'SMA - Lealtad', ejecutiva: 'SMA Lealtad' },
+    { nombre: 'SMA - Lealtad', ejecutiva: 'Elisa' },
     { nombre: 'SF - San Felipe', ejecutiva: 'Dulce' },
     { nombre: 'SLPZ - Mejorando Familias', ejecutiva: 'Vero' },
-    { nombre: 'SDU - De Corazón', ejecutiva: 'Evelyn' }
+    { nombre: 'SDU - De Corazón', ejecutiva: 'Evelyn' },
+    { nombre: 'VIC - Cumpliendo Sueños', ejecutiva: 'Claudia' }
   ];
 
   actividades = [
@@ -87,60 +55,33 @@ export class EjecutivasComponent implements OnInit {
 
   codigos = [
     { codigo: 'NR' },
-    { codigo: 'R' },
-  ]
+    { codigo: 'R' }
+  ];
 
-  // 0 = Domingo, 1 = Lunes, …, 6 = Sábado
   private frecuenciaSemanal: Record<string, number[]> = {
-    'Envio de registros, depositos': [1, 2, 3, 4, 5, 6],  // Lunes–Sábado
-    'Envio de Zona Roja': [1, 2, 3, 4, 5, 6],  // Lunes–Sábado
-    'Envio de agendas y concentrado': [5],            // Viernes
-    'Reportar pagos diarios': [1, 2, 3, 4, 5, 6],  // Lunes–Sábado
-    'Solicitud de Garantias': [3]             // Miércoles
+    'Envio de registros, depositos': [1, 2, 3, 4, 5, 6],
+    'Envio de Zona Roja': [1, 2, 3, 4, 5, 6],
+    'Envio de agendas y concentrado': [5],
+    'Reportar pagos diarios': [1, 2, 3, 4, 5, 6],
+    'Solicitud de Garantias': [3]
   };
 
-  //Regstro y filtrado de actividades de ejecutivas
   registros: any[] = [];
   registrosFiltrados: any[] = [];
 
+  constructor(private ejecutivasService: EjecutivasService) { }
+
   ngOnInit() {
     this.setFechaHoy();
+    Chart.register(ChartDataLabels);
   }
 
-  /** 
-   * Cuenta cuántas fechas del mes dado caen en cualquiera de los daysOfWeek.
-   * @param year  Año (2025)
-   * @param month Mes (1–12)
-   * @param daysOfWeek Array de 0=Domingo … 6=Sábado
-   */
-  private contarOcurrenciasEnMes(
-    year: number,
-    month: number,
-    daysOfWeek: number[]
-  ): number {
-    let count = 0;
-    // JS: monthIndex es 0–11
-    const mesIndex = month - 1;
-    const fecha = new Date(year, mesIndex, 1);
-    while (fecha.getMonth() === mesIndex) {
-      if (daysOfWeek.includes(fecha.getDay())) {
-        count++;
-      }
-      fecha.setDate(fecha.getDate() + 1);
-    }
-    return count;
-  }
-
-
-  setFechaHoy() {
+  private setFechaHoy() {
     const hoy = new Date();
-    const anio = hoy.getFullYear();
     const mes = (hoy.getMonth() + 1).toString().padStart(2, '0');
     const dia = hoy.getDate().toString().padStart(2, '0');
-    this.fecha = `${anio}-${mes}-${dia}`;
-
+    this.fecha = `${hoy.getFullYear()}-${mes}-${dia}`;
   }
-
 
   mostrarFormulario(nombre: string, ejecutiva: string) {
     this.nombreSeleccionado = nombre;
@@ -149,357 +90,429 @@ export class EjecutivasComponent implements OnInit {
     this.actividadSeleccionada = '';
     this.codigoSeleccionado = '';
     this.horaReporte = '';
-    this.hora = '';
 
-    this.ejecutivasService.obtenerRegistros().subscribe((data: any[]) => {
+    this.ejecutivasService.obtenerRegistros().subscribe(data => {
       this.registros = data;
       this.filtrarRegistros();
     });
   }
 
-  // filtrarRegistros() {
-  //   this.registrosFiltrados = this.registros
-  //     .filter(registro =>
-  //       registro.nombre === this.nombreSeleccionado &&
-  //       registro.ejecutiva === this.ejecutivaSeleccionada &&
-  //       // mantén el filtro del día actual
-  //       registro.fecha === this.fecha
-  //     )
-  //     .filter(registro =>
-  //       // si no hay mes seleccionado, deja pasar todo; si hay, que coincida
-  //       !this.mesSeleccionado ||
-  //       this.obtenerMesDeFecha(registro.fecha) === this.mesSeleccionado
-  //     );
-  // }
   filtrarRegistros() {
-  if (!this.mesSeleccionado) {
-    // Si no hay mes seleccionado, mostrar todos los registros de la ejecutiva seleccionada
-    this.registrosFiltrados = this.registros.filter(registro =>
-      registro.nombre === this.nombreSeleccionado
-    );
-  } else {
-    this.registrosFiltrados = this.registros.filter(registro => {
-      const fecha = new Date(registro.fecha);
-      const mesRegistro = (fecha.getMonth() + 1).toString().padStart(2, '0');
-      const anioRegistro = fecha.getFullYear();
-
-      return (
-        registro.nombre === this.nombreSeleccionado &&
-        mesRegistro === this.mesSeleccionado &&
-        anioRegistro === new Date().getFullYear() // Filtra también por año actual si es necesario
-      );
-    });
+    if (!this.mesSeleccionado) {
+      this.registrosFiltrados = this.registros.filter(r => r.nombre === this.nombreSeleccionado && r.fecha === this.fecha);
+    } else {
+      this.registrosFiltrados = this.registros.filter(r => {
+        const mes = (new Date(r.fecha).getMonth() + 1).toString().padStart(2, '0');
+        return r.nombre === this.nombreSeleccionado && mes === this.mesSeleccionado;
+      });
+    }
   }
-}
 
   actualizarHora() {
-    const actividad = this.actividades.find(a => a.nombre === this.actividadSeleccionada);
-    this.horaReporte = actividad ? actividad.hora : '';
-
+    const act = this.actividades.find(a => a.nombre === this.actividadSeleccionada);
+    this.horaReporte = act ? act.hora : '';
   }
 
   guardarActividad() {
-    // Validación de campos vacíos
-    if (
-      !this.nombreSeleccionado ||
-      !this.ejecutivaSeleccionada ||
-      !this.actividadSeleccionada ||
-      !this.codigoSeleccionado ||
-      !this.fecha
-    ) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Campos incompletos',
-        text: 'Por favor llena todos los campos antes de guardar la actividad.'
-      });
+    if (!this.actividadSeleccionada || !this.codigoSeleccionado) {
+      Swal.fire('Campos incompletos', 'Completa actividad y código', 'warning');
       return;
     }
+    const act = this.actividades.find(a => a.nombre === this.actividadSeleccionada)!;
+    const registro = {
+      nombre: this.nombreSeleccionado,
+      ejecutiva: this.ejecutivaSeleccionada,
+      fecha: this.fecha,
+      actividad: this.actividadSeleccionada,
+      frecuencia: act.frecuencia,
+      hora: act.hora,
+      actRealizada: this.codigoSeleccionado,
+      horaReporte: this.horaReporte || '-'
+    };
 
-    const actividad = this.actividades.find(a => a.nombre === this.actividadSeleccionada);
-
-    if (actividad) {
-      const registro = {
-        nombre: this.nombreSeleccionado,
-        ejecutiva: this.ejecutivaSeleccionada,
-        fecha: this.fecha,
-        actividad: this.actividadSeleccionada,
-        frecuencia: actividad.frecuencia,
-        hora: actividad.hora,
-        actRealizada: this.codigoSeleccionado,
-        horaReporte: this.horaReporte || '-'
-      };
-
-      this.ejecutivasService.guardarRegistro(registro).subscribe({
-        next: (response) => {
-          const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-              toast.onmouseenter = Swal.stopTimer;
-              toast.onmouseleave = Swal.resumeTimer;
-            }
-          });
-          Toast.fire({
-            icon: 'success',
-            title: 'Actividad Registrada'
-          });
-
-          // Limpiar campos y recargar
-          this.ejecutivasService.obtenerRegistros().subscribe((data: any[]) => {
-            this.registros = data;
-            this.filtrarRegistros();
-            this.actividadSeleccionada = '';
-            this.codigoSeleccionado = '';
-            this.horaReporte = '';
-          });
-        },
-        error: (error) => {
-          console.error('Error al guardar registro', error);
+    this.ejecutivasService.guardarRegistro(registro).subscribe(() => {
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
         }
       });
-    }
-  }
-
-  cerrarFormulario() {
-    this.mostrarForm = false;
-  }
-
-  generarReporteMensual(): void {
-    if (!this.mesSeleccionado) {
-      Swal.fire('Selecciona un mes para generar el reporte', '', 'warning');
-      return;
-    }
-
-    this.ejecutivasService.obtenerRegistros().subscribe(allRegs => {
-      // Filtramos solo los registros del mes seleccionado:
-      const registrosMes = allRegs.filter(reg => {
-        // Extraemos mes de la fecha ("YYYY-MM-DD")
-        const mesReg = (new Date(reg.fecha).getMonth() + 1)
-          .toString()
-          .padStart(2, '0');
-        return mesReg === this.mesSeleccionado;
+      Toast.fire({
+        icon: "success",
+        title: "Se registro correctamente"
       });
-
-      // Creamos la estructura: coordinación → actividad → { R, NR, P }
-      const agrupado: Record<string, Record<string, { R: number; NR: number; P: number }>> = {};
-
-      registrosMes.forEach(r => {
-        const coord = r.nombre as string;
-        const act = r.actividad as string;
-        const cod = r.actRealizada as 'R' | 'NR';
-        const horaLim = r.hora;          // p.ej. "11:00:00"
-        const horaRep = r.horaReporte;   // p.ej. "10:45:00"
-
-        if (!agrupado[coord]) agrupado[coord] = {};
-        if (!agrupado[coord][act]) agrupado[coord][act] = { R: 0, NR: 0, P: 0 };
-
-        agrupado[coord][act][cod]++;
-
-        // Si fue R y puntual:
-        if (cod === 'R' && horaRep && horaRep <= horaLim) {
-          agrupado[coord][act].P++;
-        }
-      });
-
-      this.generarPDFPorCoordinacionYActividad(agrupado);
+      this.mostrarFormulario(this.nombreSeleccionado, this.ejecutivaSeleccionada);
     });
   }
 
+  actualizarVistaPrevia() {
+    if (!this.mesSeleccionado) {
+      this.totales = null;
+      if (this.chartInstance) {
+        this.chartInstance.destroy();
+      }
+      return;
+    }
 
-  private generarPDFPorCoordinacionYActividad(
-    data: Record<string, Record<string, { R: number; NR: number; P: number }>>
-  ): void {
-    // 1) Instanciamos jsPDF
-    const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    this.ejecutivasService.obtenerRegistros().subscribe(all => {
+      const regs = all.filter(r => (new Date(r.fecha).getMonth() + 1).toString().padStart(2, '0') === this.mesSeleccionado);
+      this.totales = this.calcularTotales(regs);
 
+      if (this.chartInstance) {
+        this.chartInstance.destroy();
+      }
+
+      const ctx = this.previewChart.nativeElement.getContext('2d');
+      this.chartInstance = new Chart(ctx, this.getChartConfig());
+    });
+  }
+
+  // private calcularDetallesPorCoordinacion(): any[] {
+  //   return this.cards.map(card => {
+  //     const registrosCoordinacion = this.registros.filter(r =>
+  //       r.nombre === card.nombre &&
+  //       (new Date(r.fecha).getMonth() + 1).toString().padStart(2, '0') === this.mesSeleccionado
+  //     );
+
+  //     let totalR = 0, totalNR = 0, puntuales = 0;
+
+  //     registrosCoordinacion.forEach(r => {
+  //       if (r.actRealizada === 'R') {
+  //         totalR++;
+  //         const horaReporte = new Date(`1970-01-01T${r.horaReporte}`);
+  //         const horaLimite = new Date(`1970-01-01T${r.hora}`);
+  //         if (horaReporte <= horaLimite) puntuales++;
+  //       } else {
+  //         totalNR++;
+  //       }
+  //     });
+
+  //     const esperadas = this.actividades.reduce((sum, actividad) => {
+  //       const dias = this.frecuenciaSemanal[actividad.nombre] || [];
+  //       return sum + this.contarOcurrenciasEnMes(
+  //         new Date().getFullYear(),
+  //         Number(this.mesSeleccionado),
+  //         dias
+  //       );
+  //     }, 0);
+
+  //     return [
+  //       card.nombre,
+  //       card.ejecutiva,
+  //       totalR,
+  //       totalNR,
+  //       esperadas,
+  //       totalR > 0 ? `${(puntuales / totalR * 100).toFixed(1)}%` : '0%'
+  //     ];
+  //   });
+  // }
+
+private calcularDetallesPorCoordinacion(): any[][] {
+  const year  = new Date().getFullYear();
+  const month = Number(this.mesSeleccionado);
+
+  return this.cards.map(card => {
+    // 1) Filtrar solo los registros de esta coordinación+ejecutiva en el mes
+    const regs = this.registros.filter((r: Ejecutivas) => {
+      const d = new Date(r.fecha);
+      return (
+        r.nombre      === card.nombre &&
+        r.ejecutiva   === card.ejecutiva &&
+        d.getFullYear() === year &&
+        (d.getMonth() + 1) === month
+      );
+    });
+
+    // 2) Contar R, NR y cuántos fueron puntuales
+    let totalR    = 0;
+    let totalNR   = 0;
+    let puntuales = 0;
+    regs.forEach(r => {
+      if (r.actRealizada === 'R') {
+        totalR++;
+        const hrRep    = new Date(`1970-01-01T${r.horaReporte}`);
+        const hrLimite = new Date(`1970-01-01T${r.hora}`);
+        if (hrRep <= hrLimite) puntuales++;
+      } else {
+        totalNR++;
+      }
+    });
+
+    // 3) Calcular cuántas entregas se esperaban en el mes (para **todas** las actividades)
+    const esperadas = this.actividades.reduce((sum, actividad) => {
+      const dias = this.frecuenciaSemanal[actividad.nombre] || [];
+      return sum + this.contarOcurrenciasEnMes(year, month, dias);
+    }, 0);
+
+    // 4) Formatear puntualidad como porcentaje
+    const puntualidad = totalR > 0
+      ? `${((puntuales / totalR) * 100).toFixed(1)}%`
+      : '0%';
+
+    // 5) Devolver la fila
+    return [
+      card.nombre,
+      card.ejecutiva,
+      totalR,
+      totalNR,
+      esperadas,
+      puntualidad
+    ];
+  });
+}
+
+
+
+
+  private getChartConfig(): any {
+    if (!this.totales) return {};
+
+    const porcentajeR = (this.totales.totalR / this.totales.esperadas) * 100 || 0;
+    const porcentajeNR = (this.totales.totalNR / this.totales.esperadas) * 100 || 0;
+    // const porcentajeE = (this.totales.esperadas) * 100 / this.totales.esperadas || 0;
+    const porcentajeE = 100 - (porcentajeR + porcentajeNR);
+
+
+    return {
+      type: 'pie',
+      data: {
+        labels: [
+          `Reportadas (R) ${porcentajeR.toFixed(1)}%`,
+          `No Reportadas (NR) ${porcentajeNR.toFixed(1)}%`,
+          `Espearadas ${porcentajeE.toFixed(1)}%`
+        ],
+        datasets: [{
+          data: [porcentajeR, porcentajeNR, porcentajeE],
+          backgroundColor: ['#24548b', '#ab1a3a', '#329f20'],
+          borderColor: '#ffffff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              font: { size: 14 }
+            }
+          },
+          tooltip: { enabled: false },
+          datalabels: {
+            color: '#ffffff',
+            font: { size: 14, weight: 'bold' },
+            formatter: (value: number) => `${value.toFixed(1)}%`
+          }
+        }
+      }
+    };
+  }
+
+  generarPDF() {
+    if (this.totales) {
+      this.generarPDFConPie(this.totales);
+    }
+  }
+
+  private async generarPDFConPie(totales: {
+    totalR: number;
+    totalNR: number;
+    esperadas: number;
+    puntualidad: number
+  }) {
+    if (totales.esperadas === 0) {
+      Swal.fire('Error', 'No hay actividades registradas este mes', 'error');
+      return;
+    }
+
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     let y = 10;
+
+    // Título principal
     doc.setFontSize(16);
-    doc.text(`Reporte mensual — Mes ${this.mesSeleccionado}`, 10, y);
+    doc.text(`Reporte Mensual - Mes ${this.mesSeleccionado}`, 10, y);
     y += 10;
 
-    // ── A) “Esperadas”
-    const anio = new Date().getFullYear();
-    const mes = Number(this.mesSeleccionado);
-
-    const esperadasBody = Object.keys(this.frecuenciaSemanal).map(act => {
-      const totalEsperado = this.contarOcurrenciasEnMes(anio, mes, this.frecuenciaSemanal[act]);
-      return [act, totalEsperado.toString()];
-    });
-
-    doc.setFontSize(14);
-    doc.text('Total de registros esperados por actividad', 10, y);
-    y += 6;
+    // Tabla resumen general de reportes
     autoTable(doc, {
-      head: [['Actividad', 'Esperadas']],
-      body: esperadasBody,
-      startY: y,
-      margin: { horizontal: 10 }
-    });
-    y = doc.lastAutoTable.finalY + 16.5;
-
-    // ── B) Desglose por coordinación
-    let totalR = 0, totalNR = 0, totalP = 0;
-    for (const coord of Object.keys(data)) {
-      doc.setFontSize(14);
-      doc.text(`Coordinación: ${coord}`, 10, y);
-      y += 6;
-
-      const body = Object.keys(data[coord]).map(act => {
-        const { R, NR, P } = data[coord][act];
-        totalR += R;
-        totalNR += NR;
-        totalP += P;
-        return [act, R.toString(), NR.toString(), P.toString()];
-      });
-
-      autoTable(doc, {
-        head: [['Actividad', 'R', 'NR', 'Puntuales']],
-        body,
-        startY: y,
-        margin: { horizontal: 10 }
-      });
-      y = doc.lastAutoTable.finalY + 20;
-    }
-
-    // ── C) Totales generales
-    const totalEsperadas = esperadasBody
-      .map(row => Number(row[1]))
-      .reduce((sum, v) => sum + v, 0);
-
-    doc.setFontSize(14);
-    doc.text('Totales de todas las coordinaciones', 10, y);
-    y += 6;
-    autoTable(doc, {
-      head: [['Tipo', 'Cantidad']],
+      head: [['Tipo', 'Cantidad', 'Promedio de entegras']],
       body: [
-        ['Total R', totalR.toString()],
-        ['Total NR', totalNR.toString()],
-        ['Total Puntuales', totalP.toString()],
-        ['Total Esperadas', totalEsperadas.toString()]
+        ['Reportadas (R)', totales.totalR, `${totales.puntualidad.toFixed(1)}%`],
+        ['No Reportadas (NR)', totales.totalNR, '-'],
+        ['Total Esperadas', totales.esperadas, '-']
       ],
       startY: y,
-      margin: { horizontal: 10 }
+      margin: { horizontal: 10 },
+      headStyles: { fillColor: [36, 84, 139] },
+      columnStyles: { 2: { cellWidth: 30 } }
     });
-    y = doc.lastAutoTable.finalY + 10;
+    y = (doc as any).lastAutoTable.finalY + 10;
 
-    // ── D) Gráfica de Totales Generales
-    const labels = ['Total R', 'Total NR', 'Total Puntuales', 'Total Esperadas'];
-    const values = [totalR, totalNR, totalP, totalEsperadas];
-    const colors = ['blue', 'green', 'red', 'orange'];
+    // Tabla detallada por coordinación
+    const detalles = this.calcularDetallesPorCoordinacion();
+    autoTable(doc, {
+      head: [['Coordinación', 'Ejecutiva', 'R', 'NR', 'Esperadas', 'Puntualidad']],
+      body: detalles,
+      startY: y,
+      margin: { horizontal: 10 },
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [58, 159, 31] },
+      columnStyles: {
+        0: { cellWidth: 45 },
+        1: { cellWidth: 35 },
+        4: { cellWidth: 25 },
+        5: { cellWidth: 25 }
+      }
+    });
+    y = (doc as any).lastAutoTable.finalY + 15;
 
-    this.generarGraficaCanvas(labels, values, colors)
-      .then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pageW = doc.internal.pageSize.getWidth();
-        const imgW = pageW - 20;
-        const imgH = (canvas.height * imgW) / canvas.width;
-        doc.addImage(imgData, 'PNG', 10, y, imgW, imgH);
+    // Gráfico
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const dpi = 3;
+
+    canvas.width = 794 * dpi;
+    canvas.height = 400 * dpi;
+    canvas.style.width = '794px';
+    canvas.style.height = '400px';
+
+    if (ctx) {
+      try {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const porcentajeR = (totales.totalR / totales.esperadas) * 100 || 0;
+        const porcentajeNR = (totales.totalNR / totales.esperadas) * 100 || 0;
+        const porcentajeE = 100 - (porcentajeR + porcentajeNR); 
+
+        const tempChart = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: [
+              `Reportadas (R) ${porcentajeR.toFixed(1)}%`,
+              `No Reportadas (NR) ${porcentajeNR.toFixed(1)}%`,
+              `Espearadas ${porcentajeE.toFixed(1)}%`
+
+            ],
+            datasets: [{
+              data: [porcentajeR, porcentajeNR, porcentajeE],
+              backgroundColor: ['#24548b', '#ab1a3a', '#329f20'],
+              borderColor: '#ffffff',
+              borderWidth: 4 * dpi
+            }]
+          },
+          options: {
+            responsive: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { font: { size: 16 * dpi } }
+              },
+              datalabels: {
+                color: '#ffffff',
+                font: {
+                  size: 16 * dpi,
+                  weight: 'bold',
+                  family: 'Arial'
+                },
+                formatter: (value: number) => `${value.toFixed(1)}%`
+              }
+            }
+          }
+        });
+
+        await new Promise<void>(resolve => {
+          tempChart.render();
+          setTimeout(resolve, 500);
+        });
+
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        const pageWidth = doc.internal.pageSize.getWidth() - 20;
+        const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+        doc.addImage(imgData, 'PNG', 10, y, pageWidth, imgHeight);
         doc.save(`reporte_mensual_${this.mesSeleccionado}.pdf`);
-      })
-      .catch(err => {
-        console.error(err);
-        doc.save(`reporte_mensual_${this.mesSeleccionado}.pdf`);
-      });
+
+        tempChart.destroy();
+
+      } catch (error) {
+        console.error('Error generando PDF:', error);
+        Swal.fire('Error', 'Error al generar el PDF', 'error');
+      }
+    }
   }
 
+  private calcularTotales(regs: any[]) {
+    let totalR = 0, totalNR = 0, puntuales = 0;
 
-  obtenerMesDeFecha(fecha: string): string {
-    return fecha.split('-')[1];
-  }
-
-  private generarPDFPorCoordinacion(
-    data: { [coord: string]: { R: number; NR: number } }
-  ) {
-    const doc = new jsPDF();
-    let y = 10;
-    doc.setFontSize(16);
-    doc.text(`Reporte mensual por coordinación — Mes ${this.mesSeleccionado}`, 10, y);
-    y += 10;
-
-    let totalR = 0;
-    let totalNR = 0;
-
-    Object.keys(data).forEach(coord => {
-      const { R, NR } = data[coord];
-      totalR += R;
-      totalNR += NR;
-
-      doc.setFontSize(14);
-      doc.text(`Coordinación: ${coord}`, 10, y);
-      y += 6;
-
-      autoTable(doc, {
-        head: [['Tipo', 'Cantidad']],
-        body: [
-          ['Reportadas (R)', R.toString()],
-          ['No Reportadas (NR)', NR.toString()]
-        ],
-        startY: y,
-        margin: { horizontal: 10 }
-      });
-      y = doc.lastAutoTable.finalY + 20;
+    regs.forEach(r => {
+      if (r.actRealizada === 'R') {
+        totalR++;
+        const horaReporte = new Date(`1970-01-01T${r.horaReporte}`);
+        const horaLimite = new Date(`1970-01-01T${r.hora}`);
+        if (horaReporte <= horaLimite) puntuales++;
+      } else {
+        totalNR++;
+      }
     });
 
-    // Totales generales
-    // doc.setFontSize(14);
-    // doc.text('Totales general de todas las sucursales', 10, y);
-    // y += 6;
-    // autoTable(doc, {
-    //   head: [['Tipo', 'Cantidad']],
-    //   body: [
-    //     ['Total R', totalR.toString()],
-    //     ['Total NR', totalNR.toString()]
-    //   ],
-    //   startY: y,
-    //   margin: { horizontal: 10 }
-    // });
+    const year = new Date().getFullYear();
+    const month = Number(this.mesSeleccionado);
+    let esperadas = 0;
 
-    // DESCARGA
-    doc.save(`reporte_mensual_${this.mesSeleccionado}.pdf`);
+    this.actividades.forEach(actividad => {
+      const dias = this.frecuenciaSemanal[actividad.nombre] || [];
+      esperadas += this.contarOcurrenciasEnMes(year, month, dias);
+    });
+
+    return {
+      totalR,
+      totalNR,
+      esperadas,
+      puntualidad: totalR > 0 ? (puntuales / totalR) * 100 : 0
+    };
   }
 
 
-  /**
- * Devuelve un canvas con una gráfica de barras.
- * @param labels  Etiquetas
- * @param values  Valores numéricos
- * @param colors  Colores CSS para cada barra
- */
-  generarGraficaCanvas(
-    labels: string[],
-    values: number[],
-    colors: string[]
-  ): Promise<HTMLCanvasElement> {
-    return new Promise(resolve => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 500;
-      canvas.height = 300;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
 
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Conteos',
-            data: values,
-            backgroundColor: colors
-          }]
-        },
-        options: {
-          responsive: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true } }
-        }
-      });
-
-      setTimeout(() => resolve(canvas), 300);
+  eliminarRegistro(id: string) {
+    Swal.fire({
+      title: '¿Seguro?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.ejecutivasService.eliminarRegistro(id).subscribe({
+          next: () => {
+            Swal.fire('Eliminado', 'Registro eliminado.', 'success');
+            this.mostrarFormulario(this.nombreSeleccionado, this.ejecutivaSeleccionada);
+          },
+          error: err => {
+            console.error(err);
+            Swal.fire('Error', 'No se pudo eliminar el registro.', 'error');
+          }
+        });
+      }
     });
   }
 
-
+  private contarOcurrenciasEnMes(year: number, month: number, daysOfWeek: number[]): number {
+    let count = 0;
+    const mesIndex = month - 1;
+    const date = new Date(year, mesIndex, 1);
+    while (date.getMonth() === mesIndex) {
+      if (daysOfWeek.includes(date.getDay())) count++;
+      date.setDate(date.getDate() + 1);
+    }
+    return count;
+  }
 }

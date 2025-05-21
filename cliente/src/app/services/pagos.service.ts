@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 })
 export class PagosService {
 
-  private url = 'http://localhost:4000/baucher/'; // 
+  private url = 'https://servidor-operaciones.onrender.com/baucher/'; 
 
   constructor(private http: HttpClient) {}
 

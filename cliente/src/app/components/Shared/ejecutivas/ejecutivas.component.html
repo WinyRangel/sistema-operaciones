@@ -110,6 +110,7 @@
                     <th>Act. Realizada</th>
                     <th>Hora Reporte</th>
                     <th>Puntual</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -127,8 +128,12 @@
                       }">
                         <i class="fas" [ngClass]="{
                           'fa-times': registro.horaReporte > registro.hora,
-                          'fa-check': registro.horaReporte <= registro.hora
-                        }"></i>
+                          'fa-check': registro.horaReporte <= registro.hora }"></i>
+                      </button>
+                    </td>
+                    <td>
+                      <button (click)="eliminarRegistro(registro._id)" class="btn btn-danger btn-sm">
+                        <i class="pi pi-trash"></i>
                       </button>
                     </td>
                   </tr>
@@ -145,7 +150,7 @@
 
 
 <!-- Modal -->
-<div class="modal fade" id="reporteModal" tabindex="-1" aria-labelledby="reporteModalLabel" aria-hidden="true">
+<!-- <div class="modal fade" id="reporteModal" tabindex="-1" aria-labelledby="reporteModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -174,6 +179,70 @@
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
         <button type="button" class="btn btn-danger" (click)="generarReporteMensual()">
           <i class="fas fa-file-pdf"></i>Descargar Reporte</button>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- Modal -->
+<div class="modal fade" id="reporteModal" tabindex="-1" aria-labelledby="reporteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reporteModalLabel">Generar Reporte Mensual</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div #reportePDF class="reporte-container">
+        <div class="row">
+          <div class="col-md-6">
+            <label for="mes" class="form-label">Selecciona un mes:</label>
+            <select class="form-select mb-3" id="mes" [(ngModel)]="mesSeleccionado" name="mes" (change)="actualizarVistaPrevia()">
+              <option value="">-- Selecciona mes --</option>
+              <option value="01">Enero</option>
+              <option value="02">Febrero</option>
+              <option value="03">Marzo</option>
+              <option value="04">Abril</option>
+              <option value="05">Mayo</option>
+              <option value="06">Junio</option>
+              <option value="07">Julio</option>
+              <option value="08">Agosto</option>
+              <option value="09">Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+            
+            <div *ngIf="totales" class="mt-4">
+              <h5>Estadísticas:</h5>
+              <ul class="list-group">
+                <li class="list-group-item">
+                  Reportadas (R): {{ totales.totalR }}
+                </li>
+                <li class="list-group-item">
+                  No Reportadas (NR): {{ totales.totalNR }}
+                </li>
+                <li class="list-group-item">
+                  Total Esperadas: {{ totales.esperadas }}
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <div class="chart-container">
+              
+              <canvas #previewChart></canvas>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-danger" (click)="generarPDF()" [disabled]="!mesSeleccionado">
+          <i class="fas fa-file-pdf"></i> Descargar Reporte
+        </button>
       </div>
     </div>
   </div>
