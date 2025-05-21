@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class DepositosService {
 
-  private apiUrl = 'http://localhost:4000/depositos';
+  private apiUrl = 'https://servidor-operaciones.onrender.com/depositos';
 
   constructor(private http: HttpClient) {}
 

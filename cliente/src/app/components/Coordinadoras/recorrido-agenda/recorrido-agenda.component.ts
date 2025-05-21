@@ -278,7 +278,7 @@ export class RecorridoAgendaComponent implements OnInit {
       }
 
       get litrosGasolina(): number {
-      const rendimiento = 14;
+      const rendimiento = 13;
       const totalKm = this.totalKmRecorridos;
       return totalKm > 0 ? +(totalKm / rendimiento).toFixed(2) : 0;
       }

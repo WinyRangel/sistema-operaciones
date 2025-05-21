@@ -1,15 +1,3 @@
-a { font-family: "Century Gothic", 
-        CenturyGothic, 
-        AppleGothic, 
-        sans-serif; 
-        font-size: 12px; 
-        font-style: normal; 
-        font-variant: normal; 
-        font-weight: 700; 
-        line-height: 22.8px; 
-}
-
-
 option { font-family: "Century Gothic", 
   CenturyGothic, 
   AppleGothic, 
@@ -65,13 +53,6 @@ input  { font-family: "Century Gothic",
 } 
 
 
-h4 { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
-    font-size: 24px; 
-    font-style: normal; 
-    font-variant: normal; 
-    font-weight: 700; 
-    line-height: 26.4px; 
-} 
 
 h3 { font-family: "Century Gothic"; 
     font-size: 20px; 
@@ -137,8 +118,6 @@ td { font-family: "Century Gothic";
   transform: scale(1.5);
 }
 
-
-/* En tu archivo de estilos CSS o SCSS */
 .row.shadow-lg {
   transition: all 0.3s ease;
 }

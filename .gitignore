@@ -134,3 +134,15 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+
+# Archivos generados por Angular
+/dist/
+
+# Archivos generados por Firebase
+/firebase/
+.firebase/
+firebase-debug.log
+
+# Node modules en funciones de Cloud Functions
+/functions/node_modules/
