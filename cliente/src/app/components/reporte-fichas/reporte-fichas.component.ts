@@ -23,13 +23,14 @@ export class ReporteFichasComponent {
   }
 
   excelDataBySheet: { [sheetName: string]: any[][] } = {};
-  
+  resumenData: any[] = [];
 
   onFileChange(event: any): void {
     const files: FileList = event.target.files;
     if (!files || files.length === 0) return;
 
-    this.excelDataBySheet = {}; // limpiar antes
+    this.excelDataBySheet = {};
+    this.resumenData = [];
 
     const readFile = (file: File): Promise<void> => {
       return new Promise((resolve, reject) => {
@@ -43,7 +44,6 @@ export class ReporteFichasComponent {
               const ws = wb.Sheets[sheetName];
               let data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
 
-              // FILTRO 1: eliminar filas con "TOTAL" o "No."
               data = data.filter(row =>
                 !row.some(cell =>
                   typeof cell === 'string' && (
@@ -53,23 +53,19 @@ export class ReporteFichasComponent {
                 )
               );
 
-              // FILTRO 3: eliminar columnas A, D y E (índices 0, 3 y 4)
               const colsToRemove = [0, 3, 4];
               data = data.map(row =>
                 row.filter((_, idx) => !colsToRemove.includes(idx))
               );
               
-              // FILTRO 2: eliminar filas donde columna B sea "-"
               data = data.filter(row =>
                 !(row[0] && row[0].toString().trim() === '-')
               );
 
-              // Limpieza adicional: remover filas completamente vacías
               data = data.filter(row =>
                 row.some(cell => cell !== null && cell !== undefined && cell !== '')
               );
 
-              // Fusionar hojas con el mismo nombre
               const cleanName = sheetName.trim();
               if (!this.excelDataBySheet[cleanName]) {
                 this.excelDataBySheet[cleanName] = [];
@@ -94,7 +90,7 @@ export class ReporteFichasComponent {
 
     Promise.all(promises)
       .then(() => {
-        console.log('Archivos limpios y fusionados por hoja:', this.excelDataBySheet);
+        this.procesarDatosParaResumen();
       })
       .catch(err => {
         console.error('Error leyendo archivos', err);
@@ -102,9 +98,8 @@ export class ReporteFichasComponent {
       });
   }
 
-  async generarReporte() {
-    const resumen = [];
-
+  procesarDatosParaResumen() {
+    this.resumenData = [];
     let totalAgendadas = 0;
     let totalReportadas = 0;
 
@@ -126,7 +121,13 @@ export class ReporteFichasComponent {
 
       const noReportadas = agendadas - reportadas;
 
-      resumen.push({ sheet, agendadas, reportadas, noReportadas });
+      this.resumenData.push({
+        sheet,
+        agendadas,
+        reportadas,
+        noReportadas,
+        chart: null
+      });
 
       totalAgendadas += agendadas;
       totalReportadas += reportadas;
@@ -134,44 +135,83 @@ export class ReporteFichasComponent {
 
     const totalNoReportadas = totalAgendadas - totalReportadas;
 
-    resumen.push({
+    this.resumenData.push({
       sheet: 'TOTAL GENERAL',
       agendadas: totalAgendadas,
       reportadas: totalReportadas,
-      noReportadas: totalNoReportadas
+      noReportadas: totalNoReportadas,
+      chart: null
     });
 
+    this.inicializarGraficas();
+  }
+
+  inicializarGraficas() {
+    setTimeout(() => {
+      this.resumenData.forEach(item => {
+        const canvasId = `chart-${item.sheet}`;
+        const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+        
+        if (canvas) {
+          if (item.chart) item.chart.destroy();
+          
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            item.chart = new Chart(ctx, {
+              type: 'pie',
+              data: {
+                labels: ['Reportadas', 'No Reportadas'],
+                datasets: [{
+                  data: [item.reportadas, item.noReportadas],
+                  backgroundColor: ['#4CAF50', '#FF6384'],
+                  hoverOffset: 4
+                }]
+              },
+              options: {
+                responsive: true,
+                plugins: {
+                  legend: { position: 'bottom' },
+                  title: { 
+                    display: true, 
+                    text: `Resumen ${item.sheet}`,
+                    font: { size: 16 }
+                  }
+                }
+              }
+            });
+          }
+        }
+      });
+    }, 0);
+  }
+
+  async generarReporte() {
     let timerInterval: ReturnType<typeof setInterval>;
     Swal.fire({
       title: 'Generando PDF...',
       html: 'Por favor espera <b></b> ms',
-      timer: 3000, 
+      timer: 3000,
       timerProgressBar: true,
       allowOutsideClick: false,
       allowEscapeKey: false,
       didOpen: () => {
-      const confirmButton = Swal.getConfirmButton();
-      Swal.showLoading(confirmButton); // ✅ solución al error TS2554
-
-      const b = Swal.getHtmlContainer()?.querySelector('b');
-      timerInterval = setInterval(() => {
-        if (b) {
-          b.textContent = `${Swal.getTimerLeft()}`;
-        }
-      }, 100);
-    },
-
+        const confirmButton = Swal.getConfirmButton();
+        Swal.showLoading(confirmButton);
+        const b = Swal.getHtmlContainer()?.querySelector('b');
+        timerInterval = setInterval(() => {
+          if (b) b.textContent = `${Swal.getTimerLeft()}`;
+        }, 100);
+      },
       willClose: () => {
         clearInterval(timerInterval);
       }
     });
-    await this.crearPDF(resumen);
+    
+    await this.crearPDF(this.resumenData);
     Swal.close();
   }
 
-
-  async crearPDF(resumen: { sheet: string, agendadas: number, reportadas: number, noReportadas: number }[]) {
-
+  async crearPDF(resumen: any[]) {
     const doc = new jsPDF();
     for (let i = 0; i < resumen.length; i++) {
       const { sheet, agendadas, reportadas, noReportadas } = resumen[i];
@@ -181,23 +221,20 @@ export class ReporteFichasComponent {
 
       doc.autoTable({
         startY: 30,
-        head: [['ACC', 'ATENCIONES AGENDADAS', 'ATENCIONES REPORTADAS', 'ATENCIONES NO REPORTADAS']],
-        body: [[sheet, agendadas.toString(), reportadas.toString(), noReportadas.toString()]],
+        head: [['ACC', 'AGENDADAS', 'REPORTADAS', 'NO REPORTADAS']],
+        body: [[sheet, agendadas, reportadas, noReportadas]],
       });
 
-      const canvas = await this.generarGraficaCanvas(sheet, agendadas, reportadas);
+      const canvas = await this.generarGraficaCanvas(sheet, reportadas, noReportadas);
       const imgData = canvas.toDataURL('image/png');
-      doc.addImage(imgData, 'PNG', 10, 60, 180, 80);
-
+      doc.addImage(imgData, 'PNG', 30, 60, 150, 80);
 
       if (i < resumen.length - 1) doc.addPage();
     }
-
-
     doc.save('reporte_mensual_fichas.pdf');
   }
 
-  generarGraficaCanvas(sheet: string, total: number, si: number): Promise<HTMLCanvasElement> {
+  generarGraficaCanvas(sheet: string, reportadas: number, noReportadas: number): Promise<HTMLCanvasElement> {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
       canvas.width = 400;
@@ -205,35 +242,34 @@ export class ReporteFichasComponent {
       const ctx = canvas.getContext('2d');
 
       new Chart(ctx!, {
-        type: 'bar',
+        type: 'pie',
         data: {
-          labels: ['Total Fichas', 'Reportados'],
+          labels: ['Reportadas', 'No Reportadas'],
           datasets: [{
-            label: sheet,
-            data: [total, si],
-            backgroundColor: ['#e2e8ac', '#559592']
+            data: [reportadas, noReportadas],
+            backgroundColor: ['#4CAF50', '#FF6384'],
+            hoverOffset: 4
           }]
         },
         options: {
           responsive: false,
           plugins: {
-            legend: { display: false },
-            title: { display: true, text: `Resumen ${sheet}` }
+            legend: { position: 'bottom' },
+            title: { 
+              display: true, 
+              text: `Resumen ${sheet}`,
+              font: { size: 16 }
+            }
           }
         }
       });
 
-      setTimeout(() => resolve(canvas), 1000); 
+      setTimeout(() => resolve(canvas), 1000);
     });
   }
 
   limpiarTodo(): void {
     this.excelDataBySheet = {};
+    this.resumenData = [];
   }
-
-
-
-
 }
-
-
