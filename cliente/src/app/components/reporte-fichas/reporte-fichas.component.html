@@ -16,22 +16,22 @@
   </div>
 </div>
 
-<div class="container my-12" *ngIf="objectKeys(excelDataBySheet).length > 0">
+<div class="container" *ngIf="objectKeys(excelDataBySheet).length > 0">
   <br>
   <div class="d-flex justify-content-end mb-4 gap-2">
     <button class="btn btn-secondary" (click)="limpiarTodo()">
       <i class="fa-solid fa-broom me-2"></i>
       Limpiar
     </button>
-    <button type="button" class="btn btn-danger" title="Generar reporte PDF" (click)="generarReporte()">
+    <button type="button" class="btn btn-primary" style="background-color: rgb(140, 0, 255);" title="Generar reporte PDF" (click)="generarReporte()">
       <i class="fas fa-file-pdf me-2"></i>
-      Descargar PDF
+      Generar Reporte
     </button>
   </div>
 
   <div class="row g-4">
     <!-- Columna Izquierda - Tablas Excel -->
-    <div class="col-md-6">
+    <div class="col-md-8">
       <h4 class="mb-4 text-primary">Datos de Archivos Excel</h4>
       <div *ngFor="let sheet of objectKeys(excelDataBySheet)" class="mb-4">
         <div class="card shadow-sm">
@@ -60,7 +60,7 @@
     </div>
 
     <!-- Columna Derecha - Vista Previa -->
-    <div class="col-md-6">
+    <div class="col-md-4">
       <div class="sticky-top" style="top: 20px;">
         <h4 class="mb-4 text-primary">Vista Previa del Reporte</h4>
         

@@ -271,7 +271,7 @@ export class EjecutivasComponent implements OnInit {
         labels: [
           `Reportadas (R) ${porcentajeR.toFixed(1)}%`,
           `No Reportadas (NR) ${porcentajeNR.toFixed(1)}%`,
-          `Faltantes0 ${porcentajeE.toFixed(1)}%`
+          `Faltantes ${porcentajeE.toFixed(1)}%`
         ],
         datasets: [{
           data: [porcentajeR, porcentajeNR, porcentajeE],
