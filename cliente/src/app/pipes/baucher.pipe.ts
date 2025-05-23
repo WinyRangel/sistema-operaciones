@@ -19,7 +19,8 @@ export class BaucherPipe implements PipeTransform {
         rbaucher.fechaReporte,
         rbaucher.grupo,
         rbaucher.concepto,
-        rbaucher.titular
+        rbaucher.titular,
+        rbaucher.fechaCreacion
       ]
         .filter(Boolean)
         .some(field => field.toString().toLowerCase().includes(searchTerm))

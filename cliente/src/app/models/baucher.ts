@@ -7,5 +7,6 @@ export interface Baucher {
     grupo?: string;
     concepto?: string;
     titular?: string;
+    fechaCreacion?: string;
   }
   

@@ -6,8 +6,6 @@ import { Coordinacion, Persona } from '../../../models/coordinacion';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { BaucherPipe } from '../../../pipes/baucher.pipe';
-import { DatePicker } from 'primeng/datepicker';
-
 @Component({
   selector: 'app-bauchers',
   standalone: false,
@@ -17,7 +15,7 @@ import { DatePicker } from 'primeng/datepicker';
 
 })
 export class BauchersComponent implements OnInit{
-  getPages(): any {
+getPages(): any {
 throw new Error('Method not implemented.');
 }
   listarBauchers: any[] = []; // Cambiado a any[] para incluir la coordinación.
@@ -25,6 +23,7 @@ throw new Error('Method not implemented.');
   coordinaciones: Coordinacion[] = [];  // Asegúrate de que coordinaciones sea de tipo Coordinacion[]
   baucherForm: FormGroup;
   personasFiltradas: Persona[] = [];
+  fechaFiltro: string = ''; // formato 'YYYY-MM-DD'
 
 
   currentPage: number = 1;
@@ -52,7 +51,16 @@ throw new Error('Method not implemented.');
     }
 
     get filteredBauchers() {
-      return this.baucherPipe.transform(this.listarBauchers, this.filtrarBaucher);
+      let bauchersFiltrados = this.baucherPipe.transform(this.listarBauchers, this.filtrarBaucher);
+
+      if (this.fechaFiltro) {
+        bauchersFiltrados = bauchersFiltrados.filter(baucher => {
+          const fechaCreacion = new Date(baucher.fechaCreacion).toISOString().slice(0, 10);
+          return fechaCreacion === this.fechaFiltro;
+        });
+      }
+
+      return bauchersFiltrados;
     }
 
     get paginatedBauchers() {
@@ -73,8 +81,12 @@ throw new Error('Method not implemented.');
         this.currentPage = page;
       }
     }
-        
-  
+      
+
+  filtrarPorFecha() {
+  this.currentPage = 1;
+}
+
     filtrarPersonas() {
       const coord: Coordinacion = this.baucherForm.get('coordinacion')?.value;
       if (coord) {
