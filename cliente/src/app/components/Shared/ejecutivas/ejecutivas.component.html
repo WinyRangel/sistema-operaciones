@@ -1,21 +1,21 @@
 <br>
-<br>
-<br>
-<br>
-<div class="container my-8">
+<div class="container-fluid px-0">
   <div class="card shadow-lg rounded-6 border-0">
     <!-- HEADER -->
-    <div class="row g-4 align-items-center justify-content-center">
-      <h2 class="text-center mb-5 text-primary fw-bold display-6">Registro de Ejecutivas</h2>
+    <div class="justify-content-center">
+      <br>
+      <h4 class="text-center mb-4 fw-bold fs-2 text-primary">
+        <i class="fa fa-users" aria-hidden="true"></i>
+        Registro de Actividades de Ejecutivas
+      </h4>
     </div>
-
 
     <!-- NAV DE COORDINACIONES SIEMPRE VISIBLE -->
     <div class="container mb-2">
-      <!-- AGREGAR UN FILTRO PARA MOSTRAR LOS REGISTROS DEL MES SELECCIONADO -->
       <div class="d-flex justify-content-end align-items-center gap-2 mt-3 mb-2">
         <!-- Select del mes -->
-        <select class="form-select w-auto" [(ngModel)]="mesSeleccionado" (change)="filtrarRegistros()">
+        <select class="form-select w-auto" [(ngModel)]="mesSeleccionado" (change)="onMesChange()">
+          <!-- llama a onMesChange() para regenerar días y filtrar -->
           <option value="">Filtrar por mes</option>
           <option value="01">Enero</option>
           <option value="02">Febrero</option>
@@ -31,13 +31,23 @@
           <option value="12">Diciembre</option>
         </select>
 
+        <!-- Select del día -->
+        <select class="form-select w-auto" [(ngModel)]="diaSeleccionado" [disabled]="!diasDelMes.length"
+          (change)="filtrarRegistros()">
+          <option value="">Filtrar por día</option>
+          <option *ngFor="let d of diasDelMes" [value]="d">
+            {{ d }}
+          </option>
+        </select>
+
         <!-- Botón de reporte -->
-        <button type="button" class="btn btn-primary" style="background-color: rgb(140, 0, 255); color: aliceblue;"
+        <button type="button" class="btn btn-primary" style="background-color: rgb(140, 0, 255);"
           data-bs-toggle="modal" data-bs-target="#reporteModal">
           Generar Reporte
           <i class="fas fa-file-alt"></i>
         </button>
       </div>
+
 
       <nav class="nav nav-pills nav-justified">
         <a class="nav-item nav-link" *ngFor="let card of cards" [class.active]="card.nombre === nombreSeleccionado"
@@ -86,7 +96,7 @@
               </div>
 
               <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-primary">
+                <button type="submit"  class="btn btn-primary px-4">
                   <i class="fas fa-save me-1"></i> Guardar
                 </button>
               </div>
@@ -100,9 +110,9 @@
         <div class="card shadow rounded-4 border-0 h-100">
           <div class="card-body p-0">
             <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0 text-center">
-                <thead class="table-light">
-                  <tr class="table-primary">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-primary text-white table-light" style="text-align: center;" >
+                  <tr>
                     <th>Fecha</th>
                     <th>Actividad</th>
                     <th>Período</th>
@@ -115,24 +125,24 @@
                 </thead>
                 <tbody>
                   <tr *ngFor="let registro of registrosFiltrados">
-                    <td>{{ registro.fecha | date:'dd-MM-yyyy':'UTC' }}</td>
+                    <td class="text-center">{{ registro.fecha | date:'dd-MM-yyyy':'UTC' }}</td>
                     <td>{{ registro.actividad }}</td>
-                    <td>{{ registro.frecuencia }}</td>
-                    <td>{{ registro.hora }}</td>
-                    <td>{{ registro.actRealizada }}</td>
-                    <td>{{ registro.horaReporte }}</td>
+                    <td class="text-center">{{ registro.frecuencia }}</td>
+                    <td class="text-center">{{ registro.hora }}</td>
+                    <td class="text-center">{{ registro.actRealizada }}</td>
+                    <td class="text-center">{{ registro.horaReporte }}</td>
                     <td>
-                      <button class="btn btn-sm" [ngClass]="{
-                        'btn-danger': registro.horaReporte > registro.hora,
-                        'btn-success': registro.horaReporte <= registro.hora
-                      }">
-                        <i class="fas" [ngClass]="{
-                          'fa-times': registro.horaReporte > registro.hora,
-                          'fa-check': registro.horaReporte <= registro.hora }"></i>
-                      </button>
+                      
+                       <i class="fas fa-2x"
+                          [ngClass]="{
+                            'fa-times text-danger': registro.horaReporte === '00:00:00' || registro.horaReporte > registro.hora,
+                            'fa-check text-success': registro.horaReporte !== '00:00:00' && registro.horaReporte <= registro.hora
+                          }">
+                       </i>
+
                     </td>
                     <td>
-                      <button (click)="eliminarRegistro(registro._id)" class="btn btn-danger btn-sm">
+                      <button (click)="eliminarRegistro(registro._id)" class="btn btn-outline-danger btn-sm" style="text-align: center;">
                         <i class="pi pi-trash"></i>
                       </button>
                     </td>
@@ -159,48 +169,49 @@
       </div>
       <div class="modal-body">
         <div #reportePDF class="reporte-container">
-        <div class="row">
-          <div class="col-md-6">
-            <label for="mes" class="form-label">Selecciona un mes:</label>
-            <select class="form-select mb-3" id="mes" [(ngModel)]="mesSeleccionado" name="mes" (change)="actualizarVistaPrevia()">
-              <option value="">-- Selecciona mes --</option>
-              <option value="01">Enero</option>
-              <option value="02">Febrero</option>
-              <option value="03">Marzo</option>
-              <option value="04">Abril</option>
-              <option value="05">Mayo</option>
-              <option value="06">Junio</option>
-              <option value="07">Julio</option>
-              <option value="08">Agosto</option>
-              <option value="09">Septiembre</option>
-              <option value="10">Octubre</option>
-              <option value="11">Noviembre</option>
-              <option value="12">Diciembre</option>
-            </select>
-            
-            <div *ngIf="totales" class="mt-4">
-              <h5>Estadísticas:</h5>
-              <ul class="list-group">
-                <li class="list-group-item">
-                  Reportadas (R): {{ totales.totalR }}
-                </li>
-                <li class="list-group-item">
-                  No Reportadas (NR): {{ totales.totalNR }}
-                </li>
-                <li class="list-group-item">
-                  Total Esperadas: {{ totales.esperadas }}
-                </li>
-              </ul>
+          <div class="row">
+            <div class="col-md-6">
+              <label for="mes" class="form-label">Selecciona un mes:</label>
+              <select class="form-select mb-3" id="mes" [(ngModel)]="mesSeleccionado" name="mes"
+                (change)="actualizarVistaPrevia()">
+                <option value="">-- Selecciona mes --</option>
+                <option value="01">Enero</option>
+                <option value="02">Febrero</option>
+                <option value="03">Marzo</option>
+                <option value="04">Abril</option>
+                <option value="05">Mayo</option>
+                <option value="06">Junio</option>
+                <option value="07">Julio</option>
+                <option value="08">Agosto</option>
+                <option value="09">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+              </select>
+
+              <div *ngIf="totales" class="mt-4">
+                <h5>Estadísticas:</h5>
+                <ul class="list-group">
+                  <li class="list-group-item">
+                    Reportadas (R): {{ totales.totalR }}
+                  </li>
+                  <li class="list-group-item">
+                    No Reportadas (NR): {{ totales.totalNR }}
+                  </li>
+                  <li class="list-group-item">
+                    Total Esperadas: {{ totales.esperadas }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="chart-container">
+
+                <canvas #previewChart></canvas>
+              </div>
             </div>
           </div>
-          
-          <div class="col-md-6">
-            <div class="chart-container">
-              
-              <canvas #previewChart></canvas>
-            </div>
-          </div>
-        </div>
         </div>
       </div>
       <div class="modal-footer">

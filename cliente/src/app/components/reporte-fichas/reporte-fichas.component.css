@@ -1,5 +1,61 @@
 table thead {
-  background-color: #006153;
+  background-color: #032d54;
   color: white; 
 }
 
+h5 { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
+    font-size: 20px; 
+    font-style: normal; 
+    font-variant: normal; 
+    font-weight: 700; 
+    line-height: 26.4px; 
+} 
+
+
+h4 { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
+    font-size: 24px; 
+    font-style: normal; 
+    font-variant: normal; 
+    font-weight: 700; 
+    line-height: 26.4px; 
+} 
+
+h3 { font-family: "Century Gothic"; 
+    font-size: 20px; 
+    font-style: normal; 
+    font-variant: normal; 
+    font-weight: 400; 
+    line-height: 11px; } 
+
+.form-label{
+    font-family: Century Gothic,CenturyGothic,AppleGothic,sans-serif; 
+}
+
+.form-select{
+    font-family: Century Gothic,CenturyGothic,AppleGothic,sans-serif; 
+}
+
+th { 
+    font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
+    font-size: 16px; 
+    font-style: normal; 
+    font-variant: normal; 
+    font-weight: 700; 
+    line-height: 22.4px;
+}
+
+td { font-family: "Century Gothic"; 
+    font-size: 16px; 
+    font-style: normal; 
+    font-variant: normal; 
+    font-weight: 400; 
+    line-height: 18.7px; 
+}
+p {
+    font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
+    font-size: 18px; 
+    font-style: normal; 
+    font-variant: normal; 
+    font-weight: 400; 
+    line-height: 18.7px; 
+}

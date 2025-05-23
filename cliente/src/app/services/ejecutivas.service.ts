@@ -24,11 +24,12 @@ export class EjecutivasService {
 
 
   getReporteMensual(mes: number) {
-    return this.http.get<any[]>(`${this.apiUrl}`); // suponiendo que esta ruta da todos los registros
+    return this.http.get<any[]>(`${this.apiUrl}`); 
   }
 
   eliminarRegistro(id: string) {
-    return this.http.delete(`${this.apiUrl}/registros/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
 
 }

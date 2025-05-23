@@ -1,9 +1,12 @@
 <br>
-<br>
-<div class="container my-8" *ngIf="true">
+<div class="container-fluid px-0" *ngIf="true">
   <div class="card shadow-lg rounded-6 border-0">
-    <div class="row g-4 align-items-center justify-content-center">
-      <h2 class="text-center mb-5 text-primary fw-bold display-6">Registro de Depositos</h2>
+    <div class="justify-content-center">
+      <br>
+      <h4 class="text-center mb-4 fw-bold fs-2 text-primary">
+        <i class="fa fa-ticket" aria-hidden="true"></i>
+        Registro de Depósitos en Efectivo
+      </h4>
     </div>
 
     <!-- SELECCIÓN DE COORDINACIONES  -->
@@ -58,12 +61,12 @@
 
       <!-- Tabla -->
       <div class="col-md-8 mb-4">
-        <div class="card shadow rounded-4 border-0 h-100">
+        <div class="table-responsive rounded-3 overflow-hidden border shadow-sm">
           <div class="card-body p-0">
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0 text-center">
-                <thead class="table-light">
-                  <tr class="table-primary">
+                <thead class="bg-primary text-white table-light" style="text-align: center;">
+                  <tr>
                     <th>¿Quién reporta?</th>
                     <th>Hora de Reporte</th>
                     <th>Fecha</th>
