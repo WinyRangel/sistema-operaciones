@@ -19,6 +19,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FooterComponent } from './components/Shared/layout/footer/footer.component';
 import { BaucherPipe } from './pipes/baucher.pipe';
 import { RecorridoAgendaComponent } from './components/Coordinadoras/recorrido-agenda/recorrido-agenda.component';
+
 import { EjecutivasComponent } from './components/Shared/ejecutivas/ejecutivas.component';
 import { DepositosComponent } from './components/Shared/depositos/depositos.component';
 import { BauchersComponent } from './components/Shared/bauchers/bauchers.component';
