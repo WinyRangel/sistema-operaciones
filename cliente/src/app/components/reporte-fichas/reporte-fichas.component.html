@@ -1,7 +1,7 @@
-<div class="container my-4">
+<div class="container-fluid px-0">
   <div class="card text-center shadow">
     <div class="card-header bg-primary text-white">
-      <h5 class="card-title mb-0">Generar Reporte Mensual de Fichas</h5>
+      <h4 class="card-title mb-0">Generar Reporte Mensual de Fichas</h4>
     </div>
     <div class="card-body">
       <img src="https://cdn-icons-png.flaticon.com/512/732/732220.png" alt="Ícono Excel" width="64" height="64"
@@ -16,42 +16,88 @@
   </div>
 </div>
 
-<div class="container" *ngIf="objectKeys(excelDataBySheet).length > 0">
+<div class="container my-12" *ngIf="objectKeys(excelDataBySheet).length > 0">
   <br>
-
-  <div class="d-flex justify-content-end mb-2 gap-2">
+  <div class="d-flex justify-content-end mb-4 gap-2">
     <button class="btn btn-secondary" (click)="limpiarTodo()">
       <i class="fa-solid fa-broom me-2"></i>
-      Limpiar y crear nuevo reporte
+      Limpiar
     </button>
     <button type="button" class="btn btn-danger" title="Generar reporte PDF" (click)="generarReporte()">
       <i class="fas fa-file-pdf me-2"></i>
-      Descargar Reporte
+      Descargar PDF
     </button>
   </div>
 
-  <br>
-
-  <div *ngFor="let sheet of objectKeys(excelDataBySheet)" class="col-md-12 mb-4">
-    <div class="card shadow-sm">
-      <div class="card-header bg-dark text-white">
-        <h6 class="mb-0">{{ sheet }}</h6>
+  <div class="row g-4">
+    <!-- Columna Izquierda - Tablas Excel -->
+    <div class="col-md-6">
+      <h4 class="mb-4 text-primary">Datos de Archivos Excel</h4>
+      <div *ngFor="let sheet of objectKeys(excelDataBySheet)" class="mb-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-dark text-white py-2">
+            <h6 class="mb-0">{{ sheet }}</h6>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover mb-0">
+                <thead class="table-info">
+                  <tr>
+                    <th scope="col">NOMBRE DEL GRUPO O INDIVIDUAL</th>
+                    <th scope="col">CERRADA</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of excelDataBySheet[sheet]">
+                    <td *ngFor="let cell of row">{{ cell }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="card-body p-2">
-        <div class="table-responsive">
-          <table class="table table-bordered table-sm">
-            <thead class="table table-info">
-              <tr>
-                <th scope="col">NOMBRE DEL GRUPO O INDIVIDUAL</th>
-                <th scope="col">CERRADA</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let row of excelDataBySheet[sheet]">
-                <td *ngFor="let cell of row">{{ cell }}</td>
-              </tr>
-            </tbody>
-          </table>
+    </div>
+
+    <!-- Columna Derecha - Vista Previa -->
+    <div class="col-md-6">
+      <div class="sticky-top" style="top: 20px;">
+        <h4 class="mb-4 text-primary">Vista Previa del Reporte</h4>
+        
+        <div *ngIf="resumenData.length > 0">
+          <div *ngFor="let item of resumenData" class="card mb-4 shadow">
+            <div class="card-header bg-dark text-white py-2">
+              <h5 class="card-title mb-0">{{ item.sheet }}</h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-2">
+                <!-- Gráfica -->
+                <div class="col-12">
+                  <canvas [id]="'chart-' + item.sheet" class="mb-3"></canvas>
+                </div>
+                
+                <!-- Tabla Resumen -->
+                <div class="col-12">
+                  <table class="table table-bordered table-sm">
+                    <tbody>
+                      <tr class="table-light">
+                        <th>Agendadas</th>
+                        <td class="fw-bold">{{ item.agendadas }}</td>
+                      </tr>
+                      <tr class="table-success">
+                        <th>Reportadas</th>
+                        <td class="fw-bold">{{ item.reportadas }}</td>
+                      </tr>
+                      <tr class="table-danger">
+                        <th>No Reportadas</th>
+                        <td class="fw-bold">{{ item.noReportadas }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

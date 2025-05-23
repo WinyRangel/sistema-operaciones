@@ -32,6 +32,7 @@ export class EjecutivasComponent implements OnInit {
   actividadSeleccionada = '';
   horaReporte = '';
   mesSeleccionado = '';
+  diaSeleccionado = ''; 
 
 
   cards = [
@@ -68,6 +69,7 @@ export class EjecutivasComponent implements OnInit {
 
   registros: any[] = [];
   registrosFiltrados: any[] = [];
+  diasDelMes: string[] = []; 
 
   constructor(private ejecutivasService: EjecutivasService) { }
 
@@ -75,6 +77,27 @@ export class EjecutivasComponent implements OnInit {
     this.setFechaHoy();
     Chart.register(ChartDataLabels);
   }
+
+  // Al cambiar mes, recalcular días y filtrar
+  onMesChange() {
+    this.diaSeleccionado = '';
+    this.generarDias();
+    this.filtrarRegistros();
+    this.actualizarVistaPrevia();
+  }
+
+  // Genera arreglo de días según mesSeleccionado
+  private generarDias() {
+    this.diasDelMes = [];
+    if (!this.mesSeleccionado) return;
+    const year = new Date().getFullYear();
+    const monthIndex = Number(this.mesSeleccionado) - 1;
+    const totalDias = new Date(year, monthIndex + 1, 0).getDate();
+    for (let d = 1; d <= totalDias; d++) {
+      this.diasDelMes.push(d.toString().padStart(2, '0'));
+    }
+  }
+
 
   private setFechaHoy() {
     const hoy = new Date();
@@ -98,15 +121,20 @@ export class EjecutivasComponent implements OnInit {
   }
 
   filtrarRegistros() {
-    if (!this.mesSeleccionado) {
-      this.registrosFiltrados = this.registros.filter(r => r.nombre === this.nombreSeleccionado && r.fecha === this.fecha);
-    } else {
-      this.registrosFiltrados = this.registros.filter(r => {
-        const mes = (new Date(r.fecha).getMonth() + 1).toString().padStart(2, '0');
-        return r.nombre === this.nombreSeleccionado && mes === this.mesSeleccionado;
-      });
-    }
+    this.registrosFiltrados = this.registros.filter(r => {
+      // parseo manual para evitar desfase de zona
+      const [y, m, d] = r.fecha.split('-').map(Number);
+      const fechaObj = new Date(y, m - 1, d);
+      const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
+      const dia = fechaObj.getDate().toString().padStart(2, '0');
+
+      if (r.nombre !== this.nombreSeleccionado) return false;
+      if (this.mesSeleccionado && mes !== this.mesSeleccionado) return false;
+      if (this.diaSeleccionado && dia !== this.diaSeleccionado) return false;
+      return true;
+    });
   }
+
 
   actualizarHora() {
     const act = this.actividades.find(a => a.nombre === this.actividadSeleccionada);
@@ -172,109 +200,68 @@ export class EjecutivasComponent implements OnInit {
     });
   }
 
-  // private calcularDetallesPorCoordinacion(): any[] {
-  //   return this.cards.map(card => {
-  //     const registrosCoordinacion = this.registros.filter(r =>
-  //       r.nombre === card.nombre &&
-  //       (new Date(r.fecha).getMonth() + 1).toString().padStart(2, '0') === this.mesSeleccionado
-  //     );
+  private calcularDetallesPorCoordinacion(): any[][] {
+    const year = new Date().getFullYear();
+    const month = Number(this.mesSeleccionado);
 
-  //     let totalR = 0, totalNR = 0, puntuales = 0;
+    return this.cards.map(card => {
+      // 1) Filtrar solo los registros de esta coordinación+ejecutiva en el mes
 
-  //     registrosCoordinacion.forEach(r => {
-  //       if (r.actRealizada === 'R') {
-  //         totalR++;
-  //         const horaReporte = new Date(`1970-01-01T${r.horaReporte}`);
-  //         const horaLimite = new Date(`1970-01-01T${r.hora}`);
-  //         if (horaReporte <= horaLimite) puntuales++;
-  //       } else {
-  //         totalNR++;
-  //       }
-  //     });
+      const regs = this.registros.filter((r: Ejecutivas) => {
+        const d = new Date(r.fecha);
+        return (
+          r.nombre === card.nombre &&
+          r.ejecutiva === card.ejecutiva &&
+          d.getFullYear() === year &&
+          (d.getMonth() + 1) === month
+        );
+      });
 
-  //     const esperadas = this.actividades.reduce((sum, actividad) => {
-  //       const dias = this.frecuenciaSemanal[actividad.nombre] || [];
-  //       return sum + this.contarOcurrenciasEnMes(
-  //         new Date().getFullYear(),
-  //         Number(this.mesSeleccionado),
-  //         dias
-  //       );
-  //     }, 0);
 
-  //     return [
-  //       card.nombre,
-  //       card.ejecutiva,
-  //       totalR,
-  //       totalNR,
-  //       esperadas,
-  //       totalR > 0 ? `${(puntuales / totalR * 100).toFixed(1)}%` : '0%'
-  //     ];
-  //   });
-  // }
+      // 2) Contar R, NR y cuántos fueron puntuales
+      let totalR = 0;
+      let totalNR = 0;
+      let puntuales = 0;
+      regs.forEach(r => {
+        if (r.actRealizada === 'R') {
+          totalR++;
+          const hrRep = new Date(`1970-01-01T${r.horaReporte}`);
+          const hrLimite = new Date(`1970-01-01T${r.hora}`);
+          if (hrRep <= hrLimite) puntuales++;
+        } else {
+          totalNR++;
+        }
+      });
 
-private calcularDetallesPorCoordinacion(): any[][] {
-  const year  = new Date().getFullYear();
-  const month = Number(this.mesSeleccionado);
+      // 3) Calcular cuántas entregas se esperaban en el mes (para **todas** las actividades)
+      const esperadas = this.actividades.reduce((sum, actividad) => {
+        const dias = this.frecuenciaSemanal[actividad.nombre] || [];
+        return sum + this.contarOcurrenciasEnMes(year, month, dias);
+      }, 0);
 
-  return this.cards.map(card => {
-    // 1) Filtrar solo los registros de esta coordinación+ejecutiva en el mes
-    const regs = this.registros.filter((r: Ejecutivas) => {
-      const d = new Date(r.fecha);
-      return (
-        r.nombre      === card.nombre &&
-        r.ejecutiva   === card.ejecutiva &&
-        d.getFullYear() === year &&
-        (d.getMonth() + 1) === month
-      );
+      // 4) Formatear puntualidad como porcentaje
+      const puntualidad = totalR > 0
+        ? `${((puntuales / totalR) * 100).toFixed(1)}%` : '0%';
+
+
+
+      // 5) Devolver la fila
+      return [
+        card.nombre,
+        card.ejecutiva,
+        totalR,
+        totalNR,
+        esperadas,
+        puntualidad
+      ];
     });
-
-    // 2) Contar R, NR y cuántos fueron puntuales
-    let totalR    = 0;
-    let totalNR   = 0;
-    let puntuales = 0;
-    regs.forEach(r => {
-      if (r.actRealizada === 'R') {
-        totalR++;
-        const hrRep    = new Date(`1970-01-01T${r.horaReporte}`);
-        const hrLimite = new Date(`1970-01-01T${r.hora}`);
-        if (hrRep <= hrLimite) puntuales++;
-      } else {
-        totalNR++;
-      }
-    });
-
-    // 3) Calcular cuántas entregas se esperaban en el mes (para **todas** las actividades)
-    const esperadas = this.actividades.reduce((sum, actividad) => {
-      const dias = this.frecuenciaSemanal[actividad.nombre] || [];
-      return sum + this.contarOcurrenciasEnMes(year, month, dias);
-    }, 0);
-
-    // 4) Formatear puntualidad como porcentaje
-    const puntualidad = totalR > 0
-      ? `${((puntuales / totalR) * 100).toFixed(1)}%`
-      : '0%';
-
-    // 5) Devolver la fila
-    return [
-      card.nombre,
-      card.ejecutiva,
-      totalR,
-      totalNR,
-      esperadas,
-      puntualidad
-    ];
-  });
-}
-
-
-
+  }
 
   private getChartConfig(): any {
     if (!this.totales) return {};
 
     const porcentajeR = (this.totales.totalR / this.totales.esperadas) * 100 || 0;
     const porcentajeNR = (this.totales.totalNR / this.totales.esperadas) * 100 || 0;
-    // const porcentajeE = (this.totales.esperadas) * 100 / this.totales.esperadas || 0;
     const porcentajeE = 100 - (porcentajeR + porcentajeNR);
 
 
@@ -284,7 +271,7 @@ private calcularDetallesPorCoordinacion(): any[][] {
         labels: [
           `Reportadas (R) ${porcentajeR.toFixed(1)}%`,
           `No Reportadas (NR) ${porcentajeNR.toFixed(1)}%`,
-          `Espearadas ${porcentajeE.toFixed(1)}%`
+          `Faltantes0 ${porcentajeE.toFixed(1)}%`
         ],
         datasets: [{
           data: [porcentajeR, porcentajeNR, porcentajeE],
@@ -389,7 +376,7 @@ private calcularDetallesPorCoordinacion(): any[][] {
 
         const porcentajeR = (totales.totalR / totales.esperadas) * 100 || 0;
         const porcentajeNR = (totales.totalNR / totales.esperadas) * 100 || 0;
-        const porcentajeE = 100 - (porcentajeR + porcentajeNR); 
+        const porcentajeE = 100 - (porcentajeR + porcentajeNR);
 
         const tempChart = new Chart(ctx, {
           type: 'pie',
@@ -397,7 +384,7 @@ private calcularDetallesPorCoordinacion(): any[][] {
             labels: [
               `Reportadas (R) ${porcentajeR.toFixed(1)}%`,
               `No Reportadas (NR) ${porcentajeNR.toFixed(1)}%`,
-              `Espearadas ${porcentajeE.toFixed(1)}%`
+              `Faltantes ${porcentajeE.toFixed(1)}%`
 
             ],
             datasets: [{
@@ -448,37 +435,32 @@ private calcularDetallesPorCoordinacion(): any[][] {
     }
   }
 
-  private calcularTotales(regs: any[]) {
-    let totalR = 0, totalNR = 0, puntuales = 0;
 
-    regs.forEach(r => {
-      if (r.actRealizada === 'R') {
-        totalR++;
-        const horaReporte = new Date(`1970-01-01T${r.horaReporte}`);
-        const horaLimite = new Date(`1970-01-01T${r.hora}`);
-        if (horaReporte <= horaLimite) puntuales++;
-      } else {
-        totalNR++;
-      }
-    });
+  private calcularTotales(regs: any[]): { totalR: number; totalNR: number; esperadas: number; puntualidad: number } {
+  let totalR = 0;
+  let totalNR = 0;
+  let puntuales = 0;
 
-    const year = new Date().getFullYear();
-    const month = Number(this.mesSeleccionado);
-    let esperadas = 0;
-
-    this.actividades.forEach(actividad => {
-      const dias = this.frecuenciaSemanal[actividad.nombre] || [];
-      esperadas += this.contarOcurrenciasEnMes(year, month, dias);
-    });
-
-    return {
-      totalR,
-      totalNR,
-      esperadas,
-      puntualidad: totalR > 0 ? (puntuales / totalR) * 100 : 0
-    };
+  for (let r of regs) {
+    if (r.actRealizada === 'R') {
+      totalR++;
+      const hrRep = new Date(`1970-01-01T${r.horaReporte}`);
+      const hrLimite = new Date(`1970-01-01T${r.hora}`);
+      if (hrRep <= hrLimite) puntuales++;
+    } else {
+      totalNR++;
+    }
   }
 
+  const esperadas = this.actividades.reduce((sum, actividad) => {
+    const dias = this.frecuenciaSemanal[actividad.nombre] || [];
+    return sum + this.contarOcurrenciasEnMes(new Date().getFullYear(), Number(this.mesSeleccionado), dias);
+  }, 0);
+
+  const puntualidad = totalR > 0 ? (puntuales / totalR) * 100 : 0;
+
+  return { totalR, totalNR, esperadas, puntualidad };
+}
 
 
   eliminarRegistro(id: string) {
@@ -515,4 +497,5 @@ private calcularDetallesPorCoordinacion(): any[][] {
     }
     return count;
   }
+
 }

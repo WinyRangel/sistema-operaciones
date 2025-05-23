@@ -1,23 +1,23 @@
 <br>
-<br>
-<div class="container my-6" *ngIf="true">
+<div class="container-fluid px-0" *ngIf="true">
   <div class="accordion" id="accordionFormLegales">
     <div class="accordion-item">
       <!-- CABECERA -->
       <h2 class="accordion-header">
-        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
-          aria-expanded="true" aria-controls="collapseOne">
+        <button class="accordion-button rounded-top-3 bg-primary text-white fw-bold" type="button"
+          data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
           Ver Tabla de Registros
         </button>
       </h2>
       <!-- FORMULARIO -->
       <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionFormLegales">
-        <div class="accordion-body">
-          <form class="p-3 p-md-4" (ngSubmit)="guardarLegal()">
-            <h4 class="text-center mb-4 fw-bold fs-2">
+        <div class="accordion-body bg-light">
+          <form class="p-3 p-md-4" (ngSubmit)="guardarLegal()" style="background-color: #f8f9fa">
+            <h4 class="text-center mb-4 fw-bold fs-2 text-primary">
+              <i class="fas fa-file-alt me-2"></i>
               {{ legalEditando ? 'Editar Registro Legal' : 'Registrar Legales' }}
             </h4>
-            <div class="container overflow-hidden">
+            <div class="container-fluid px-0">
               <div class="row gx-5">
                 <!-- Izquierda -->
                 <div class="col-12 col-lg-6 mb-4">
@@ -31,7 +31,7 @@
                     <br>
                     <div class="mb-3">
                       <label class="form-label">GPO/IND</label>
-                      <input type="text" class="form-control" [(ngModel)]="gpoind" name="gpoind" required>
+                      <input type="text" placeholder="Ej: Las Mariposas" class="form-control" [(ngModel)]="gpoind" name="gpoind" required>
                     </div>
                   </section>
                 </div>
@@ -65,7 +65,6 @@
           </form>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -77,12 +76,12 @@
 
     <!-- Tabla -->
     <div class="col-md-12 mb-4 mx-auto">
-      <div class="card shadow rounded-4 border-0 h-100">
+      <div class="table-responsive rounded-3 overflow-hidden border shadow-sm">
         <div class="card-body p-0">
           <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 text-center table-sm">
-              <thead class="table-light">
-                <tr class="table-primary">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-primary text-white table-light" style="text-align: center;">
+                <tr>
                   <th>Coordinación</th>
                   <th>GPO/IND</th>
                   <th>Fecha Reportada como Faltante</th>
@@ -96,7 +95,7 @@
                 <tr *ngFor="let legal of legales; let i=index ">
                   <td>{{ legal.coordinacion }}</td>
                   <td>{{ legal.gpoind }}</td>
-                  <td>{{ legal.fechaReportada  | date:'dd-MM-yy':'UTC' }}</td>
+                  <td>{{ legal.fechaReportada | date:'dd-MM-yy':'UTC' }}</td>
                   <td>
                     <p-tag [value]="legal.registro ? 'Entregado' : 'Pendiente'"
                       [severity]="getSeverity(legal.registro)"></p-tag>
@@ -106,14 +105,19 @@
                     <i class="pi"
                       [ngClass]="legal.registro ? 'pi-check-circle text-success' : 'pi-times-circle text-danger'"></i>
                   </td>
-                  <td>{{ legal.fechaEntrega  | date:'dd-MM-yy':'UTC' }}</td>
+                  <td>{{ legal.fechaEntrega | date:'dd-MM-yy':'UTC' }}</td>
                   <td>
-                    <button (click)="editarLegal(legal)" type="button" class="btn">
-                      <i class="fa-solid fa-pen" style="color: #288107;"></i>
-                    </button>
-                    <button (click)="eliminarRegistro(i, legal._id)" type="button" class="btn">
-                      <i class="fa-solid fa-trash" style="color: #d30808;"></i>
-                    </button>
+                    <div class="d-flex justify-content-center gap-2">
+                      <button (click)="editarLegal(legal)" type="button"
+                        class="btn btn-sm btn-outline-success hover-bg-success hover-text-white">
+                        <i class="fa-regular fa-pen-to-square"></i>
+                      </button>
+                      <button (click)="eliminarRegistro(i, legal._id)" type="button"
+                        class="btn btn-sm btn-outline-danger hover-bg-danger hover-text-white">
+                        <i class="fa-regular fa-trash-can"></i>
+                      </button>
+                    </div>
+
                   </td>
                 </tr>
               </tbody>
@@ -124,7 +128,3 @@
     </div>
   </div>
 </div>
-
-
-
-
