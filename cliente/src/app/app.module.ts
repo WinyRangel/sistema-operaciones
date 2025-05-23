@@ -7,6 +7,7 @@ import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { TableModule } from 'primeng/table'
 import { NgOptimizedImage } from '@angular/common';
+import { DatePickerModule } from 'primeng/datepicker';
 
 
 import { AppRoutingModule } from './app-routing.module';
@@ -55,19 +56,14 @@ import { FechaFormatPipe } from './pipes/fecha-format.pipe';
     ToggleButtonModule,
     TableModule,
     FormsModule,
-    NgOptimizedImage 
+    NgOptimizedImage,
+    DatePickerModule
 
   ],
-
-  providers: [
-    provideAnimationsAsync(),
-        providePrimeNG({
-            theme: {
-                preset: Aura
-            }
-        }),
-        
-  ],  
+    providers: [
+        provideAnimationsAsync(),
+        providePrimeNG({ /* options */ })
+    ], 
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,5 +1,5 @@
-<br>
-<div class="accordion custom-accordion" id="accordionFormBaucher">
+<!-- Formulario de Registro de Vouchers -->
+<div class="accordion custom-accordion mt-3" id="accordionFormBaucher">
   <div class="accordion-item border-0 shadow-sm">
     <h2 class="accordion-header">
       <button class="accordion-button rounded-top-3 bg-primary text-white fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
@@ -17,7 +17,7 @@
         
           <div class="container-fluid px-0">
             <div class="row g-4">
-              <!-- Primera columna -->
+              <!-- Columna de Datos de Coordinación -->
               <div class="col-12 col-lg-6">
                 <section class="p-3 border-end-lg">
                   <div class="d-flex align-items-center gap-3 mb-4">
@@ -67,14 +67,14 @@
                 </section>
               </div>
         
-              <!-- Segunda columna -->
+              <!-- Columna de Reporte de Pago -->
               <div class="col-12 col-lg-6">
                 <section class="p-3">
                   <div class="d-flex align-items-center gap-3 mb-4">
                     <div class="icon-container bg-primary-light">
                       <i class="fas fa-file-invoice-dollar text-primary"></i>
                     </div>
-                    <h5 class="mb-0 fw-bold text-primary">Reporte de Pago</h5>
+                    <h5 class="mb-0 fw-bold text-primary">Detalles del Pago</h5>
                   </div>
         
                   <div class="row g-3">
@@ -122,6 +122,7 @@
               </div>
             </div>
             
+            <!-- Botones de Acción -->
             <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">              
               <div class="d-flex gap-3">
                 <button type="button" class="btn btn-outline-secondary" (click)="resetForm()">
@@ -140,90 +141,133 @@
     </div>
   </div>
 </div>
-    
 
-  <!-- Tabla de Reportes -->
-  <div class="bg-light rounded-3 p-3 p-md-4 mt-4 shadow-sm">
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-      <h4 class="fw-semibold mb-0 text-dark text-center mb-4 fw-bold fs-2">Vouchers Registrados</h4>
-
-      <div class="col-12 col-md-5">
-        <div class="input-group shadow-sm rounded-2">
-          <span class="input-group-text bg-white border-end-0 pe-1">
-            <i class="bi bi-search text-secondary fs-5"></i>
-          </span>
-          <input
-          type="search"
-          class="form-control"
-          [(ngModel)]="filtrarBaucher"
-          placeholder="Buscar reporte..."
-        />
-        </div>
-        
+<!-- Tabla de Vouchers Registrados -->
+<div class="card mt-4 border-0 shadow-sm">
+<div class="card-header bg-white border-0 py-3">
+  <div class="container-fluid">
+    <div class="row align-items-center justify-content-between gy-2">
+      
+      <!-- Título -->
+      <div class="col-md-auto text-center text-md-start">
+        <h4 class="fw-bold text-primary mb-0">
+          <i class="fas fa-file-invoice-dollar me-2"></i>
+          Vouchers Registrados
+        </h4>
       </div>
-    </div>
 
-    <div class="table-responsive overflow-hidden card shadow rounded-4 border-0 h-100">
+      <!-- Filtro por fecha -->
+      <div class="col-md-auto">
+        <div class="input-group shadow-sm">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="fas fa-calendar-day text-secondary"></i>
+          </span>
+          <input 
+            type="date" 
+            class="form-control border-start-0 ps-2" 
+            placeholder="Filtrar por fecha"
+          >
+        </div>
+      </div>
+
+      <!-- Buscador -->
+      <div class="col-md-auto">
+        <div class="input-group shadow-sm">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="fas fa-search text-secondary"></i>
+          </span>
+          <input 
+            type="search" 
+            class="form-control border-start-0 ps-2" 
+            [(ngModel)]="filtrarBaucher" 
+            placeholder="Buscar voucher..."
+          >
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
       <table class="table table-hover align-middle mb-0">
-        <thead class="bg-primary text-white table-light" style="text-align: center;">
+        <thead class="table-primary">
           <tr>
-            <th class="fw-medium py-3">Coordinación</th>
-            <th class="fw-medium py-3">Ejecutiva</th>
-            <th class="fw-medium py-3">Fecha Pago</th>
-            <th class="fw-medium py-3">Hora</th>
-            <th class="fw-medium py-3">Fecha Reporte</th>
-            <th class="fw-medium py-3">Hora</th>
-            <th class="fw-medium py-3">Días diferencia</th>
-            <th class="fw-medium py-3">Grupo</th>
-            <th class="fw-medium py-3">Concepto</th>
-            <th class="fw-medium py-3">Titular</th>
-            <th class="fw-medium py-3">Acciones</th>
+            <th class="fw-medium py-3 text-center">Coordinación</th>
+            <th class="fw-medium py-3 text-center">Responsable</th>
+            <th class="fw-medium py-3 text-center">Fecha Pago</th>
+            <th class="fw-medium py-3 text-center">Hora</th>
+            <th class="fw-medium py-3 text-center">Fecha Reporte</th>
+            <th class="fw-medium py-3 text-center">Hora</th>
+            <th class="fw-medium py-3 text-center">Diferencia</th>
+            <th class="fw-medium py-3 text-center">Grupo</th>
+            <th class="fw-medium py-3 text-center">Concepto</th>
+            <th class="fw-medium py-3 text-center">Titular</th>
+            <th class="fw-medium py-3 text-center">Acciones</th>
           </tr>
         </thead>
-        <tbody class="table-group-divider">
-          <tr *ngFor="let baucher of paginatedBauchers" style="text-align: center;">
-            <td class="py-2">{{ baucher.coordinacion.municipio }}</td>
-            <td>{{ baucher.ejecutiva || baucher.coordinador }} </td>
-            <td>{{ baucher.fechaBaucher | date: 'dd-MM-yy' }}</td>
-            <td>{{ baucher.fechaBaucher | date: 'HH:mm' }}</td>
-            <td>{{ baucher.fechaReporte | date: 'dd-MM-yy' }}</td>
-            <td>{{ baucher.fechaReporte | date: 'HH:mm' }}</td>
-            <td><span class="badge bg-danger">{{ baucher.diasDiferencia }}</span></td>
-            <td>{{ baucher.grupo }}</td>
-            <td>{{ baucher.concepto }}</td>
-            <td>{{ baucher.titular }}</td>
-            <td>
+        <tbody>
+          <tr *ngFor="let baucher of paginatedBauchers">
+            <td class="text-center">{{ baucher.coordinacion.municipio }}</td>
+            <td class="text-center">{{ baucher.ejecutiva || baucher.coordinador }}</td>
+            <td class="text-center">{{ baucher.fechaBaucher | date: 'dd-MM-yy' }}</td>
+            <td class="text-center">{{ baucher.fechaBaucher | date: 'HH:mm' }}</td>
+            <td class="text-center">{{ baucher.fechaReporte | date: 'dd-MM-yy' }}</td>
+            <td class="text-center">{{ baucher.fechaReporte | date: 'HH:mm' }}</td>
+            <td class="text-center">
+              <span class="badge" [ngClass]="{
+                'bg-danger': baucher.diasDiferencia > 3,
+                'bg-warning': baucher.diasDiferencia > 1 && baucher.diasDiferencia <= 3,
+                'bg-success': baucher.diasDiferencia <= 1
+              }">
+                {{ baucher.diasDiferencia }}
+              </span>
+            </td>
+            <td class="text-center">{{ baucher.grupo }}</td>
+            <td class="text-center">{{ baucher.concepto }}</td>
+            <td class="text-center">{{ baucher.titular }}</td>
+            <td class="text-center">
               <div class="d-flex justify-content-center gap-2">
-                <button class="btn btn-sm btn-outline-success hover-bg-success hover-text-white" 
-                (click)="cargarBaucherParaEditar(baucher)">
-                <i class="fa-regular fa-pen-to-square"></i>
-              </button>
-                 <button (click)="eliminarBaucher(baucher._id)" class="btn btn-sm btn-outline-danger hover-bg-danger hover-text-white">
-                  <i class="fa-regular fa-trash-can"></i>
-                </button> 
+                <button class="btn btn-sm btn-outline-primary" 
+                  (click)="cargarBaucherParaEditar(baucher)"
+                  title="Editar">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" 
+                  (click)="eliminarBaucher(baucher._id)"
+                  title="Eliminar">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
-      <nav aria-label="Page navigation example" class="mt-4">
-        <ul class="pagination justify-content-center">
-          <li class="page-item" [class.disabled]="currentPage === 1">
-            <a class="page-link"  (click)="changePage(currentPage - 1)">Anterior</a>
-          </li>
-      
-          <li 
-            class="page-item" 
-            *ngFor="let page of [].constructor(totalPages); let i = index" 
-            [class.active]="currentPage === (i + 1)">
-            <a class="page-link"  (click)="changePage(i + 1)">{{ i + 1 }}</a>
-          </li>
-      
-          <li class="page-item" [class.disabled]="currentPage === totalPages">
-            <a class="page-link"  (click)="changePage(currentPage + 1)">Siguiente</a>
-          </li>
-        </ul>
-      </nav>
-      
+
+      <!-- Paginación -->
+      <div class="p-3 border-top" *ngIf="totalPages > 1">
+        <nav aria-label="Paginación de vouchers">
+          <ul class="pagination justify-content-center mb-0">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <a class="page-link" (click)="changePage(currentPage - 1)">
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            </li>
+            
+            <li class="page-item" *ngFor="let page of getPages()" [class.active]="currentPage === page">
+              <a class="page-link" (click)="changePage(page)">{{ page }}</a>
+            </li>
+            
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <a class="page-link" (click)="changePage(currentPage + 1)">
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </div>
   </div>
+</div>

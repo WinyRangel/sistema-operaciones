@@ -94,6 +94,7 @@
                         <!-- Fecha -->
                         <div class="col-md-6">
                           <label for="fecha" class="form-label fw-bold">Fecha</label>
+                          
                           <input type="date" class="form-control" id="fecha" formControlName="fecha">
                           <div *ngIf="registrarAgenda.get('fecha')?.touched && registrarAgenda.get('fecha')?.invalid" 
                               class="invalid-feedback d-block">
@@ -346,6 +347,7 @@
                         <th>Domicilio</th>
                         <th>Actividad</th>
                         <th>Código</th>
+                        <th>Actividad Reportada</th>
                         <th>Reportado</th>
                         <th class="text-center">KM</th>
                         <th class="text-center">Estado</th>
@@ -378,6 +380,11 @@
                         <!-- Código -->
                         <td>
                           <input type="text" class="form-control form-control-sm" [(ngModel)]="agenda.codigo">
+                        </td>
+
+                         <!-- Actividad Reportada -->
+                        <td>
+                          <textarea class="form-control form-control-sm" rows="1" [(ngModel)]="agenda.actividadReportada"></textarea>
                         </td>
                         
                         <!-- Reportado -->

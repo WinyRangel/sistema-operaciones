@@ -6,6 +6,8 @@ import { Coordinacion, Persona } from '../../../models/coordinacion';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { BaucherPipe } from '../../../pipes/baucher.pipe';
+import { DatePicker } from 'primeng/datepicker';
+
 @Component({
   selector: 'app-bauchers',
   standalone: false,
@@ -15,6 +17,9 @@ import { BaucherPipe } from '../../../pipes/baucher.pipe';
 
 })
 export class BauchersComponent implements OnInit{
+  getPages(): any {
+throw new Error('Method not implemented.');
+}
   listarBauchers: any[] = []; // Cambiado a any[] para incluir la coordinación.
   filtrarBaucher = '';
   coordinaciones: Coordinacion[] = [];  // Asegúrate de que coordinaciones sea de tipo Coordinacion[]
@@ -23,7 +28,7 @@ export class BauchersComponent implements OnInit{
 
 
   currentPage: number = 1;
-  itemsPerPage: number = 10; // número de bauchers por página
+  itemsPerPage: number = 25; // número de bauchers por página
   /**EDITAR*/
   // Añade estas nuevas propiedades
   editingBaucherId: string | null = null;

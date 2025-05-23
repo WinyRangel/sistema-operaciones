@@ -6,7 +6,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class BaucherPipe implements PipeTransform {
   transform(value: any[], arg: string): any[] {
-    if (!arg || arg.trim().length < 1 || !Array.isArray(value)) return value;
+    if (!arg || arg.trim().length < 4 || !Array.isArray(value)) return value;
 
     const searchTerm = arg.toLowerCase();
 
