@@ -349,6 +349,8 @@
                         <th>Código</th>
                         <th>Actividad Reportada</th>
                         <th>Reportado</th>
+                        <th>Hora Reporte</th>
+                        <th>Hora Fin Reporte</th>
                         <th class="text-center">KM</th>
                         <th class="text-center">Estado</th>
                         <th class="text-center">Acciones</th>
@@ -393,6 +395,15 @@
                             <option [value]="true" class="text-success">✓ Reportado</option>
                             <option [value]="false" class="text-danger">✗ No reportado</option>
                           </select>
+                        </td>
+
+                          <td>
+                          <input type="time" [(ngModel)]="agenda.horaReporte" 
+                                class="form-control form-control-sm border-primary border-opacity-25">
+                        </td>
+                        <td>
+                          <input type="time" [(ngModel)]="agenda.horaCierre" 
+                                class="form-control form-control-sm border-primary border-opacity-25">
                         </td>
                         
                         <!-- KM -->
