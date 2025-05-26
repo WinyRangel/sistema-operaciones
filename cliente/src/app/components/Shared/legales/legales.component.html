@@ -31,7 +31,8 @@
                     <br>
                     <div class="mb-3">
                       <label class="form-label">GPO/IND</label>
-                      <input type="text" placeholder="Ej: Las Mariposas" class="form-control" [(ngModel)]="gpoind" name="gpoind" required>
+                      <input type="text" placeholder="Ej: Las Mariposas" class="form-control" [(ngModel)]="gpoind"
+                        name="gpoind" required>
                     </div>
                   </section>
                 </div>
@@ -74,6 +75,24 @@
       <h4 class="fw-semibold mb-0 text-dark text-center mb-4 fw-bold fs-2">Registros</h4>
     </div>
 
+    <!-- FILTROS -->
+    <div class="row gx-3 mb-3">
+      <div class="col-md-4">
+        <label class="form-label">Filtrar por Coordinación</label>
+        <select class="form-select" [(ngModel)]="filter.coordinacion" (ngModelChange)="goTo(1)"
+          name="filterCoordinacion">
+          <option value="">Todas</option>
+          <option *ngFor="let c of coordinacion" [value]="c">{{ c }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Filtrar por GPO/IND</label>
+        <input type="text" class="form-control" placeholder="Buscar GPO/IND" [(ngModel)]="filter.gpoind"
+          (ngModelChange)="goTo(1)" name="filterGpoind">
+      </div>
+    </div>
+
     <!-- Tabla -->
     <div class="col-md-12 mb-4 mx-auto">
       <div class="table-responsive rounded-3 overflow-hidden border shadow-sm">
@@ -92,7 +111,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let legal of legales; let i=index ">
+                <tr *ngFor="let legal of pagedLegales; let i = index">
                   <td>{{ legal.coordinacion }}</td>
                   <td>{{ legal.gpoind }}</td>
                   <td>{{ legal.fechaReportada | date:'dd-MM-yy':'UTC' }}</td>
@@ -126,5 +145,28 @@
         </div>
       </div>
     </div>
+
+
+    <!-- PAGINACIÓN BOOTSTRAP -->
+    <nav aria-label="Paginación registros" class="mt-3">
+      <ul class="pagination justify-content-center flex-wrap">
+        <li class="page-item" [class.disabled]="page === 1">
+          <button class="page-link" (click)="goTo(page - 1)" aria-label="Anterior">
+            <span aria-hidden="true">&laquo;</span>
+          </button>
+        </li>
+        <li class="page-item" *ngFor="let _ of [].constructor(totalPages); let idx = index"
+          [class.active]="page === (idx + 1)">
+          <button class="page-link" (click)="goTo(idx + 1)">
+            {{ idx + 1 }}
+          </button>
+        </li>
+        <li class="page-item" [class.disabled]="page === totalPages">
+          <button class="page-link" (click)="goTo(page + 1)" aria-label="Siguiente">
+            <span aria-hidden="true">&raquo;</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
   </div>
 </div>

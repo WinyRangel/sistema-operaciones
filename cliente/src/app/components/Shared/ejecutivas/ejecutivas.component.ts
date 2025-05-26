@@ -7,6 +7,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Ejecutivas } from '../../../models/ejecutivas';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-ejecutivas',
@@ -16,12 +17,13 @@ import { Ejecutivas } from '../../../models/ejecutivas';
 })
 export class EjecutivasComponent implements OnInit {
   @ViewChild('previewChart', { static: false }) previewChart!: ElementRef;
+
   chartInstance: any;
   totales: {
     totalR: number;
     totalNR: number;
     esperadas: number;
-    puntualidad: number
+    puntualidad: number;
   } | null = null;
 
   mostrarForm = false;
@@ -32,8 +34,7 @@ export class EjecutivasComponent implements OnInit {
   actividadSeleccionada = '';
   horaReporte = '';
   mesSeleccionado = '';
-  diaSeleccionado = ''; 
-
+  diaSeleccionado = '';
 
   cards = [
     { nombre: 'DH - Experiencias', ejecutiva: 'Guadalupe' },
@@ -69,7 +70,7 @@ export class EjecutivasComponent implements OnInit {
 
   registros: any[] = [];
   registrosFiltrados: any[] = [];
-  diasDelMes: string[] = []; 
+  diasDelMes: string[] = [];
 
   constructor(private ejecutivasService: EjecutivasService) { }
 
@@ -78,15 +79,13 @@ export class EjecutivasComponent implements OnInit {
     Chart.register(ChartDataLabels);
   }
 
-  // Al cambiar mes, recalcular días y filtrar
   onMesChange() {
     this.diaSeleccionado = '';
     this.generarDias();
     this.filtrarRegistros();
-    this.actualizarVistaPrevia();
+    this.actualizarVistaPreviaYEsperar();
   }
 
-  // Genera arreglo de días según mesSeleccionado
   private generarDias() {
     this.diasDelMes = [];
     if (!this.mesSeleccionado) return;
@@ -97,7 +96,6 @@ export class EjecutivasComponent implements OnInit {
       this.diasDelMes.push(d.toString().padStart(2, '0'));
     }
   }
-
 
   private setFechaHoy() {
     const hoy = new Date();
@@ -122,7 +120,6 @@ export class EjecutivasComponent implements OnInit {
 
   filtrarRegistros() {
     this.registrosFiltrados = this.registros.filter(r => {
-      // parseo manual para evitar desfase de zona
       const [y, m, d] = r.fecha.split('-').map(Number);
       const fechaObj = new Date(y, m - 1, d);
       const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
@@ -134,7 +131,6 @@ export class EjecutivasComponent implements OnInit {
       return true;
     });
   }
-
 
   actualizarHora() {
     const act = this.actividades.find(a => a.nombre === this.actividadSeleccionada);
@@ -159,111 +155,84 @@ export class EjecutivasComponent implements OnInit {
     };
 
     this.ejecutivasService.guardarRegistro(registro).subscribe(() => {
-      const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.onmouseenter = Swal.stopTimer;
-          toast.onmouseleave = Swal.resumeTimer;
-        }
-      });
-      Toast.fire({
-        icon: "success",
-        title: "Se registro correctamente"
-      });
+      Swal.fire({ icon: 'success', title: 'Se registró correctamente', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
       this.mostrarFormulario(this.nombreSeleccionado, this.ejecutivaSeleccionada);
     });
   }
 
-  actualizarVistaPrevia() {
-    if (!this.mesSeleccionado) {
-      this.totales = null;
-      if (this.chartInstance) {
-        this.chartInstance.destroy();
-      }
-      return;
-    }
 
-    this.ejecutivasService.obtenerRegistros().subscribe(all => {
-      const regs = all.filter(r => (new Date(r.fecha).getMonth() + 1).toString().padStart(2, '0') === this.mesSeleccionado);
-      this.totales = this.calcularTotales(regs);
+  actualizarVistaPreviaYEsperar(): Promise<void> {
+    return new Promise((resolve) => {
+      this.ejecutivasService.obtenerRegistros().subscribe(all => {
+        const regs = all.filter(r => (new Date(r.fecha).getMonth() + 1).toString().padStart(2, '0') === this.mesSeleccionado);
+        this.totales = this.calcularTotales(regs);
 
-      if (this.chartInstance) {
-        this.chartInstance.destroy();
-      }
+        // Destruir gráfico anterior si existe
+        if (this.chartInstance) {
+          this.chartInstance.destroy();
+        }
 
-      const ctx = this.previewChart.nativeElement.getContext('2d');
-      this.chartInstance = new Chart(ctx, this.getChartConfig());
+        // Crear gráfico y esperar al próximo ciclo de renderizado
+        const ctx = this.previewChart.nativeElement.getContext('2d');
+        this.chartInstance = new Chart(ctx, this.getChartConfig());
+
+        // Esperamos un ciclo de render para asegurar que el canvas esté listo
+        setTimeout(() => resolve(), 2000); 
+      });
     });
   }
 
-  private calcularDetallesPorCoordinacion(): any[][] {
+
+  calcularTotales(registros: Ejecutivas[]): any {
+    let totalR = 0, totalNR = 0, puntuales = 0;
     const year = new Date().getFullYear();
     const month = Number(this.mesSeleccionado);
 
-    return this.cards.map(card => {
-      // 1) Filtrar solo los registros de esta coordinación+ejecutiva en el mes
 
-      const regs = this.registros.filter((r: Ejecutivas) => {
-        const d = new Date(r.fecha);
-        return (
-          r.nombre === card.nombre &&
-          r.ejecutiva === card.ejecutiva &&
-          d.getFullYear() === year &&
-          (d.getMonth() + 1) === month
-        );
-      });
-
-
-      // 2) Contar R, NR y cuántos fueron puntuales
-      let totalR = 0;
-      let totalNR = 0;
-      let puntuales = 0;
-      regs.forEach(r => {
-        if (r.actRealizada === 'R') {
-          totalR++;
-          const hrRep = new Date(`1970-01-01T${r.horaReporte}`);
-          const hrLimite = new Date(`1970-01-01T${r.hora}`);
-          if (hrRep <= hrLimite) puntuales++;
-        } else {
-          totalNR++;
-        }
-      });
-
-      // 3) Calcular cuántas entregas se esperaban en el mes (para **todas** las actividades)
-      const esperadas = this.actividades.reduce((sum, actividad) => {
-        const dias = this.frecuenciaSemanal[actividad.nombre] || [];
-        return sum + this.contarOcurrenciasEnMes(year, month, dias);
-      }, 0);
-
-      // 4) Formatear puntualidad como porcentaje
-      const puntualidad = totalR > 0
-        ? `${((puntuales / totalR) * 100).toFixed(1)}%` : '0%';
-
-
-
-      // 5) Devolver la fila
-      return [
-        card.nombre,
-        card.ejecutiva,
-        totalR,
-        totalNR,
-        esperadas,
-        puntualidad
-      ];
+    registros.forEach(r => {
+      if (r.actRealizada === 'R') {
+        totalR++;
+        const hrRep = new Date(`1970-01-01T${r.horaReporte}`);
+        const hrLimite = new Date(`1970-01-01T${r.hora}`);
+        if (hrRep <= hrLimite) puntuales++;
+      } else {
+        totalNR++;
+      }
     });
+
+    const actividadesPorEjecutiva = this.actividades.reduce((sum, actividad) => {
+      const dias = this.frecuenciaSemanal[actividad.nombre] || [];
+      console.log(dias);
+      console.log("suma de actividades", sum);
+      return sum + this.contarOcurrenciasEnMes(year, month, dias);
+    }, 0);
+
+    const esperadas = actividadesPorEjecutiva * this.cards.length;
+    console.log('Esperadas:', esperadas);
+
+
+    const puntualidad = totalR > 0 ? (puntuales / totalR) * 100 : 0;
+
+    return { totalR, totalNR, esperadas, puntualidad };
+
   }
 
-  private getChartConfig(): any {
-    if (!this.totales) return {};
+  contarOcurrenciasEnMes(year: number, month: number, diasSemana: number[]): number {
+    const totalDias = new Date(year, month, 0).getDate();
+    let count = 0;
+    for (let d = 1; d <= totalDias; d++) {
+      const dia = new Date(year, month - 1, d).getDay();
+      if (diasSemana.includes(dia)) count++;
+    }
+    return count;
+  }
 
-    const porcentajeR = (this.totales.totalR / this.totales.esperadas) * 100 || 0;
-    const porcentajeNR = (this.totales.totalNR / this.totales.esperadas) * 100 || 0;
+  getChartConfig(): any {
+    if (!this.totales) return;
+    const { totalR, totalNR, esperadas } = this.totales;
+    const porcentajeR = (totalR / esperadas) * 100 || 0;
+    const porcentajeNR = (totalNR / esperadas) * 100 || 0;
     const porcentajeE = 100 - (porcentajeR + porcentajeNR);
-
 
     return {
       type: 'pie',
@@ -286,9 +255,7 @@ export class EjecutivasComponent implements OnInit {
         plugins: {
           legend: {
             position: 'bottom',
-            labels: {
-              font: { size: 14 }
-            }
+            labels: { font: { size: 14 } }
           },
           tooltip: { enabled: false },
           datalabels: {
@@ -301,18 +268,102 @@ export class EjecutivasComponent implements OnInit {
     };
   }
 
-  generarPDF() {
-    if (this.totales) {
-      this.generarPDFConPie(this.totales);
+  
+  // Generar reporte de las 
+  async generarPDF(): Promise<void> {
+    if (!this.mesSeleccionado) {
+      Swal.fire('Selecciona un mes', '', 'warning');
+      return;
     }
+
+    // 1) Asegura datos y gráfico listos
+    await this.actualizarVistaPreviaYEsperar();
+    await new Promise(res => setTimeout(res, 500));
+    
+
+    // 2) Obtiene registros filtrados del mes
+    const allRegs: Ejecutivas[] = await lastValueFrom(this.ejecutivasService.obtenerRegistros());
+    const regsMes = allRegs.filter(r => {
+      const m = (new Date(r.fecha).getMonth() + 1).toString().padStart(2, '0');
+      return m === this.mesSeleccionado;
+    });
+
+    // 3) Calcula totales y detalles
+    const tot = this.calcularTotales(regsMes);
+    const detalles = this.cards.map(card => {
+      const regsCard = regsMes.filter(r => r.nombre === card.nombre && r.ejecutiva === card.ejecutiva);
+      let totalR = 0, totalNR = 0, puntuales = 0;
+      regsCard.forEach(r => {
+        if (r.actRealizada === 'R') {
+          totalR++;
+          const hrRep = new Date(`1970-01-01T${r.horaReporte}`);
+          const hrLim = new Date(`1970-01-01T${r.hora}`);
+          if (hrRep <= hrLim) puntuales++;
+        } else {
+          totalNR++;
+        }
+      });
+      const esperadas = this.actividades
+        .reduce((sum, act) => sum + this.contarOcurrenciasEnMes(new Date().getFullYear(),
+          Number(this.mesSeleccionado),
+          this.frecuenciaSemanal[act.nombre] || []),
+          0);
+      const punt = totalR > 0 ? `${((puntuales / totalR) * 100).toFixed(1)}%` : '0%';
+      return [card.nombre, card.ejecutiva, totalR, totalNR, esperadas, punt];
+    });
+
+    // 4) Prepara PDF
+    const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    let y = 10;
+    doc.setFontSize(16);
+    doc.text(`Reporte Mensual - Mes ${this.mesSeleccionado}`, 10, y);
+    y += 10;
+
+    // 5) Tabla de totales
+    autoTable(doc, {
+      head: [['Tipo', 'Cantidad', 'Prom. entregas']],
+      body: [
+        ['Reportadas (R)', tot.totalR, `${tot.puntualidad.toFixed(1)}%`],
+        ['No Reportadas (NR)', tot.totalNR, '-'],
+        ['Total Esperadas', tot.esperadas, '-']
+      ],
+      startY: y,
+      margin: { left: 10, right: 10 },
+      headStyles: { fillColor: [36, 84, 139] },
+      theme: 'grid'
+    });
+    y = (doc as any).lastAutoTable.finalY + 6;
+
+    // 6) Tabla de detalle
+    autoTable(doc, {
+      head: [['Coordinación', 'Ejecutiva', 'R', 'NR', 'Esperadas', 'Puntualidad']],
+      body: detalles,
+      startY: y,
+      margin: { left: 10, right: 10 },
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [36, 84, 139] },
+      theme: 'grid'
+    });
+    y = (doc as any).lastAutoTable.finalY + 6;
+
+    // 7) Imagen de la gráfica centrada
+    const canvas: HTMLCanvasElement = this.previewChart.nativeElement;
+    const chartImg = canvas.toDataURL('image/png');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const fullWidth = pageWidth - 20;
+    const imgW = fullWidth * 0.6;
+    const imgProps = doc.getImageProperties(chartImg);
+    const imgH = (imgProps.height * imgW) / imgProps.width;
+    const xCenter = (pageWidth - imgW) / 2;
+    doc.addImage(chartImg, 'PNG', xCenter, y, imgW, imgH);
+
+    // 8) Guardar PDF
+    doc.save(`reporte_ejecutivas_mes_${this.mesSeleccionado}.pdf`);
   }
 
-  private async generarPDFConPie(totales: {
-    totalR: number;
-    totalNR: number;
-    esperadas: number;
-    puntualidad: number
-  }) {
+
+  // Generar PDF con grafica y tablas
+  async generarPDFConPie(totales: { totalR: number; totalNR: number; esperadas: number; puntualidad: number }) {
     if (totales.esperadas === 0) {
       Swal.fire('Error', 'No hay actividades registradas este mes', 'error');
       return;
@@ -320,15 +371,12 @@ export class EjecutivasComponent implements OnInit {
 
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     let y = 10;
-
-    // Título principal
     doc.setFontSize(16);
     doc.text(`Reporte Mensual - Mes ${this.mesSeleccionado}`, 10, y);
     y += 10;
 
-    // Tabla resumen general de reportes
     autoTable(doc, {
-      head: [['Tipo', 'Cantidad', 'Promedio de entegras']],
+      head: [['Tipo', 'Cantidad', 'Promedio de entregas']],
       body: [
         ['Reportadas (R)', totales.totalR, `${totales.puntualidad.toFixed(1)}%`],
         ['No Reportadas (NR)', totales.totalNR, '-'],
@@ -341,7 +389,6 @@ export class EjecutivasComponent implements OnInit {
     });
     y = (doc as any).lastAutoTable.finalY + 10;
 
-    // Tabla detallada por coordinación
     const detalles = this.calcularDetallesPorCoordinacion();
     autoTable(doc, {
       head: [['Coordinación', 'Ejecutiva', 'R', 'NR', 'Esperadas', 'Puntualidad']],
@@ -349,119 +396,60 @@ export class EjecutivasComponent implements OnInit {
       startY: y,
       margin: { horizontal: 10 },
       styles: { fontSize: 8 },
-      headStyles: { fillColor: [58, 159, 31] },
-      columnStyles: {
-        0: { cellWidth: 45 },
-        1: { cellWidth: 35 },
-        4: { cellWidth: 25 },
-        5: { cellWidth: 25 }
-      }
+      headStyles: { fillColor: [36, 84, 139] }
     });
-    y = (doc as any).lastAutoTable.finalY + 15;
 
-    // Gráfico
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const dpi = 3;
+    doc.save(`reporte_ejecutivas_mes_${this.mesSeleccionado}.pdf`);
+  }
 
-    canvas.width = 794 * dpi;
-    canvas.height = 400 * dpi;
-    canvas.style.width = '794px';
-    canvas.style.height = '400px';
+  calcularDetallesPorCoordinacion(): any[][] {
+    const year = new Date().getFullYear();
+    const month = Number(this.mesSeleccionado);
 
-    if (ctx) {
-      try {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    return this.cards.map(card => {
+      const regs = this.registros.filter((r: Ejecutivas) => {
+        const d = new Date(r.fecha);
+        return (
+          r.nombre === card.nombre &&
+          r.ejecutiva === card.ejecutiva &&
+          d.getFullYear() === year &&
+          (d.getMonth() + 1) === month
+        );
+      });
 
-        const porcentajeR = (totales.totalR / totales.esperadas) * 100 || 0;
-        const porcentajeNR = (totales.totalNR / totales.esperadas) * 100 || 0;
-        const porcentajeE = 100 - (porcentajeR + porcentajeNR);
+      let totalR = 0, totalNR = 0, puntuales = 0;
 
-        const tempChart = new Chart(ctx, {
-          type: 'pie',
-          data: {
-            labels: [
-              `Reportadas (R) ${porcentajeR.toFixed(1)}%`,
-              `No Reportadas (NR) ${porcentajeNR.toFixed(1)}%`,
-              `Faltantes ${porcentajeE.toFixed(1)}%`
-
-            ],
-            datasets: [{
-              data: [porcentajeR, porcentajeNR, porcentajeE],
-              backgroundColor: ['#24548b', '#ab1a3a', '#329f20'],
-              borderColor: '#ffffff',
-              borderWidth: 4 * dpi
-            }]
-          },
-          options: {
-            responsive: false,
-            plugins: {
-              legend: {
-                position: 'bottom',
-                labels: { font: { size: 16 * dpi } }
-              },
-              datalabels: {
-                color: '#ffffff',
-                font: {
-                  size: 16 * dpi,
-                  weight: 'bold',
-                  family: 'Arial'
-                },
-                formatter: (value: number) => `${value.toFixed(1)}%`
-              }
-            }
+      regs.forEach(r => {
+        if (r.actRealizada === 'R') {
+          totalR++;
+          if (r.horaReporte && r.horaReporte !== '-') {
+            const hrRep = new Date(`1970-01-01T${r.horaReporte}`);
+            const hrLimite = new Date(`1970-01-01T${r.hora}`);
+            if (hrRep <= hrLimite) puntuales++;
           }
-        });
+        }
+        else {
+          totalNR++;
+        }
+      });
 
-        await new Promise<void>(resolve => {
-          tempChart.render();
-          setTimeout(resolve, 500);
-        });
+      const esperadas = this.actividades.reduce((sum, actividad) => {
+        const dias = this.frecuenciaSemanal[actividad.nombre] || [];
+        return sum + this.contarOcurrenciasEnMes(year, month, dias);
+      }, 0);
 
-        const imgData = canvas.toDataURL('image/png', 1.0);
-        const pageWidth = doc.internal.pageSize.getWidth() - 20;
-        const imgHeight = (canvas.height * pageWidth) / canvas.width;
+      const puntualidad = totalR > 0 ? `${((puntuales / totalR) * 100).toFixed(1)}%` : '0%';
 
-        doc.addImage(imgData, 'PNG', 10, y, pageWidth, imgHeight);
-        doc.save(`reporte_mensual_${this.mesSeleccionado}.pdf`);
-
-        tempChart.destroy();
-
-      } catch (error) {
-        console.error('Error generando PDF:', error);
-        Swal.fire('Error', 'Error al generar el PDF', 'error');
-      }
-    }
+      return [
+        card.nombre,
+        card.ejecutiva,
+        totalR,
+        totalNR,
+        esperadas,
+        puntualidad
+      ];
+    });
   }
-
-
-  private calcularTotales(regs: any[]): { totalR: number; totalNR: number; esperadas: number; puntualidad: number } {
-  let totalR = 0;
-  let totalNR = 0;
-  let puntuales = 0;
-
-  for (let r of regs) {
-    if (r.actRealizada === 'R') {
-      totalR++;
-      const hrRep = new Date(`1970-01-01T${r.horaReporte}`);
-      const hrLimite = new Date(`1970-01-01T${r.hora}`);
-      if (hrRep <= hrLimite) puntuales++;
-    } else {
-      totalNR++;
-    }
-  }
-
-  const esperadas = this.actividades.reduce((sum, actividad) => {
-    const dias = this.frecuenciaSemanal[actividad.nombre] || [];
-    return sum + this.contarOcurrenciasEnMes(new Date().getFullYear(), Number(this.mesSeleccionado), dias);
-  }, 0);
-
-  const puntualidad = totalR > 0 ? (puntuales / totalR) * 100 : 0;
-
-  return { totalR, totalNR, esperadas, puntualidad };
-}
-
 
   eliminarRegistro(id: string) {
     Swal.fire({
@@ -485,17 +473,6 @@ export class EjecutivasComponent implements OnInit {
         });
       }
     });
-  }
-
-  private contarOcurrenciasEnMes(year: number, month: number, daysOfWeek: number[]): number {
-    let count = 0;
-    const mesIndex = month - 1;
-    const date = new Date(year, mesIndex, 1);
-    while (date.getMonth() === mesIndex) {
-      if (daysOfWeek.includes(date.getDay())) count++;
-      date.setDate(date.getDate() + 1);
-    }
-    return count;
   }
 
 }
