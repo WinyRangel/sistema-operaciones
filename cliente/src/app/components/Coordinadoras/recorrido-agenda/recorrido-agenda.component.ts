@@ -26,6 +26,7 @@ const SEMANAS_ANIO = 52;
 
 
 export class RecorridoAgendaComponent implements OnInit {
+
   // ViewChilds
   @ViewChild('graficaCodigo') graficaCodigo!: ElementRef<HTMLCanvasElement>;
   @ViewChild('reportePDF') reportePDF!: ElementRef;
@@ -100,6 +101,44 @@ export class RecorridoAgendaComponent implements OnInit {
         actividades: this.fb.array([this.crearActividad()])
       });
     }
+
+    resetForm() {
+        const swalWithBootstrapButtons = Swal.mixin({
+          customClass: {
+            confirmButton: "btn btn-success",
+            cancelButton: "btn btn-danger"
+          },
+          buttonsStyling: false
+        });
+        swalWithBootstrapButtons.fire({
+          title: "¿Estás seguro de realizar está acción?",
+          text: "No podrás revertir esto",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Si, limpiar formulario.",
+          cancelButtonText: "No, Cancelar.",
+          reverseButtons: true
+        }).then((result) => {
+          if (result.isConfirmed) {
+            swalWithBootstrapButtons.fire({
+              title: "¡Formulario limpio!",
+              text: "El fórmulario ha sido limpiado.",
+              icon: "success"
+            });
+              this.actividades.reset();
+              this.registrarAgenda
+          } else if (
+            /* Read more about handling dismissals below */
+            result.dismiss === Swal.DismissReason.cancel
+          ) {
+            swalWithBootstrapButtons.fire({
+              title: "Cancelado",
+              text: "El fórmulario no se ha limpiado.",
+              icon: "error"
+            });
+          }
+        });
+  }
 
     private generateWeeks(): void {
       this.semanas = Array.from({length: SEMANAS_ANIO},
@@ -341,7 +380,9 @@ export class RecorridoAgendaComponent implements OnInit {
         actividadReportada: agenda.actividadReportada,
         reportado: agenda.reportado,
         horaReporte: agenda.horaReporte,
-        horaCierre: agenda.horaCierre
+        horaCierre: agenda.horaCierre,
+        kmRecorrido: agenda.kmRecorrido
+        
       }).subscribe({
         next: () => this.showToast('success', 'Cambios guardados correctamente'),
         error: (error) => {
