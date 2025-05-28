@@ -8,7 +8,7 @@ import Aura from '@primeng/themes/aura';
 import { TableModule } from 'primeng/table'
 import { NgOptimizedImage } from '@angular/common';
 import { DatePickerModule } from 'primeng/datepicker';
-
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -28,6 +28,9 @@ import { ReporteFichasComponent } from './components/reporte-fichas/reporte-fich
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TagModule } from 'primeng/tag';
 import { FechaFormatPipe } from './pipes/fecha-format.pipe';
+import { AgendaFormComponent } from './components/Coordinadoras/recorrido-agenda/agenda-form/agenda-form.component';
+import { AgendaListComponent } from './components/Coordinadoras/recorrido-agenda/agenda-list/agenda-list.component';
+import { AgendaChartsComponent } from './components/Coordinadoras/recorrido-agenda/agenda-charts/agenda-charts.component';
 
 
 @NgModule({
@@ -43,7 +46,10 @@ import { FechaFormatPipe } from './pipes/fecha-format.pipe';
     EjecutivasComponent,
     DepositosComponent,
     ReporteFichasComponent,
-    FechaFormatPipe
+    FechaFormatPipe,
+    AgendaFormComponent,
+    AgendaListComponent,
+    AgendaChartsComponent
   ],
   
   imports: [
@@ -57,7 +63,8 @@ import { FechaFormatPipe } from './pipes/fecha-format.pipe';
     TableModule,
     FormsModule,
     NgOptimizedImage,
-    DatePickerModule
+    DatePickerModule,
+    ScrollingModule
 
   ],
     providers: [

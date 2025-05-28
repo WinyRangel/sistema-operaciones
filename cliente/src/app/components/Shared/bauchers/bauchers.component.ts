@@ -15,9 +15,9 @@ import { BaucherPipe } from '../../../pipes/baucher.pipe';
 
 })
 export class BauchersComponent implements OnInit{
-getPages(): any {
-throw new Error('Method not implemented.');
-}
+  getPages(): any {
+  throw new Error('Method not implemented.');
+  }
   listarBauchers: any[] = []; // Cambiado a any[] para incluir la coordinación.
   filtrarBaucher = '';
   coordinaciones: Coordinacion[] = [];  // Asegúrate de que coordinaciones sea de tipo Coordinacion[]

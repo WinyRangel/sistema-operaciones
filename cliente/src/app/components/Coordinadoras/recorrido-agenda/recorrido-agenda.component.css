@@ -1,24 +1,4 @@
-option { font-family: "Century Gothic", 
-  CenturyGothic, 
-  AppleGothic, 
-  sans-serif; 
-  font-size: 12px; 
-  font-style: normal; 
-  font-variant: normal; 
-  font-weight: 700; 
-  line-height: 22.8px; 
-}
 
-select { font-family: "Century Gothic", 
-  CenturyGothic, 
-  AppleGothic, 
-  sans-serif; 
-  font-size: 12px; 
-  font-style: normal; 
-  font-variant: normal; 
-  font-weight: 700; 
-  line-height: 22.8px; 
-}
 
 input  { font-family: "Century Gothic", 
   CenturyGothic, 
@@ -333,4 +313,9 @@ canvas {
     flex-grow: 1;
     justify-content: center;
   }
+}
+
+.table-viewport {
+  height: 600px;    /* ajusta según tu diseño */
+  overflow: auto;
 }
