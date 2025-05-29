@@ -10,6 +10,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { InicioComponent } from './components/inicio/inicio.component';
@@ -28,6 +29,7 @@ import { ReporteFichasComponent } from './components/reporte-fichas/reporte-fich
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TagModule } from 'primeng/tag';
 import { FechaFormatPipe } from './pipes/fecha-format.pipe';
+import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-agenda/cumplimiento-agenda.component';
 import { AgendaFormComponent } from './components/Coordinadoras/recorrido-agenda/agenda-form/agenda-form.component';
 import { AgendaListComponent } from './components/Coordinadoras/recorrido-agenda/agenda-list/agenda-list.component';
 import { AgendaChartsComponent } from './components/Coordinadoras/recorrido-agenda/agenda-charts/agenda-charts.component';
@@ -47,6 +49,7 @@ import { AgendaChartsComponent } from './components/Coordinadoras/recorrido-agen
     DepositosComponent,
     ReporteFichasComponent,
     FechaFormatPipe,
+    CumplimientoAgendaComponent
     AgendaFormComponent,
     AgendaListComponent,
     AgendaChartsComponent
@@ -65,7 +68,6 @@ import { AgendaChartsComponent } from './components/Coordinadoras/recorrido-agen
     NgOptimizedImage,
     DatePickerModule,
     ScrollingModule
-
   ],
     providers: [
         provideAnimationsAsync(),
