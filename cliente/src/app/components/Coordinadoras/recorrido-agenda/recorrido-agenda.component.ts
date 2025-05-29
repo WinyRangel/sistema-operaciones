@@ -52,12 +52,11 @@ export class RecorridoAgendaComponent implements OnInit {
   meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-
-    
-    //Visibilidad del formulario
+  
+  //Visibilidad del formulario
     isFormVisible: boolean = true;
     isTableVisible: boolean = false;
-    isFormExpanded: boolean = false;
+    isFormExpanded: boolean = false;    
 
   //horas de trabajo para métricas del mes
   horasAgenda: number = 0;
