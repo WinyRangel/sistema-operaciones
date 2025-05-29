@@ -40,19 +40,18 @@
             <i class="fa-solid fa-fw" [class.fa-eye]="!isFormVisible" [class.fa-eye-slash]="isFormVisible"></i>
             <span class="d-none d-md-inline">{{ isFormVisible ? 'Ocultar Formulario' : 'Registrar agenda' }}</span>
           </button>
-      
+
           <button type="button" class="btn btn-outline-success d-flex align-items-center gap-2 action-btn" (click)="toggleTableVisibility()">
             <i class="fa-solid fa-fw" [class.fa-eye]="!isTableVisible" [class.fa-eye-slash]="isTableVisible"></i>
             <span class="d-none d-md-inline">{{ isTableVisible ? 'Ocultar Tabla' : 'Seguimiento Agenda' }}</span>
           </button>
-      
+
           <button *ngIf="isFormVisible" type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2 action-btn" (click)="toggleFormSize()">
             <i class="fa-solid fa-fw" [class.fa-expand]="!isFormExpanded" [class.fa-compress]="isFormExpanded"></i>
             <span class="d-none d-md-inline">{{ isFormExpanded ? 'Reducir' : 'Expandir' }}</span>
           </button>
         </div>
       </div>
-
         <!-- CONTENIDO PRINCIPAL -->
       <div class="container-fluid mt-4 mb-4">
         <div class="row g-4">
@@ -61,6 +60,7 @@
               [class.col-12]="isFormExpanded || !isTableVisible"
               [class.col-lg-6]="!isFormExpanded && isTableVisible"
               [class.col-lg-4]="isFormExpanded && isTableVisible">
+
             <form [formGroup]="registrarAgenda" (ngSubmit)="RegistrarAgenda()" class="h-100">
               <div class="card shadow-sm h-100">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -69,7 +69,7 @@
                     <i class="bi" [class.bi-arrows-angle-contract]="isFormExpanded" [class.bi-arrows-angle-expand]="!isFormExpanded"></i>
                   </button>
                 </div>
-                
+
                 <div class="card-body overflow-auto" style="max-height: 80vh;">
                   <!-- Sección de información básica -->
                   <div class="card mb-3 shadow-sm">
@@ -90,24 +90,24 @@
                             La semana es obligatoria
                           </div>
                         </div>
-                        
+
                         <!-- Fecha -->
                         <div class="col-md-6">
                           <label for="fecha" class="form-label fw-bold">Fecha</label>
-                          
+
                           <input type="date" class="form-control" id="fecha" formControlName="fecha">
                           <div *ngIf="registrarAgenda.get('fecha')?.touched && registrarAgenda.get('fecha')?.invalid" 
                               class="invalid-feedback d-block">
                             La fecha es obligatoria
                           </div>
                         </div>
-                        
+
                         <!-- Objetivo -->
                         <div class="col-12">
                           <label for="objetivo" class="form-label fw-bold">Objetivo del día</label>
                           <textarea class="form-control" id="objetivo" formControlName="objetivo" rows="2"></textarea>
                         </div>
-                        
+
                         <!-- Switch de cumplimiento -->
                         <div class="col-12">
                           <div class="form-check form-switch">
@@ -118,12 +118,16 @@
                       </div>
                     </div>
                   </div>
-                  
+
                   <!-- Lista de actividades -->
-                  <div formArrayName="actividades" class="mb-3">   
+                  <div formArrayName="actividades" class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                       <h5 class="mb-0"><i class="bi bi-list-task me-2"></i>Actividades</h5>
-                    </div>                 
+                      <button type="button" class="btn btn-sm btn-primary" (click)="agregarActividad()">
+                        <i class="bi bi-plus-circle me-1"></i>Agregar
+                      </button>
+                    </div>
+
                     <div *ngFor="let actividad of actividades.controls; let i = index" [formGroupName]="i" 
                         class="card mb-3 shadow-sm border-start-3 border-primary">
                       <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -133,7 +137,7 @@
                           <i class="bi bi-trash"></i>
                         </button>
                       </div>
-                      
+
                       <div class="card-body">
                         <div class="row g-3">
                           <!-- Hora -->
@@ -141,7 +145,7 @@
                             <label class="form-label">Hora</label>
                             <input type="time" class="form-control" formControlName="hora">
                           </div>
-                          
+
                           <!-- Domicilio -->
                           <div class="col-md-9">
                             <label class="form-label">Domicilio</label>
@@ -151,14 +155,14 @@
                               <option *ngFor="let d of domicilios" [value]="d"></option>
                             </datalist>
                           </div>
-                          
+
                           <!-- Actividad -->
                           <div class="col-md-6">
                             <label class="form-label">Actividad</label>
                             <input type="text" class="form-control" formControlName="actividad" 
                                   placeholder="Descripción de la actividad">
                           </div>
-                          
+
                           <!-- Código -->
                           <div class="col-md-6">
                             <label class="form-label">Código</label>
@@ -167,19 +171,19 @@
                               <option *ngFor="let opcion of opcionesCodigo" [value]="opcion.value">{{ opcion.texto }}</option>
                             </select>
                           </div>
-                          
+
                           <!-- Traslado -->
                           <div class="col-md-6">
                             <label class="form-label d-block">Traslado</label>
                             <div class="btn-group btn-group-sm" role="group">
                               <input type="radio" class="btn-check" formControlName="traslado" value="SI" id="trasladoSi{{i}}">
                               <label class="btn btn-outline-success" for="trasladoSi{{i}}">Sí</label>
-                              
+
                               <input type="radio" class="btn-check" formControlName="traslado" value="NO" id="trasladoNo{{i}}">
                               <label class="btn btn-outline-secondary" for="trasladoNo{{i}}">No</label>
                             </div>
                           </div>
-                          
+
                           <!-- KM Recorridos (condicional) -->
                           <div class="col-md-6" *ngIf="actividad.get('traslado')?.value === 'SI'">
                             <label class="form-label">KM Recorridos</label>
@@ -192,46 +196,24 @@
                       </div>
                     </div>
                   </div>
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                      <button
-                        type="button"
-                        class="btn btn-warning"
-                        (click)="resetForm()"
-                        aria-label="Limpiar formulario">
-                        <i class="bi bi-x-circle me-1"></i>
-                        Limpiar formulario
-                      </button>
 
-
-
-                      <button
-                        type="button"
-                        class="btn btn-primary"
-                        (click)="agregarActividad()"
-                        aria-label="Agregar nueva actividad">
-                        <i class="bi bi-plus-circle me-1"></i>
-                        Agregar
-                      </button>
-
-                      <button
-                        type="submit"
-                        class="btn btn-success"
-                        aria-label="Guardar agenda">
-                        <i class="bi bi-save me-1"></i>
-                        Guardar Agenda
-                      </button>
-                    </div>
+                  <!-- Botón de guardar -->
+                  <div class="d-grid">
+                    <button type="submit" class="btn btn-success btn-lg">
+                      <i class="bi bi-save me-2"></i>Guardar Agenda
+                    </button>
+                  </div>
                 </div>
               </div>
             </form>
-            </div>
-          
+          </div>
+
           <!-- TABLA DE SEGUIMIENTO -->
           <div *ngIf="isTableVisible" 
               [class.col-12]="!isFormVisible"
               [class.col-lg-8]="isFormVisible && !isFormExpanded"
               [class.col-lg-6]="isFormVisible && isFormExpanded">
-              
+
             <div class="card shadow-sm h-100">
               <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0"><i class="bi bi-table me-2"></i>Seguimiento de Agenda</h4>
@@ -239,12 +221,12 @@
                   <i class="bi bi-arrow-clockwise"></i>
                 </button>
               </div>
-              
+
               <div class="card-body p-0 overflow-auto" style="max-height: 80vh;">
                 <!-- Filtros -->
                 <div class="p-3 bg-light border-bottom">
                   <h5 class="mb-3"><i class="bi bi-funnel me-2"></i>Filtros</h5>
-                  
+
                         <div class="row g-3">
                           <!-- Mes -->
                           <div class="col-md-4">
@@ -254,7 +236,7 @@
                               <option *ngFor="let mes of meses" [value]="mes">{{ mes }}</option>
                             </select>
                           </div>
-                          
+
                           <!-- Semana -->
                           <div class="col-md-4">
                             <label for="semanaSelect" class="form-label fw-bold">Semana</label>
@@ -263,7 +245,7 @@
                               <option *ngFor="let semana of semanas" [value]="semana">{{ semana }}</option>
                             </select>
                           </div>
-                          
+
                           <!-- Día -->
                           <div class="col-md-4">
                             <label for="diaSelect" class="form-label fw-bold">Día</label>
@@ -281,11 +263,11 @@
                           </button>
                         </div>
 
-                
+
                 <!-- Estadísticas de gastos -->
                 <div class="p-3 border-bottom">
                   <h5 class="mb-3"><i class="bi bi-graph-up me-2"></i>Estadísticas</h5>
-                  
+
                   <div class="row g-3">
                     <!-- KM Recorridos -->
                     <div class="col-md-3">
@@ -295,7 +277,7 @@
                         <span class="input-group-text">km</span>
                       </div>
                     </div>
-                    
+
                     <!-- Litros Gasolina -->
                     <div class="col-md-3">
                       <label class="form-label fw-bold">Litros Gasolina</label>
@@ -304,7 +286,7 @@
                         <span class="input-group-text">L</span>
                       </div>
                     </div>
-                    
+
                     <!-- Costo Gasolina -->
                     <div class="col-md-3">
                       <label class="form-label fw-bold">Costo Gasolina</label>
@@ -314,7 +296,7 @@
                         <span class="input-group-text">/L</span>
                       </div>
                     </div>
-                    
+
                     <!-- Total -->
                     <div class="col-md-3">
                       <label class="form-label fw-bold">Total</label>
@@ -324,7 +306,7 @@
                       </div>
                     </div>
                   </div>
-                  
+
                   <div class="row g-3 mt-2">
                     <!-- Horas de trabajo -->
                     <div class="col-md-4">
@@ -334,7 +316,7 @@
                         <span class="input-group-text">h/mes</span>
                       </div>
                     </div>
-                    
+
                     <!-- Horas agendadas -->
                     <div class="col-md-4">
                       <label class="form-label fw-bold">Horas agendadas</label>
@@ -343,7 +325,7 @@
                         <span class="input-group-text"><i class="bi bi-clock"></i></span>
                       </div>
                     </div>
-                    
+
                     <!-- Horas reportadas -->
                     <div class="col-md-4">
                       <label class="form-label fw-bold">Horas reportadas</label>
@@ -354,10 +336,9 @@
                     </div>
                   </div>
                 </div>
-                
+
                 <!-- Tabla de actividades -->
                 <div class="table-responsive">
-                  <cdk-virtual-scroll-viewport itemSize="56" class="table-viewport">
                   <table class="table table-hover align-middle mb-0">
                     <thead class="table-primary">
                       <tr>
@@ -375,29 +356,29 @@
                         <th class="text-center">Acciones</th>
                       </tr>
                     </thead>
-                    
+
                     <tbody>
                       <tr *ngFor="let agenda of agendasFiltradasPorCoordinador">
                         <!-- Fecha -->
                         <td class="text-center fw-semibold">
                           {{ agenda.fecha | date:'dd-MM-yy' }}
                         </td>
-                        
+
                         <!-- Hora -->
                         <td class="text-center">
                           <input type="time" class="form-control form-control-sm" [(ngModel)]="agenda.hora">
                         </td>
-                        
+
                         <!-- Domicilio -->
                         <td>
                           <input type="text" class="form-control form-control-sm" [(ngModel)]="agenda.domicilio.nombre">
                         </td>
-                        
+
                         <!-- Actividad -->
                         <td>
                           <textarea class="form-control form-control-sm" rows="1" [(ngModel)]="agenda.actividad"></textarea>
                         </td>
-                        
+
                         <!-- Código -->
                         <td>
                           <input type="text" class="form-control form-control-sm" [(ngModel)]="agenda.codigo">
@@ -407,7 +388,7 @@
                         <td>
                           <textarea class="form-control form-control-sm" rows="1" [(ngModel)]="agenda.actividadReportada"></textarea>
                         </td>
-                        
+
                         <!-- Reportado -->
                         <td>
                           <select class="form-select form-select-sm" [(ngModel)]="agenda.reportado">
@@ -424,13 +405,12 @@
                           <input type="time" [(ngModel)]="agenda.horaCierre" 
                                 class="form-control form-control-sm border-primary border-opacity-25">
                         </td>
-                        
+
                         <!-- KM -->
                         <td class="text-center fw-bold text-info">
-                          <input type="number" [(ngModel)]="agenda.kmRecorrido"
-                          class="form-control form-control-sm border-primary border-opacity-25">
+                          {{ agenda.kmRecorrido || '0' }}
                         </td>
-                        
+
                         <!-- Estado -->
                         <td class="text-center">
                           <span class="badge" 
@@ -438,7 +418,7 @@
                             {{ agenda.cumplimientoAgenda ? 'Cumplido' : 'Destiempo' }}
                           </span>
                         </td>
-                        
+
                         <!-- Acciones -->
                         <td class="text-center">
                           <button class="btn btn-sm btn-outline-primary me-1" (click)="guardarCambios(agenda)" title="Guardar">
@@ -451,23 +431,19 @@
                       </tr>
                     </tbody>
                   </table>
-                  </cdk-virtual-scroll-viewport>
-
                 </div>
-                    <!-- Botón de reporte -->
-                  <div class="p-3 text-center border-top">
-                    <button class="btn btn-primary" (click)="mostrarGraficas()">
-                      <i class="bi bi-file-earmark-bar-graph me-2"></i>Generar Reporte
-                    </button>
-                  </div>
+
+                <!-- Botón de reporte -->
+                <div class="p-3 text-center border-top">
+                  <button class="btn btn-primary" (click)="mostrarGraficas()">
+                    <i class="bi bi-file-earmark-bar-graph me-2"></i>Generar Reporte
+                  </button>
                 </div>
               </div>
-              <!--Graficas-->
-
-              <!---->
             </div>
           </div>
-        </div>
+
+          <!-- REPORTES GRÁFICOS -->
           <div *ngIf="mostrarContenedorGraficas" class="col-12 mt-4">
             <div class="card shadow-sm">
               <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -481,7 +457,7 @@
                   </button>
                 </div>
               </div>
-              
+
               <div class="card-body">
                 <div #reportePDF class="position-relative">
                 <!-- Resumen estadístico -->
@@ -494,16 +470,16 @@
                       </div>
                     </div>
                   </div>
-                  
+
                   <div class="col-md-3 mb-3">
                     <div class="card border-0 shadow-sm h-100">
                       <div class="card-body text-center">
-                        <h6 class="text-muted">Horas laborables del Mes</h6>
+                        <h6 class="text-muted">Horas Trabajo</h6>
                         <h4 class="fw-bold">{{horasTrabajo}}</h4>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div class="col-md-3 mb-3">
                     <div class="card border-0 shadow-sm h-100">
                       <div class="card-body text-center">
@@ -512,7 +488,7 @@
                       </div>
                     </div>
                   </div>
-                  
+
                   <div class="col-md-3 mb-3">
                     <div class="card border-0 shadow-sm h-100">
                       <div class="card-body text-center">
@@ -533,7 +509,7 @@
                       </div>
                     </div>
                   </div>
-                  
+
                   <div class="col-md-3 mb-3">
                     <div class="card border-0 shadow-sm h-100">
                       <div class="card-body text-center">
@@ -542,7 +518,7 @@
                       </div>
                     </div>
                   </div>
-                  
+
                   <div class="col-md-3 mb-3">
                     <div class="card border-0 shadow-sm h-100">
                       <div class="card-body text-center">
@@ -551,78 +527,21 @@
                       </div>
                     </div>
                   </div>
-                  
+
                   <div class="col-md-3 mb-3">
                     <div class="card border-0 shadow-sm h-100">
                       <div class="card-body text-center">
                         <h6 class="text-muted">Horas productivas</h6>
-                        <h4 class="fw-bold text-success">{{horasProductividad}}%</h4>
+                        <h4 class="fw-bold text-success">{{horasProductividad}}</h4>
                       </div>
                     </div>
                   </div>
                 </div>
-                    <table class="table table-bordered table-striped text-center align-middle">
-                      <thead class="table-dark">
-                        <tr>
-                          <th>Actividad</th>
-                          <th>Horas Agendadas</th> 
-                          <th>Horas Reportadas</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <th>Revisión Matutinas</th>
-                          <td>{{horasAM}}</td> 
-                          <td>{{horasAMReportadas}}</td> 
-                        </tr>
-                        <tr>
-                          <th>Operativos</th>
-                          <td>{{horasOpe}}</td>
-                          <td>{{horasOpeReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Supervisiones</th>
-                          <td>{{horasSup}}</td>
-                          <td>{{horasSupReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Entregas</th>
-                          <td>{{horasEntregas}}</td>
-                          <td>{{horasEntregasReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Cobranza</th>
-                          <td>{{horasCobranza}}</td>
-                          <td>{{horasCobranzasReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Ventas</th>
-                          <td>{{horasVentas}}</td>
-                          <td>{{horasVentasReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Actividades sin código</th>
-                          <td>{{horasSC}}</td>
-                          <td>{{horasSCReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Realizar Agenda</th>
-                          <td>{{horasReA}}</td>
-                          <td>{{horasReAReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Reunión</th>
-                          <td>0</td>
-                          <td>0</td>
-                        </tr>
-                      </tbody>
-                    </table>
-
                 <!---->
-                
+
                 <!-- Gráficos -->
                 <div class="row">
-                  <div class="col-md-12 mb-4">
+                  <div class="col-md-6 mb-4">
                     <div class="card h-100">
                       <div class="card-header bg-light">
                         <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Distribución por Código</h5>
@@ -632,7 +551,7 @@
                       </div>
                     </div>
                   </div>
-                  
+
                   <div class="col-md-6 mb-4">
                     <div class="card h-100">
                       <div class="card-header bg-light">
@@ -648,8 +567,8 @@
               </div>
             </div>
           </div>
+        </div>
       </div>
-    <!--FIN CONTENIDO-->
+        <!--FIN CONTENIDO-->
     </div>
   </div>
-</div>

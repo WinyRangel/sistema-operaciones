@@ -26,9 +26,7 @@ const SEMANAS_ANIO = 52;
 
 
 export class RecorridoAgendaComponent implements OnInit {
-getPages(): any {
-throw new Error('Method not implemented.');
-}
+
   // ViewChilds
   @ViewChild('graficaCodigo') graficaCodigo!: ElementRef<HTMLCanvasElement>;
   @ViewChild('reportePDF') reportePDF!: ElementRef;
@@ -55,8 +53,8 @@ throw new Error('Method not implemented.');
 
     
     //Visibilidad del formulario
-    isFormVisible: boolean = true;
-    isTableVisible: boolean = false;
+    isFormVisible: boolean = false;
+    isTableVisible: boolean = true;
     isFormExpanded: boolean = false;
 
     //horas de trabajo para métricas del mes
@@ -73,37 +71,17 @@ throw new Error('Method not implemented.');
     chartCodigo: any;
     mostrarContenedorGraficas: boolean = false;
 
-    currentPage: number = 1;
-    itemsPerPage: number = 10; // número de bauchers por página
+
   constructor(
-    private fb: FormBuilder, 
-      private _coordinacionService: CoordinacionService){
-        this.registrarAgenda = this.initForm();
-      this.generateWeeks();
+    private fb: FormBuilder, private _coordinacionService: CoordinacionService){
+    this.registrarAgenda = this.initForm();
+    this.generateWeeks();
       }
 
+      
     fixUTCDateToLocal(dateStr: string): Date {
       const date = new Date(dateStr);
       return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-    }
-
-    get paginatedAgendasFiltradasPorCoordinador() {
-      const start = (this.currentPage - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
-      return this.agendasFiltradasPorCoordinador.slice(start, end);
-    }
-
-        cambiarPagina(pagina: number) {
-      this.currentPage = pagina;
-    }
-  
-    get totalPages() {
-      return Math.ceil(this.agendas.length / this.itemsPerPage);
-    }
-    changePage(page: number) {
-      if (page >= 1 && page <= this.totalPages) {
-        this.currentPage = page;
-      }
     }
 
     ngOnInit(): void {
@@ -236,7 +214,7 @@ throw new Error('Method not implemented.');
       this.actividades.removeAt(index);
     }
 
-        // CRUD operations
+    // Registro de agenda
     RegistrarAgenda(): void {
       if (this.registrarAgenda.invalid) {
         this.showToast('error', 'Por favor, revisa los campos obligatorios del formulario.');
@@ -258,34 +236,36 @@ throw new Error('Method not implemented.');
     }
 
     private saveAgenda(): void {
-    const datos = this.registrarAgenda.value;
-    const requests = this.actividades.value.map((actividad: any) => {
-      const agenda: Agenda = {
-        coordinador: datos.coordinador,
-        semana: datos.semana,
-        fecha: datos.fecha,
-        objetivo: datos.objetivo,
-        cumplimientoAgenda: datos.cumplimientoAgenda,
-        ...actividad
-      };
+      const datos = this.registrarAgenda.value;
+      const actividades = this.actividades.value;
 
-      return this._coordinacionService.registrarAgenda(agenda);
-    });
+      actividades.forEach((actividad: any) => {
+        const agenda: Agenda = {
+          coordinador: datos.coordinador,
+          semana: datos.semana,
+          fecha: datos.fecha,
+          objetivo: datos.objetivo,
+          cumplimientoAgenda: datos.cumplimientoAgenda,
+          hora: actividad.hora,
+          domicilio: actividad.domicilio,
+          actividad: actividad.actividad,
+          codigo: actividad.codigo,
+          traslado: actividad.traslado,
+          kmRecorrido: actividad.kmRecorrido
+        };
 
-    Promise.all(requests.map((req: { toPromise: () => any; }) => req.toPromise()))
-      .then(() => {
-        this.showToast('success', 'Actividades registradas con éxito');
-        this.refrescarAgendas();
-        this.registrarAgenda.reset();
-        this.actividades.clear();
-        this.actividades.push(this.crearActividad());
-      })
-      .catch(error => {
-        console.error('Error al registrar agenda:', error);
-        this.showToast('error', 'Error al registrar las actividades');
+        this._coordinacionService.registrarAgenda(agenda).subscribe({
+          next: () => {
+            this.showToast('success', 'Actividad registrada con éxito');
+            this.refrescarAgendas();
+          },
+          error: (error) => {
+            console.error('Error al registrar agenda:', error);
+            this.showToast('error', 'Error al registrar la actividad');
+          }
+        });
       });
-  }
-
+    }
 
       // Operaciones CRUD
     eliminarRegistro(id: string): void {
@@ -313,6 +293,7 @@ throw new Error('Method not implemented.');
       });
     }
 
+
     seleccionarCoordinador(coord: Coordinacion | null): void {
     this.selectedCoord = coord;
 
@@ -332,16 +313,21 @@ throw new Error('Method not implemented.');
       }));
     });
   }
+      
+
+    obtenerAgendas() {
+      this._coordinacionService.obtenerAgendas().subscribe(data => {
+        this.agendas = data;
+      });
+    }
 
     //Botón para ocultar agenda
     toggleFormVisibility() {
     this.isFormVisible = !this.isFormVisible;
-    console.log('Abriendo formularios');
     }
 
     toggleTableVisibility() {
     this.isTableVisible = !this.isTableVisible;
-        console.log('Abriendo tabla');
     }
 
     toggleFormSize() {
@@ -396,6 +382,7 @@ throw new Error('Method not implemented.');
         horaReporte: agenda.horaReporte,
         horaCierre: agenda.horaCierre,
         kmRecorrido: agenda.kmRecorrido
+        
       }).subscribe({
         next: () => this.showToast('success', 'Cambios guardados correctamente'),
         error: (error) => {
@@ -405,14 +392,12 @@ throw new Error('Method not implemented.');
       });
     }
 
-      // Metrics calculations
-  get totalKmRecorridos(): number {
-    return +this.agendasFiltradasPorCoordinador
-      .reduce((acc, curr) => acc + (curr.kmRecorrido || 0), 0)
-      .toFixed(2);
-  }
+    get totalKmRecorridos(): number {
+    return this.agendasFiltradasPorCoordinador.
+      reduce((acc, curr) => acc + (curr.kmRecorrido || 0), 0).toFixed(2);
+    }
 
-  get litrosGasolina(): number {
+    get litrosGasolina(): number {
     const nombreCoordinador = this.registrarAgenda.get('coordinador')?.value;
     const rendimiento = this.rendimientosCoordinadores[nombreCoordinador] ?? RENDIMIENTO_POR_DEFECTO;
     return this.totalKmRecorridos > 0 
@@ -420,498 +405,237 @@ throw new Error('Method not implemented.');
       : 0;
   }
 
-  get costoTotalGasolina(): number {
-    return +(this.litrosGasolina * this.precioPorLitro).toFixed(2);
-  }
+      
+      get costoTotalGasolina(): number {
+      return +(this.litrosGasolina * this.precioPorLitro).toFixed(2);
+      }
 
-  get horasAgendadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(a => a.hora).length;
-  }
+      get horasAgendadas(): number {
+        return this.agendasFiltradasPorCoordinador.filter(a => a.hora).length;
+      }
 
-  get horasReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true
-    ).length;
-  }
+      get horasReportadas(): number {
+        return this.agendasFiltradasPorCoordinador.filter(
+          a => a.horaReporte && a.reportado === true
+        ).length;
+      }
 
-  get horasEntregas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'E'
-    ).length;
-  }
+      get horasEntregas(): number{
+        return this.agendasFiltradasPorCoordinador.filter(
+          a => a.hora && a.codigo === 'E'
+        ).length;
+      }
 
-  get horasEntregasReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'E'
-    ).length;
-  }
+      get horasEntregasReportadas(): number {
+        return this.agendasFiltradasPorCoordinador.filter(
+          a => a.horaReporte && a.reportado === true && a.codigo === 'E'
+        ).length;
+      }
 
-  get horasEntregasNoReportadas(): number {
-    return this.horasEntregas - this.horasEntregasReportadas;
-  }
+       get horasEntregasNoReportadas(): number {
+        return((this.horasEntregas) - (this.horasEntregasReportadas) )
+      }
 
-  //
-
-    get horasPagos(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'R'
-    ).length;
-  }
-
-  get horasPagosReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'R'
-    ).length;
-  }
-
-  get horasPagosNoReportadas(): number {
-    return this.horasPagos - this.horasEntregasReportadas;
-  }
-
-    get horasRP(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'R/P'
-    ).length;
-  }
-
-  get horasRPReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'R/P'
-    ).length;
-  }
-
-  get horasRPNoReportadas(): number {
-    return this.horasRP - this.horasRPReportadas;
-  }
-
-  //
-    get horasCobranza(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'C'
-    ).length;
-  }
-
-  get horasCobranzasReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'C'
-    ).length;
-  }
-
-  get horasCobranzasNoReportadas(): number {
-    return this.horasCobranza - this.horasCobranzasReportadas;
-  }
-
-
-    get horasVentas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'E'
-    ).length;
-  }
-
-  get horasVentasReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'E'
-    ).length;
-  }
-
-  get horasVentasNoReportadas(): number {
-    return this.horasVentas - this.horasVentasReportadas;
-  }
-
-  
-    get horasREC(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'E'
-    ).length;
-  }
-
-  get horasRECReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'R/EC'
-    ).length;
-  }
-
-  get horasRECNoReportadas(): number {
-    return this.horasREC - this.horasRECReportadas;
-  }
-
-    get horasRER(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'R/ER'
-    ).length;
-  }
-
-  get horashorasRERReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'R/ER'
-    ).length;
-  }
-
-  get horashorasRERNoReportadas(): number {
-    return this.horasRER - this.horasRER;
-  }
-
-    get horasGrupoN(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'E'
-    ).length;
-  }
-
-  get horashorasGrupoNReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'GN'
-    ).length;
-  }
-
-  get horashorasGrupoNNoReportadas(): number {
-    return this.horasGrupoN - this.horashorasGrupoNReportadas;
-  }
-
-
-    get horasSup(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'Sup'
-    ).length;
-  }
-
-  get horasSupReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'Sup'
-    ).length;
-  }
-
-  get horasSupNoReportadas(): number {
-    return this.horasSup - this.horasSupReportadas;
-  }
-
-
-
-  
-    get horasAten(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'Aten'
-    ).length;
-  }
-
-  get horasAtenReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'Sup'
-    ).length;
-  }
-
-  get horasAtenNoReportadas(): number {
-    return this.horasAten - this.horasAtenReportadas;
-  }
-
-
-///
-    get horasReA(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'R/A'
-    ).length;
-  }
-
-  get horasReAReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'Sup'
-    ).length;
-  }
-
-  get horasReANoReportadas(): number {
-    return this.horasReA - this.horasReAReportadas;
-  }
-
-
-  //
-
-      get horasDomiciliar(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'R/A'
-    ).length;
-  }
-
-  get horasDomiciliarReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'Sup'
-    ).length;
-  }
-
-  get horasDomiciliarNoReportadas(): number {
-    return this.horasDomiciliar - this.horasDomiciliarReportadas;
-  }
-
-  get horasSC(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'Sin Codigo'
-    ).length;
-  }
-
-  get horasSCReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'Sin Codigo'
-    ).length;
-  }
-
-  get horasSCNoReportadas(): number {
-    return this.horasSC - this.horasSCReportadas;
-  }
-
-
-    get horasAM(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'AM'
-    ).length;
-  }
-
-  get horasAMReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'AM'
-    ).length;
-  }
-
-  get horasAMNoReportadas(): number {
-    return this.horasAM - this.horasAMReportadas;
-  }
-
-      get horasOpe(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'Ope'
-    ).length;
-  }
-
-  get horasOpeReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'Ope'
-    ).length;
-  }
-
-
-  get horasProductividad(): number {
-    return this.horasTrabajo > 0
-      ? parseFloat(((this.horasAgendadas / this.horasTrabajo)*100).toFixed(2))
-      : 0;
-  }
+      get horasProductividad(): number {
+        return this.horasTrabajo > 0
+          ? parseFloat(((this.horasAgendadas / this.horasTrabajo)).toFixed(2))
+          : 0;
+      }
 
       opcionesCodigo = [
-      {value: 'AG', texto: 'AG | Aseo General'},
-      {value: 'AM', texto: 'AM | Actividades Matutinas'},
-      {value: 'Aten', texto: 'Aten | Atenciones'},
-      {value: 'C', texto: 'C | Cobranza'},
-      {value: 'CF', texto: 'CF | Cierre de Fichas'},
-      {value: 'D', texto: 'D | Domiciliar'},
-      {value: 'E', texto: 'E | Desembolso o Entregas'},
-      {value: 'GN', texto: 'GN | Grupo Nuevo'},
-      {value: 'INT', texto: 'INT | Integración'},
-      {value: 'Ope', texto: 'Ope | Env. Operativos'},
       {value: 'R', texto: 'R | Pago'},
-      {value: 'R/A', texto: 'R/A | Realizando Agendas'},
+      {value: 'R/P', texto: 'R/P | Pago/Levantamiento de Papeleria'},
+      {value: 'C', texto: 'C | Cobranza'},
+      {value: 'VTA', texto: 'VTA | Promoción'},
       {value: 'R/EC', texto: 'R/EC | Pago/Entrega/Cambio de Ciclo'},
       {value: 'R/ER', texto: 'R/ER | Pago/Entrega/Refill'},
-      {value: 'R/P', texto: 'R/P | Pago/Levantamiento de Papeleria'},
-      {value: 'RS', texto: 'RS | Reunión Semanal'},
-      {value: 'TS', texto: 'TS | Traslado'},
-      {value: 'VTA', texto: 'VTA | Promoción'},
-      {value: 'Seg', texto: 'Seg | Seguimiento'},
+      {value: 'GN', texto: 'GN | Grupo Nuevo'},
       {value: 'Sup', texto: 'Sup | Supervisión'},
+      {value: 'Aten', texto: 'Aten | Atenciones'},
+      {value: 'E', texto: 'E | Desembolso o Entregas'},
+      {value: 'R/A', texto: 'R/A | Realizando Agendas'},
+      {value: 'D', texto: 'D | Domiciliar'},
       {value: 'Sin Codigo', texto: 'Sin codigo'},
       {value: '', texto: ''}
       ];
 
-    // Chart methods
+   // Gráficos
     mostrarGraficas(): void {
-      this.mostrarContenedorGraficas = !this.mostrarContenedorGraficas;
-      if (this.mostrarContenedorGraficas) {
-        setTimeout(() => {
-          this.dibujarGraficaPorCodigo();
-          this.dibujarGraficaReporteadasVsNoReportadas();
-        }, 100);
-      } else {
-        this.destroyCharts();
-      }
+      this.mostrarContenedorGraficas = true;
+      setTimeout(() => {
+        this.dibujarGraficaPorCodigo();
+        this.dibujarGraficaReporteadasVsNoReportadas();
+      }, 100);
     }
 
-    private destroyCharts(): void {
-      if (this.chart) {
-        this.chart.destroy();
-        this.chart = null;
-      }
-      if (this.chartCodigo) {
-        this.chartCodigo.destroy();
-        this.chartCodigo = null;
-      }
-    }
+    dibujarGraficaPorCodigo() {
+        if (!this.mostrarContenedorGraficas) return;
+        
+        if (this.chartCodigo) this.chartCodigo.destroy();
 
-    dibujarGraficaPorCodigo(): void {
-      if (!this.mostrarContenedorGraficas || !this.graficaCodigo) return;
-      
-      if (this.chartCodigo) this.chartCodigo.destroy();
+        const codigosTexto = this.opcionesCodigo.map(o => o.texto);
+        const conteoReportadas: { [key: string]: number } = {};
+        const conteoNoReportadas: { [key: string]: number } = {};
 
-      const conteoReportadas: Record<string, number> = {};
-      const conteoNoReportadas: Record<string, number> = {};
+        codigosTexto.forEach(texto => {
+          conteoReportadas[texto] = 0;
+          conteoNoReportadas[texto] = 0;
+        });
 
-      // Inicializar conteos
-      this.opcionesCodigo.forEach(opcion => {
-        conteoReportadas[opcion.texto] = 0;
-        conteoNoReportadas[opcion.texto] = 0;
-      });
+        this.agendasFiltradasPorCoordinador.forEach(a => {
+          const codigoTexto = this.opcionesCodigo.find(o => o.value === a.codigo)?.texto;
+          
+          if (!codigoTexto) return;
 
-      // Contar actividades
-      this.agendasFiltradasPorCoordinador.forEach(a => {
-        const codigoTexto = this.opcionesCodigo.find(o => o.value === a.codigo)?.texto;
-        if (!codigoTexto) return;
+          if (a.reportado) {
+            conteoReportadas[codigoTexto]++;
+          } else {
+            conteoNoReportadas[codigoTexto]++;
+          }
+          
+  });
 
-        if (a.reportado) {
-          conteoReportadas[codigoTexto]++;
-        } else {
-          conteoNoReportadas[codigoTexto]++;
-        }
-      });
+  const etiquetas = codigosTexto;
+  const datosReportadas = etiquetas.map(et => conteoReportadas[et]);
+  const datosNoReportadas = etiquetas.map(et => conteoNoReportadas[et]);
 
-      const etiquetas = this.opcionesCodigo.map(o => o.texto);
-      const datosReportadas = etiquetas.map(et => conteoReportadas[et]);
-      const datosNoReportadas = etiquetas.map(et => conteoNoReportadas[et]);
-
-      const ctx = this.graficaCodigo.nativeElement.getContext('2d');
-      if (!ctx) return;
-
-      this.chartCodigo = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: etiquetas,
-          datasets: [
-            {
-              label: 'Reportadas',
-              data: datosReportadas,
-              backgroundColor: '#4caf50'
-            },
-            {
-              label: 'No Reportadas',
-              data: datosNoReportadas,
-              backgroundColor: '#f44336'
-            }
-          ]
+  this.chartCodigo = new Chart(this.graficaCodigo.nativeElement.getContext('2d')!, {
+    type: 'bar',
+    data: {
+      labels: etiquetas,
+      datasets: [
+        {
+          label: 'Reportadas',
+          data: datosReportadas,
+          backgroundColor: '#4caf50'
         },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: true },
-            title: {
-              display: true,
-              text: 'Agendas por Código (Reportadas vs No Reportadas)'
-            },
-            datalabels: {
-              anchor: 'end',
-              align: 'top',
-              formatter: (value) => value,
-              font: {
-                weight: 'bold',
-                size: 10
+        {
+          label: 'No Reportadas',
+          data: datosNoReportadas,
+          backgroundColor: '#f44336'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true },
+        title: {
+          display: true,
+          text: 'Agendas por Código (Reportadas vs No Reportadas)'
+        },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          formatter: (value) => value,
+          
+          font: {
+            weight: 'bold',
+            size: 10
+            
+          }
+          
+          
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+    }
+          
+    dibujarGraficaReporteadasVsNoReportadas() {
+      if (!this.mostrarContenedorGraficas) return;
+
+      if (this.chart) this.chart.destroy();
+
+      const total = this.agendasFiltradasPorCoordinador.length;
+      const reportadas = this.agendasFiltradasPorCoordinador.filter(a => a.reportado === true).length;
+      const noReportadas = total - reportadas;
+
+        this.chart = new Chart(this.graficaHoras.nativeElement.getContext('2d'), {
+          type: 'pie',
+          data: {
+            labels: ['Reportadas', 'No Reportadas'],
+            datasets: [{
+              data: [reportadas, noReportadas],
+              backgroundColor: ['#4caf50', '#f44336']
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'bottom'
+              },
+              title: {
+                display: true,
+                text: 'Horas Reportadas vs No Reportadas'
+              },
+              datalabels: {
+                formatter: (value, context) => {
+                  const rawData = context.chart.data.datasets[0].data;
+                  const total = (rawData as number[])
+                    .filter((v): v is number => typeof v === 'number')
+                    .reduce((a, b) => a + b, 0);
+
+                  if (total === 0) return '0 (0%)';
+
+                  const percentage = ((value / total) * 100).toFixed(1);
+                  return `${value} (${percentage}%)`;
+                },
+                color: '#fff'
               }
             }
-          }
-        },
-        plugins: [ChartDataLabels]
-      });
-    }
-
-    dibujarGraficaReporteadasVsNoReportadas(): void {
-    if (!this.mostrarContenedorGraficas || !this.graficaHoras) return;
-
-    if (this.chart) this.chart.destroy();
-
-    const total = this.agendasFiltradasPorCoordinador.length;
-    const reportadas = this.agendasFiltradasPorCoordinador.filter(a => a.reportado === true).length;
-    const noReportadas = total - reportadas;
-
-    const ctx = this.graficaHoras.nativeElement.getContext('2d');
-    if (!ctx) return;
-
-    this.chart = new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: ['Reportadas', 'No Reportadas'],
-        datasets: [{
-          data: [reportadas, noReportadas],
-          backgroundColor: ['#4caf50', '#f44336']
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: true,
-            position: 'bottom'
           },
-          title: {
-            display: true,
-            text: 'Horas Reportadas vs No Reportadas'
-          },
-          datalabels: {
-            formatter: (value, context) => {
-              const rawData = context.chart.data.datasets[0].data;
-              const total = (rawData as number[])
-                .filter((v): v is number => typeof v === 'number')
-                .reduce((a, b) => a + b, 0);
-
-              if (total === 0) return '0 (0%)';
-
-              const percentage = ((value / total) * 100).toFixed(1);
-              return `${value} (${percentage}%)`;
-            },
-            color: '#fff'
-          }
-        }
-      },
-      plugins: [ChartDataLabels]
-    });
-  }
-
-
-  // PDF Generation
-  generarPDFConGrafica(): void {
-    Swal.fire({
-      title: 'Generando PDF...',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading
-    });
-
-    setTimeout(() => {
-      const element = this.reportePDF.nativeElement;
-
-      html2canvas(element).then(canvas => {
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgData = canvas.toDataURL('image/png');
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-        pdf.text(`Reporte de ${this.coordinadorVisible}`, 10, 10);
-        pdf.addImage(imgData, 'PNG', 0, 20, pdfWidth, pdfHeight - 20);
-        pdf.save(`reporte_${this.coordinadorVisible}.pdf`);
-
-        Swal.close();
-        this.showToast('success', 'PDF generado correctamente');
-      }).catch(error => {
-        console.error('Error al generar PDF:', error);
-        Swal.fire('Error', 'No se pudo generar el PDF', 'error');
-      });
-    },DELAY_PDF_GENERATION);
-  }
-
-  // Helper para notificaciones
-  private showToast(icon: 'success' | 'error', title: string): void {
-    const Toast = Swal.mixin({
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.onmouseenter = Swal.stopTimer;
-        toast.onmouseleave = Swal.resumeTimer;
+          plugins: [ChartDataLabels]
+        });
       }
-    });
 
-    Toast.fire({ icon, title });
-  }
+  // Generación de PDF
+      generarPDFConGrafica(): void {
+        Swal.fire({
+          title: 'Generando PDF...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(Swal.getDenyButton())
+        });
+
+        setTimeout(() => {
+          const element = this.reportePDF.nativeElement;
+
+          html2canvas(element).then(canvas => {
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgData = canvas.toDataURL('image/png');
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            pdf.text(`Reporte de ${this.coordinadorVisible}`, 10, 10);
+            pdf.addImage(imgData, 'PNG', 0, 20, pdfWidth, pdfHeight - 20);
+            pdf.save(`reporte_${this.coordinadorVisible}.pdf`);
+
+            Swal.close();
+            this.showToast('success', 'PDF generado correctamente');
+          }).catch(error => {
+            console.error('Error al generar PDF:', error);
+            Swal.fire('Error', 'No se pudo generar el PDF', 'error');
+          });
+        }, DELAY_PDF_GENERATION);
+      }
+         // Helper para notificaciones
+      private showToast(icon: 'success' | 'error', title: string): void {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          }
+        });
+
+        Toast.fire({ icon, title });
+      }
 }
