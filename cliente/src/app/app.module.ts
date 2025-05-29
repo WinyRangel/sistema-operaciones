@@ -49,7 +49,7 @@ import { AgendaChartsComponent } from './components/Coordinadoras/recorrido-agen
     DepositosComponent,
     ReporteFichasComponent,
     FechaFormatPipe,
-    CumplimientoAgendaComponent
+    CumplimientoAgendaComponent,
     AgendaFormComponent,
     AgendaListComponent,
     AgendaChartsComponent
