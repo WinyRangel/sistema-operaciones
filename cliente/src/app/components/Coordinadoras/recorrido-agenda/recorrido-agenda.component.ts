@@ -448,6 +448,241 @@ throw new Error('Method not implemented.');
     return this.horasEntregas - this.horasEntregasReportadas;
   }
 
+  //
+
+    get horasPagos(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'R'
+    ).length;
+  }
+
+  get horasPagosReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'R'
+    ).length;
+  }
+
+  get horasPagosNoReportadas(): number {
+    return this.horasPagos - this.horasEntregasReportadas;
+  }
+
+    get horasRP(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'R/P'
+    ).length;
+  }
+
+  get horasRPReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'R/P'
+    ).length;
+  }
+
+  get horasRPNoReportadas(): number {
+    return this.horasRP - this.horasRPReportadas;
+  }
+
+  //
+    get horasCobranza(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'C'
+    ).length;
+  }
+
+  get horasCobranzasReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'C'
+    ).length;
+  }
+
+  get horasCobranzasNoReportadas(): number {
+    return this.horasCobranza - this.horasCobranzasReportadas;
+  }
+
+
+    get horasVentas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'E'
+    ).length;
+  }
+
+  get horasVentasReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'E'
+    ).length;
+  }
+
+  get horasVentasNoReportadas(): number {
+    return this.horasVentas - this.horasVentasReportadas;
+  }
+
+  
+    get horasREC(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'E'
+    ).length;
+  }
+
+  get horasRECReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'R/EC'
+    ).length;
+  }
+
+  get horasRECNoReportadas(): number {
+    return this.horasREC - this.horasRECReportadas;
+  }
+
+    get horasRER(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'R/ER'
+    ).length;
+  }
+
+  get horashorasRERReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'R/ER'
+    ).length;
+  }
+
+  get horashorasRERNoReportadas(): number {
+    return this.horasRER - this.horasRER;
+  }
+
+    get horasGrupoN(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'E'
+    ).length;
+  }
+
+  get horashorasGrupoNReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'GN'
+    ).length;
+  }
+
+  get horashorasGrupoNNoReportadas(): number {
+    return this.horasGrupoN - this.horashorasGrupoNReportadas;
+  }
+
+
+    get horasSup(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'Sup'
+    ).length;
+  }
+
+  get horasSupReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'Sup'
+    ).length;
+  }
+
+  get horasSupNoReportadas(): number {
+    return this.horasSup - this.horasSupReportadas;
+  }
+
+
+
+  
+    get horasAten(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'Aten'
+    ).length;
+  }
+
+  get horasAtenReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'Sup'
+    ).length;
+  }
+
+  get horasAtenNoReportadas(): number {
+    return this.horasAten - this.horasAtenReportadas;
+  }
+
+
+///
+    get horasReA(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'R/A'
+    ).length;
+  }
+
+  get horasReAReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'Sup'
+    ).length;
+  }
+
+  get horasReANoReportadas(): number {
+    return this.horasReA - this.horasReAReportadas;
+  }
+
+
+  //
+
+      get horasDomiciliar(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'R/A'
+    ).length;
+  }
+
+  get horasDomiciliarReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'Sup'
+    ).length;
+  }
+
+  get horasDomiciliarNoReportadas(): number {
+    return this.horasDomiciliar - this.horasDomiciliarReportadas;
+  }
+
+  get horasSC(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'Sin Codigo'
+    ).length;
+  }
+
+  get horasSCReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'Sin Codigo'
+    ).length;
+  }
+
+  get horasSCNoReportadas(): number {
+    return this.horasSC - this.horasSCReportadas;
+  }
+
+
+    get horasAM(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'AM'
+    ).length;
+  }
+
+  get horasAMReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'AM'
+    ).length;
+  }
+
+  get horasAMNoReportadas(): number {
+    return this.horasAM - this.horasAMReportadas;
+  }
+
+      get horasOpe(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'Ope'
+    ).length;
+  }
+
+  get horasOpeReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'Ope'
+    ).length;
+  }
+
   get horasProductividad(): number {
     return this.horasTrabajo > 0
       ? parseFloat(((this.horasAgendadas / this.horasTrabajo)*100).toFixed(2))
@@ -455,17 +690,25 @@ throw new Error('Method not implemented.');
   }
 
       opcionesCodigo = [
+      {value: 'AG', texto: 'AG | Aseo General'},
+      {value: 'AM', texto: 'AM | Actividades Matutinas'},
       {value: 'Aten', texto: 'Aten | Atenciones'},
       {value: 'C', texto: 'C | Cobranza'},
+      {value: 'CF', texto: 'CF | Cierre de Fichas'},
       {value: 'D', texto: 'D | Domiciliar'},
       {value: 'E', texto: 'E | Desembolso o Entregas'},
       {value: 'GN', texto: 'GN | Grupo Nuevo'},
+      {value: 'INT', texto: 'INT | Integración'},
+      {value: 'Ope', texto: 'Ope | Env. Operativos'},
       {value: 'R', texto: 'R | Pago'},
       {value: 'R/A', texto: 'R/A | Realizando Agendas'},
       {value: 'R/EC', texto: 'R/EC | Pago/Entrega/Cambio de Ciclo'},
       {value: 'R/ER', texto: 'R/ER | Pago/Entrega/Refill'},
       {value: 'R/P', texto: 'R/P | Pago/Levantamiento de Papeleria'},
+      {value: 'RS', texto: 'RS | Reunión Semanal'},
+      {value: 'TS', texto: 'TS | Traslado'},
       {value: 'VTA', texto: 'VTA | Promoción'},
+      {value: 'Seg', texto: 'Seg | Seguimiento'},
       {value: 'Sup', texto: 'Sup | Supervisión'},
       {value: 'Sin Codigo', texto: 'Sin codigo'},
       {value: '', texto: ''}

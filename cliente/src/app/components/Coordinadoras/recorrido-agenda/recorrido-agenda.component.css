@@ -319,3 +319,28 @@ canvas {
   height: 600px;    /* ajusta según tu diseño */
   overflow: auto;
 }
+ table.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    font-family: Arial, sans-serif;
+  }
+
+  table.custom-table th,
+  table.custom-table td {
+    border: 1px solid #999;
+    padding: 8px;
+  }
+
+  table.custom-table thead {
+    background-color: #343a40;
+    color: white;
+  }
+
+  table.custom-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+
+  table.custom-table tr:hover {
+    background-color: #e0e0e0;
+  }
