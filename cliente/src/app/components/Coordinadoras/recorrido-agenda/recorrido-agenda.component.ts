@@ -55,8 +55,8 @@ throw new Error('Method not implemented.');
 
     
     //Visibilidad del formulario
-    isFormVisible: boolean = false;
-    isTableVisible: boolean = true;
+    isFormVisible: boolean = true;
+    isTableVisible: boolean = false;
     isFormExpanded: boolean = false;
 
     //horas de trabajo para métricas del mes
@@ -336,10 +336,12 @@ throw new Error('Method not implemented.');
     //Botón para ocultar agenda
     toggleFormVisibility() {
     this.isFormVisible = !this.isFormVisible;
+    console.log('Abriendo formularios');
     }
 
     toggleTableVisibility() {
     this.isTableVisible = !this.isTableVisible;
+        console.log('Abriendo tabla');
     }
 
     toggleFormSize() {
