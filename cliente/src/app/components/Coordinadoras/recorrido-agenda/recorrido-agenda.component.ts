@@ -53,11 +53,11 @@ export class RecorridoAgendaComponent implements OnInit {
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
-
-  //Visibilidad del formulario
-  isFormVisible: boolean = false;
-  isTableVisible: boolean = true;
-  isFormExpanded: boolean = false;
+    
+    //Visibilidad del formulario
+    isFormVisible: boolean = true;
+    isTableVisible: boolean = false;
+    isFormExpanded: boolean = false;
 
   //horas de trabajo para métricas del mes
   horasAgenda: number = 0;
@@ -336,11 +336,11 @@ export class RecorridoAgendaComponent implements OnInit {
   //Botón para ocultar agenda
   toggleFormVisibility() {
     this.isFormVisible = !this.isFormVisible;
-  }
+    }
 
   toggleTableVisibility() {
     this.isTableVisible = !this.isTableVisible;
-  }
+    }
 
   toggleFormSize() {
     this.isFormExpanded = !this.isFormExpanded;
