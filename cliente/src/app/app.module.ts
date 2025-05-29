@@ -4,7 +4,6 @@ import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { ApplicationConfig } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
 import { TableModule } from 'primeng/table'
 import { NgOptimizedImage } from '@angular/common';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -30,9 +29,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TagModule } from 'primeng/tag';
 import { FechaFormatPipe } from './pipes/fecha-format.pipe';
 import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-agenda/cumplimiento-agenda.component';
-import { AgendaFormComponent } from './components/Coordinadoras/recorrido-agenda/agenda-form/agenda-form.component';
-import { AgendaListComponent } from './components/Coordinadoras/recorrido-agenda/agenda-list/agenda-list.component';
-import { AgendaChartsComponent } from './components/Coordinadoras/recorrido-agenda/agenda-charts/agenda-charts.component';
 
 
 @NgModule({
@@ -49,10 +45,7 @@ import { AgendaChartsComponent } from './components/Coordinadoras/recorrido-agen
     DepositosComponent,
     ReporteFichasComponent,
     FechaFormatPipe,
-    CumplimientoAgendaComponent,
-    AgendaFormComponent,
-    AgendaListComponent,
-    AgendaChartsComponent
+    CumplimientoAgendaComponent
   ],
   
   imports: [
