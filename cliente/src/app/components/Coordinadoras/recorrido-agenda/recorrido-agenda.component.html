@@ -335,7 +335,7 @@
                   <div class="col-md-3 mb-3">
                     <div class="card border-0 shadow-sm h-100">
                       <div class="card-body text-center">
-                        <h6 class="text-muted">Horas Trabajo</h6>
+                        <h6 class="text-muted">Horas laborables del Mes</h6>
                         <h4 class="fw-bold">{{horasTrabajo}}</h4>
                       </div>
                     </div>
@@ -398,58 +398,63 @@
                     </div>
                   </div>
                 </div>
+                    <table class="table table-bordered table-striped text-center align-middle">
+                      <thead class="table-dark">
+                        <tr>
+                          <th>Actividad</th>
+                          <th>Horas Agendadas</th> 
+                          <th>Horas Reportadas</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <th>Revisión Matutinas</th>
+                          <td>{{horasAM}}</td> 
+                          <td>{{horasAMReportadas}}</td> 
+                        </tr>
+                        <tr>
+                          <th>Operativos</th>
+                          <td>{{horasOpe}}</td>
+                          <td>{{horasOpeReportadas}}</td>
+                        </tr>
+                        <tr>
+                          <th>Supervisiones</th>
+                          <td>{{horasSup}}</td>
+                          <td>{{horasSupReportadas}}</td>
+                        </tr>
+                        <tr>
+                          <th>Entregas</th>
+                          <td>{{horasEntregas}}</td>
+                          <td>{{horasEntregasReportadas}}</td>
+                        </tr>
+                        <tr>
+                          <th>Cobranza</th>
+                          <td>{{horasCobranza}}</td>
+                          <td>{{horasCobranzasReportadas}}</td>
+                        </tr>
+                        <tr>
+                          <th>Ventas</th>
+                          <td>{{horasVentas}}</td>
+                          <td>{{horasVentasReportadas}}</td>
+                        </tr>
+                        <tr>
+                          <th>Actividades sin código</th>
+                          <td>{{horasSC}}</td>
+                          <td>{{horasSCReportadas}}</td>
+                        </tr>
+                        <tr>
+                          <th>Realizar Agenda</th>
+                          <td>{{horasReA}}</td>
+                          <td>{{horasReAReportadas}}</td>
+                        </tr>
+                        <tr>
+                          <th>Reunión</th>
+                          <td>0</td>
+                          <td>0</td>
+                        </tr>
+                      </tbody>
+                    </table>
 
-                <TABLE BORDER>
-                  <TR>
-                    <TH>Actividad</TH>
-                    <TD>Horas Agendadas</TD> 
-                    <TD>Horas Reportadas</TD>
-                  </TR>
-                  <TR>
-                    <TH>Revisión Matutinas</TH>
-                    <TD>Item 4</TD> 
-                    <TD>Item 5</TD> 
-                  <TR>
-                    <TH>Operativos</TH>
-                    <TD>Item 7</TD>
-                    <TD>Item 8</TD>
-                  </TR>
-                  <TR>
-                    <TH>Supervisiones</TH>
-                    <TD>Item 7</TD>
-                    <TD>Item 8</TD>
-                  </TR>
-                  <TR>
-                    <TH>Entregas</TH>
-                    <TD>Item 7</TD>
-                    <TD>Item 8</TD>
-                  </TR>
-                  <TR>
-                    <TH>Cobranza</TH>
-                    <TD>Item 7</TD>
-                    <TD>Item 8</TD>
-                  </TR>
-                  <TR>
-                    <TH>Ventas</TH>
-                    <TD>Item 7</TD>
-                    <TD>Item 8</TD>
-                  </TR>
-                  <TR>
-                    <TH>Actividades sin código</TH>
-                    <TD>Item 7</TD>
-                    <TD>Item 8</TD>
-                  </TR>
-                  <TR>
-                    <TH>Realizar Agenda</TH>
-                    <TD>Item 7</TD>
-                    <TD>Item 8</TD>
-                  </TR>
-                  <TR>
-                    <TH>Reunión</TH>
-                    <TD>Item 7</TD>
-                    <TD>Item 8</TD>
-                  </TR>
-                </TABLE>
                 <!---->
                 
                 <!-- Gráficos -->
