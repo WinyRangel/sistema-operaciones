@@ -7,6 +7,7 @@ import { RecorridoAgendaComponent } from './components/Coordinadoras/recorrido-a
 import { EjecutivasComponent } from './components/Shared/ejecutivas/ejecutivas.component';
 import { DepositosComponent } from './components/Shared/depositos/depositos.component';
 import { ReporteFichasComponent } from './components/reporte-fichas/reporte-fichas.component';
+import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-agenda/cumplimiento-agenda.component';
 
 const routes: Routes = [
   { path: 'baucher', component: BauchersComponent },
@@ -16,6 +17,7 @@ const routes: Routes = [
   { path: 'depositos', component: DepositosComponent },
   { path: 'inicio', component: InicioComponent },
   { path: 'reportefichas', component: ReporteFichasComponent },
+  { path: 'cumplimientoagenda', component: CumplimientoAgendaComponent},
   { path: '**', component: InicioComponent }
 ];
 

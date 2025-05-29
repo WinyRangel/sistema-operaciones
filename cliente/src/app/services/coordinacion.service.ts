@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Coordinacion } from '../models/coordinacion';
@@ -40,5 +40,7 @@ export class CoordinacionService {
   eliminarAgenda(id: string): Observable<any>{
     return this.http.delete(`https://servidor-operaciones.onrender.com/agenda/${id}`);
   }
+
+
 
 }

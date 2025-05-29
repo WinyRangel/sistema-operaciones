@@ -9,7 +9,6 @@ import { TableModule } from 'primeng/table'
 import { NgOptimizedImage } from '@angular/common';
 import { DatePickerModule } from 'primeng/datepicker';
 
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { InicioComponent } from './components/inicio/inicio.component';
@@ -28,7 +27,7 @@ import { ReporteFichasComponent } from './components/reporte-fichas/reporte-fich
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TagModule } from 'primeng/tag';
 import { FechaFormatPipe } from './pipes/fecha-format.pipe';
-
+import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-agenda/cumplimiento-agenda.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +42,9 @@ import { FechaFormatPipe } from './pipes/fecha-format.pipe';
     EjecutivasComponent,
     DepositosComponent,
     ReporteFichasComponent,
-    FechaFormatPipe
+    FechaFormatPipe,
+    CumplimientoAgendaComponent
+    
   ],
   
   imports: [
@@ -58,7 +59,6 @@ import { FechaFormatPipe } from './pipes/fecha-format.pipe';
     FormsModule,
     NgOptimizedImage,
     DatePickerModule
-
   ],
     providers: [
         provideAnimationsAsync(),
