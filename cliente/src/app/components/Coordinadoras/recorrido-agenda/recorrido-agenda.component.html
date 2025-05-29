@@ -52,6 +52,7 @@
           </button>
         </div>
       </div>
+
         <!-- CONTENIDO PRINCIPAL -->
       <div class="container-fluid mt-4 mb-4">
         <div class="row g-4">
@@ -453,203 +454,202 @@
                   </cdk-virtual-scroll-viewport>
 
                 </div>
-                
-                <!-- Botón de reporte -->
-                <div class="p-3 text-center border-top">
-                  <button class="btn btn-primary" (click)="mostrarGraficas()">
-                    <i class="bi bi-file-earmark-bar-graph me-2"></i>Generar Reporte
-                  </button>
+                    <!-- Botón de reporte -->
+                  <div class="p-3 text-center border-top">
+                    <button class="btn btn-primary" (click)="mostrarGraficas()">
+                      <i class="bi bi-file-earmark-bar-graph me-2"></i>Generar Reporte
+                    </button>
+                  </div>
                 </div>
               </div>
+              <!--Graficas-->
+
+              <!---->
             </div>
           </div>
-        
         </div>
-
-                  <!-- REPORTES GRÁFICOS -->
-          <div *ngIf="mostrarContenedorGraficas" class="col-12 mt-4">
-            <div class="card shadow-sm">
-              <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h4 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Reporte de Actividades</h4>
-                <div>
-                  <button class="btn btn-sm btn-light me-2" (click)="generarPDFConGrafica()">
-                    <i class="bi bi-file-pdf me-1"></i>PDF
-                  </button>
-                  <button class="btn btn-sm btn-light" (click)="mostrarGraficas()">
-                    <i class="bi bi-x-lg"></i>
-                  </button>
-                </div>
-              </div>
-              
-              <div class="card-body">
-                <div #reportePDF class="position-relative">
-                <!-- Resumen estadístico -->
-                <div class="row mb-4">
-                  <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm h-100">
-                      <div class="card-body text-center">
-                        <h6 class="text-muted">Coordinador</h6>
-                        <h4 class="fw-bold text-primary">{{coordinadorVisible}}</h4>
+                          <div *ngIf="mostrarContenedorGraficas" class="col-12 mt-4">
+                    <div class="card shadow-sm">
+                      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Reporte de Actividades</h4>
+                        <div>
+                          <button class="btn btn-sm btn-light me-2" (click)="generarPDFConGrafica()">
+                            <i class="bi bi-file-pdf me-1"></i>PDF
+                          </button>
+                          <button class="btn btn-sm btn-light" (click)="mostrarGraficas()">
+                            <i class="bi bi-x-lg"></i>
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  
-                  <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm h-100">
-                      <div class="card-body text-center">
-                        <h6 class="text-muted">Horas laborables del Mes</h6>
-                        <h4 class="fw-bold">{{horasTrabajo}}</h4>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm h-100">
-                      <div class="card-body text-center">
-                        <h6 class="text-muted">Horas Agendadas</h6>
-                        <h4 class="fw-bold text-warning">{{horasAgendadas}}</h4>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm h-100">
-                      <div class="card-body text-center">
-                        <h6 class="text-muted">Horas Reportadas</h6>
-                        <h4 class="fw-bold text-success">{{horasReportadas}}</h4>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!--ENTREGAS-->
-                <div class="row mb-4">
-                  <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm h-100">
-                      <div class="card-body text-center">
-                        <h6 class="text-muted">Entregas programadas</h6>
-                        <h4 class="fw-bold text-primary">{{horasEntregas}}</h4>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm h-100">
-                      <div class="card-body text-center">
-                        <h6 class="text-muted">Entregas reportadas</h6>
-                        <h4 class="fw-bold">{{horasEntregasReportadas}}</h4>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm h-100">
-                      <div class="card-body text-center">
-                        <h6 class="text-muted">Entregas no reportadas</h6>
-                        <h4 class="fw-bold text-warning">{{horasEntregasNoReportadas}}</h4>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm h-100">
-                      <div class="card-body text-center">
-                        <h6 class="text-muted">Horas productivas</h6>
-                        <h4 class="fw-bold text-success">{{horasProductividad}}%</h4>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                    <table class="table table-bordered table-striped text-center align-middle">
-                      <thead class="table-dark">
-                        <tr>
-                          <th>Actividad</th>
-                          <th>Horas Agendadas</th> 
-                          <th>Horas Reportadas</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <th>Revisión Matutinas</th>
-                          <td>{{horasAM}}</td> 
-                          <td>{{horasAMReportadas}}</td> 
-                        </tr>
-                        <tr>
-                          <th>Operativos</th>
-                          <td>{{horasOpe}}</td>
-                          <td>{{horasOpeReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Supervisiones</th>
-                          <td>{{horasSup}}</td>
-                          <td>{{horasSupReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Entregas</th>
-                          <td>{{horasEntregas}}</td>
-                          <td>{{horasEntregasReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Cobranza</th>
-                          <td>{{horasCobranza}}</td>
-                          <td>{{horasCobranzasReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Ventas</th>
-                          <td>{{horasVentas}}</td>
-                          <td>{{horasVentasReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Actividades sin código</th>
-                          <td>{{horasSC}}</td>
-                          <td>{{horasSCReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Realizar Agenda</th>
-                          <td>{{horasReA}}</td>
-                          <td>{{horasReAReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Reunión</th>
-                          <td>0</td>
-                          <td>0</td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                <!---->
-                
-                <!-- Gráficos -->
-                <div class="row">
-                  <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                      <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Distribución por Código</h5>
-                      </div>
+                      
                       <div class="card-body">
-                        <canvas #graficaCodigo class="w-100" height="300"></canvas>
+                        <div #reportePDF class="position-relative">
+                        <!-- Resumen estadístico -->
+                        <div class="row mb-4">
+                          <div class="col-md-3 mb-3">
+                            <div class="card border-0 shadow-sm h-100">
+                              <div class="card-body text-center">
+                                <h6 class="text-muted">Coordinador</h6>
+                                <h4 class="fw-bold text-primary">{{coordinadorVisible}}</h4>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="col-md-3 mb-3">
+                            <div class="card border-0 shadow-sm h-100">
+                              <div class="card-body text-center">
+                                <h6 class="text-muted">Horas laborables del Mes</h6>
+                                <h4 class="fw-bold">{{horasTrabajo}}</h4>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="col-md-3 mb-3">
+                            <div class="card border-0 shadow-sm h-100">
+                              <div class="card-body text-center">
+                                <h6 class="text-muted">Horas Agendadas</h6>
+                                <h4 class="fw-bold text-warning">{{horasAgendadas}}</h4>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="col-md-3 mb-3">
+                            <div class="card border-0 shadow-sm h-100">
+                              <div class="card-body text-center">
+                                <h6 class="text-muted">Horas Reportadas</h6>
+                                <h4 class="fw-bold text-success">{{horasReportadas}}</h4>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!--ENTREGAS-->
+                        <div class="row mb-4">
+                          <div class="col-md-3 mb-3">
+                            <div class="card border-0 shadow-sm h-100">
+                              <div class="card-body text-center">
+                                <h6 class="text-muted">Entregas programadas</h6>
+                                <h4 class="fw-bold text-primary">{{horasEntregas}}</h4>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="col-md-3 mb-3">
+                            <div class="card border-0 shadow-sm h-100">
+                              <div class="card-body text-center">
+                                <h6 class="text-muted">Entregas reportadas</h6>
+                                <h4 class="fw-bold">{{horasEntregasReportadas}}</h4>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="col-md-3 mb-3">
+                            <div class="card border-0 shadow-sm h-100">
+                              <div class="card-body text-center">
+                                <h6 class="text-muted">Entregas no reportadas</h6>
+                                <h4 class="fw-bold text-warning">{{horasEntregasNoReportadas}}</h4>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="col-md-3 mb-3">
+                            <div class="card border-0 shadow-sm h-100">
+                              <div class="card-body text-center">
+                                <h6 class="text-muted">Horas productivas</h6>
+                                <h4 class="fw-bold text-success">{{horasProductividad}}%</h4>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                            <table class="table table-bordered table-striped text-center align-middle">
+                              <thead class="table-dark">
+                                <tr>
+                                  <th>Actividad</th>
+                                  <th>Horas Agendadas</th> 
+                                  <th>Horas Reportadas</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <th>Revisión Matutinas</th>
+                                  <td>{{horasAM}}</td> 
+                                  <td>{{horasAMReportadas}}</td> 
+                                </tr>
+                                <tr>
+                                  <th>Operativos</th>
+                                  <td>{{horasOpe}}</td>
+                                  <td>{{horasOpeReportadas}}</td>
+                                </tr>
+                                <tr>
+                                  <th>Supervisiones</th>
+                                  <td>{{horasSup}}</td>
+                                  <td>{{horasSupReportadas}}</td>
+                                </tr>
+                                <tr>
+                                  <th>Entregas</th>
+                                  <td>{{horasEntregas}}</td>
+                                  <td>{{horasEntregasReportadas}}</td>
+                                </tr>
+                                <tr>
+                                  <th>Cobranza</th>
+                                  <td>{{horasCobranza}}</td>
+                                  <td>{{horasCobranzasReportadas}}</td>
+                                </tr>
+                                <tr>
+                                  <th>Ventas</th>
+                                  <td>{{horasVentas}}</td>
+                                  <td>{{horasVentasReportadas}}</td>
+                                </tr>
+                                <tr>
+                                  <th>Actividades sin código</th>
+                                  <td>{{horasSC}}</td>
+                                  <td>{{horasSCReportadas}}</td>
+                                </tr>
+                                <tr>
+                                  <th>Realizar Agenda</th>
+                                  <td>{{horasReA}}</td>
+                                  <td>{{horasReAReportadas}}</td>
+                                </tr>
+                                <tr>
+                                  <th>Reunión</th>
+                                  <td>0</td>
+                                  <td>0</td>
+                                </tr>
+                              </tbody>
+                            </table>
+
+                        <!---->
+                        
+                        <!-- Gráficos -->
+                        <div class="row">
+                          <div class="col-md-12 mb-4">
+                            <div class="card h-100">
+                              <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Distribución por Código</h5>
+                              </div>
+                              <div class="card-body">
+                                <canvas #graficaCodigo class="w-100" height="300"></canvas>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                              <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Distribución de Horas</h5>
+                              </div>
+                              <div class="card-body">
+                                <canvas #graficaHoras class="w-100" height="300"></canvas>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                       </div>
                     </div>
                   </div>
-                  
-                  <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                      <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Distribución de Horas</h5>
-                      </div>
-                      <div class="card-body">
-                        <canvas #graficaHoras class="w-100" height="300"></canvas>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              </div>
-            </div>
-          </div>
       </div>
-        <!--FIN CONTENIDO-->
-      </div>
+    <!--FIN CONTENIDO-->
     </div>
   </div>
 </div>
