@@ -73,8 +73,8 @@ throw new Error('Method not implemented.');
     chartCodigo: any;
     mostrarContenedorGraficas: boolean = false;
 
-    
-
+    currentPage: number = 1;
+    itemsPerPage: number = 10; // número de bauchers por página
   constructor(
     private fb: FormBuilder, 
       private _coordinacionService: CoordinacionService){
@@ -87,6 +87,24 @@ throw new Error('Method not implemented.');
       return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
     }
 
+    get paginatedAgendasFiltradasPorCoordinador() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.agendasFiltradasPorCoordinador.slice(start, end);
+    }
+
+        cambiarPagina(pagina: number) {
+      this.currentPage = pagina;
+    }
+  
+    get totalPages() {
+      return Math.ceil(this.agendas.length / this.itemsPerPage);
+    }
+    changePage(page: number) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
+    }
 
     ngOnInit(): void {
     this.loadCoordinaciones();
@@ -664,6 +682,7 @@ throw new Error('Method not implemented.');
       a => a.horaReporte && a.reportado === true && a.codigo === 'Ope'
     ).length;
   }
+
 
   get horasProductividad(): number {
     return this.horasTrabajo > 0

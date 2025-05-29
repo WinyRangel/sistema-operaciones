@@ -60,7 +60,7 @@
               [class.col-12]="isFormExpanded || !isTableVisible"
               [class.col-lg-6]="!isFormExpanded && isTableVisible"
               [class.col-lg-4]="isFormExpanded && isTableVisible">
-                          <form [formGroup]="registrarAgenda" (ngSubmit)="RegistrarAgenda()" class="h-100">
+            <form [formGroup]="registrarAgenda" (ngSubmit)="RegistrarAgenda()" class="h-100">
               <div class="card shadow-sm h-100">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                   <h4 class="mb-0"><i class="bi bi-calendar-plus me-2"></i>Registro de Agenda</h4>
@@ -223,7 +223,7 @@
                 </div>
               </div>
             </form>
-          </div>
+            </div>
           
           <!-- TABLA DE SEGUIMIENTO -->
           <div *ngIf="isTableVisible" 
@@ -621,7 +621,7 @@
                 
                 <!-- Gráficos -->
                 <div class="row">
-                  <div class="col-md-12 mb-4">
+                  <div class="col-md-6 mb-4">
                     <div class="card h-100">
                       <div class="card-header bg-light">
                         <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Distribución por Código</h5>
@@ -631,8 +631,8 @@
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="col-md-12 mb-4">
+                  
+                  <div class="col-md-6 mb-4">
                     <div class="card h-100">
                       <div class="card-header bg-light">
                         <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Distribución de Horas</h5>
@@ -642,6 +642,7 @@
                       </div>
                     </div>
                   </div>
+                </div>
               </div>
               </div>
             </div>
