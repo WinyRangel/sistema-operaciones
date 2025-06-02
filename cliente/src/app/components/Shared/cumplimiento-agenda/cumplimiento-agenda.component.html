@@ -3,7 +3,7 @@
         <div class="col-xxl-10 col-xl-12">
             <div class="card shadow-lg rounded-4 border-0 bg-light">
                 <div class="card-header bg-primary text-white rounded-top-3 py-4">
-                    <h3 class="text-center mb-0 fw-bold display-6">Cumplimiento de Agenda y Objetivos</h3>
+                    <h3 class="text-center mb-0 fw-bold display-6">Cumplimiento de Objetivos</h3>
                 </div>
 
                 <div class="card-body p-4 mb-3">
@@ -52,7 +52,41 @@
                                         <td>{{ fila.codigos.join(', ') }}</td>
                                         <td>{{ fila.agendados }}</td>
                                         <td>{{ fila.reportados }}</td>
-                                        <td>{{ fila.porcentaje }}%</td>
+                                        <!-- <td>{{ fila.porcentaje }}%</td> -->
+                                       <td [ngClass]="{
+      'text-danger': fila.porcentaje < 50,
+      'text-warning': fila.porcentaje >= 50 && fila.porcentaje < 90,
+      'text-success': fila.porcentaje >= 90
+    }" [title]="fila.porcentaje >= 90 ? 'Se ha cumplido el objetivo' : 'No se ha cumplido el objetivo'">
+    <div class="d-flex align-items-center gap-2">
+        <!-- Ícono -->
+        <i class="bi" [ngClass]="{
+             'bi-x-circle-fill text-danger': fila.porcentaje < 50,
+             'bi-exclamation-triangle-fill text-warning': fila.porcentaje >= 50 && fila.porcentaje < 90,
+             'bi-check-circle-fill text-success': fila.porcentaje >= 90
+           }"></i>
+        <!-- Barra de progreso -->
+        <div class="progress flex-grow-1"
+            style="height: 20px; border-radius: 10px; overflow: hidden;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                role="progressbar" 
+                [ngClass]="{
+                     'bg-danger': fila.porcentaje < 50,
+                     'bg-warning': fila.porcentaje >= 50 && fila.porcentaje < 90,
+                     'bg-success': fila.porcentaje >= 90
+                   }" 
+                [style.width.%]="fila.porcentaje" 
+                [attr.aria-valuenow]="fila.porcentaje" 
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [title]="fila.porcentaje < 50 ? 'El progreso es bajo. Es necesario mejorar.' : 
+                         (fila.porcentaje < 90 ? 'Progreso aceptable, pero aún se puede mejorar.' : 
+                         '¡Excelente! Se ha cumplido el objetivo.')">
+                {{ fila.porcentaje }}%
+            </div>
+        </div>
+    </div>
+</td>
                                     </tr>
                                 </ng-container>
                             </tbody>
@@ -98,8 +132,8 @@
                                 <colgroup>
                                     <col style="width: 10%;">
                                     <col style="width: 30%;">
-                                    <col style="width: 50%;">
-                                    <col style="width: 10%;">
+                                    <col style="width: 45%;">
+                                    <col style="width: 15%;">
                                 </colgroup>
                                 <thead>
                                     <tr>

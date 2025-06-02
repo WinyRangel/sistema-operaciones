@@ -85,6 +85,6 @@ p {
 .fixed-table th:nth-child(2),
 .fixed-table td:nth-child(2) { width: 30%; }
 .fixed-table th:nth-child(3),
-.fixed-table td:nth-child(3) { width: 50%; }
+.fixed-table td:nth-child(3) { width: 45; }
 .fixed-table th:nth-child(4),
-.fixed-table td:nth-child(4) { width: 10%; }
+.fixed-table td:nth-child(4) { width: 15%; }

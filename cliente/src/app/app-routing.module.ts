@@ -17,7 +17,7 @@ const routes: Routes = [
   { path: 'depositos', component: DepositosComponent },
   { path: 'inicio', component: InicioComponent },
   { path: 'reportefichas', component: ReporteFichasComponent },
-  { path: 'cumplimientoagenda', component: CumplimientoAgendaComponent},
+  { path: 'cumplimientoobjetivo', component: CumplimientoAgendaComponent},
   { path: '**', component: InicioComponent }
 ];
 
