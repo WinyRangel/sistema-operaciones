@@ -89,7 +89,9 @@ export class RecorridoAgendaComponent implements OnInit {
   get paginatedAgendasFiltradasPorCoordinador() {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     const end = start + this.itemsPerPage;
+    
     return this.agendasFiltradasPorCoordinador.slice(start, end);
+    
   }
 
   cambiarPagina(pagina: number) {
@@ -147,7 +149,6 @@ export class RecorridoAgendaComponent implements OnInit {
           icon: "success"
         });
         this.actividades.reset();
-        this.registrarAgenda
       } else if (
         /* Read more about handling dismissals below */
         result.dismiss === Swal.DismissReason.cancel
@@ -275,7 +276,6 @@ export class RecorridoAgendaComponent implements OnInit {
       .then(() => {
         this.showToast('success', 'Actividades registradas con éxito');
         this.refrescarAgendas();
-        this.registrarAgenda.reset();
         this.actividades.clear();
         this.actividades.push(this.crearActividad());
       })
@@ -361,6 +361,7 @@ export class RecorridoAgendaComponent implements OnInit {
         (!this.diaSeleccionado || dia.toLowerCase() === this.diaSeleccionado.toLowerCase())
       );
     });
+    
   }
 
   aplicarFiltros(): void {
