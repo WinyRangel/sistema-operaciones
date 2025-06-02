@@ -49,10 +49,11 @@ export class RecorridoAgendaComponent implements OnInit {
   domicilios: string[] = ["NA"];
   rendimientosCoordinadores: { [nombre: string]: number } = {};
 
-  meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-  diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-  
+    meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+    
   //Visibilidad del formulario
     isFormVisible: boolean = true;
     isTableVisible: boolean = false;
@@ -112,8 +113,45 @@ export class RecorridoAgendaComponent implements OnInit {
     this.loadAgendas();
     this.loadDomicilios();
     this.setupFormListeners();
-  }
 
+
+  //   resetForm() {
+  //       const swalWithBootstrapButtons = Swal.mixin({
+  //         customClass: {
+  //           confirmButton: "btn btn-success",
+  //           cancelButton: "btn btn-danger"
+  //         },
+  //         buttonsStyling: false
+  //       });
+  //       swalWithBootstrapButtons.fire({
+  //         title: "¿Estás seguro de realizar está acción?",
+  //         text: "No podrás revertir esto",
+  //         icon: "warning",
+  //         showCancelButton: true,
+  //         confirmButtonText: "Si, limpiar formulario.",
+  //         cancelButtonText: "No, Cancelar.",
+  //         reverseButtons: true
+  //       }).then((result) => {
+  //         if (result.isConfirmed) {
+  //           swalWithBootstrapButtons.fire({
+  //             title: "¡Formulario limpio!",
+  //             text: "El fórmulario ha sido limpiado.",
+  //             icon: "success"
+  //           });
+  //             this.actividades.reset();
+  //         } else if (
+  //           /* Read more about handling dismissals below */
+  //           result.dismiss === Swal.DismissReason.cancel
+  //         ) {
+  //           swalWithBootstrapButtons.fire({
+  //             title: "Cancelado",
+  //             text: "El fórmulario no se ha limpiado.",
+  //             icon: "error"
+  //           });
+  //         }
+  //       });
+  // }
+  }
   private initForm(): FormGroup {
     return this.fb.group({
       coordinador: [''],
@@ -124,44 +162,6 @@ export class RecorridoAgendaComponent implements OnInit {
       actividades: this.fb.array([this.crearActividad()])
     });
   }
-
-  resetForm() {
-    const swalWithBootstrapButtons = Swal.mixin({
-      customClass: {
-        confirmButton: "btn btn-success",
-        cancelButton: "btn btn-danger"
-      },
-      buttonsStyling: false
-    });
-    swalWithBootstrapButtons.fire({
-      title: "¿Estás seguro de realizar está acción?",
-      text: "No podrás revertir esto",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Si, limpiar formulario.",
-      cancelButtonText: "No, Cancelar.",
-      reverseButtons: true
-    }).then((result) => {
-      if (result.isConfirmed) {
-        swalWithBootstrapButtons.fire({
-          title: "¡Formulario limpio!",
-          text: "El fórmulario ha sido limpiado.",
-          icon: "success"
-        });
-        this.actividades.reset();
-      } else if (
-        /* Read more about handling dismissals below */
-        result.dismiss === Swal.DismissReason.cancel
-      ) {
-        swalWithBootstrapButtons.fire({
-          title: "Cancelado",
-          text: "El fórmulario no se ha limpiado.",
-          icon: "error"
-        });
-      }
-    });
-  }
-
   private generateWeeks(): void {
     this.semanas = Array.from({ length: SEMANAS_ANIO },
       (_, i) => `SEMANA ${i + 1}`);
@@ -339,6 +339,7 @@ export class RecorridoAgendaComponent implements OnInit {
 
   toggleTableVisibility() {
     this.isTableVisible = !this.isTableVisible;
+
     }
 
   toggleFormSize() {
