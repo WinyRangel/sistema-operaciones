@@ -544,7 +544,7 @@ export class RecorridoAgendaComponent implements OnInit {
   opcionesCodigo = [
     { value: 'AG', texto: 'AG | Aseo General' },
     { value: 'AM', texto: 'AM | Actividades Matutinas' },
-    { value: 'ATEN', texto: 'Aten | Atenciones' },
+    { value: 'Aten', texto: 'Aten | Atenciones' },
     { value: 'C', texto: 'C | Cobranza' },
     { value: 'CF', texto: 'CF | Cierre de Fichas' },
     { value: 'D', texto: 'D | Domiciliar' },
@@ -560,8 +560,8 @@ export class RecorridoAgendaComponent implements OnInit {
     { value: 'RS', texto: 'RS | Reunión Semanal' },
     { value: 'TS', texto: 'TS | Traslado' },
     { value: 'VTA', texto: 'VTA | Promoción' },
-    { value: 'SEG', texto: 'Seg | Seguimiento' },
-    { value: 'SUP', texto: 'Sup | Supervisión' },
+    { value: 'Seg', texto: 'Seg | Seguimiento' },
+    { value: 'Sup', texto: 'Sup | Supervisión' },
     { value: 'Sin Codigo', texto: 'Sin codigo' },
     { value: '', texto: '' }
   ];
