@@ -10,6 +10,7 @@ import { Agenda, Domicilio } from '../models/agenda';
 export class CoordinacionService {
 
   url = 'https://servidor-operaciones.onrender.com/coordinacion'
+  url3 = 'https://servidor-operaciones.onrender.com/agendas?page=1&limit=10000'
   url2 = 'https://servidor-operaciones.onrender.com/agenda'
   constructor(private http: HttpClient) { }
 
@@ -21,9 +22,18 @@ export class CoordinacionService {
     return this.http.post(this.url2, ragenda);
   }
 
+  obtenerAgendas1(page: number = 1, limit: number = 50): Observable<any> {
+      const params = new HttpParams()
+        .set('page', page.toString())
+        .set('limit', limit.toString());
+
+      return this.http.get(this.url3, { params });
+  }
+
   obtenerAgendas(): Observable<any> {
     return this.http.get(this.url2);
   }
+
 
   getDomicilios(): Observable<Domicilio[]> {
   return this.http.get<Domicilio[]>('https://servidor-operaciones.onrender.com/domicilios');

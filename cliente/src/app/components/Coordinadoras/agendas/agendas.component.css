@@ -77,21 +77,6 @@ td { font-family: "Century Gothic";
   transition: all 0.3s ease;
 }
 
-/* Agregar en tu archivo CSS */
-.bg-success-light { background-color: rgba(25, 135, 84, 0.1); }
-.bg-danger-light { background-color: rgba(220, 53, 69, 0.1); }
-.bg-warning-light { background-color: rgba(255, 193, 7, 0.1); }
-.bg-info-light { background-color: rgba(13, 202, 240, 0.1); }
-
-.btn-icon {
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-
 canvas {
   max-width: 100%;
   height: auto !important;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Coordinacion } from '../../../models/coordinacion';
 import { CoordinacionService } from '../../../services/coordinacion.service';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -18,24 +18,21 @@ const DELAY_PDF_GENERATION = 500;
 const SEMANAS_ANIO = 52;
 
 @Component({
-  selector: 'app-recorrido-agenda',
+  selector: 'app-reporte-agendas',
   standalone: false,
-  templateUrl: './recorrido-agenda.component.html',
-  styleUrls: ['./recorrido-agenda.component.css'],
+  templateUrl: './reporte-agendas.component.html',
+  styleUrl: './reporte-agendas.component.css'
 })
-
-
-export class RecorridoAgendaComponent implements OnInit {
+export class ReporteAgendasComponent {
   // ViewChilds
   @ViewChild('graficaCodigo') graficaCodigo!: ElementRef<HTMLCanvasElement>;
   @ViewChild('reportePDF') reportePDF!: ElementRef;
   @ViewChild('graficaHoras') graficaHoras!: ElementRef;
-  agendasFiltradasPorCoordinador: any[] = [];
 
   //Variables para agenda
+  registrarAgenda: FormGroup;
   coordinaciones: Coordinacion[] = [];
   agendas: any[] = []; // Lista completa de agendas
-
 
   //
   selectedCoord: Coordinacion | null = null;
@@ -51,8 +48,7 @@ export class RecorridoAgendaComponent implements OnInit {
                    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
-  actividadSeleccionada: any = null;
-
+    
   //horas de trabajo para métricas del mes
   horasAgenda: number = 0;
   horasTrabajo: number = 0;
@@ -67,10 +63,10 @@ export class RecorridoAgendaComponent implements OnInit {
   chartCodigo: any;
   mostrarContenedorGraficas: boolean = false;
 
-
   constructor(
     private fb: FormBuilder,
     private _coordinacionService: CoordinacionService) {
+    this.registrarAgenda = this.initForm();
     this.generateWeeks();
   }
 
@@ -79,9 +75,7 @@ export class RecorridoAgendaComponent implements OnInit {
     return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
   }
 
-  trackById(index: number, item: any): string {
-  return item._id;
-}
+
 
   ngOnInit(): void {
     this.loadCoordinaciones();
@@ -89,9 +83,15 @@ export class RecorridoAgendaComponent implements OnInit {
   }
 
 
-  editarActividad(agenda: any) {
-    console.log('Actividad seleccionada:', agenda);
-    this.actividadSeleccionada = agenda;
+  private initForm(): FormGroup {
+    return this.fb.group({
+      coordinador: [''],
+      semana: ['', Validators.required],
+      fecha: ['', Validators.required],
+      objetivo: [''],
+      cumplimientoAgenda: [false],
+      actividades: this.fb.array([this.crearActividad()])
+    });
   }
 
 
@@ -109,21 +109,13 @@ export class RecorridoAgendaComponent implements OnInit {
   }
 
   private loadAgendas(): void {
-    this._coordinacionService.obtenerAgendas1(1, 315).subscribe({
-      next: response => {
-        this.agendas = response.agendas.map((agenda: { fecha: string }) => ({
-          ...agenda,
-          fecha: this.fixUTCDateToLocal(agenda.fecha)
-        }));
-        this.filtrarAgendas();
-      },
-      error: err => {
-        console.error('Error al cargar agendas:', err);
-      }
+    this._coordinacionService.obtenerAgendas().subscribe(response => {
+      this.agendas = response.map((agenda: { fecha: string; }) => ({
+        ...agenda,
+        fecha: this.fixUTCDateToLocal(agenda.fecha)
+      }));
     });
   }
-
-
 
 
   private setRendimientos(coordinaciones: Coordinacion[]): void {
@@ -134,11 +126,84 @@ export class RecorridoAgendaComponent implements OnInit {
     });
   }
 
-    mostrarDiv(nombre: string): void {
-      this.coordinadorVisible = nombre;
-      this.filtrarAgendas(); // Filtro inmediato al cambiar de coordinador
+  mostrarDiv(nombre: string): void {
+    this.coordinadorVisible = nombre;
+    this.registrarAgenda.get('coordinador')?.setValue(nombre);
+  }
+
+  crearActividad(): FormGroup {
+    return this.fb.group({
+      hora: ['', Validators.required],
+      domicilio: [''],
+      actividad: [''],
+      codigo: [''],
+      traslado: ['', Validators.required],
+      kmRecorrido: ['']
+    });
+
+  }
+
+
+  get actividades(): FormArray {
+    return this.registrarAgenda.get('actividades') as FormArray;
+  }
+
+  agregarActividad(): void {
+    this.actividades.push(this.crearActividad());
+  }
+
+  eliminarActividad(index: number): void {
+    this.actividades.removeAt(index);
+  }
+
+  // CRUD operations
+  RegistrarAgenda(): void {
+    if (this.registrarAgenda.invalid) {
+      this.showToast('error', 'Por favor, revisa los campos obligatorios del formulario.');
+      return;
     }
 
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¿Deseas registrar esta(s) actividad(es)?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, registrar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.saveAgenda();
+      }
+    });
+  }
+
+  private saveAgenda(): void {
+    const datos = this.registrarAgenda.value;
+    const requests = this.actividades.value.map((actividad: any) => {
+      const agenda: Agenda = {
+        coordinador: datos.coordinador,
+        semana: datos.semana,
+        fecha: datos.fecha,
+        objetivo: datos.objetivo,
+        cumplimientoAgenda: datos.cumplimientoAgenda,
+        ...actividad
+      };
+
+      return this._coordinacionService.registrarAgenda(agenda);
+    });
+
+    Promise.all(requests.map((req: { toPromise: () => any; }) => req.toPromise()))
+      .then(() => {
+        this.showToast('success', 'Actividades registradas con éxito');
+        this.refrescarAgendas();
+        this.actividades.clear();
+        this.actividades.push(this.crearActividad());
+      })
+      .catch(error => {
+        console.error('Error al registrar agenda:', error);
+        this.showToast('error', 'Error al registrar las actividades');
+      });
+  }
 
 
   // Operaciones CRUD
@@ -156,7 +221,7 @@ export class RecorridoAgendaComponent implements OnInit {
         this._coordinacionService.eliminarAgenda(id).subscribe({
           next: () => {
             this.showToast('success', 'Agenda eliminada correctamente');
-            this.loadAgendas();
+            this.refrescarAgendas();
           },
           error: (error) => {
             console.error('Error al eliminar agenda:', error);
@@ -167,58 +232,43 @@ export class RecorridoAgendaComponent implements OnInit {
     });
   }
 
+  seleccionarCoordinador(coord: Coordinacion | null): void {
+    this.selectedCoord = coord;
+
+    if (coord?.coordinador?.[0]?.nombre) {
+      this.registrarAgenda.get('coordinador')?.setValue(coord.coordinador[0].nombre);
+    } else {
+      this.registrarAgenda.get('coordinador')?.setValue('');
+    }
+  }
+
 
   refrescarAgendas(): void {
-    this._coordinacionService.obtenerAgendas1().subscribe(data => {
-      this.agendas = data.map((agenda: { fecha: string }) => ({
+    this._coordinacionService.obtenerAgendas().subscribe(data => {
+      this.agendas = data.map((agenda: { fecha: string; }) => ({
         ...agenda,
         fecha: this.fixUTCDateToLocal(agenda.fecha)
       }));
-      this.filtrarAgendas(); // Aplicar filtros después de cargar
     });
   }
 
+  // : Agregar métodos para obtener
+  get agendasFiltradasPorCoordinador() {
+    return this.agendas.filter(agenda => {
+      const fecha = new Date(agenda.fecha);
+      const mes = fecha.toLocaleString('es-MX', { month: 'long' });
+      const dia = fecha.toLocaleString('es-MX', { weekday: 'long' });
 
-  filtrarAgendas(): void {
-    this.agendasFiltradasPorCoordinador = this.agendas.filter(agenda => {
-      // 1) Validar que agenda.coordinador exista
-      if (!agenda.coordinador) return false;
+      const semana = agenda.semana?.trim(); // Elimina espacios al inicio y final
 
-      // 2) Convertir fecha en objeto y extraer mes y día en español
-      const fechaObj = new Date(agenda.fecha);
-      if (isNaN(fechaObj.getTime())) return false;
-
-      const mesNombre = fechaObj
-        .toLocaleString('es-MX', { month: 'long' }); // e.g. "mayo"
-      const diaNombre = fechaObj
-        .toLocaleString('es-MX', { weekday: 'long' }); // e.g. "lunes"
-      const semanaTrimmed = agenda.semana?.trim() || '';
-
-      // 3) Comparar coordinador solo si se seleccionó alguno
-      const cumpleCoordinador = this.coordinadorVisible
-        ? agenda.coordinador.toLowerCase() === this.coordinadorVisible.toLowerCase()
-        : true;
-
-      // 4) Comparar mes (si hay mesSeleccionado)
-      const cumpleMes = this.mesSeleccionado
-        ? mesNombre.toLowerCase() === this.mesSeleccionado.toLowerCase()
-        : true;
-
-      // 5) Comparar semana (si hay semanaSeleccionada)
-      const cumpleSemana = this.semanaSeleccionada
-        ? semanaTrimmed === this.semanaSeleccionada
-        : true;
-
-      // 6) Comparar día (si hay diaSeleccionado)
-      const cumpleDia = this.diaSeleccionado
-        ? diaNombre.toLowerCase() === this.diaSeleccionado.toLowerCase()
-        : true;
-
-      return cumpleCoordinador && cumpleMes && cumpleSemana && cumpleDia;
+      return (
+        agenda.coordinador === this.coordinadorVisible &&
+        (!this.mesSeleccionado || mes.toLowerCase() === this.mesSeleccionado.toLowerCase()) &&
+        (!this.semanaSeleccionada || semana === this.semanaSeleccionada) &&
+        (!this.diaSeleccionado || dia.toLowerCase() === this.diaSeleccionado.toLowerCase())
+      );
     });
   }
-
-
 
   aplicarFiltros(): void {
     // Actualizar métricas y gráficos si es necesario
@@ -260,7 +310,6 @@ export class RecorridoAgendaComponent implements OnInit {
   }
 
   // Metrics calculations
-// Métricas de reporte
   get totalKmRecorridos(): number {
     return +this.agendasFiltradasPorCoordinador
       .reduce((acc, curr) => acc + (curr.kmRecorrido || 0), 0)
@@ -268,7 +317,8 @@ export class RecorridoAgendaComponent implements OnInit {
   }
 
   get litrosGasolina(): number {
-    const rendimiento = this.rendimientosCoordinadores[this.coordinadorVisible] ?? RENDIMIENTO_POR_DEFECTO;
+    const nombreCoordinador = this.registrarAgenda.get('coordinador')?.value;
+    const rendimiento = this.rendimientosCoordinadores[nombreCoordinador] ?? RENDIMIENTO_POR_DEFECTO;
     return this.totalKmRecorridos > 0
       ? parseFloat((this.totalKmRecorridos / rendimiento).toFixed(2))
       : 0;
@@ -287,7 +337,6 @@ export class RecorridoAgendaComponent implements OnInit {
       a => a.horaReporte && a.reportado === true
     ).length;
   }
-
 
   get horasEntregas(): number {
     return this.agendasFiltradasPorCoordinador.filter(

@@ -8,11 +8,15 @@ import { EjecutivasComponent } from './components/Shared/ejecutivas/ejecutivas.c
 import { DepositosComponent } from './components/Shared/depositos/depositos.component';
 import { ReporteFichasComponent } from './components/reporte-fichas/reporte-fichas.component';
 import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-agenda/cumplimiento-agenda.component';
+import { AgendasComponent } from './components/Coordinadoras/agendas/agendas.component';
+import { ReporteAgendasComponent } from './components/Coordinadoras/reporte-agendas/reporte-agendas.component';
 
 const routes: Routes = [
   { path: 'baucher', component: BauchersComponent },
   { path: 'legales', component: LegalesComponent },
   { path: 'recorrido-agenda', component: RecorridoAgendaComponent },
+  { path: 'reporte-agendas', component: ReporteAgendasComponent },
+  { path: 'agendas', component: AgendasComponent },
   { path: 'ejecutivas', component: EjecutivasComponent },
   { path: 'depositos', component: DepositosComponent },
   { path: 'inicio', component: InicioComponent },

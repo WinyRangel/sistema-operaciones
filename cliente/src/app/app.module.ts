@@ -8,6 +8,8 @@ import { TableModule } from 'primeng/table'
 import { NgOptimizedImage } from '@angular/common';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { CommonModule } from '@angular/common';
+import { ButtonModule } from 'primeng/button';
 
 
 import { AppRoutingModule } from './app-routing.module';
@@ -29,6 +31,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TagModule } from 'primeng/tag';
 import { FechaFormatPipe } from './pipes/fecha-format.pipe';
 import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-agenda/cumplimiento-agenda.component';
+import { AgendasComponent } from './components/Coordinadoras/agendas/agendas.component';
+import { ReporteAgendasComponent } from './components/Coordinadoras/reporte-agendas/reporte-agendas.component';
 
 
 @NgModule({
@@ -45,7 +49,9 @@ import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-ag
     DepositosComponent,
     ReporteFichasComponent,
     FechaFormatPipe,
-    CumplimientoAgendaComponent
+    CumplimientoAgendaComponent,
+    AgendasComponent,
+    ReporteAgendasComponent
   ],
   
   imports: [
@@ -60,7 +66,9 @@ import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-ag
     FormsModule,
     NgOptimizedImage,
     DatePickerModule,
-    ScrollingModule
+    ScrollingModule,
+    ButtonModule,
+    CommonModule
   ],
     providers: [
         provideAnimationsAsync(),
