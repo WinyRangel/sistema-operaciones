@@ -79,10 +79,6 @@ export class RecorridoAgendaComponent implements OnInit {
     return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
   }
 
-  trackById(index: number, item: any): string {
-  return item._id;
-}
-
   ngOnInit(): void {
     this.loadCoordinaciones();
     this.loadAgendas();
@@ -93,8 +89,6 @@ export class RecorridoAgendaComponent implements OnInit {
     console.log('Actividad seleccionada:', agenda);
     this.actividadSeleccionada = agenda;
   }
-
-
   private generateWeeks(): void {
     this.semanas = Array.from({ length: SEMANAS_ANIO },
       (_, i) => `SEMANA ${i + 1}`);
@@ -216,6 +210,7 @@ export class RecorridoAgendaComponent implements OnInit {
 
       return cumpleCoordinador && cumpleMes && cumpleSemana && cumpleDia;
     });
+    
   }
 
 
