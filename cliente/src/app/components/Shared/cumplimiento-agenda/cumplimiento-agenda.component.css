@@ -79,6 +79,21 @@ p {
   vertical-align: top;                 /* Alinea la celda arriba */
 }
 
+/* src/app/components/cumplimiento-agenda/cumplimiento-agenda.component.css */
+
+/* Estilos básicos; ajústalos a tu paleta o framework */
+table {
+  border: 1px solid #d1d5db; /* gris claro */
+}
+th, td {
+  padding: 0.5rem 1rem;
+}
+th {
+  background-color: #f3f4f6; /* gris muy claro */
+  font-weight: 600;
+}
+
+
 /* Opcional: si no usas colgroup, puedes asignar anchos por columna */
 .fixed-table th:nth-child(1),
 .fixed-table td:nth-child(1) { width: 10%; }
