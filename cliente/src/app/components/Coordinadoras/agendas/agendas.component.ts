@@ -262,7 +262,6 @@ private loadAgendas(): void {
     { value: 'E', texto: 'E | Entregas', color: '#fce5cd' },
     { value: 'GN', texto: 'GN | Grupo Nuevo', color: '#f4cccc' },
     { value: 'Int', texto: 'INT | Integración', color: '#d0e0e3' },
-    { value: 'Ope', texto: 'Ope | Env. Operativos', color: '#f9cb9c' },
     { value: 'R', texto: 'R | Pago', color: '#ead1dc' },
     { value: 'R/A', texto: 'R/A | Realizando Agendas', color: '#c9daf8' },
     { value: 'RS', texto: 'RS | Reunión Semanal', color: '#b6d7a8' },
