@@ -153,12 +153,12 @@
             <tr *ngFor="let row of getRows(currentSheet); let rowIndex = index">
               <td *ngFor="let colIndex of getColumnCount(currentSheet); let c = index">
                 <!-- input editable -->
-                <input
+                <!-- <input
                   type="text"
                   class="form-control editable-cell"
                   [ngModel]="sheetsData[currentSheet][rowIndex + 1]?.[c] || ''"
                   (ngModelChange)="updateCell(currentSheet, rowIndex + 1, c, $event)"
-                />
+                /> -->
               </td>
               <td></td>
               <td></td>
