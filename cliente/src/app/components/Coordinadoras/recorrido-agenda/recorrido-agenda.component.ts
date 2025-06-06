@@ -240,6 +240,7 @@ export class RecorridoAgendaComponent implements OnInit {
       actividad: agenda.actividad,
       hora: agenda.hora,
       codigo: agenda.codigo,
+      codigoReportado: agenda.codigoReportado,
       actividadReportada: agenda.actividadReportada,
       reportado: agenda.reportado,
       horaReporte: agenda.horaReporte,

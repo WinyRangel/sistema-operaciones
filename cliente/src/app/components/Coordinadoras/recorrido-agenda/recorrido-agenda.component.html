@@ -173,9 +173,10 @@
                         <th class="text-center" style="width: 100px;">Fecha</th>
                         <th class="text-center" style="width: 80px;">Hora</th>
                         <th style="min-width: 180px;">Actividad</th>
-                        <th class="text-center" style="min-width: 50px;">Código</th>
+                        <th class="text-center" style="min-width: 40px;">Código</th>
                         <th style="min-width: 180px;">Actividad Reportada</th>
-                        <th class="text-center" style="width: 120px;">Estado</th>
+                        <th class="text-center" style="min-width: 40px;">Código Reportado</th>
+                        <th class="text-center" style="width: 100px;">Estado</th>
                         <th class="text-center" style="width: 100px;">Inicio</th>
                         <th class="text-center" style="width: 100px;">Cierre</th>
                         <th class="text-center" style="width: 100px;">Cumplimiento</th>
@@ -227,6 +228,12 @@
                             {{ agenda.actividadReportada || '--' }}
                           </div>
                         </td>
+
+                        <td>
+                          <div class="text-center" style="max-width: 180px;" [title]="agenda.codigoReportado">
+                           <span class="badge text-bg-success"> {{ agenda.codigoReportado }} </span>
+                          </div>
+                        </td>
                         
                         <!-- Estado Reportado -->
                         <td class="text-center">
@@ -236,7 +243,7 @@
                                   'bg-danger-light text-danger': !agenda.reportado
                                 }">
                             <i class="bi me-1" [ngClass]="agenda.reportado ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
-                            {{ agenda.reportado ? 'Reportado' : 'Pendiente' }}
+                            {{ agenda.reportado ? 'R' : 'NREP' }}
                           </span>
                         </td>
                         
@@ -275,10 +282,10 @@
                           <span class="badge py-2" 
                                 [ngClass]="{
                                   'bg-success-light text-success': agenda.cumplimientoAgenda,
-                                  'bg-warning-light text-warning': !agenda.cumplimientoAgenda
+                                  'bg-danger-light text-danger': !agenda.cumplimientoAgenda
                                 }">
                             <i class="bi me-1" [ngClass]="agenda.cumplimientoAgenda ? 'bi-check-circle-fill' : 'bi-clock-history'"></i>
-                            {{ agenda.cumplimientoAgenda ? 'Cumplido' : 'No cumplido' }}
+                            {{ agenda.cumplimientoAgenda ? '' : '' }}
                           </span>
                         </td>
                         
@@ -578,11 +585,11 @@
                 <th class="bg-light-blue text-primary">Actividad</th>
                 <th class="bg-light-blue text-primary">Código</th>
                 <th class="bg-light-blue text-primary">Actividad Reportada</th>
+                <th class="bg-light-blue text-primary">Código Reportado</th>
                 <th class="text-center bg-light-blue text-primary">Estado</th>
                 <th class="text-center bg-light-blue text-primary">Hora Inicio</th>
                 <th class="text-center bg-light-blue text-primary">Hora Cierre</th>
                 <th class="text-center bg-light-blue text-primary">KM</th>
-                <th class="text-center bg-light-blue text-primary">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -626,6 +633,14 @@
                             [(ngModel)]="actividadSeleccionada.actividadReportada"
                             placeholder="Actividad realizada"></textarea>
                 </td>
+
+                                <!-- Codigo Reportado -->
+                <td>
+                  <input class="form-control form-control-sm border-primary" 
+                            rows="2" 
+                            [(ngModel)]="actividadSeleccionada.codigoReportado"
+                            placeholder="Actividad realizada">
+                </td>
                 
                 <!-- Estado Reportado -->
                 <td class="text-center">
@@ -666,17 +681,7 @@
                            step="0.1">
                     <span class="input-group-text bg-light">km</span>
                   </div>
-                </td>
-                
-                <!-- Acciones -->
-                <td class="text-center">
-                  <button class="btn btn-sm btn-success me-1" 
-                          (click)="guardarCambios(actividadSeleccionada)" 
-                          title="Guardar cambios"
-                          >
-                    <i class="fas fa-save me-1"></i>
-                  </button>
-                </td>
+                </td>          
               </tr>
             </tbody>
           </table>
