@@ -33,6 +33,7 @@ import { FechaFormatPipe } from './pipes/fecha-format.pipe';
 import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-agenda/cumplimiento-agenda.component';
 import { AgendasComponent } from './components/Coordinadoras/agendas/agendas.component';
 import { ReporteAgendasComponent } from './components/Coordinadoras/reporte-agendas/reporte-agendas.component';
+import { ProyeccionesComponent } from './components/Shared/proyecciones/proyecciones.component';
 
 
 @NgModule({
@@ -51,7 +52,8 @@ import { ReporteAgendasComponent } from './components/Coordinadoras/reporte-agen
     FechaFormatPipe,
     CumplimientoAgendaComponent,
     AgendasComponent,
-    ReporteAgendasComponent
+    ReporteAgendasComponent,
+    ProyeccionesComponent
   ],
   
   imports: [
