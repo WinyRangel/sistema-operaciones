@@ -418,62 +418,105 @@
                     </div>
                   </div>
                 </div>
-                    <table class="table table-bordered table-striped text-center align-middle">
-                      <thead class="table-dark">
-                        <tr>
-                          <th>Actividad</th>
-                          <th>Horas Agendadas</th> 
-                          <th>Horas Reportadas</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <th>Revisión Matutinas</th>
-                          <td>{{horasAM}}</td> 
-                          <td>{{horasAMReportadas}}</td> 
-                        </tr>
-                        <tr>
-                          <th>Operativos</th>
-                          <td>{{horasOpe}}</td>
-                          <td>{{horasOpeReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Supervisiones</th>
-                          <td>{{horasSup}}</td>
-                          <td>{{horasSupReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Entregas</th>
-                          <td>{{horasEntregas}}</td>
-                          <td>{{horasEntregasReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Cobranza</th>
-                          <td>{{horasCobranza}}</td>
-                          <td>{{horasCobranzasReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Ventas</th>
-                          <td>{{horasVentas}}</td>
-                          <td>{{horasVentasReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Actividades sin código</th>
-                          <td>{{horasSC}}</td>
-                          <td>{{horasSCReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Realizar Agenda</th>
-                          <td>{{horasReA}}</td>
-                          <td>{{horasReAReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Reunión</th>
-                          <td></td>
-                          <td></td>
-                        </tr>
-                      </tbody>
-                    </table>
+                  <table class="table table-bordered table-striped text-center align-middle">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>Actividad</th>
+                        <th>Horas Agendadas</th>
+                        <th>Horas Reportadas</th>
+                        <th>Logro</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Revisión Matutina -->
+                      <tr>
+                        <th>Revisión Matutina</th>
+                        <td>{{ horasAM }}</td>
+                        <td>{{ horasAMReportadas }}</td>
+                        <td>
+                          <span *ngIf="horasAMReportadas === horasAM" class="badge text-bg-success">Logrado</span>
+                          <span *ngIf="horasAMReportadas < horasAM" class="badge text-bg-danger">No logrado</span>
+                        </td>
+                      </tr>
+
+                      <!-- Supervisiones -->
+                      <tr>
+                        <th>Supervisiones</th>
+                        <td>{{ horasSup }}</td>
+                        <td>{{ horasSupReportadas }}</td>
+                        <td>
+                          <span *ngIf="horasSupReportadas === horasSup" class="badge text-bg-success">Logrado</span>
+                          <span *ngIf="horasSupReportadas < horasSup" class="badge text-bg-danger">No logrado</span>
+                        </td>
+                      </tr>
+
+                      <!-- Entregas -->
+                      <tr>
+                        <th>Entregas</th>
+                        <td>{{ horasEntregas }}</td>
+                        <td>{{ horasEntregasReportadas }}</td>
+                        <td>
+                          <span *ngIf="horasEntregasReportadas === horasEntregas" class="badge text-bg-success">Logrado</span>
+                          <span *ngIf="horasEntregasReportadas < horasEntregas" class="badge text-bg-danger">No logrado</span>
+                        </td>
+                      </tr>
+
+                      <!-- Cobranza -->
+                      <tr>
+                        <th>Cobranza</th>
+                        <td>{{ horasCobranza }}</td>
+                        <td>{{ horasCobranzasReportadas }}</td>
+                        <td>
+                          <span *ngIf="horasCobranzasReportadas === horasCobranza" class="badge text-bg-success">Logrado</span>
+                          <span *ngIf="horasCobranzasReportadas < horasCobranza" class="badge text-bg-danger">No logrado</span>
+                        </td>
+                      </tr>
+
+                      <!-- Ventas -->
+                      <tr>
+                        <th>Ventas</th>
+                        <td>{{ horasVentas }}</td>
+                        <td>{{ horasVentasReportadas }}</td>
+                        <td>
+                          <span *ngIf="horasVentasReportadas === horasVentas" class="badge text-bg-success">Logrado</span>
+                          <span *ngIf="horasVentasReportadas < horasVentas" class="badge text-bg-danger">No logrado</span>
+                        </td>
+                      </tr>
+
+                      <!-- Actividades sin código -->
+                      <tr>
+                        <th>Actividades sin código</th>
+                        <td>{{ horasSC }}</td>
+                        <td>{{ horasSCReportadas }}</td>
+                        <td>
+                          <span *ngIf="horasSCReportadas === horasSC" class="badge text-bg-success">Logrado</span>
+                          <span *ngIf="horasSCReportadas < horasSC" class="badge text-bg-danger">No logrado</span>
+                        </td>
+                      </tr>
+
+                      <!-- Realizar Agenda -->
+                      <tr>
+                        <th>Realizar Agenda</th>
+                        <td>{{ horasReA }}</td>
+                        <td>{{ horasReAReportadas }}</td>
+                        <td>
+                          <span *ngIf="horasReAReportadas === horasReA" class="badge text-bg-success">Logrado</span>
+                          <span *ngIf="horasReAReportadas < horasReA" class="badge text-bg-danger">No logrado</span>
+                        </td>
+                      </tr>
+
+                      <!-- Reunión -->
+                      <tr>
+                        <th>Reunión</th>
+                        <td>{{ horasReunion }}</td>
+                        <td>{{ horasReunionesRep }}</td>
+                        <td>
+                          <span *ngIf="horasReunionesRep === horasReunion" class="badge text-bg-success">Logrado</span>
+                          <span *ngIf="horasReunionesRep < horasReunion" class="badge text-bg-danger">No logrado</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
 
                 <!---->
                 

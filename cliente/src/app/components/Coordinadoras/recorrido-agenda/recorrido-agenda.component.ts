@@ -462,13 +462,10 @@ export class RecorridoAgendaComponent implements OnInit {
 
   get horasReAReportadas(): number {
     return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'Sup'
+      a => a.horaReporte && a.reportado === true && a.codigo === 'R/A'
     ).length;
   }
 
-  get horasReANoReportadas(): number {
-    return this.horasReA - this.horasReAReportadas;
-  }
 
 
   //
@@ -518,26 +515,23 @@ export class RecorridoAgendaComponent implements OnInit {
     ).length;
   }
 
-  get horasAMNoReportadas(): number {
-    return this.horasAM - this.horasAMReportadas;
-  }
 
-  get horasOpe(): number {
+    get horasReunion(): number {
     return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'Ope'
+      a => a.hora && a.codigo === 'RM' && 'RS'
     ).length;
   }
 
-  get horasOpeReportadas(): number {
+  get horasReunionesRep(): number {
     return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'Ope'
+      a => a.horaReporte && a.reportado === true && a.codigo === 'RM' && 'RS'
     ).length;
   }
-
+ 
 
   get horasProductividad(): number {
-    return this.horasTrabajo > 0
-      ? parseFloat(((this.horasAgendadas / this.horasTrabajo) * 100).toFixed(2))
+    return this.horasAgendadas > 0
+      ? parseFloat(((this.horasReportadas / this.horasAgendadas)*100).toFixed(2))
       : 0;
   }
 
@@ -546,22 +540,18 @@ export class RecorridoAgendaComponent implements OnInit {
     { value: 'AM', texto: 'AM | Actividades Matutinas' },
     { value: 'Aten', texto: 'Aten | Atenciones' },
     { value: 'C', texto: 'C | Cobranza' },
-    { value: 'CF', texto: 'CF | Cierre de Fichas' },
     { value: 'D', texto: 'D | Domiciliar' },
-    { value: 'E', texto: 'E | Desembolso o Entregas' },
+    { value: 'Dep', texto: 'Dep | Depósitar' },
+    { value: 'E', texto: 'E | Entregas' },
     { value: 'GN', texto: 'GN | Grupo Nuevo' },
     { value: 'INT', texto: 'INT | Integración' },
-    { value: 'Ope', texto: 'Ope | Env. Operativos' },
     { value: 'R', texto: 'R | Pago' },
     { value: 'R/A', texto: 'R/A | Realizando Agendas' },
-    { value: 'R/EC', texto: 'R/EC | Pago/Entrega/Cambio de Ciclo' },
-    { value: 'R/ER', texto: 'R/ER | Pago/Entrega/Refill' },
-    { value: 'R/P', texto: 'R/P | Pago/Levantamiento de Papeleria' },
+    { value: 'R/M', texto: 'R/M | Reunión Mensual' },
     { value: 'RS', texto: 'RS | Reunión Semanal' },
-    { value: 'TS', texto: 'TS | Traslado' },
     { value: 'VTA', texto: 'VTA | Promoción' },
-    { value: 'Seg', texto: 'Seg | Seguimiento' },
     { value: 'Sup', texto: 'Sup | Supervisión' },
+    { value: 'S/Renov', texto: 'S/Renov | Sup.Renovación' },
     { value: 'Sin Codigo', texto: 'Sin codigo' },
     { value: '', texto: '' }
   ];

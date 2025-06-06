@@ -132,13 +132,17 @@
                           </div>
                           
                           <!-- Código -->
-                          <div class="col-md-6">
-                            <label class="form-label">Código</label>
-                            <select class="form-select" formControlName="codigo">
-                              <option disabled selected value="">Seleccione código</option>
-                              <option *ngFor="let opcion of opcionesCodigo" [value]="opcion.value">{{ opcion.texto }}</option>
-                            </select>
-                          </div>
+                          <select class="form-select" formControlName="codigo">
+                            <option disabled selected value="">Seleccione código</option>
+                            <option
+                              *ngFor="let opcion of opcionesCodigo"
+                              [value]="opcion.value"
+                              [ngStyle]="{ 'background-color': opcion.color }"
+                            >
+                              {{ opcion.texto }}
+                            </option>
+                          </select>
+
                           
                           <!-- Traslado -->
                           <div class="col-md-6">
