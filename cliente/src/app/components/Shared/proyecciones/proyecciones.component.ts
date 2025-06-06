@@ -1,14 +1,3 @@
-// import { Component } from '@angular/core';
-
-// @Component({
-//   selector: 'app-proyecciones',
-//   standalone: false,
-//   templateUrl: './proyecciones.component.html',
-//   styleUrl: './proyecciones.component.css'
-// })
-// export class ProyeccionesComponent {
-
-// }
 // src/app/proyecciones/proyecciones.component.ts
 
 import { Component, OnInit } from '@angular/core';
@@ -31,17 +20,10 @@ export class ProyeccionesComponent implements OnInit {
 
   /**
    * Contiene para cada sheetName su matriz de datos (array de arrays).
-   * Ejemplo:
-   *   this.sheetsData = {
-   *     "Semana 1": [
-   *        ["No.","ASESOR","Grupo/Individual", ...],    // fila de encabezados
-   *        [1, "ROCIO", "SINDICALIZADO", ...],           // fila 1
-   *        [2, "ALFREDO", "GP O NUEVO",  ...],           // fila 2
-   *        ...
-   *     ],
-   *     "Semana 2": [ ... ],
-   *     ...
-   *   }
+   * Después de aplicar “limpieza” (borrar fila 0 y descartar las que contengan:
+   *  - la palabra 'semana' (insensible a mayúsculas)
+   *  - la palabra 'totales'
+   *  - el patrón completo de encabezados "No.", "ASESOR", "Grupo/Individual", "Fecha Entrega Ope.", "Fecha Entrega"
    */
   sheetsData: { [sheetName: string]: any[][] } = {};
 
@@ -63,7 +45,7 @@ export class ProyeccionesComponent implements OnInit {
     }
   }
 
-  // ─── 1. LEER EL EXCEL AL SELECCIONAR EL ARCHIVO ───────────────────────
+  // ─── 1. LEER Y “LIMPIAR” EL EXCEL AL SELECCIONAR EL ARCHIVO ───────────────────────
   onFileChange(evt: any): void {
     const target: DataTransfer = <DataTransfer>(evt.target);
     if (!target.files || target.files.length === 0) {
@@ -74,8 +56,8 @@ export class ProyeccionesComponent implements OnInit {
     const file: File = target.files[0];
     const reader: FileReader = new FileReader();
     reader.onload = (e: any) => {
-      /*  — Leemos el contenido completo como binary string —
-          e.target.result es una cadena binaria con todo el .xlsx */
+      /* Leemos el contenido completo como binary string.
+         e.target.result es una cadena binaria con todo el .xlsx */
       const bstr: string = e.target.result;
       const workbook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
 
@@ -83,18 +65,60 @@ export class ProyeccionesComponent implements OnInit {
       this.sheetsData = {};
       this.workbookSheetNames = [];
 
-      // Para cada hoja, convertimos a array de arrays
+      // Patrones de encabezados repetidos que queremos eliminar si aparecen en una fila
+      const headerPattern = [
+        'no.', 
+        'asesor', 
+        'grupo/individual', 
+        'fecha entrega ope.', 
+        'fecha entrega'
+      ].map(h => h.toLowerCase());
+
+      // Para cada hoja, convertimos a array de arrays y luego limpiamos filas no deseadas
       workbook.SheetNames.forEach((sheetName: string) => {
         const ws: XLSX.WorkSheet = workbook.Sheets[sheetName];
-        // 【header: 1】 hace que devuelva un array de arrays (incluye encabezados en fila 0)
-        const data: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
-        this.sheetsData[sheetName] = data;
+        // ► Primero, extraemos toda la hoja como array de arrays (incluye fila 0 original).
+        const rawData: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+        // ► Ahora “limpiamos” rawData:
+        //  1) Eliminamos la primera fila (índice 0).
+        //  2) Filtramos todas las filas que contengan "semana" o "totales" en cualquier celda.
+        //  3) Filtramos también las filas que contengan **TODOS** los elementos de headerPattern en alguna posición.
+        const cleanedData: any[][] = rawData
+          .slice(1) // quitar fila 0 original
+          .filter((row: any[]) => {
+            //  → 1) Descartar si alguna celda contiene “semana” o “totales”
+            for (const cell of row) {
+              if (cell !== null && cell !== undefined) {
+                const text = String(cell).toLowerCase();
+                if (text.includes('semana') || text.includes('totales'))  {
+                  return false;
+                }
+              }
+            }
+
+            //  → 2) Descartar si la fila coincide con el patrón completo de encabezados
+            //     (es decir, si en la fila aparecen todas las cadenas de headerPattern, sin importar el orden)
+            const lowercasedRow = row.map(cell => (cell !== null && cell !== undefined) ? String(cell).toLowerCase() : '');
+            const contieneTodosLosEncabezados = headerPattern.every(hdr =>
+              lowercasedRow.some(cellText => cellText.trim() === hdr.trim())
+            );
+            if (contieneTodosLosEncabezados) {
+              return false;
+            }
+
+            //  → Si no coincide con ninguno de los criterios anteriores, la conservamos
+            return true;
+          });
+
+        // ► Finalmente, asignamos la “hoja limpia” a sheetsData[sheetName]
+        this.sheetsData[sheetName] = cleanedData;
       });
 
-      // Guardamos lista de nombres de hojas
+      // Guardamos la lista de nombres de hojas (pestañas)
       this.workbookSheetNames = workbook.SheetNames.slice();
 
-      // Seleccionamos automáticamente la primera hoja
+      // Seleccionamos automáticamente la primera hoja (si existe)
       if (this.workbookSheetNames.length > 0) {
         this.currentSheet = this.workbookSheetNames[0];
       }
@@ -107,6 +131,7 @@ export class ProyeccionesComponent implements OnInit {
 
   /**
    * Devuelve los encabezados (fila 0) de la hoja indicada.
+   * - Como ya quitamos la antigua fila 0, aquí el “nuevo” índice 0 será la primera fila post-limpieza.
    */
   getHeaders(sheetName: string): any[] {
     if (!this.sheetsData[sheetName] || this.sheetsData[sheetName].length === 0) {
@@ -122,7 +147,7 @@ export class ProyeccionesComponent implements OnInit {
     if (!this.sheetsData[sheetName] || this.sheetsData[sheetName].length <= 1) {
       return [];
     }
-    // slice(1) quita la fila de encabezados
+    // slice(1) quita la fila de encabezados (que ahora es la “nueva” fila 0)
     return this.sheetsData[sheetName].slice(1);
   }
 
@@ -149,9 +174,9 @@ export class ProyeccionesComponent implements OnInit {
   /**
    * Cuando el usuario edita el <input> de la celda, actualizamos en sheetsData.
    * @param sheetName  Nombre de la hoja donde ocurre el cambio
-   * @param rowIndex   Índice real de fila en sheetsData (incluye encabezados): 
-   *                   si editas la primera fila de datos, rowIndex será 1, 
-   *                   porque 0 = encabezados.
+   * @param rowIndex   Índice real de fila en sheetsData (incluye encabezados).
+   *                   Ej: si editas la primera fila de datos, rowIndex será 1, 
+   *                   porque 0 = encabezados (nueva estructura tras limpiar).
    * @param colIndex   Índice de columna (0 = primera columna)
    * @param newValue   Nuevo valor del input
    */
@@ -220,8 +245,7 @@ export class ProyeccionesComponent implements OnInit {
       alert('No hay ninguna hoja activa.');
       return;
     }
-    // Esto “vuelve a llamar” a Angular para refrescar la tabla en pantalla.
-    // Por simplicidad, basta con reasignar currentSheet (mismo valor) para forzar change detection.
+    // Esto “vuelve a llamar” a Angular para refrescar la tabla en pantalla
     const temp = this.currentSheet;
     this.currentSheet = null;
     setTimeout(() => {

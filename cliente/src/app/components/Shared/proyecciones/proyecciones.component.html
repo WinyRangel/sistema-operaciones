@@ -133,9 +133,20 @@
           <thead>
             <tr>
               <!-- Si la hoja está vacía, no hay encabezados -->
-              <th *ngFor="let header of getHeaders(currentSheet)">
+              <!-- <th *ngFor="let header of getHeaders(currentSheet)">
                 {{ header }}
-              </th>
+              </th> -->
+              <th>No.</th>
+              <th>ASESOR</th>
+              <th>Grupo/Individua</th>
+              <th>Fecha Entrega Ope</th>
+              <th>Fecha Entrega</th>
+              <th>Fecha de envio de operativo</th>
+              <th>Hora</th>
+              <th>Incidencias de operativo</th>
+              <th>Fecha limite entrega</th>
+              <th>Fecha recibo Exp. Legal.</th>
+              <th>Renovado</th>
             </tr>
           </thead>
           <tbody>
@@ -149,6 +160,13 @@
                   (ngModelChange)="updateCell(currentSheet, rowIndex + 1, c, $event)"
                 />
               </td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+
             </tr>
           </tbody>
         </table>

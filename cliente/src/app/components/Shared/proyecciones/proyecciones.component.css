@@ -220,14 +220,14 @@ footer {
       }
     }
     
-    &-success {
+    /* &-success {
       background: #2ecc71;
       color: white;
       
       &:hover {
         background: #27ae60;
       }
-    }
+    } */
   }
 }
 

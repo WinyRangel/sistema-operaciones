@@ -262,7 +262,6 @@ private loadAgendas(): void {
     { value: 'E', texto: 'E | Desembolso o Entregas' },
     { value: 'GN', texto: 'GN | Grupo Nuevo' },
     { value: 'INT', texto: 'INT | Integración' },
-    { value: 'Ope', texto: 'Ope | Env. Operativos' },
     { value: 'R', texto: 'R | Pago' },
     { value: 'R/A', texto: 'R/A | Realizando Agendas' },
     { value: 'R/EC', texto: 'R/EC | Pago/Entrega/Cambio de Ciclo' },
