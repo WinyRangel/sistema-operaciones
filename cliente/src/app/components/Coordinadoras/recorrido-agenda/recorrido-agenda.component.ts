@@ -567,7 +567,7 @@ codigosReportados: any;
     { value: 'INT', texto: 'INT | Integración' },
     { value: 'R', texto: 'R | Pago' },
     { value: 'R/A', texto: 'R/A | Realizando Agendas' },
-    { value: 'R/M', texto: 'R/M | Reunión Mensual' },
+    { value: 'RM', texto: 'R/M | Reunión Mensual' },
     { value: 'RS', texto: 'RS | Reunión Semanal' },
     { value: 'VTA', texto: 'VTA | Promoción' },
     { value: 'Sup', texto: 'Sup | Supervisión' },
