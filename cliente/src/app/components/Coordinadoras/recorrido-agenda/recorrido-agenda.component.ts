@@ -51,6 +51,7 @@ export class RecorridoAgendaComponent implements OnInit {
                    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
+
   actividadSeleccionada: any = null;
 
   //horas de trabajo para métricas del mes
@@ -62,10 +63,14 @@ export class RecorridoAgendaComponent implements OnInit {
   semanaSeleccionada: string = '';
   diaSeleccionado: string = '';
 
+  codigoSeleccionado: string = '';
+  codigoReportadoSeleccionado: string = '';
+  estadoSeleccionado: string = '';
   //Variables de las graficas
   chart: any;
   chartCodigo: any;
   mostrarContenedorGraficas: boolean = false;
+codigosReportados: any;
 
 
   constructor(
@@ -86,9 +91,13 @@ export class RecorridoAgendaComponent implements OnInit {
 
 
   editarActividad(agenda: any) {
-    console.log('Actividad seleccionada:', agenda);
-    this.actividadSeleccionada = agenda;
+    this.actividadSeleccionada = {
+      domicilio: { nombre: '' },
+      ...agenda,
+    };
   }
+
+
   private generateWeeks(): void {
     this.semanas = Array.from({ length: SEMANAS_ANIO },
       (_, i) => `SEMANA ${i + 1}`);
@@ -162,56 +171,64 @@ export class RecorridoAgendaComponent implements OnInit {
   }
 
 
-  refrescarAgendas(): void {
-    this._coordinacionService.obtenerAgendas1().subscribe(data => {
-      this.agendas = data.map((agenda: { fecha: string }) => ({
-        ...agenda,
-        fecha: this.fixUTCDateToLocal(agenda.fecha)
-      }));
-      this.filtrarAgendas(); // Aplicar filtros después de cargar
-    });
-  }
+    refrescarAgendas(): void {
+      this._coordinacionService.obtenerAgendas1().subscribe(data => {
+        this.agendas = data.map((agenda: { fecha: string }) => ({
+          ...agenda,
+          fecha: this.fixUTCDateToLocal(agenda.fecha)
+        }));
+        this.filtrarAgendas(); // Aplicar filtros después de cargar
+      });
+    }
 
+    filtrarAgendas(): void {
+      this.agendasFiltradasPorCoordinador = this.agendas.filter(agenda => {
+        if (!agenda.coordinador) return false;
 
-  filtrarAgendas(): void {
-    this.agendasFiltradasPorCoordinador = this.agendas.filter(agenda => {
-      // 1) Validar que agenda.coordinador exista
-      if (!agenda.coordinador) return false;
+        const fechaObj = new Date(agenda.fecha);
+        if (isNaN(fechaObj.getTime())) return false;
 
-      // 2) Convertir fecha en objeto y extraer mes y día en español
-      const fechaObj = new Date(agenda.fecha);
-      if (isNaN(fechaObj.getTime())) return false;
+        const mesNombre = fechaObj.toLocaleString('es-MX', { month: 'long' });
+        const diaNombre = fechaObj.toLocaleString('es-MX', { weekday: 'long' });
+        const semanaTrimmed = agenda.semana?.trim() || '';
 
-      const mesNombre = fechaObj
-        .toLocaleString('es-MX', { month: 'long' }); // e.g. "mayo"
-      const diaNombre = fechaObj
-        .toLocaleString('es-MX', { weekday: 'long' }); // e.g. "lunes"
-      const semanaTrimmed = agenda.semana?.trim() || '';
+        const cumpleCoordinador = this.coordinadorVisible
+          ? agenda.coordinador.toLowerCase() === this.coordinadorVisible.toLowerCase()
+          : true;
 
-      // 3) Comparar coordinador solo si se seleccionó alguno
-      const cumpleCoordinador = this.coordinadorVisible
-        ? agenda.coordinador.toLowerCase() === this.coordinadorVisible.toLowerCase()
-        : true;
+        const cumpleMes = this.mesSeleccionado
+          ? mesNombre.toLowerCase() === this.mesSeleccionado.toLowerCase()
+          : true;
 
-      // 4) Comparar mes (si hay mesSeleccionado)
-      const cumpleMes = this.mesSeleccionado
-        ? mesNombre.toLowerCase() === this.mesSeleccionado.toLowerCase()
-        : true;
+        const cumpleSemana = this.semanaSeleccionada
+          ? semanaTrimmed === this.semanaSeleccionada
+          : true;
 
-      // 5) Comparar semana (si hay semanaSeleccionada)
-      const cumpleSemana = this.semanaSeleccionada
-        ? semanaTrimmed === this.semanaSeleccionada
-        : true;
+        const cumpleDia = this.diaSeleccionado
+          ? diaNombre.toLowerCase() === this.diaSeleccionado.toLowerCase()
+          : true;
 
-      // 6) Comparar día (si hay diaSeleccionado)
-      const cumpleDia = this.diaSeleccionado
-        ? diaNombre.toLowerCase() === this.diaSeleccionado.toLowerCase()
-        : true;
+        const cumpleCodigo = this.codigoSeleccionado
+          ? agenda.codigo === this.codigoSeleccionado
+          : true;
 
-      return cumpleCoordinador && cumpleMes && cumpleSemana && cumpleDia;
-    });
-    
-  }
+        const cumpleCodigoReportado = this.codigoReportadoSeleccionado
+          ? agenda.codigoReportado === this.codigoReportadoSeleccionado
+          : true;
+
+        const cumpleEstado = this.estadoSeleccionado
+          ? (this.estadoSeleccionado === 'reportado' ? agenda.reportado === true : agenda.reportado === false)
+          : true;
+
+        return cumpleCoordinador &&
+          cumpleMes &&
+          cumpleSemana &&
+          cumpleDia &&
+          cumpleCodigo &&
+          cumpleCodigoReportado &&
+          cumpleEstado;
+      });
+    }
 
 
 
@@ -228,6 +245,9 @@ export class RecorridoAgendaComponent implements OnInit {
     this.mesSeleccionado = '';
     this.semanaSeleccionada = '';
     this.diaSeleccionado = '';
+    this.codigoSeleccionado = '';
+    this.codigoReportadoSeleccionado = '';
+    this.estadoSeleccionado = '';
     this.aplicarFiltros();
   }
 
@@ -539,7 +559,6 @@ export class RecorridoAgendaComponent implements OnInit {
   opcionesCodigo = [
     { value: 'AG', texto: 'AG | Aseo General' },
     { value: 'AM', texto: 'AM | Actividades Matutinas' },
-    { value: 'Aten', texto: 'Aten | Atenciones' },
     { value: 'C', texto: 'C | Cobranza' },
     { value: 'D', texto: 'D | Domiciliar' },
     { value: 'Dep', texto: 'Dep | Depósitar' },

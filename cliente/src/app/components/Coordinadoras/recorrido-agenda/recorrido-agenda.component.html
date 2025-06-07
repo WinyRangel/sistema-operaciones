@@ -80,6 +80,36 @@
                     </select>
                   </div>
                 </div>
+                  <div class="row g-3">
+                    <!-- Código -->
+                      <div class="col-md-4">
+                        <label for="codigoSelect" class="form-label fw-bold">Código</label>
+                        <select class="form-select" id="codigoSelect" [(ngModel)]="codigoSeleccionado" (change)="aplicarFiltros()">
+                          <option value="">Todos los códigos</option>
+                          <option *ngFor="let opcion of opcionesCodigo" [value]="opcion.value">{{ opcion.texto }}</option>
+                        </select>
+                      </div>
+
+                      <!-- Código Reportado -->
+                      <div class="col-md-4">
+                        <label for="codigoReportadoSelect" class="form-label fw-bold">Código Reportado</label>
+                        <select class="form-select" id="codigoReportadoSelect" [(ngModel)]="codigoReportadoSeleccionado" (change)="aplicarFiltros()">
+                          <option value="">Todos los códigos reportados</option>
+                          <option *ngFor="let opcion of opcionesCodigo" [value]="opcion.value">{{ opcion.texto }}</option>
+                        </select>
+                      </div>
+
+                    <!-- Estado -->
+                    <div class="col-md-4">
+                      <label class="form-label fw-bold">Estado</label>
+                      <select class="form-select" [(ngModel)]="estadoSeleccionado" (change)="aplicarFiltros()">
+                        <option value="" disabled selected>Seleccione estado</option>
+                        <option value="reportado">Reportado</option>
+                        <option value="no reportado">No reportado</option>
+                      </select>
+                    </div>
+                  </div>
+
 
                 <!-- Botón para limpiar filtros -->
                 <div class="d-flex justify-content-end mt-3">
@@ -708,4 +738,5 @@
 
     </div>
   </div>
+</div>
 </div>
