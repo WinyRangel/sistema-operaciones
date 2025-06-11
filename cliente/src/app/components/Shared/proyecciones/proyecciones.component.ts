@@ -1,7 +1,7 @@
-// src/app/proyecciones/proyecciones.component.ts
-
-import { Component, OnInit } from '@angular/core';
-import * as XLSX           from 'xlsx';
+import { Component } from '@angular/core';
+import * as XLSX from 'xlsx';
+import { ProyeccionesService, ProyeccionPayload } from '../../../services/proyeccion.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-proyecciones',
@@ -9,247 +9,149 @@ import * as XLSX           from 'xlsx';
   templateUrl: './proyecciones.component.html',
   styleUrls: ['./proyecciones.component.css']
 })
-export class ProyeccionesComponent implements OnInit {
-  // ─── PROPIEDADES PRINCIPALES ───────────────────────────────────
+export class ProyeccionesComponent {
+  sheetNames: string[] = [];
+  sheetsData: { [name: string]: any[][] } = {};
+  currentSheet = '';
+  dateCols: { [name: string]: number[] } = {};
+  private originalWorkbook: XLSX.WorkBook | null = null;
 
-  /** Arreglo con los nombres de todas las hojas (pestañas) del Excel */
-  workbookSheetNames: string[] = [];
+  constructor(private proyeccionesSvc: ProyeccionesService) { }
 
-  /** Nombre de la hoja activa (seleccionada) */
-  currentSheet: string | null = null;
+  onFileChange(evt: any) {
+    const target: DataTransfer = <DataTransfer>evt.target;
+    if (!target.files || target.files.length !== 1) return;
 
-  /**
-   * Contiene para cada sheetName su matriz de datos (array de arrays).
-   * Después de aplicar “limpieza” (borrar fila 0 y descartar las que contengan:
-   *  - la palabra 'semana' (insensible a mayúsculas)
-   *  - la palabra 'totales'
-   *  - el patrón completo de encabezados "No.", "ASESOR", "Grupo/Individual", "Fecha Entrega Ope.", "Fecha Entrega"
-   */
-  sheetsData: { [sheetName: string]: any[][] } = {};
-
-  constructor() { }
-
-  ngOnInit(): void {
-    // Al cargar el componente, intentamos leer de localStorage si hay datos guardados
-    const guardado = localStorage.getItem('proyecciones_sheets');
-    if (guardado) {
-      try {
-        this.sheetsData = JSON.parse(guardado);
-        this.workbookSheetNames = Object.keys(this.sheetsData);
-        if (this.workbookSheetNames.length > 0) {
-          this.currentSheet = this.workbookSheetNames[0];
-        }
-      } catch (e) {
-        console.error('Error parseando datos guardados del localStorage:', e);
-      }
-    }
-  }
-
-  // ─── 1. LEER Y “LIMPIAR” EL EXCEL AL SELECCIONAR EL ARCHIVO ───────────────────────
-  onFileChange(evt: any): void {
-    const target: DataTransfer = <DataTransfer>(evt.target);
-    if (!target.files || target.files.length === 0) {
-      alert('Por favor selecciona un archivo .xlsx');
-      return;
-    }
-
-    const file: File = target.files[0];
-    const reader: FileReader = new FileReader();
+    const reader = new FileReader();
     reader.onload = (e: any) => {
-      /* Leemos el contenido completo como binary string.
-         e.target.result es una cadena binaria con todo el .xlsx */
-      const bstr: string = e.target.result;
-      const workbook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+      const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+      this.originalWorkbook = wb;
+      this.sheetNames = wb.SheetNames.slice();
 
-      // Reseteamos cualquier dato anterior
       this.sheetsData = {};
-      this.workbookSheetNames = [];
+      this.dateCols = {};
 
-      // Patrones de encabezados repetidos que queremos eliminar si aparecen en una fila
-      const headerPattern = [
-        'no.', 
-        'asesor', 
-        'grupo/individual', 
-        'fecha entrega ope.', 
-        'fecha entrega'
-      ].map(h => h.toLowerCase());
+      this.sheetNames.forEach(name => {
+        const ws = wb.Sheets[name];
+        const data: any[][] = XLSX.utils.sheet_to_json(ws, {
+          header: 1,
+          raw: false,
+          dateNF: 'yyyy-mm-dd'
+        });
+        this.sheetsData[name] = data;
 
-      // Para cada hoja, convertimos a array de arrays y luego limpiamos filas no deseadas
-      workbook.SheetNames.forEach((sheetName: string) => {
-        const ws: XLSX.WorkSheet = workbook.Sheets[sheetName];
-        // ► Primero, extraemos toda la hoja como array de arrays (incluye fila 0 original).
-        const rawData: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
-
-        // ► Ahora “limpiamos” rawData:
-        //  1) Eliminamos la primera fila (índice 0).
-        //  2) Filtramos todas las filas que contengan "semana" o "totales" en cualquier celda.
-        //  3) Filtramos también las filas que contengan **TODOS** los elementos de headerPattern en alguna posición.
-        const cleanedData: any[][] = rawData
-          .slice(1) // quitar fila 0 original
-          .filter((row: any[]) => {
-            //  → 1) Descartar si alguna celda contiene “semana” o “totales”
-            for (const cell of row) {
-              if (cell !== null && cell !== undefined) {
-                const text = String(cell).toLowerCase();
-                if (text.includes('semana') || text.includes('totales'))  {
-                  return false;
-                }
-              }
-            }
-
-            //  → 2) Descartar si la fila coincide con el patrón completo de encabezados
-            //     (es decir, si en la fila aparecen todas las cadenas de headerPattern, sin importar el orden)
-            const lowercasedRow = row.map(cell => (cell !== null && cell !== undefined) ? String(cell).toLowerCase() : '');
-            const contieneTodosLosEncabezados = headerPattern.every(hdr =>
-              lowercasedRow.some(cellText => cellText.trim() === hdr.trim())
-            );
-            if (contieneTodosLosEncabezados) {
-              return false;
-            }
-
-            //  → Si no coincide con ninguno de los criterios anteriores, la conservamos
-            return true;
-          });
-
-        // ► Finalmente, asignamos la “hoja limpia” a sheetsData[sheetName]
-        this.sheetsData[sheetName] = cleanedData;
+        // Opcional: detectar índices de las columnas de fecha para inputs tipo date
+        const headers = data[0] || [];
+        this.dateCols[name] = headers
+          .map((h: string, i: number) => /fecha/i.test(h) ? i : -1)
+          .filter(i => i >= 0);
       });
 
-      // Guardamos la lista de nombres de hojas (pestañas)
-      this.workbookSheetNames = workbook.SheetNames.slice();
-
-      // Seleccionamos automáticamente la primera hoja (si existe)
-      if (this.workbookSheetNames.length > 0) {
-        this.currentSheet = this.workbookSheetNames[0];
-      }
+      this.currentSheet = this.sheetNames[0] || '';
     };
-
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(target.files[0]);
   }
 
-  // ─── 2. MÉTODOS PARA RENDERIZAR LA HOJA ACTIVA EN HTML ─────────────────
-
-  /**
-   * Devuelve los encabezados (fila 0) de la hoja indicada.
-   * - Como ya quitamos la antigua fila 0, aquí el “nuevo” índice 0 será la primera fila post-limpieza.
-   */
-  getHeaders(sheetName: string): any[] {
-    if (!this.sheetsData[sheetName] || this.sheetsData[sheetName].length === 0) {
-      return [];
-    }
-    return this.sheetsData[sheetName][0] as any[];
+  switchSheet(name: string) {
+    this.currentSheet = name;
   }
 
-  /**
-   * Devuelve las filas A PARTIR de la fila 1 (sin incluir encabezados)
-   */
-  getRows(sheetName: string): any[][] {
-    if (!this.sheetsData[sheetName] || this.sheetsData[sheetName].length <= 1) {
-      return [];
-    }
-    // slice(1) quita la fila de encabezados (que ahora es la “nueva” fila 0)
-    return this.sheetsData[sheetName].slice(1);
+  getHeaders(sheet: string): string[] {
+    return this.sheetsData[sheet][0] as string[];
   }
 
-  /**
-   * Devuelve un array con tantos índices como columnas tenga la hoja.
-   * Se usa en *ngFor para iterar columnas desde 0 hasta N-1.
-   */
-  getColumnCount(sheetName: string): number[] {
-    const headers = this.getHeaders(sheetName);
-    return headers.map((_, i) => i);
+  getRows(sheet: string): any[][] {
+    return this.sheetsData[sheet].slice(1);
   }
 
-  /**
-   * Al hacer clic en una pestaña, cambiamos la hoja activa
-   */
-  switchSheet(sheetName: string): void {
-    if (this.currentSheet !== sheetName) {
-      this.currentSheet = sheetName;
-    }
+  getColumnCount(sheet: string): number[] {
+    return Array(this.getHeaders(sheet).length).fill(0).map((_, i) => i);
   }
 
-  // ─── 3. ACTUALIZAR UNA CELDA CUANDO CAMBIA EL INPUT ────────────────────
-
-  /**
-   * Cuando el usuario edita el <input> de la celda, actualizamos en sheetsData.
-   * @param sheetName  Nombre de la hoja donde ocurre el cambio
-   * @param rowIndex   Índice real de fila en sheetsData (incluye encabezados).
-   *                   Ej: si editas la primera fila de datos, rowIndex será 1, 
-   *                   porque 0 = encabezados (nueva estructura tras limpiar).
-   * @param colIndex   Índice de columna (0 = primera columna)
-   * @param newValue   Nuevo valor del input
-   */
-  updateCell(sheetName: string, rowIndex: number, colIndex: number, newValue: any): void {
-    if (!this.sheetsData[sheetName]) {
-      return;
-    }
-    // Garantizamos que la fila exista
-    if (!this.sheetsData[sheetName][rowIndex]) {
-      this.sheetsData[sheetName][rowIndex] = [];
-    }
-    this.sheetsData[sheetName][rowIndex][colIndex] = newValue;
+  isDateColumn(sheet: string, col: number): boolean {
+    return this.dateCols[sheet]?.includes(col);
   }
 
-  // ─── 4. EXPORTAR A EXCEL ─────────────────────────────────────────────
+  isCheckboxColumn(sheet: string, col: number): boolean {
+    const headers = this.getHeaders(sheet);
+    return /renovado/i.test(headers[col]);
+  }
 
-  exportExcel(): void {
+  saveChanges() {
     if (!this.currentSheet) {
-      alert('No hay ningún archivo cargado para exportar.');
+      alert('Primero carga y selecciona una hoja.');
       return;
     }
+    const rows = this.getRows(this.currentSheet);
+    // const payload: ProyeccionPayload[] = rows.map(r => ({
+    //   coordinacion:             `${this.currentSheet}-`,  // <— aquí
+    //   asesor:                    r[0],
+    //   cliente:                   r[1],
+    //   fechaEntregaAgendadaOpe:   r[2],
+    //   fechaEntregaAgendada:      r[3],
+    //   fechaEnvioOperativo:       r[4] ? new Date(r[4]).toISOString(): undefined,
+    //   hora:                      r[5] || undefined,
+    //   diasRetrasoExpOp:          r[6] !== undefined ? Number(r[6]) : undefined,
+    //   incidenciasOperativo:      r[7] || undefined,
+    //   fechaLimiteEntrega:        r[8] ? new Date(r[8]).toISOString() : undefined,
+    //   fechaRealReciboExpLegal:   r[9] ? new Date(r[9]).toISOString() : undefined,
+    //   renovado:                  typeof r[10] === 'string' ? r[10].toLowerCase() === 'sí' : undefined
+    // }));
+    const payload: ProyeccionPayload[] = rows.map(r => ({
+      coordinacion: `${this.currentSheet}-`,
+      asesor: r[0] || '',
+      cliente: r[1] || '',
+      fechaEntregaAgendadaOpe: r[2] ? new Date(r[2]).toISOString() : undefined,
+      fechaEntregaAgendada: r[3] ? new Date(r[3]).toISOString() : undefined,
+      /** |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+      fechaEnvioOperativo: r[4] ? new Date(r[4]).toISOString() : undefined,
+      hora: r[5] || '', //se agrega
+      diasRetrasoExpOp: r[6],
+      incidenciasOperativo: r[7] || '', //se agrega
+      fechaLimiteEntrega: r[8] ? new Date(r[8]).toISOString() : undefined,
+      fechaRealReciboExpLegal: r[9] ? new Date(r[9]).toISOString() : undefined,
+      renovado: typeof r[10] === 'string' ? r[10].toLowerCase() === 'sí' : undefined
+    }));
 
-    // 1) Creamos un nuevo Workbook vacío
-    const newWb: XLSX.WorkBook = XLSX.utils.book_new();
+    console.log('Payload a enviar:', payload);
 
-    // 2) Por cada hoja en sheetsData, convertimos a worksheet y la agregamos
-    for (const sheetName of this.workbookSheetNames) {
-      const data: any[][] = this.sheetsData[sheetName] || [];
-      // Crea una hoja a partir de array de arrays
-      const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(data);
-      XLSX.utils.book_append_sheet(newWb, ws, sheetName);
-    }
-
-    // 3) Forzamos la descarga como “trabajo_modificado.xlsx”
-    XLSX.writeFile(newWb, 'trabajo_modificado.xlsx');
+    this.proyeccionesSvc.saveBulk(payload).subscribe({
+      next: res => {
+        alert(`Se guardaron ${res.inserted ?? payload.length} registros correctamente.`);
+      },
+      error: (error: HttpErrorResponse) => {
+        console.error('Error HTTP status:', error.status);
+        console.error('Error backend (body):', error.error);
+        alert(`Error al guardar en el servidor:\n${error.error?.message || error.message}`);
+      }
+    });
   }
 
-  // ─── 5. GUARDAR CAMBIOS (localStorage) ────────────────────────────────
-
-  /**
-   * Guarda todo el objeto sheetsData en localStorage para que, al recargar
-   * en el futuro, se pueda retomar la edición desde donde quedó.
-   */
-  saveChanges(): void {
-    if (!this.currentSheet) {
-      alert('No hay datos para guardar.');
-      return;
-    }
-    try {
-      localStorage.setItem('proyecciones_sheets', JSON.stringify(this.sheetsData));
-      alert('Cambios guardados en el navegador (localStorage).');
-    } catch (e) {
-      console.error('Error guardando en localStorage:', e);
-      alert('No se pudieron guardar los cambios en localStorage.');
-    }
+  
+  exportExcel() {
+    if (!this.originalWorkbook) return;
+    this.sheetNames.forEach(name => {
+      this.originalWorkbook!.Sheets[name] =
+        XLSX.utils.aoa_to_sheet(this.sheetsData[name]);
+    });
+    XLSX.writeFile(this.originalWorkbook, 'proyecciones_editado.xlsx');
   }
 
-  // ─── 6. REFRESCAR LA VISTA DE LA HOJA ACTIVA ────────────────────────────
-
-  /**
-   * Fuerza a volver a pintar la hoja activa a partir de sheetsData.
-   * Útil si quieres descartar ediciones a medias y recargar desde el último valor en memoria.
-   */
-  refreshSheet(): void {
-    if (!this.currentSheet) {
-      alert('No hay ninguna hoja activa.');
-      return;
-    }
-    // Esto “vuelve a llamar” a Angular para refrescar la tabla en pantalla
-    const temp = this.currentSheet;
-    this.currentSheet = null;
-    setTimeout(() => {
-      this.currentSheet = temp;
-    }, 0);
+  refreshSheet() {
+    if (!this.originalWorkbook) return;
+    const wb = this.originalWorkbook;
+    this.sheetNames.forEach(name => {
+      const ws = wb.Sheets[name];
+      const data: any[][] = XLSX.utils.sheet_to_json(ws, {
+        header: 1,
+        raw: false,
+        dateNF: 'yyyy-mm-dd'
+      });
+      this.sheetsData[name] = data;
+      this.dateCols[name] = (data[0] || [])
+        .map((h: string, i: number) => /fecha/i.test(h) ? i : -1)
+        .filter(i => i >= 0);
+    });
+    this.currentSheet = this.sheetNames[0] || '';
   }
 }

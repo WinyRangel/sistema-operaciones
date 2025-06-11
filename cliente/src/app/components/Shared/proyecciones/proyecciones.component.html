@@ -1,205 +1,122 @@
-<!-- <div class="container">
-    <header>
-        <h1><i class="fas fa-file-contract"></i> Proyecciones de entregas</h1>
-        <p>Monitoreo y seguimiento de entrega de creditos según las proyecciones</p>
-    </header>
-
-    <div class="card">
-        <div class="card-header">
-            <h2><i class="fas fa-table"></i>Ciclo de credito</h2>
-            <div>
-                <span class="status-badge status-pending">Pendiente: 12</span>
-                <span class="status-badge status-completed">Completado: 8</span>
-                <span class="status-badge status-delayed">Retrasado: 4</span>
-            </div>
-        </div>
-
-        <div class="upload-section">
-            <div class="upload-box">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <h3>Seleccione un archivo xslx para cargar</h3>
-                <label class="file-input">
-                    <i class="fas fa-file-csv"></i> Seleccionar archivo
-                    <input type="file" accept=".xslx" style="display: none;">
-                </label>
-                <p class="file-info">El archivo debe contener las columnas: No., ASESOR, Grupo/Individual, Fecha Entrega
-                    Ope., Fecha Entrega</p>
-            </div>
-        </div>
-
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>ASESOR</th>
-                        <th>Grupo/Individual</th>
-                        <th>Fecha Entrega Ope.</th>
-                        <th>Fecha de envio de operativo</th>
-                        <th>Hora</th>
-                        <th>Dias de retraso de Exp. Op.</th>
-                        <th>Incidencias de operativo</th>
-                        <th>Fecha Entrega<br>Fecha limite entrega expediente legal</th>
-                        <th>Fecha recibo Exp. Legal.</th>
-                        <th>Renovado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td class="editable"></td>
-                        <td class="editable"></td>
-                        <td class="editable"></td>
-                        <td class="editable"></td>
-                        <td></td>
-                        <td class="editable"></td>
-                        <td class="editable"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="actions">
-            <button class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
-            <button class="btn btn-success"><i class="fas fa-file-export"></i> Exportar xslx</button>
-            <button class="btn btn-secondary"><i class="fas fa-sync-alt"></i> Actualizar</button>
-        </div>
-    </div>
-
-
-</div> -->
-
-<!-- src/app/proyecciones/proyecciones.component.html -->
-
 <div class="container py-3">
-  <header class="mb-4">
+  <header>
     <h1><i class="fas fa-file-contract"></i> Proyecciones de entregas</h1>
-    <p>Monitoreo y seguimiento de entrega de créditos según las proyecciones</p>
+    <p>Monitoreo y seguimiento de entrega de creditos según las proyecciones</p>
   </header>
 
   <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h2 class="mb-0"><i class="fas fa-table"></i> Ciclo de crédito</h2>
+    <div class="card-header">
+      <h2><i class="fas fa-table"></i>Ciclo de credito</h2>
       <div>
-        <span class="badge bg-warning text-dark me-2">Pendiente: 12</span>
-        <span class="badge bg-success me-2">Completado: 8</span>
-        <span class="badge bg-danger">Retrasado: 4</span>
+        <span class="status-badge status-pending">Pendiente: 12</span>
+        <span class="status-badge status-completed">Completado: 8</span>
+        <span class="status-badge status-delayed">Retrasado: 4</span>
       </div>
     </div>
 
-    <div class="card-body">
-      <!-- === Zona de carga de archivo === -->
-      <div class="upload-section text-center mb-4">
-        <div class="upload-box p-4 border border-2 border-dashed rounded">
-          <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
-          <h4>Seleccione un archivo <code>.xlsx</code> para cargar</h4>
-          <label class="btn btn-outline-primary mt-2">
-            <i class="fas fa-file-excel"></i> Seleccionar archivo
-            <!-- Aquí dispara el onFileChange en el componente -->
-            <input 
-              id="file-input" 
-              type="file" 
-              accept=".xlsx" 
-              (change)="onFileChange($event)" 
-              hidden 
-            />
-          </label>
-          <p class="text-muted mt-2">
-            El archivo debe contener las columnas esperadas y puede tener varias hojas.
-          </p>
-        </div>
-      </div>
-
-      <!-- === Pestañas dinámicas (una por cada sheet) === -->
-      <ul class="nav nav-tabs mb-3" *ngIf="workbookSheetNames.length > 0">
-        <li class="nav-item" *ngFor="let sheetName of workbookSheetNames">
-          <a 
-            class="nav-link" 
-            [class.active]="sheetName === currentSheet" 
-            (click)="switchSheet(sheetName)"
-            href="javascript:void(0)"
-          >
-            {{ sheetName }}
-          </a>
-        </li>
-      </ul>
-
-      <!-- === Contenedor para la tabla editable de la hoja activa === -->
-      <div class="table-container" *ngIf="currentSheet">
-        <table class="table table-bordered table-striped">
-          <thead>
-            <tr>
-              <!-- Si la hoja está vacía, no hay encabezados -->
-              <!-- <th *ngFor="let header of getHeaders(currentSheet)">
-                {{ header }}
-              </th> -->
-              <th>No.</th>
-              <th>ASESOR</th>
-              <th>Grupo/Individua</th>
-              <th>Fecha Entrega Ope</th>
-              <th>Fecha Entrega</th>
-              <th>Fecha de envio de operativo</th>
-              <th>Hora</th>
-              <th>Incidencias de operativo</th>
-              <th>Fecha limite entrega</th>
-              <th>Fecha recibo Exp. Legal.</th>
-              <th>Renovado</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let row of getRows(currentSheet); let rowIndex = index">
-              <td *ngFor="let colIndex of getColumnCount(currentSheet); let c = index">
-                <!-- input editable -->
-                <!-- <input
-                  type="text"
-                  class="form-control editable-cell"
-                  [ngModel]="sheetsData[currentSheet][rowIndex + 1]?.[c] || ''"
-                  (ngModelChange)="updateCell(currentSheet, rowIndex + 1, c, $event)"
-                /> -->
-              </td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Si aún no hay archivo cargado, mostramos un mensaje -->
-      <div class="alert alert-info" *ngIf="!currentSheet">
-        Por favor, selecciona un archivo <strong>.xlsx</strong> para visualizar sus hojas y editar.
+    <div class="upload-section">
+      <div class="upload-box">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <h3>Seleccione un archivo xslx para cargar</h3>
+        <label class="file-input">
+          <i class="fas fa-file-csv"></i> Seleccionar archivo
+           <input id="file-input" type="file" accept=".xlsx" (change)="onFileChange($event)" hidden />
+        </label>
+        <p class="file-info">El archivo debe contener las columnas: No., ASESOR, Grupo/Individual, Fecha Entrega
+          Ope., Fecha Entrega</p>
       </div>
     </div>
 
-    <div class="card-footer text-end">
-      <button 
-        class="btn btn-primary me-2" 
-        (click)="saveChanges()" 
-        [disabled]="!currentSheet"
-      >
-        <i class="fas fa-save"></i> Guardar Cambios
-      </button>
-      <button 
-        class="btn btn-success me-2" 
-        (click)="exportExcel()" 
-        [disabled]="!currentSheet"
-      >
-        <i class="fas fa-file-export"></i> Exportar .xlsx
-      </button>
-      <button 
-        class="btn btn-secondary" 
-        (click)="refreshSheet()" 
-        [disabled]="!currentSheet"
-      >
-        <i class="fas fa-sync-alt"></i> Actualizar
-      </button>
+     <!-- tabs -->
+    <ul class="nav nav-tabs mb-3" *ngIf="sheetNames.length">
+      <li class="nav-item" *ngFor="let name of sheetNames">
+        <a class="nav-link" [class.active]="name === currentSheet" (click)="switchSheet(name)">{{ name }}</a>
+      </li>
+    </ul>
+
+    <!-- table editable -->
+    <div class="table-container" *ngIf="currentSheet">
+      <table class="table table-bordered table-striped">
+        <thead>
+          <th>Asesor</th>
+          <th>Grupo/Individual</th>
+          <th>Fecha Entrega Ope.</th>
+          <th>Fecha de envio de operativo</th>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of getRows(currentSheet); let i = index">
+            <td *ngFor="let col of getColumnCount(currentSheet)">
+              <input *ngIf="isCheckboxColumn(currentSheet, col)" type="checkbox" class="form-check-input"
+                [(ngModel)]="sheetsData[currentSheet][i + 1][col]">
+              <input *ngIf="!isCheckboxColumn(currentSheet, col)"
+                [type]="isDateColumn(currentSheet, col) ? 'date' : 'text'" class="form-control"
+                [(ngModel)]="sheetsData[currentSheet][i + 1][col]">
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </div>
+<div class="actions">
+  <button class="btn btn-primary" (click)="saveChanges()">
+    <i class="fas fa-save"></i> Guardar Cambios
+  </button>
+  <!-- <button class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button> -->
+  <button class="btn btn-success"><i class="fas fa-file-export"></i> Exportar xslx</button>
+  <button class="btn btn-secondary"><i class="fas fa-sync-alt"></i> Actualizar</button>
 </div>
+</div>
+</div>
+
+
+<!-- <div class="container py-3"> -->
+  <!-- upload section -->
+  <!-- <div class="upload-section text-center mb-4">
+    <label class="btn btn-outline-primary">
+      <i class="fas fa-file-excel"></i> Seleccionar archivo
+      <input id="file-input" type="file" accept=".xlsx" (change)="onFileChange($event)" hidden />
+    </label>
+  </div> -->
+
+  <!-- tabs -->
+  <!-- <ul class="nav nav-tabs mb-3" *ngIf="sheetNames.length">
+    <li class="nav-item" *ngFor="let name of sheetNames">
+      <a class="nav-link" [class.active]="name === currentSheet" (click)="switchSheet(name)">{{ name }}</a>
+    </li>
+  </ul> -->
+
+  <!-- table editable -->
+  <!-- <div class="table-container" *ngIf="currentSheet">
+    <table class="table table-bordered table-striped">
+      <thead>
+        <th>Asesor</th>
+        <th>Grupo/Individual</th>
+        <th>Fecha Entrega Ope.</th>
+        <th>Fecha de envio de operativo</th>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of getRows(currentSheet); let i = index">
+          <td *ngFor="let col of getColumnCount(currentSheet)">
+            <input *ngIf="isCheckboxColumn(currentSheet, col)" type="checkbox" class="form-check-input"
+              [(ngModel)]="sheetsData[currentSheet][i + 1][col]">
+            <input *ngIf="!isCheckboxColumn(currentSheet, col)"
+              [type]="isDateColumn(currentSheet, col) ? 'date' : 'text'" class="form-control"
+              [(ngModel)]="sheetsData[currentSheet][i + 1][col]">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div> -->
+
+  <!-- actions -->
+  <!-- <div class="text-end mt-2">
+    <button class="btn btn-primary me-2" (click)="saveChanges()" [disabled]="!sheetNames.length">
+      Guardar Cambios
+    </button>
+    <button class="btn btn-success me-2" (click)="exportExcel()" [disabled]="!sheetNames.length">
+      Exportar .xlsx
+    </button>
+    <button class="btn btn-secondary" (click)="refreshSheet()" [disabled]="!sheetNames.length">
+      Actualizar
+    </button>
+  </div>
+</div> -->
