@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { ViewChild, ElementRef } from '@angular/core';
-import Chart from 'chart.js/auto';
+import Chart, { ChartConfiguration } from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 
@@ -30,6 +30,8 @@ export class RecorridoAgendaComponent implements OnInit {
   @ViewChild('graficaCodigo') graficaCodigo!: ElementRef<HTMLCanvasElement>;
   @ViewChild('reportePDF') reportePDF!: ElementRef;
   @ViewChild('graficaHoras') graficaHoras!: ElementRef;
+  @ViewChild('entregasChart') entregasChart!: ElementRef;
+
   agendasFiltradasPorCoordinador: any[] = [];
 
   //Variables para agenda
@@ -306,10 +308,10 @@ codigosReportados: any;
 
 
   get horasEntregas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'E'
-    ).length;
-  }
+      return this.agendasFiltradasPorCoordinador.filter(
+        a => a.hora && a.codigo === 'E'
+      ).length;
+    }
 
   get horasEntregasReportadas(): number {
     return this.agendasFiltradasPorCoordinador.filter(
@@ -322,6 +324,41 @@ codigosReportados: any;
   }
 
 
+
+  generarGraficaEntregas(): void {
+    const ctx = document.getElementById('entregasChart') as HTMLCanvasElement;
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Agendadas', 'Reportadas', 'No Reportadas'],
+        datasets: [{
+          label: 'Horas de Entregas',
+          data: [
+            this.horasEntregas,
+            this.horasEntregasReportadas,
+            this.horasEntregasNoReportadas
+          ],
+          backgroundColor: ['#42A5F5', '#66BB6A', '#EF5350']
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+  }
+
+    
   get horasPagos(): number {
     return this.agendasFiltradasPorCoordinador.filter(
       a => a.hora && a.codigo === 'R'
@@ -389,37 +426,7 @@ codigosReportados: any;
   }
 
 
-  get horasREC(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'E'
-    ).length;
-  }
 
-  get horasRECReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'R/EC'
-    ).length;
-  }
-
-  get horasRECNoReportadas(): number {
-    return this.horasREC - this.horasRECReportadas;
-  }
-
-  get horasRER(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'R/ER'
-    ).length;
-  }
-
-  get horashorasRERReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'R/ER'
-    ).length;
-  }
-
-  get horashorasRERNoReportadas(): number {
-    return this.horasRER - this.horasRER;
-  }
 
   get horasGrupoN(): number {
     return this.agendasFiltradasPorCoordinador.filter(
@@ -519,9 +526,6 @@ codigosReportados: any;
     ).length;
   }
 
-  get horasSCNoReportadas(): number {
-    return this.horasSC - this.horasSCReportadas;
-  }
 
 
   get horasAM(): number {
@@ -552,7 +556,7 @@ codigosReportados: any;
 
   get horasProductividad(): number {
     return this.horasAgendadas > 0
-      ? parseFloat(((this.horasReportadas / this.horasAgendadas)*100).toFixed(2))
+      ? parseFloat(((this.horasReportadas / this.horasTrabajo)*100).toFixed(2))
       : 0;
   }
 
@@ -571,8 +575,8 @@ codigosReportados: any;
     { value: 'RS', texto: 'RS | Reunión Semanal' },
     { value: 'VTA', texto: 'VTA | Promoción' },
     { value: 'Sup', texto: 'Sup | Supervisión' },
-    { value: 'S/Renov', texto: 'S/Renov | Sup.Renovación' },
-    { value: 'Sin Codigo', texto: 'Sin codigo' },
+    { value: 'S/Renov', texto: 'S/Renov | Seg.Renovación' },
+    { value: 'Sin Codigo', texto: 'Sin Codigo' },
     { value: '', texto: '' }
   ];
 
@@ -583,6 +587,7 @@ codigosReportados: any;
       setTimeout(() => {
         this.dibujarGraficaPorCodigo();
         this.dibujarGraficaReporteadasVsNoReportadas();
+        this.generarGraficaEntregas();
       }, 100);
     } else {
       this.destroyCharts();
