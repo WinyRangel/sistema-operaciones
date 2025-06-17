@@ -427,7 +427,7 @@
                     <div class="card border-0 shadow-sm h-100">
                       <div class="card-body text-center">
                         <h6 class="text-muted">Entregas programadas</h6>
-                        <h4 class="fw-bold text-primary">{{horasEntregas}}</h4>
+                        <h4 class="fw-bold text-info">{{horasEntregas}}</h4>
                       </div>
                     </div>
                   </div>
@@ -436,7 +436,7 @@
                     <div class="card border-0 shadow-sm h-100">
                       <div class="card-body text-center">
                         <h6 class="text-muted">Entregas reportadas</h6>
-                        <h4 class="fw-bold">{{horasEntregasReportadas}}</h4>
+                        <h4 class="fw-bold text-success">{{horasEntregasReportadas}}</h4>
                       </div>
                     </div>
                   </div>
@@ -445,7 +445,7 @@
                     <div class="card border-0 shadow-sm h-100">
                       <div class="card-body text-center">
                         <h6 class="text-muted">Entregas no reportadas</h6>
-                        <h4 class="fw-bold text-warning">{{horasEntregasNoReportadas}}</h4>
+                        <h4 class="fw-bold text-danger">{{horasEntregasNoReportadas}}</h4>
                       </div>
                     </div>
                   </div>
@@ -454,7 +454,7 @@
                     <div class="card border-0 shadow-sm h-100">
                       <div class="card-body text-center">
                         <h6 class="text-muted">Horas productivas</h6>
-                        <h4 class="fw-bold text-success">{{horasProductividad}}%</h4>
+                        <h4 class="fw-bold text-primary">{{horasProductividad}}%</h4>
                       </div>
                     </div>
                   </div>
@@ -544,6 +544,21 @@
                       </td>
                     </tr>
 
+                    <!-- S/Renov -->
+                    <tr>
+                      <th scope="row">Sup. Renovación</th>
+                      <td>{{ horasRenov }}</td>
+                      <td>{{ horasRenovReportadas }}</td>
+                      <td>
+                        <span class="badge" [ngClass]="{
+                          'text-bg-success': horasRenovReportadas === horasRenov,
+                          'text-bg-danger': horasRenovReportadas < horasRenov
+                        }">
+                          {{ horasRenovReportadas === horasRenov ? 'Logrado' : 'No logrado' }}
+                        </span>
+                      </td>
+                    </tr>
+
                     <!-- Actividades sin código -->
                     <tr>
                       <th scope="row">Actividades sin código</th>
@@ -622,7 +637,7 @@
                         </div>
                         <div class="card-body">
                           <div style="max-width: 600px;">
-                            <canvas #entregasChart class="w-100" height="300"></canvas>
+                              <canvas #graficaProductividad class="chart-canvas"></canvas>
                           </div>
                         </div>
                   </div>
