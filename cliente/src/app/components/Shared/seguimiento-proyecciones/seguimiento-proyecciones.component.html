@@ -1,0 +1,179 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proyecciones - Seguimiento</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <h1 class="app-title">Proyecciones</h1>
+      <p class="app-subtitle">Seguimiento de operativos y entregas</p>
+    </header>
+    <div class="controls-container">
+      <div class="row align-items-center controls-row">
+        <!-- Izquierda: Buscador y selector -->
+        <div class="col-lg-6 col-md-6 col-12">
+          <div class="input-group search-container">  
+            <span class="input-group-text bg-white">
+              <i class="bi bi-search text-secondary"></i>
+            </span>
+            <input type="text" class="form-control form-control-lg" placeholder="Buscar asesor, cliente, incidencia..."
+              [(ngModel)]="filterTerm" />
+            <select class="form-select form-select-lg" [(ngModel)]="mesSeleccionado">
+              <option value="">Todos los meses</option>
+              <option *ngFor="let mes of meses" [value]="mes">{{ mes }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Derecha: Botones alineados a la derecha -->
+        <div class="col-lg-6 col-md-6 col-12">
+          <div class="d-flex justify-content-end gap-2 mt-2 mt-md-0 actions-container">
+            <div class="d-flex flex-column gap-2">
+              <button class="btn btn-primary" (click)="saveChanges()" [disabled]="loading">
+                <i class="bi bi-save"></i> 
+                {{ loading ? 'Cargando...' : 'Guardar Cambios' }}
+              </button>
+          </div>
+          <div class="d-flex flex-column gap-2">
+            <button class="btn btn-secondary" routerLink="/proyecciones">
+              <i class="bi bi-plus-square"></i> 
+              Nueva Proyección
+            </button>
+          </div>
+          <div class="d-flex flex-column gap-2">
+            <button class="btn btn-success" (click)="exportarExcelPorCoordinacion()">
+              <i class="bi bi-file-earmark-excel"></i>  Excel
+            </button>
+            <button class="btn btn-danger" (click)="generarReportePDF()">
+              <i class="bi bi-file-earmark-pdf"></i>  PDF
+            </button>
+          </div>
+            <!-- <button class="btn btn-save btn-custom" (click)="exportarExcelPorCoordinacion()">
+              <i class="bi bi-graph-up"></i> Resultados
+            </button>
+            <button class="btn btn-primary" (click)="generarReportePDF()">
+              <i class="bi bi-file-earmark-pdf"></i> Vista previa PDF
+            </button> -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="filters-container">
+      <div class="footer-info">
+        <div>Total de registros: <span class="record-count">{{ filteredProyecciones.length }}</span></div>
+        <div class="justify-content-end instructions">
+          <i class="bi bi-info-circle"></i> Los campos en blanco pueden ser editados directamente
+        </div>
+      </div>
+      <br>
+      <h6 class="filter-title">Filtrar por coordinación:</h6>
+      <div class="filter-buttons">
+        <button *ngFor="let coord of coordinaciones" class="btn btn-primary filter-btn"
+          [class.active]="coord === coordinacionSeleccionada" (click)="coordinacionSeleccionada = coord">
+          {{ coord }}
+        </button>
+        <button class="btn btn-secondary filter-btn" [class.active]="!coordinacionSeleccionada"
+          (click)="coordinacionSeleccionada = null">
+          Todas
+        </button>
+        <button class="d-flex justify-content-end btn btn-secondary" (click)="addRow()">
+          <!-- <i class="bi bi-plus-lg"></i>  -->
+          Agregar Fila
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="d-flex justify-content-center my-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!loading" class="table-container">
+      <table class="app-table">
+        <thead>
+         <tr class="text-center">
+            <th>ASESOR</th>
+            <th>Cliente</th>
+            <th>Fecha proyectada envío ope.</th>
+            <th>Fecha de envío operativo APK</th>
+            <th>Hora</th>
+            <th>Incidencias operativo</th>
+            <th>Fecha agendada entrega crédito</th>
+            <th>Renovado</th>
+            <th>Fecha límite entrega legal</th>
+            <th>Fecha de legal recibido</th>
+            <th>Días de retraso Op.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of proyeccionesFiltradasPorCoordinacion">
+            <td>
+              <span class="badge bg-info rounded-pill p-2">{{item.asesor}}</span>
+            </td>
+            <td>{{item.cliente}}</td>
+            <td>{{item.fechaEntregaAgendadaOpe | date:'dd/MM/yyyy'}}</td>
+            <td>
+              <input type="date" class="form-control" [(ngModel)]="item.fechaEnvioOperativo">
+            </td>
+            <td>
+              <input type="time" class="form-control" [(ngModel)]="item.hora">
+            </td>
+            <td>
+              <textarea class="form-control" [(ngModel)]="item.incidenciasOperativo" rows="2"></textarea>
+            </td>
+            <td>{{item.fechaEntregaAgendada | date:'dd/MM/yyyy'}}</td>
+            <td class="text-center">
+              <div class="form-check form-switch d-inline-block">
+                <input class="form-check-input" type="checkbox" [(ngModel)]="item.renovado">
+              </div>
+            </td>
+            <td>
+              {{ getFechaLimiteEntrega(item.fechaEntregaAgendada) | date:'dd/MM/yyyy' }}
+            </td>
+            <td>
+              <input type="date" class="form-control" [(ngModel)]="item.fechaRealReciboExpLegal">
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="{
+                                    'status-ontime': getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal) === 0,
+                                    'status-pending': getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal) > 0 && getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal) <= 3,
+                                    'status-delayed': getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal) > 3
+                                  }">
+                {{ getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal)
+                || 0 }} días
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal de vista previa PDF -->
+  <div class="modal fade" id="pdfPreviewModal" tabindex="-1" aria-labelledby="pdfPreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 90vw;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="pdfPreviewModalLabel">Vista previa del Reporte PDF</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body" style="height: 80vh; padding:0;">
+          <iframe *ngIf="pdfSrcSafe" [src]="pdfSrcSafe" width="100%" height="100%" style="border:none;"></iframe>
+          <div *ngIf="!pdfSrcSafe" class="d-flex justify-content-center align-items-center" style="height:100%;">
+            <span>No se ha generado el PDF aún.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" (click)="downloadPDF()">Descargar PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>

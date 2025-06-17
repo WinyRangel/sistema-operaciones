@@ -1,0 +1,74 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecciones de Entregas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<div class="container py-3">
+   <header class="app-header">
+      <h1 class="app-title">Proyecciones de entregas</h1>
+  </header>
+
+  <div class="actions">
+    <button class="btn btn-secondary" routerLink="/seg-proyecciones">
+      <i class="bi bi-list-check"></i> Ir a seguimiento de Proyecciones
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2><i class="fas fa-table"></i>Cargar archivo</h2>
+    </div>
+
+    <div class="upload-section">
+      <div class="upload-box">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <h3>Seleccione un archivo xslx</h3>
+        <label class="file-input">
+          <i class="fas fa-file-csv"></i> Seleccionar archivo
+          <input id="file-input" type="file" accept=".xlsx" (change)="onFileChange($event)" hidden />
+        </label>
+        <p class="file-info">El archivo debe contener las columnas: ASESOR, Grupo/Individual, Fecha Entrega
+          Ope., Fecha Entrega</p>
+        <p class="file-info">Cargar el archivo con el formato limpio</p>
+      </div>
+    </div>
+    <div class="actions" style="display: flex; flex-direction: column; align-items: center;">
+      <button class="btn btn-primary" (click)="saveChanges()">
+        <i class="fas fa-save"></i> Guardar
+      </button>
+      <p class="mt-2">Guardar cambios de cada Coordinación</p>
+    </div>
+
+
+    <ul class="nav nav-tabs mb-3" *ngIf="sheetNames.length">
+      <li class="nav-item" *ngFor="let name of sheetNames">
+        <a class="nav-link" [class.active]="name === currentSheet" (click)="switchSheet(name)">{{ name }}</a>
+      </li>
+    </ul>
+
+    <div class="table-container" *ngIf="currentSheet">
+      <table class="table table-bordered table-striped">
+        <thead>
+          <th>Asesor</th>
+          <th>Grupo/Individual</th>
+          <th>Fecha Entrega Ope.</th>
+          <th>Fecha de envio de operativo</th>
+          <th>Mes</th>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of getRows(currentSheet); let i = index">
+            <td *ngFor="let col of getColumnCount(currentSheet)">
+              <input *ngIf="isCheckboxColumn(currentSheet, col)" type="checkbox" class="form-check-input"
+                [(ngModel)]="sheetsData[currentSheet][i + 1][col]">
+              <input *ngIf="!isCheckboxColumn(currentSheet, col)"
+                [type]="isDateColumn(currentSheet, col) ? 'date' : 'text'" class="form-control"
+                [(ngModel)]="sheetsData[currentSheet][i + 1][col]">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

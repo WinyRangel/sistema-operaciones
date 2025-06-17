@@ -158,6 +158,7 @@
                     <th>Código</th>
                     <th>Actividad Agendada</th>
                     <th>Actividad Reportada</th>
+                    <!-- <th>Código Reportado</th> -->
                     <th>Cumplimiento</th>
                   </tr>
                 </thead>
@@ -172,6 +173,7 @@
                     <td class="cell-wrap">{{ actividad.codigo }}</td>
                     <td class="cell-wrap">{{ actividad.actividadAgendada }}</td>
                     <td class="cell-wrap">{{ actividad.actividadReportada }}</td>
+                    <!-- <td class="cell-wrap">{{actividad.codigoReportado}}</td> -->
                     <td class="cell-wrap">
                       <span
                         [class.text-success]="actividad.cumplida"
