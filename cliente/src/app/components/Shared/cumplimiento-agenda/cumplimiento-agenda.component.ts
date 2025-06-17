@@ -1,5 +1,3 @@
-// src/app/components/cumplimiento-agenda/cumplimiento-agenda.component.ts
-
 import { Component, OnInit } from '@angular/core';
 import { CoordinacionService } from '../../../services/coordinacion.service';
 import { Agenda } from '../../../models/agenda';
@@ -44,23 +42,28 @@ export class CumplimientoAgendaComponent implements OnInit {
 
   // Mapeo de palabra clave a códigos
   codigoClave: Record<string, string[]> = {
-    'Mora': ['C', 'Seg'],
+    'Mora': ['C'],
     'Supervisión': ['Sup'],
     'Fichas': ['CF', 'R'],
     'Ficha': ['CF', 'R'],
-    'Grupo': ['GN', 'VTA'],
     'Nuevo': ['GN', 'VTA'],
+    'Venta': ['VTA'],
+    'ventas': ['VTA'],
+    'Ventas': ['VTA'],
+    'Renovación': ['S/Renov'],
+    'Renovacion': ['S/Renov'],
+    'ficha cerrada': ['R'],   
+    'cierre fichas': ['R'],
   };
-
-  // Mapeo de códigos a palabras clave esperadas
+  
   validacionCodigos: Record<string, string[]> = {
     'C': ['cobranza', 'cobranzas', 'precobranza'],
-    'Seg': ['seguimiento mora'],
-    'Sup': ['supervisión', 'supervisando', 'supervisar'],
+    'Sup': ['supervision','supervisión', 'supervisando', 'supervisar'],
     'R': ['ficha cerrada', 'cierre fichas'],
     'CF': ['ficha cerrada', 'cierre fichas'],
     'GN': ['grupo nuevo', 'cliente nuevo'],
-    'VTA': ['grupo nuevo', 'cliente nuevo'],
+    'VTA': ['nuevo', 'cliente nuevo', 'ventas', 'venta', 'promoción', 'cambaceo', 'contactos', 'volanteo'],
+    'S/Renov': ['renovacion','renovación', 'renovar', 'renovando']
   };
 
   // 1) Definimos un set de stop words en español (artículos, preposiciones, conjunciones, pronombres básicos)
@@ -158,7 +161,7 @@ export class CumplimientoAgendaComponent implements OnInit {
 
   /**
    * Valida si la actividad reportada corresponde al código,
-   * si no coincide por código, valida similitud con la actividad agendada,
+   * si no coincide por código, valida similitud con la actividad agendada (requiere palabra clave de código),
    * y finalmente si no cumple ninguno de esos dos, verifica relación con el objetivo.
    */
   validarActividad(
@@ -172,21 +175,33 @@ export class CumplimientoAgendaComponent implements OnInit {
       return false;
     }
 
+    const actRepNorm = this.normalizarTexto(actividadReportada);
+
     // 1) Intentar lógica por código, si existe en validacionCodigos
     if (codigo && this.validacionCodigos[codigo]) {
-      const claves = this.validacionCodigos[codigo]!.map(c => this.normalizarTexto(c));
-      const actRepNorm = this.normalizarTexto(actividadReportada);
-      const coincideCodigo = claves.some(palabraClave =>
-        actRepNorm.includes(palabraClave)
-      );
+      const clavesCodigo = this.validacionCodigos[codigo]!.map(c => this.normalizarTexto(c));
+      const coincideCodigo = clavesCodigo.some(palabraClave => actRepNorm.includes(palabraClave));
       if (coincideCodigo) {
         return true;
       }
     }
 
-    // 2) Si no coincide por código, usar similitud entre actividad agendada y reportada
+    // 2) Si no coincide por código, usar similitud entre actividad agendada y reportada,
+    // pero VALIDAR que también exista palabra clave de validación de código
     if (this.cumplePorSimilitud(actividadAgendada, actividadReportada)) {
-      return true;
+      if (codigo && this.validacionCodigos[codigo]) {
+        const clavesCodigo = this.validacionCodigos[codigo]!.map(c => this.normalizarTexto(c));
+        const coincideCodigoPorSimilitud = clavesCodigo.some(palabraClave => actRepNorm.includes(palabraClave));
+        if (coincideCodigoPorSimilitud) {
+          return true;
+        } else {
+          // No existe palabra clave de validación de código, no se considera cumplida
+          return false;
+        }
+      } else {
+        // No hay validación de código definida, no se considera cumplida
+        return false;
+      }
     }
 
     // 3) Si aún no cumple, verificar si actividad reportada contiene palabra del objetivo

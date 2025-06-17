@@ -10,6 +10,8 @@ import { ReporteFichasComponent } from './components/reporte-fichas/reporte-fich
 import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-agenda/cumplimiento-agenda.component';
 import { AgendasComponent } from './components/Coordinadoras/agendas/agendas.component';
 import { ReporteAgendasComponent } from './components/Coordinadoras/reporte-agendas/reporte-agendas.component';
+import { ProyeccionesComponent } from './components/Shared/proyecciones/proyecciones.component';
+import { SeguimientoProyeccionesComponent } from './components/Shared/seguimiento-proyecciones/seguimiento-proyecciones.component';
 
 const routes: Routes = [
   { path: 'baucher', component: BauchersComponent },
@@ -22,6 +24,8 @@ const routes: Routes = [
   { path: 'inicio', component: InicioComponent },
   { path: 'reportefichas', component: ReporteFichasComponent },
   { path: 'cumplimientoobjetivo', component: CumplimientoAgendaComponent},
+  { path: 'proyecciones', component: ProyeccionesComponent },
+  { path: 'seg-proyecciones', component: SeguimientoProyeccionesComponent },
   { path: '**', component: InicioComponent }
 ];
 
