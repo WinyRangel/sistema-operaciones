@@ -34,6 +34,7 @@ import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-ag
 import { AgendasComponent } from './components/Coordinadoras/agendas/agendas.component';
 import { ReporteAgendasComponent } from './components/Coordinadoras/reporte-agendas/reporte-agendas.component';
 import { ProyeccionesComponent } from './components/Shared/proyecciones/proyecciones.component';
+import { SeguimientoProyeccionesComponent } from './components/Shared/seguimiento-proyecciones/seguimiento-proyecciones.component';
 
 
 @NgModule({
@@ -53,7 +54,8 @@ import { ProyeccionesComponent } from './components/Shared/proyecciones/proyecci
     CumplimientoAgendaComponent,
     AgendasComponent,
     ReporteAgendasComponent,
-    ProyeccionesComponent
+    ProyeccionesComponent,
+    SeguimientoProyeccionesComponent
   ],
   
   imports: [

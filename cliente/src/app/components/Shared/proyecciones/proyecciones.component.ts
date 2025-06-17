@@ -83,35 +83,23 @@ export class ProyeccionesComponent {
       return;
     }
     const rows = this.getRows(this.currentSheet);
-    // const payload: ProyeccionPayload[] = rows.map(r => ({
-    //   coordinacion:             `${this.currentSheet}-`,  // <— aquí
-    //   asesor:                    r[0],
-    //   cliente:                   r[1],
-    //   fechaEntregaAgendadaOpe:   r[2],
-    //   fechaEntregaAgendada:      r[3],
-    //   fechaEnvioOperativo:       r[4] ? new Date(r[4]).toISOString(): undefined,
-    //   hora:                      r[5] || undefined,
-    //   diasRetrasoExpOp:          r[6] !== undefined ? Number(r[6]) : undefined,
-    //   incidenciasOperativo:      r[7] || undefined,
-    //   fechaLimiteEntrega:        r[8] ? new Date(r[8]).toISOString() : undefined,
-    //   fechaRealReciboExpLegal:   r[9] ? new Date(r[9]).toISOString() : undefined,
-    //   renovado:                  typeof r[10] === 'string' ? r[10].toLowerCase() === 'sí' : undefined
-    // }));
     const payload: ProyeccionPayload[] = rows.map(r => ({
       coordinacion: `${this.currentSheet}-`,
       asesor: r[0] || '',
       cliente: r[1] || '',
       fechaEntregaAgendadaOpe: r[2] ? new Date(r[2]).toISOString() : undefined,
       fechaEntregaAgendada: r[3] ? new Date(r[3]).toISOString() : undefined,
-      /** |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-      fechaEnvioOperativo: r[4] ? new Date(r[4]).toISOString() : undefined,
-      hora: r[5] || '', //se agrega
-      diasRetrasoExpOp: r[6],
-      incidenciasOperativo: r[7] || '', //se agrega
-      fechaLimiteEntrega: r[8] ? new Date(r[8]).toISOString() : undefined,
-      fechaRealReciboExpLegal: r[9] ? new Date(r[9]).toISOString() : undefined,
-      renovado: typeof r[10] === 'string' ? r[10].toLowerCase() === 'sí' : undefined
+      mes: r[4] || '',
+      fechaEnvioOperativo: r[5] ? new Date(r[5]).toISOString() : undefined,
+      hora: r[6] || '',
+      diasRetrasoExpOp: r[7] !== undefined && r[7] !== '' ? Number(r[6]) : undefined,
+      incidenciasOperativo: r[8] || '',
+      fechaLimiteEntrega: r[9] ? new Date(r[9]).toISOString() : undefined,
+      fechaRealReciboExpLegal: r[10] ? new Date(r[10]).toISOString() : undefined,
+      renovado: typeof r[11] === 'string' ? r[11].toLowerCase() === 'sí' : false
+      
     }));
+
 
     console.log('Payload a enviar:', payload);
 

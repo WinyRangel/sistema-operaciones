@@ -4,13 +4,14 @@ export interface Proyeccion {
   asesor?: string;
   cliente?: string;
   fechaEntregaAgendadaOpe?: string;   
-  fechaEntregaAgendada?: string;      
+  fechaEntregaAgendada?: string;   
+  mes?: string;    
   fechaEnvioOperativo?: string;      
   hora?: string;
   diasRetrasoExpOp?: number;
   incidenciasOperativo?: string;
   fechaLimiteEntrega?: string;       
-  fechaRealReciboExpLegal?: string;  
+  fechaRealReciboExpLegal?: string; 
   renovado?: boolean;
   createdAt?: string;                
   updatedAt?: string;                
