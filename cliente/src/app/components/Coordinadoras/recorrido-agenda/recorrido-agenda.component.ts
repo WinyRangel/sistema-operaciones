@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { ViewChild, ElementRef } from '@angular/core';
-import Chart from 'chart.js/auto';
+import Chart, { ChartConfiguration } from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 
@@ -30,6 +30,8 @@ export class RecorridoAgendaComponent implements OnInit {
   @ViewChild('graficaCodigo') graficaCodigo!: ElementRef<HTMLCanvasElement>;
   @ViewChild('reportePDF') reportePDF!: ElementRef;
   @ViewChild('graficaHoras') graficaHoras!: ElementRef;
+  @ViewChild('entregasChart') entregasChart!: ElementRef;
+
   agendasFiltradasPorCoordinador: any[] = [];
 
   //Variables para agenda
@@ -51,6 +53,7 @@ export class RecorridoAgendaComponent implements OnInit {
                    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
+
   actividadSeleccionada: any = null;
 
   //horas de trabajo para métricas del mes
@@ -62,10 +65,14 @@ export class RecorridoAgendaComponent implements OnInit {
   semanaSeleccionada: string = '';
   diaSeleccionado: string = '';
 
+  codigoSeleccionado: string = '';
+  codigoReportadoSeleccionado: string = '';
+  estadoSeleccionado: string = '';
   //Variables de las graficas
   chart: any;
   chartCodigo: any;
   mostrarContenedorGraficas: boolean = false;
+codigosReportados: any;
 
 
   constructor(
@@ -86,9 +93,13 @@ export class RecorridoAgendaComponent implements OnInit {
 
 
   editarActividad(agenda: any) {
-    console.log('Actividad seleccionada:', agenda);
-    this.actividadSeleccionada = agenda;
+    this.actividadSeleccionada = {
+      domicilio: { nombre: '' },
+      ...agenda,
+    };
   }
+
+
   private generateWeeks(): void {
     this.semanas = Array.from({ length: SEMANAS_ANIO },
       (_, i) => `SEMANA ${i + 1}`);
@@ -162,56 +173,64 @@ export class RecorridoAgendaComponent implements OnInit {
   }
 
 
-  refrescarAgendas(): void {
-    this._coordinacionService.obtenerAgendas1().subscribe(data => {
-      this.agendas = data.map((agenda: { fecha: string }) => ({
-        ...agenda,
-        fecha: this.fixUTCDateToLocal(agenda.fecha)
-      }));
-      this.filtrarAgendas(); // Aplicar filtros después de cargar
-    });
-  }
+    refrescarAgendas(): void {
+      this._coordinacionService.obtenerAgendas1().subscribe(data => {
+        this.agendas = data.map((agenda: { fecha: string }) => ({
+          ...agenda,
+          fecha: this.fixUTCDateToLocal(agenda.fecha)
+        }));
+        this.filtrarAgendas(); // Aplicar filtros después de cargar
+      });
+    }
 
+    filtrarAgendas(): void {
+      this.agendasFiltradasPorCoordinador = this.agendas.filter(agenda => {
+        if (!agenda.coordinador) return false;
 
-  filtrarAgendas(): void {
-    this.agendasFiltradasPorCoordinador = this.agendas.filter(agenda => {
-      // 1) Validar que agenda.coordinador exista
-      if (!agenda.coordinador) return false;
+        const fechaObj = new Date(agenda.fecha);
+        if (isNaN(fechaObj.getTime())) return false;
 
-      // 2) Convertir fecha en objeto y extraer mes y día en español
-      const fechaObj = new Date(agenda.fecha);
-      if (isNaN(fechaObj.getTime())) return false;
+        const mesNombre = fechaObj.toLocaleString('es-MX', { month: 'long' });
+        const diaNombre = fechaObj.toLocaleString('es-MX', { weekday: 'long' });
+        const semanaTrimmed = agenda.semana?.trim() || '';
 
-      const mesNombre = fechaObj
-        .toLocaleString('es-MX', { month: 'long' }); // e.g. "mayo"
-      const diaNombre = fechaObj
-        .toLocaleString('es-MX', { weekday: 'long' }); // e.g. "lunes"
-      const semanaTrimmed = agenda.semana?.trim() || '';
+        const cumpleCoordinador = this.coordinadorVisible
+          ? agenda.coordinador.toLowerCase() === this.coordinadorVisible.toLowerCase()
+          : true;
 
-      // 3) Comparar coordinador solo si se seleccionó alguno
-      const cumpleCoordinador = this.coordinadorVisible
-        ? agenda.coordinador.toLowerCase() === this.coordinadorVisible.toLowerCase()
-        : true;
+        const cumpleMes = this.mesSeleccionado
+          ? mesNombre.toLowerCase() === this.mesSeleccionado.toLowerCase()
+          : true;
 
-      // 4) Comparar mes (si hay mesSeleccionado)
-      const cumpleMes = this.mesSeleccionado
-        ? mesNombre.toLowerCase() === this.mesSeleccionado.toLowerCase()
-        : true;
+        const cumpleSemana = this.semanaSeleccionada
+          ? semanaTrimmed === this.semanaSeleccionada
+          : true;
 
-      // 5) Comparar semana (si hay semanaSeleccionada)
-      const cumpleSemana = this.semanaSeleccionada
-        ? semanaTrimmed === this.semanaSeleccionada
-        : true;
+        const cumpleDia = this.diaSeleccionado
+          ? diaNombre.toLowerCase() === this.diaSeleccionado.toLowerCase()
+          : true;
 
-      // 6) Comparar día (si hay diaSeleccionado)
-      const cumpleDia = this.diaSeleccionado
-        ? diaNombre.toLowerCase() === this.diaSeleccionado.toLowerCase()
-        : true;
+        const cumpleCodigo = this.codigoSeleccionado
+          ? agenda.codigo === this.codigoSeleccionado
+          : true;
 
-      return cumpleCoordinador && cumpleMes && cumpleSemana && cumpleDia;
-    });
-    
-  }
+        const cumpleCodigoReportado = this.codigoReportadoSeleccionado
+          ? agenda.codigoReportado === this.codigoReportadoSeleccionado
+          : true;
+
+        const cumpleEstado = this.estadoSeleccionado
+          ? (this.estadoSeleccionado === 'reportado' ? agenda.reportado === true : agenda.reportado === false)
+          : true;
+
+        return cumpleCoordinador &&
+          cumpleMes &&
+          cumpleSemana &&
+          cumpleDia &&
+          cumpleCodigo &&
+          cumpleCodigoReportado &&
+          cumpleEstado;
+      });
+    }
 
 
 
@@ -228,6 +247,9 @@ export class RecorridoAgendaComponent implements OnInit {
     this.mesSeleccionado = '';
     this.semanaSeleccionada = '';
     this.diaSeleccionado = '';
+    this.codigoSeleccionado = '';
+    this.codigoReportadoSeleccionado = '';
+    this.estadoSeleccionado = '';
     this.aplicarFiltros();
   }
 
@@ -240,6 +262,7 @@ export class RecorridoAgendaComponent implements OnInit {
       actividad: agenda.actividad,
       hora: agenda.hora,
       codigo: agenda.codigo,
+      codigoReportado: agenda.codigoReportado,
       actividadReportada: agenda.actividadReportada,
       reportado: agenda.reportado,
       horaReporte: agenda.horaReporte,
@@ -285,10 +308,10 @@ export class RecorridoAgendaComponent implements OnInit {
 
 
   get horasEntregas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'E'
-    ).length;
-  }
+      return this.agendasFiltradasPorCoordinador.filter(
+        a => a.hora && a.codigo === 'E'
+      ).length;
+    }
 
   get horasEntregasReportadas(): number {
     return this.agendasFiltradasPorCoordinador.filter(
@@ -301,6 +324,41 @@ export class RecorridoAgendaComponent implements OnInit {
   }
 
 
+
+  generarGraficaEntregas(): void {
+    const ctx = document.getElementById('entregasChart') as HTMLCanvasElement;
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Agendadas', 'Reportadas', 'No Reportadas'],
+        datasets: [{
+          label: 'Horas de Entregas',
+          data: [
+            this.horasEntregas,
+            this.horasEntregasReportadas,
+            this.horasEntregasNoReportadas
+          ],
+          backgroundColor: ['#42A5F5', '#66BB6A', '#EF5350']
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+  }
+
+    
   get horasPagos(): number {
     return this.agendasFiltradasPorCoordinador.filter(
       a => a.hora && a.codigo === 'R'
@@ -368,37 +426,7 @@ export class RecorridoAgendaComponent implements OnInit {
   }
 
 
-  get horasREC(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'E'
-    ).length;
-  }
 
-  get horasRECReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'R/EC'
-    ).length;
-  }
-
-  get horasRECNoReportadas(): number {
-    return this.horasREC - this.horasRECReportadas;
-  }
-
-  get horasRER(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'R/ER'
-    ).length;
-  }
-
-  get horashorasRERReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'R/ER'
-    ).length;
-  }
-
-  get horashorasRERNoReportadas(): number {
-    return this.horasRER - this.horasRER;
-  }
 
   get horasGrupoN(): number {
     return this.agendasFiltradasPorCoordinador.filter(
@@ -462,13 +490,10 @@ export class RecorridoAgendaComponent implements OnInit {
 
   get horasReAReportadas(): number {
     return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'Sup'
+      a => a.horaReporte && a.reportado === true && a.codigo === 'R/A'
     ).length;
   }
 
-  get horasReANoReportadas(): number {
-    return this.horasReA - this.horasReAReportadas;
-  }
 
 
   //
@@ -501,9 +526,6 @@ export class RecorridoAgendaComponent implements OnInit {
     ).length;
   }
 
-  get horasSCNoReportadas(): number {
-    return this.horasSC - this.horasSCReportadas;
-  }
 
 
   get horasAM(): number {
@@ -518,51 +540,43 @@ export class RecorridoAgendaComponent implements OnInit {
     ).length;
   }
 
-  get horasAMNoReportadas(): number {
-    return this.horasAM - this.horasAMReportadas;
-  }
 
-  get horasOpe(): number {
+    get horasReunion(): number {
     return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'Ope'
+      a => a.hora && a.codigo === 'RM' && 'RS'
     ).length;
   }
 
-  get horasOpeReportadas(): number {
+  get horasReunionesRep(): number {
     return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'Ope'
+      a => a.horaReporte && a.reportado === true && a.codigo === 'RM' && 'RS'
     ).length;
   }
-
+ 
 
   get horasProductividad(): number {
-    return this.horasTrabajo > 0
-      ? parseFloat(((this.horasAgendadas / this.horasTrabajo) * 100).toFixed(2))
+    return this.horasAgendadas > 0
+      ? parseFloat(((this.horasReportadas / this.horasTrabajo)*100).toFixed(2))
       : 0;
   }
 
   opcionesCodigo = [
     { value: 'AG', texto: 'AG | Aseo General' },
     { value: 'AM', texto: 'AM | Actividades Matutinas' },
-    { value: 'Aten', texto: 'Aten | Atenciones' },
     { value: 'C', texto: 'C | Cobranza' },
-    { value: 'CF', texto: 'CF | Cierre de Fichas' },
     { value: 'D', texto: 'D | Domiciliar' },
-    { value: 'E', texto: 'E | Desembolso o Entregas' },
+    { value: 'Dep', texto: 'Dep | Depósitar' },
+    { value: 'E', texto: 'E | Entregas' },
     { value: 'GN', texto: 'GN | Grupo Nuevo' },
     { value: 'INT', texto: 'INT | Integración' },
-    { value: 'Ope', texto: 'Ope | Env. Operativos' },
     { value: 'R', texto: 'R | Pago' },
     { value: 'R/A', texto: 'R/A | Realizando Agendas' },
-    { value: 'R/EC', texto: 'R/EC | Pago/Entrega/Cambio de Ciclo' },
-    { value: 'R/ER', texto: 'R/ER | Pago/Entrega/Refill' },
-    { value: 'R/P', texto: 'R/P | Pago/Levantamiento de Papeleria' },
+    { value: 'RM', texto: 'R/M | Reunión Mensual' },
     { value: 'RS', texto: 'RS | Reunión Semanal' },
-    { value: 'TS', texto: 'TS | Traslado' },
     { value: 'VTA', texto: 'VTA | Promoción' },
-    { value: 'Seg', texto: 'Seg | Seguimiento' },
     { value: 'Sup', texto: 'Sup | Supervisión' },
-    { value: 'Sin Codigo', texto: 'Sin codigo' },
+    { value: 'S/Renov', texto: 'S/Renov | Seg.Renovación' },
+    { value: 'Sin Codigo', texto: 'Sin Codigo' },
     { value: '', texto: '' }
   ];
 
@@ -573,6 +587,7 @@ export class RecorridoAgendaComponent implements OnInit {
       setTimeout(() => {
         this.dibujarGraficaPorCodigo();
         this.dibujarGraficaReporteadasVsNoReportadas();
+        this.generarGraficaEntregas();
       }, 100);
     } else {
       this.destroyCharts();

@@ -80,6 +80,36 @@
                     </select>
                   </div>
                 </div>
+                  <div class="row g-3">
+                    <!-- Código -->
+                      <div class="col-md-4">
+                        <label for="codigoSelect" class="form-label fw-bold">Código</label>
+                        <select class="form-select" id="codigoSelect" [(ngModel)]="codigoSeleccionado" (change)="aplicarFiltros()">
+                          <option value="">Todos los códigos</option>
+                          <option *ngFor="let opcion of opcionesCodigo" [value]="opcion.value">{{ opcion.texto }}</option>
+                        </select>
+                      </div>
+
+                      <!-- Código Reportado -->
+                      <div class="col-md-4">
+                        <label for="codigoReportadoSelect" class="form-label fw-bold">Código Reportado</label>
+                        <select class="form-select" id="codigoReportadoSelect" [(ngModel)]="codigoReportadoSeleccionado" (change)="aplicarFiltros()">
+                          <option value="">Todos los códigos reportados</option>
+                          <option *ngFor="let opcion of opcionesCodigo" [value]="opcion.value">{{ opcion.texto }}</option>
+                        </select>
+                      </div>
+
+                    <!-- Estado -->
+                    <div class="col-md-4">
+                      <label class="form-label fw-bold">Estado</label>
+                      <select class="form-select" [(ngModel)]="estadoSeleccionado" (change)="aplicarFiltros()">
+                        <option value="" disabled selected>Seleccione estado</option>
+                        <option value="reportado">Reportado</option>
+                        <option value="no reportado">No reportado</option>
+                      </select>
+                    </div>
+                  </div>
+
 
                 <!-- Botón para limpiar filtros -->
                 <div class="d-flex justify-content-end mt-3">
@@ -173,9 +203,10 @@
                         <th class="text-center" style="width: 100px;">Fecha</th>
                         <th class="text-center" style="width: 80px;">Hora</th>
                         <th style="min-width: 180px;">Actividad</th>
-                        <th class="text-center" style="min-width: 50px;">Código</th>
+                        <th class="text-center" style="min-width: 40px;">Código</th>
                         <th style="min-width: 180px;">Actividad Reportada</th>
-                        <th class="text-center" style="width: 120px;">Estado</th>
+                        <th class="text-center" style="min-width: 40px;">Código Reportado</th>
+                        <th class="text-center" style="width: 100px;">Estado</th>
                         <th class="text-center" style="width: 100px;">Inicio</th>
                         <th class="text-center" style="width: 100px;">Cierre</th>
                         <th class="text-center" style="width: 100px;">Cumplimiento</th>
@@ -227,6 +258,12 @@
                             {{ agenda.actividadReportada || '--' }}
                           </div>
                         </td>
+
+                        <td>
+                          <div class="text-center" style="max-width: 180px;" [title]="agenda.codigoReportado">
+                           <span class="badge text-bg-success"> {{ agenda.codigoReportado }} </span>
+                          </div>
+                        </td>
                         
                         <!-- Estado Reportado -->
                         <td class="text-center">
@@ -236,7 +273,7 @@
                                   'bg-danger-light text-danger': !agenda.reportado
                                 }">
                             <i class="bi me-1" [ngClass]="agenda.reportado ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
-                            {{ agenda.reportado ? 'Reportado' : 'Pendiente' }}
+                            {{ agenda.reportado ? 'R' : 'NREP' }}
                           </span>
                         </td>
                         
@@ -275,10 +312,10 @@
                           <span class="badge py-2" 
                                 [ngClass]="{
                                   'bg-success-light text-success': agenda.cumplimientoAgenda,
-                                  'bg-warning-light text-warning': !agenda.cumplimientoAgenda
+                                  'bg-danger-light text-danger': !agenda.cumplimientoAgenda
                                 }">
                             <i class="bi me-1" [ngClass]="agenda.cumplimientoAgenda ? 'bi-check-circle-fill' : 'bi-clock-history'"></i>
-                            {{ agenda.cumplimientoAgenda ? 'Cumplido' : 'No cumplido' }}
+                            {{ agenda.cumplimientoAgenda ? '' : '' }}
                           </span>
                         </td>
                         
@@ -339,10 +376,14 @@
                 </div>
               </div>
               
-              <div class="card-body">
+              <div class="card-body mb-4 p-3">
                 <div #reportePDF class="position-relative">
                 <!-- Resumen estadístico -->
                 <div class="row mb-4">
+                  <p class="text-center" style="font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 10px;">
+                    Reporte Mensual - Mes: {{ mesSeleccionado }}
+                  </p>
+
                   <div class="col-md-3 mb-3">
                     <div class="card border-0 shadow-sm h-100">
                       <div class="card-body text-center">
@@ -418,63 +459,137 @@
                     </div>
                   </div>
                 </div>
-                    <table class="table table-bordered table-striped text-center align-middle">
-                      <thead class="table-dark">
-                        <tr>
-                          <th>Actividad</th>
-                          <th>Horas Agendadas</th> 
-                          <th>Horas Reportadas</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <th>Revisión Matutinas</th>
-                          <td>{{horasAM}}</td> 
-                          <td>{{horasAMReportadas}}</td> 
-                        </tr>
-                        <tr>
-                          <th>Operativos</th>
-                          <td>{{horasOpe}}</td>
-                          <td>{{horasOpeReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Supervisiones</th>
-                          <td>{{horasSup}}</td>
-                          <td>{{horasSupReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Entregas</th>
-                          <td>{{horasEntregas}}</td>
-                          <td>{{horasEntregasReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Cobranza</th>
-                          <td>{{horasCobranza}}</td>
-                          <td>{{horasCobranzasReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Ventas</th>
-                          <td>{{horasVentas}}</td>
-                          <td>{{horasVentasReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Actividades sin código</th>
-                          <td>{{horasSC}}</td>
-                          <td>{{horasSCReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Realizar Agenda</th>
-                          <td>{{horasReA}}</td>
-                          <td>{{horasReAReportadas}}</td>
-                        </tr>
-                        <tr>
-                          <th>Reunión</th>
-                          <td></td>
-                          <td></td>
-                        </tr>
-                      </tbody>
-                    </table>
+                <table class="table table-bordered table-striped text-center align-middle">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>Actividad</th>
+                      <th>Horas Agendadas</th>
+                      <th>Horas Reportadas</th>
+                      <th>Logro</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Revisión Matutina -->
+                    <tr>
+                      <th scope="row">Revisión Matutina</th>
+                      <td>{{ horasAM }}</td>
+                      <td>{{ horasAMReportadas }}</td>
+                      <td>
+                        <span class="badge" [ngClass]="{
+                          'text-bg-success': horasAMReportadas === horasAM,
+                          'text-bg-danger': horasAMReportadas < horasAM
+                        }">
+                          {{ horasAMReportadas === horasAM ? 'Logrado' : 'No logrado' }}
+                        </span>
+                      </td>
+                    </tr>
 
+                    <!-- Supervisiones -->
+                    <tr>
+                      <th scope="row">Supervisiones</th>
+                      <td>{{ horasSup }}</td>
+                      <td>{{ horasSupReportadas }}</td>
+                      <td>
+                        <span class="badge" [ngClass]="{
+                          'text-bg-success': horasSupReportadas === horasSup,
+                          'text-bg-danger': horasSupReportadas < horasSup
+                        }">
+                          {{ horasSupReportadas === horasSup ? 'Logrado' : 'No logrado' }}
+                        </span>
+                      </td>
+                    </tr>
+
+                    <!-- Entregas -->
+                    <tr>
+                      <th scope="row">Entregas</th>
+                      <td>{{ horasEntregas }}</td>
+                      <td>{{ horasEntregasReportadas }}</td>
+                      <td>
+                        <span class="badge" [ngClass]="{
+                          'text-bg-success': horasEntregasReportadas === horasEntregas,
+                          'text-bg-danger': horasEntregasReportadas < horasEntregas
+                        }">
+                          {{ horasEntregasReportadas === horasEntregas ? 'Logrado' : 'No logrado' }}
+                        </span>
+                      </td>
+                    </tr>
+
+                    <!-- Cobranza -->
+                    <tr>
+                      <th scope="row">Cobranza</th>
+                      <td>{{ horasCobranza }}</td>
+                      <td>{{ horasCobranzasReportadas }}</td>
+                      <td>
+                        <span class="badge" [ngClass]="{
+                          'text-bg-success': horasCobranzasReportadas === horasCobranza,
+                          'text-bg-danger': horasCobranzasReportadas < horasCobranza
+                        }">
+                          {{ horasCobranzasReportadas === horasCobranza ? 'Logrado' : 'No logrado' }}
+                        </span>
+                      </td>
+                    </tr>
+
+                    <!-- Ventas -->
+                    <tr>
+                      <th scope="row">Ventas</th>
+                      <td>{{ horasVentas }}</td>
+                      <td>{{ horasVentasReportadas }}</td>
+                      <td>
+                        <span class="badge" [ngClass]="{
+                          'text-bg-success': horasVentasReportadas === horasVentas,
+                          'text-bg-danger': horasVentasReportadas < horasVentas
+                        }">
+                          {{ horasVentasReportadas === horasVentas ? 'Logrado' : 'No logrado' }}
+                        </span>
+                      </td>
+                    </tr>
+
+                    <!-- Actividades sin código -->
+                    <tr>
+                      <th scope="row">Actividades sin código</th>
+                      <td>{{ horasSC }}</td>
+                      <td>{{ horasSCReportadas }}</td>
+                      <td>
+                        <span class="badge" [ngClass]="{
+                          'text-bg-success': horasSCReportadas === horasSC,
+                          'text-bg-danger': horasSCReportadas < horasSC
+                        }">
+                          {{ horasSCReportadas === horasSC ? 'Logrado' : 'No logrado' }}
+                        </span>
+                      </td>
+                    </tr>
+
+                    <!-- Realizar Agenda -->
+                    <tr>
+                      <th scope="row">Realizar Agenda</th>
+                      <td>{{ horasReA }}</td>
+                      <td>{{ horasReAReportadas }}</td>
+                      <td>
+                        <span class="badge" [ngClass]="{
+                          'text-bg-success': horasReAReportadas === horasReA,
+                          'text-bg-danger': horasReAReportadas < horasReA
+                        }">
+                          {{ horasReAReportadas === horasReA ? 'Logrado' : 'No logrado' }}
+                        </span>
+                      </td>
+                    </tr>
+
+                    <!-- Reunión -->
+                    <tr>
+                      <th scope="row">Reunión</th>
+                      <td>{{ horasReunion }}</td>
+                      <td>{{ horasReunionesRep }}</td>
+                      <td>
+                        <span class="badge" [ngClass]="{
+                          'text-bg-success': horasReunionesRep === horasReunion,
+                          'text-bg-danger': horasReunionesRep < horasReunion
+                        }">
+                          {{ horasReunionesRep === horasReunion ? 'Logrado' : 'No logrado' }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
                 <!---->
                 
                 <!-- Gráficos -->
@@ -499,6 +614,17 @@
                         <canvas #graficaHoras class="w-100" height="300"></canvas>
                       </div>
                     </div>
+                  </div>
+                  <div class="col-md-6 mb-4">
+                      <div class="card h-100">
+                        <div class="card-header bg-light">
+                          <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Distribución de Horas</h5>
+                        </div>
+                        <div class="card-body">
+                          <div style="max-width: 600px;">
+                            <canvas #entregasChart class="w-100" height="300"></canvas>
+                          </div>
+                        </div>
                   </div>
                 </div>
               </div>
@@ -525,6 +651,7 @@
       </div>
 
       <!-- Modal Body -->
+
       <div class="modal-body p-4">
         <div class="table-responsive rounded-3 border">
           <table class="table table-hover align-middle mb-0">
@@ -535,11 +662,11 @@
                 <th class="bg-light-blue text-primary">Actividad</th>
                 <th class="bg-light-blue text-primary">Código</th>
                 <th class="bg-light-blue text-primary">Actividad Reportada</th>
+                <th class="bg-light-blue text-primary">Código Reportado</th>
                 <th class="text-center bg-light-blue text-primary">Estado</th>
                 <th class="text-center bg-light-blue text-primary">Hora Inicio</th>
                 <th class="text-center bg-light-blue text-primary">Hora Cierre</th>
                 <th class="text-center bg-light-blue text-primary">KM</th>
-                <th class="text-center bg-light-blue text-primary">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -583,6 +710,14 @@
                             [(ngModel)]="actividadSeleccionada.actividadReportada"
                             placeholder="Actividad realizada"></textarea>
                 </td>
+
+                                <!-- Codigo Reportado -->
+                <td>
+                  <input class="form-control form-control-sm border-primary" 
+                            rows="2" 
+                            [(ngModel)]="actividadSeleccionada.codigoReportado"
+                            placeholder="Actividad realizada">
+                </td>
                 
                 <!-- Estado Reportado -->
                 <td class="text-center">
@@ -623,17 +758,7 @@
                            step="0.1">
                     <span class="input-group-text bg-light">km</span>
                   </div>
-                </td>
-                
-                <!-- Acciones -->
-                <td class="text-center">
-                  <button class="btn btn-sm btn-success me-1" 
-                          (click)="guardarCambios(actividadSeleccionada)" 
-                          title="Guardar cambios"
-                          >
-                    <i class="fas fa-save me-1"></i>
-                  </button>
-                </td>
+                </td>          
               </tr>
             </tbody>
           </table>
@@ -660,4 +785,5 @@
 
     </div>
   </div>
+</div>
 </div>

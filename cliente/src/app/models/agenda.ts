@@ -8,6 +8,7 @@ export interface Agenda {
     domicilio?: string;
     actividad?: string;
     codigo?: string;
+    codigoReportado?: string;
     actividadReportada?: string;
     reportado?: boolean;
     horaReporte?: string;

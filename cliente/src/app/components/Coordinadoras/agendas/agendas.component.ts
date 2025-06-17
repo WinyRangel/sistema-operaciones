@@ -253,27 +253,23 @@ private loadAgendas(): void {
 
 
   opcionesCodigo = [
-    { value: 'AG', texto: 'AG | Aseo General' },
-    { value: 'AM', texto: 'AM | Actividades Matutinas' },
-    { value: 'Aten', texto: 'Aten | Atenciones' },
-    { value: 'C', texto: 'C | Cobranza' },
-    { value: 'CF', texto: 'CF | Cierre de Fichas' },
-    { value: 'D', texto: 'D | Domiciliar' },
-    { value: 'E', texto: 'E | Desembolso o Entregas' },
-    { value: 'GN', texto: 'GN | Grupo Nuevo' },
-    { value: 'INT', texto: 'INT | Integración' },
-    { value: 'R', texto: 'R | Pago' },
-    { value: 'R/A', texto: 'R/A | Realizando Agendas' },
-    { value: 'R/EC', texto: 'R/EC | Pago/Entrega/Cambio de Ciclo' },
-    { value: 'R/ER', texto: 'R/ER | Pago/Entrega/Refill' },
-    { value: 'R/P', texto: 'R/P | Pago/Levantamiento de Papeleria' },
-    { value: 'RS', texto: 'RS | Reunión Semanal' },
-    { value: 'TS', texto: 'TS | Traslado' },
-    { value: 'VTA', texto: 'VTA | Promoción' },
-    { value: 'Seg', texto: 'Seg | Seguimiento' },
-    { value: 'Sup', texto: 'Sup | Supervisión' },
-    { value: 'Sin Codigo', texto: 'Sin codigo' },
-    { value: '', texto: '' }
+    { value: 'AG', texto: 'AG | Aseo General', color: '#ffcccc' },
+    { value: 'AM', texto: 'AM | Actividades Matutinas', color: '#ffe6cc' },
+    { value: 'C', texto: 'C | Cobranza', color: '#d9ead3' },
+    { value: 'D', texto: 'D | Domiciliar', color: '#cfe2f3' },
+    { value: 'Dep', texto: 'Dep | Depósitar', color: '#d9d2e9' },
+    { value: 'E', texto: 'E | Entregas', color: '#fce5cd' },
+    { value: 'GN', texto: 'GN | Grupo Nuevo', color: '#f4cccc' },
+    { value: 'INT', texto: 'INT | Integración', color: '#d0e0e3' },
+    { value: 'R', texto: 'R | Pago', color: '#ead1dc' },
+    { value: 'R/A', texto: 'R/A | Realizando Agendas', color: '#c9daf8' },
+    { value: 'RM', texto: 'RM | Reunión Mensual', color: '#ffcccb' },
+    { value: 'RS', texto: 'RS | Reunión Semanal', color: '#b6d7a8' },
+    { value: 'VTA', texto: 'VTA | Promoción', color: '#a2c4c9' },
+    { value: 'Sup', texto: 'Sup | Supervisión', color: '#d5a6bd' },
+    { value: 'S/Renov', texto: 'S/Renov | Sup.Renovación', color: '#b4a7d6' },
+    { value: 'Sin Codigo', texto: 'Sin código', color: '#eeeeee' },
+    { value: '', texto: '', color: '#ffffff' }
   ];
 
 
