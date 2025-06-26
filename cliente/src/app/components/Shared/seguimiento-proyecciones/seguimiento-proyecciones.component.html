@@ -22,10 +22,19 @@
             </span>
             <input type="text" class="form-control form-control-lg" placeholder="Buscar asesor o cliente"
               [(ngModel)]="filterTerm" />
-            <select class="form-select form-select-lg" [(ngModel)]="mesSeleccionado">
-              <option value="">Todos los meses</option>
-              <option *ngFor="let mes of meses" [value]="mes">{{ mes }}</option>
+            <div class="input-group" style="width: fit-content;">
+            <span class="input-group-text">
+              <i class="bi bi-calendar-range"></i>
+            </span>
+            <select class="form-select" [(ngModel)]="mesSeleccionado">
+              <option value="" disabled selected>Mes para exportar</option>
+              <option *ngFor="let m of meses" [value]="m">{{ m }}</option>
             </select>
+            <button class="btn btn-outline-success" (click)="exportarExcelConFechasExtra()">
+              <i class="bi bi-download"></i> Exportar
+            </button>
+          </div>
+
           </div>
         </div>
 
@@ -45,23 +54,16 @@
             </button>
           </div>
           <div class="d-flex flex-column gap-2">
-            <button class="btn btn-success" (click)="exportarExcelPorCoordinacion()">
+            <!-- <button class="btn btn-success" (click)="exportarExcelPorCoordinacion()">
               <i class="bi bi-file-earmark-excel"></i>  Excel
             </button>
             <button class="btn btn-success" (click)="exportarExcelConFechasExtra()">
               <i class="bi bi-file-earmark-excel"></i>  Excel proyecciones
-            </button>
-
+            </button> -->
             <button class="btn btn-danger" (click)="generarReportePDF()">
               <i class="bi bi-file-earmark-pdf"></i>  PDF
             </button>
           </div>
-            <!-- <button class="btn btn-save btn-custom" (click)="exportarExcelPorCoordinacion()">
-              <i class="bi bi-graph-up"></i> Resultados
-            </button>
-            <button class="btn btn-primary" (click)="generarReportePDF()">
-              <i class="bi bi-file-earmark-pdf"></i> Vista previa PDF
-            </button> -->
           </div>
         </div>
       </div>
@@ -87,7 +89,7 @@
           Todas
         </button>
         <button class="d-flex justify-content-end btn btn-secondary" (click)="addRow()">
-          <!-- <i class="bi bi-plus-lg"></i>  -->
+          <i class="bi bi-plus-lg"></i> 
           Agregar Fila
         </button>
       </div>

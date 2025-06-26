@@ -18,8 +18,7 @@ export interface Proyeccion {
   fechaLimiteEntrega?: string;
   fechaRealReciboExpLegal?: string;
   renovado?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
+  refil?: string;
 }
 
 export interface ProyeccionPayload {
@@ -36,13 +35,14 @@ export interface ProyeccionPayload {
   fechaLimiteEntrega?: string;
   fechaRealReciboExpLegal?: string;
   renovado?: boolean;
+  refil?: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProyeccionesService {
-  private baseUrl = 'https://servidor-operaciones.onrender.com/api/proyecciones';
+  private baseUrl = 'http://localhost:4000/api/proyecciones';
 
   constructor(private http: HttpClient) {}
 
