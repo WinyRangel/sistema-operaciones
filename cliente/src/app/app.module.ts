@@ -38,6 +38,7 @@ import { IniciarSesionComponent } from './components/Shared/iniciar-sesion/inici
 
 import { ProyeccionesComponent } from './components/Shared/proyecciones/proyecciones.component';
 import { SeguimientoProyeccionesComponent } from './components/Shared/seguimiento-proyecciones/seguimiento-proyecciones.component';
+import { DirSegProyeccionComponent } from './components/Shared/dir-seg-proyeccion/dir-seg-proyeccion.component';
 
 
 @NgModule({
@@ -58,7 +59,8 @@ import { SeguimientoProyeccionesComponent } from './components/Shared/seguimient
     AgendasComponent,
     ReporteAgendasComponent,
     ProyeccionesComponent,
-    SeguimientoProyeccionesComponent
+    SeguimientoProyeccionesComponent,
+    DirSegProyeccionComponent
   ],
   
   imports: [
