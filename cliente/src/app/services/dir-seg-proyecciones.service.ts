@@ -20,7 +20,7 @@ export interface CreditosProyeccion extends CreditosProyeccionPayload {
 
 @Injectable({ providedIn: 'root' })
 export class DirSegProyeccionesService {
-  private baseUrl = 'http://localhost:4000/dir-seg-proyecciones';
+  private baseUrl = 'https://servidor-operaciones.onrender.com/dir-seg-proyecciones';
 
   constructor(private http: HttpClient) {}
 
