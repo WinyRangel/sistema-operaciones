@@ -26,6 +26,8 @@ app.use('/', require('./routes/agenda.routes'));
 app.use('/', require('./routes/ejecutivas.routes'));
 app.use('/', require('./routes/depositos.routes'));
 app.use('/api/proyecciones', require('./routes/proyeccion.routes'));
+app.use('/', require('./routes/creditos.routes'));
+
 
 
 // Inicializar domicilio por defecto

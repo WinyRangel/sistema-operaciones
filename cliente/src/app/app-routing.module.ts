@@ -12,6 +12,7 @@ import { AgendasComponent } from './components/Coordinadoras/agendas/agendas.com
 import { ReporteAgendasComponent } from './components/Coordinadoras/reporte-agendas/reporte-agendas.component';
 import { ProyeccionesComponent } from './components/Shared/proyecciones/proyecciones.component';
 import { SeguimientoProyeccionesComponent } from './components/Shared/seguimiento-proyecciones/seguimiento-proyecciones.component';
+import { DirSegProyeccionComponent } from './components/Shared/dir-seg-proyeccion/dir-seg-proyeccion.component';
 
 const routes: Routes = [
   { path: 'baucher', component: BauchersComponent },
@@ -26,6 +27,7 @@ const routes: Routes = [
   { path: 'cumplimientoobjetivo', component: CumplimientoAgendaComponent},
   { path: 'proyecciones', component: ProyeccionesComponent },
   { path: 'seg-proyecciones', component: SeguimientoProyeccionesComponent },
+  { path: 'dir-seg-proyeccion', component: DirSegProyeccionComponent},
   { path: '**', component: InicioComponent }
 ];
 

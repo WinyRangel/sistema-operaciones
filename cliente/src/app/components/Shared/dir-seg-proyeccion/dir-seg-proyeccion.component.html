@@ -1,0 +1,211 @@
+<!-- dir-seg-proyeccion.component.html -->
+<div class="app-container">
+  <div class="container-fluid px-4">
+    <header class="app-header mb-4">
+      <h1 class="app-title">Proyecciones y Colocación</h1>
+    </header>
+
+    <!-- CONTROLES SUPERIORES -->
+    <div class="top-controls-container mb-4" style="display: flex; justify-content: space-around;">
+      <!-- FILTRO TABLA -->
+      <div class="input-group" style="width: fit-content;">
+        <span class="input-group-text">
+          <i class="bi bi-search"></i>
+        </span>
+        <input type="text" class="form-control" placeholder="Filtrar tabla por mes (ej. Junio)"
+          [(ngModel)]="tableFilterText" (input)="applyTableFilter()" />
+      </div>
+
+      <!-- SELECT PARA DESCARGA -->
+      <div class="input-group" style="width: fit-content;">
+        <span class="input-group-text">
+          <i class="bi bi-calendar-range"></i>
+        </span>
+        <select class="form-select" [(ngModel)]="downloadMonth">
+          <option value="" disabled selected>Mes para exportar</option>
+          <option *ngFor="let m of meses" [value]="m">{{ m }}</option>
+        </select>
+        <button class="btn btn-outline-success" (click)="descargarExcel()">
+          <i class="bi bi-download"></i> Exportar
+        </button>
+      </div>
+
+      <!-- BOTÓN AGREGAR CRÉDITO -->
+      <button class="btn btn-secondary me-2" type="button" (click)="abrirInsertModal()">
+        <i class="bi bi-plus-lg"></i> Agregar crédito
+      </button>
+      <!-- Botón que abre el modal de carga -->
+      <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#uploadModal">
+        <i class="bi bi-upload"></i> Cargar Proyección
+      </button>
+    </div>
+
+
+    <div class="container-fluid">
+      <!-- NAV TABS -->
+      <ul class="nav nav-tabs mb-3">
+        <li class="nav-item" *ngFor="let coord of coordinadores">
+          <a class="nav-link" [class.active]="coord === activeTab" (click)="setActive(coord)" href="javascript:void(0)">
+            {{ coord }}
+          </a>
+        </li>
+      </ul>
+
+      <!-- TAB CONTENT -->
+      <div *ngIf="proyeccionesPorCoordinador[activeTab]?.length; else sinDatos">
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped text-center">
+            <thead class="table-light">
+              <tr>
+                <th>No</th>
+                <th>Fecha de Entrega</th>
+                <th>Concepto</th>
+                <th>$ Proyectada</th>
+                <th>$ Colocación</th>
+                <th>$ Diferencia</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of proyeccionesPorCoordinador[activeTab]; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ item.fechaEntrega | date:'yyyy-MM-dd' }}</td>
+                <td>
+                  <input type="text" class="form-control" [(ngModel)]="item.concepto" />
+                </td>
+                <td>{{ item.proyectada | currency:'MXN':'symbol':'1.0-2' }}</td>
+                <td>{{ item.colocacion | currency:'MXN':'symbol':'1.0-2' }}</td>
+                <td class="text-center">
+                  <i class="bi me-1" [ngClass]="{
+                'bi-arrow-up text-success': item.diferencia > 0,
+                'bi-arrow-down text-danger': item.diferencia < 0,
+                'bi-arrow-right text-warning': item.diferencia === 0
+              }"></i>
+                  {{ item.diferencia | currency:'MXN':'symbol':'1.0-2' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <ng-template #sinDatos>
+        <p class="text-center">No hay proyecciones para mostrar.</p>
+      </ng-template>
+
+
+      <!-- MODAL DE CARGA Y VISTA PREVIA -->
+      <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 90vw;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="uploadModalLabel">Cargar Proyección</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <!-- Input de archivo -->
+              <div class="mb-4 text-center">
+                <label class="btn btn-outline-primary mb-3">
+                  <i class="bi bi-file-earmark-excel"></i> Seleccionar archivo .xlsx
+                  <input type="file" accept=".xlsx" hidden (change)="onFileChange($event)" />
+                </label>
+                <button type="button" class="btn btn-primary mb-3" (click)="guardarDesdeModal()">
+                  Guardar
+                </button>
+              </div>
+
+              <!-- Tabla de vista previa y edición -->
+              <div class="table-responsive">
+                <table class="table table-bordered align-middle text-center">
+                  <thead class="table-light">
+                    <tr>
+                      <th>No</th>
+                      <th>Fecha de Entrega de Credito</th>
+                      <th>Concepto</th>
+                      <th>$ Proyectada</th>
+                      <th>$ Colocación</th>
+                      <th>Coordinación</th>
+                      <th>Mes de Proyección</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let fila of datosExcel; let i = index">
+                      <td>{{ i + 1 }}</td>
+                      <td>
+                        <input type="date" class="form-control" [(ngModel)]="fila.fechaEntrega" />
+                      </td>
+                      <td>
+                        <input type="text" class="form-control" [(ngModel)]="fila.concepto" />
+                      </td>
+                      <td>
+                        <input type="number" class="form-control" [(ngModel)]="fila.proyectada" />
+                      </td>
+                      <td>
+                        <input type="number" class="form-control" [(ngModel)]="fila.colocacion" />
+                      </td>
+                      <td><input class="form-control" [(ngModel)]="fila.coordinador" readonly /></td>
+                      <td><input class="form-control" [(ngModel)]="fila.mesArchivo" readonly /></td>
+                    </tr>
+                    <tr *ngIf="!datosExcel.length">
+                      <td colspan="6">Selecciona un archivo para ver la vista previa.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario de proyeccion -->
+    <div class="modal fade" id="insertModal" tabindex="-1" aria-labelledby="insertModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="insertModalLabel">Agregar un Credito no Proyectado</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Coordinador -->
+            <select class="form-select mb-3" [(ngModel)]="nuevo.coordinador">
+              <option value="" disabled>Seleccionar Coordinación</option>
+              <option *ngFor="let c of coordinadores" [value]="c">{{ c }}</option>
+            </select>
+
+            <!-- Fecha -->
+            <input type="date" class="form-control mb-3" [(ngModel)]="nuevo.fechaEntrega" />
+
+            <!-- Concepto -->
+            <input type="text" class="form-control mb-3" [(ngModel)]="nuevo.concepto" />
+
+            <!-- Proyectada -->
+            <div class="input-group mb-3">
+              <span class="input-group-text">$</span>
+              <input type="number" class="form-control" [(ngModel)]="nuevo.proyectada" />
+            </div>
+
+            <!-- Colocación -->
+            <div class="input-group mb-3">
+              <span class="input-group-text">$</span>
+              <input type="number" class="form-control" [(ngModel)]="nuevo.colocacion" />
+            </div>
+
+            <!-- Mes -->
+            <select class="form-select mb-3" [(ngModel)]="nuevo.mesArchivo">
+              <option value="" disabled>Seleccionar Mes</option>
+              <option *ngFor="let m of meses" [value]="m">{{ m }}</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" (click)="guardarNuevo()">
+              Guardar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

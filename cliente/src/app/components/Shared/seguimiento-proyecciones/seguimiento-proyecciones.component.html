@@ -20,7 +20,7 @@
             <span class="input-group-text bg-white">
               <i class="bi bi-search text-secondary"></i>
             </span>
-            <input type="text" class="form-control form-control-lg" placeholder="Buscar asesor, cliente, incidencia..."
+            <input type="text" class="form-control form-control-lg" placeholder="Buscar asesor o cliente"
               [(ngModel)]="filterTerm" />
             <select class="form-select form-select-lg" [(ngModel)]="mesSeleccionado">
               <option value="">Todos los meses</option>
@@ -48,6 +48,10 @@
             <button class="btn btn-success" (click)="exportarExcelPorCoordinacion()">
               <i class="bi bi-file-earmark-excel"></i>  Excel
             </button>
+            <button class="btn btn-success" (click)="exportarExcelConFechasExtra()">
+              <i class="bi bi-file-earmark-excel"></i>  Excel proyecciones
+            </button>
+
             <button class="btn btn-danger" (click)="generarReportePDF()">
               <i class="bi bi-file-earmark-pdf"></i>  PDF
             </button>
@@ -100,16 +104,17 @@
         <thead>
          <tr class="text-center">
             <th>ASESOR</th>
-            <th>Cliente</th>
+            <th>Credito</th>
             <th>Fecha proyectada envío ope.</th>
             <th>Fecha de envío operativo APK</th>
+            <th>Días de retraso Ope.</th>
             <th>Hora</th>
             <th>Incidencias operativo</th>
             <th>Fecha agendada entrega crédito</th>
             <th>Renovado</th>
             <th>Fecha límite entrega legal</th>
             <th>Fecha de legal recibido</th>
-            <th>Días de retraso Op.</th>
+            <th>Días de retraso Legal</th>
           </tr>
         </thead>
         <tbody>
@@ -121,6 +126,16 @@
             <td>{{item.fechaEntregaAgendadaOpe | date:'dd/MM/yyyy'}}</td>
             <td>
               <input type="date" class="form-control" [(ngModel)]="item.fechaEnvioOperativo">
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="{
+                                    'status-ontime': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) === 0,
+                                    'status-pending': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) > 0 && getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) <= 3,
+                                    'status-delayed': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) > 3
+                                  }">
+                {{ getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo)
+                || 0 }} días
+              </span>
             </td>
             <td>
               <input type="time" class="form-control" [(ngModel)]="item.hora">

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { ProyeccionesService, ProyeccionPayload } from '../../../services/proyeccion.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-proyecciones',
@@ -15,6 +16,20 @@ export class ProyeccionesComponent {
   currentSheet = '';
   dateCols: { [name: string]: number[] } = {};
   private originalWorkbook: XLSX.WorkBook | null = null;
+
+    // 1) Aquí definimos Toast como propiedad de la clase:
+  private Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toastElement) => {
+      // pausar/resumir timer al hacer hover
+      toastElement.addEventListener('mouseenter', Swal.stopTimer);
+      toastElement.addEventListener('mouseleave', Swal.resumeTimer);
+    }
+  });
 
   constructor(private proyeccionesSvc: ProyeccionesService) { }
 
@@ -77,11 +92,54 @@ export class ProyeccionesComponent {
     return /renovado/i.test(headers[col]);
   }
 
+  // saveChanges() {
+  //   if (!this.currentSheet) {
+  //     alert('Primero carga y selecciona una hoja.');
+  //     return;
+  //   }
+  //   const rows = this.getRows(this.currentSheet);
+  //   const payload: ProyeccionPayload[] = rows.map(r => ({
+  //     coordinacion: `${this.currentSheet}-`,
+  //     asesor: r[0] || '',
+  //     cliente: r[1] || '',
+  //     fechaEntregaAgendadaOpe: r[2] ? new Date(r[2]).toISOString() : undefined,
+  //     fechaEntregaAgendada: r[3] ? new Date(r[3]).toISOString() : undefined,
+  //     mes: r[4] || '',
+  //     fechaEnvioOperativo: r[5] ? new Date(r[5]).toISOString() : undefined,
+  //     hora: r[6] || '',
+  //     diasRetrasoExpOp: r[7] !== undefined && r[7] !== '' ? Number(r[6]) : undefined,
+  //     incidenciasOperativo: r[8] || '',
+  //     fechaLimiteEntrega: r[9] ? new Date(r[9]).toISOString() : undefined,
+  //     fechaRealReciboExpLegal: r[10] ? new Date(r[10]).toISOString() : undefined,
+  //     renovado: typeof r[11] === 'string' ? r[11].toLowerCase() === 'sí' : false
+      
+  //   }));
+
+
+  //   console.log('Payload a enviar:', payload);
+
+  //   this.proyeccionesSvc.saveBulk(payload).subscribe({
+  //     next: res => {
+  //       alert(`Se guardaron ${res.inserted ?? payload.length} registros correctamente.`);
+  //     },
+  //     error: (error: HttpErrorResponse) => {
+  //       console.error('Error HTTP status:', error.status);
+  //       console.error('Error backend (body):', error.error);
+  //       alert(`Error al guardar en el servidor:\n${error.error?.message || error.message}`);
+  //     }
+  //   });
+  // }
+
   saveChanges() {
+    // Caso: no se ha cargado ni seleccionado hoja
     if (!this.currentSheet) {
-      alert('Primero carga y selecciona una hoja.');
+      this.Toast.fire({
+        icon: 'warning',
+        title: 'Primero carga y selecciona una hoja.'
+      });
       return;
     }
+
     const rows = this.getRows(this.currentSheet);
     const payload: ProyeccionPayload[] = rows.map(r => ({
       coordinacion: `${this.currentSheet}-`,
@@ -92,25 +150,42 @@ export class ProyeccionesComponent {
       mes: r[4] || '',
       fechaEnvioOperativo: r[5] ? new Date(r[5]).toISOString() : undefined,
       hora: r[6] || '',
-      diasRetrasoExpOp: r[7] !== undefined && r[7] !== '' ? Number(r[6]) : undefined,
+      // Se corrige: la condición revisa r[7], por lo que convertimos r[7]
+      diasRetrasoExpOp: r[7] !== undefined && r[7] !== '' ? Number(r[7]) : undefined,
       incidenciasOperativo: r[8] || '',
       fechaLimiteEntrega: r[9] ? new Date(r[9]).toISOString() : undefined,
       fechaRealReciboExpLegal: r[10] ? new Date(r[10]).toISOString() : undefined,
       renovado: typeof r[11] === 'string' ? r[11].toLowerCase() === 'sí' : false
-      
     }));
-
 
     console.log('Payload a enviar:', payload);
 
     this.proyeccionesSvc.saveBulk(payload).subscribe({
       next: res => {
-        alert(`Se guardaron ${res.inserted ?? payload.length} registros correctamente.`);
+        const insertedCount = res.inserted ?? payload.length;
+        this.Toast.fire({
+          icon: 'success',
+          title: `Se guardaron ${insertedCount} registro${insertedCount !== 1 ? 's' : ''} correctamente.`
+        });
       },
       error: (error: HttpErrorResponse) => {
         console.error('Error HTTP status:', error.status);
         console.error('Error backend (body):', error.error);
-        alert(`Error al guardar en el servidor:\n${error.error?.message || error.message}`);
+        const mensajeBackend = error.error?.message || error.message || 'Error desconocido';
+
+        // Toast breve de error
+        this.Toast.fire({
+          icon: 'error',
+          title: 'Error al guardar en el servidor'
+        });
+
+        // Opcional: mostrar modal normal con detalle si se desea más información
+        // Swal.fire({
+        //   icon: 'error',
+        //   title: 'Error al guardar en el servidor',
+        //   text: mensajeBackend,
+        //   footer: 'Revisa la consola para más detalles'
+        // });
       }
     });
   }

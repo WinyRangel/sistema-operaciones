@@ -7,7 +7,7 @@ import jsPDF from 'jspdf';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import Swal from 'sweetalert2';
 
-declare const bootstrap: any; // para usar new bootstrap.Modal(...) si tienes Bootstrap JS cargado globalmente
+declare const bootstrap: any;
 
 @Component({
   selector: 'app-seguimiento-proyecciones',
@@ -152,6 +152,7 @@ export class SeguimientoProyeccionesComponent implements OnInit {
       return;
     }
     forkJoin(operaciones).subscribe({
+
       next: () => {
         this.toast.fire({ icon: 'success', title: 'Cambios guardados correctamente' });
         this.loadData();
@@ -168,11 +169,27 @@ export class SeguimientoProyeccionesComponent implements OnInit {
   }
   coordinacionSeleccionada: string | null = null;
 
+  // get proyeccionesFiltradasPorCoordinacion(): Proyeccion[] {
+  //   return this.filteredProyecciones.filter(p => {
+  //     const okCoord = !this.coordinacionSeleccionada || p.coordinacion === this.coordinacionSeleccionada;
+  //     const okMes = !this.mesSeleccionado || p.mes === this.mesSeleccionado;
+  //     return okCoord && okMes;
+  //   });
+
+  // }
   get proyeccionesFiltradasPorCoordinacion(): Proyeccion[] {
-    return this.filteredProyecciones.filter(p => {
+    // Primero filtras por coordinación y mes
+    const filtradas = this.filteredProyecciones.filter(p => {
       const okCoord = !this.coordinacionSeleccionada || p.coordinacion === this.coordinacionSeleccionada;
       const okMes = !this.mesSeleccionado || p.mes === this.mesSeleccionado;
       return okCoord && okMes;
+    });
+
+    // Luego las ordenas de menor a mayor según fechaEntregaAgendadaOpe
+    return filtradas.sort((a, b) => {
+      const fa = a.fechaEntregaAgendadaOpe ? new Date(a.fechaEntregaAgendadaOpe) : new Date(0);
+      const fb = b.fechaEntregaAgendadaOpe ? new Date(b.fechaEntregaAgendadaOpe) : new Date(0);
+      return fa.getTime() - fb.getTime();
     });
   }
 
@@ -190,6 +207,16 @@ export class SeguimientoProyeccionesComponent implements OnInit {
     const recibido = new Date(fechaRecibido);
     if (isNaN(limite.getTime()) || isNaN(recibido.getTime())) return 0;
     const diffMs = recibido.getTime() - limite.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  }
+
+  getDiasRetrasoOpe(fechaLimite: string | undefined, fechaEnvio: string | undefined): number {
+    if (!fechaLimite || !fechaEnvio) return 0;
+    const limite = new Date(fechaLimite);
+    const envio = new Date(fechaEnvio);
+    if (isNaN(limite.getTime()) || isNaN(envio.getTime())) return 0;
+    const diffMs = envio.getTime() - limite.getTime();
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
     return diffDays > 0 ? diffDays : 0;
   }
@@ -240,6 +267,64 @@ export class SeguimientoProyeccionesComponent implements OnInit {
     const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
     FileSaver.saveAs(blob, `Proyecciones_${this.mesSeleccionado || 'Todos'}.xlsx`);
   }
+
+  //Excel con las fechas proyectadas de Refil.
+  exportarExcelConFechasExtra(): void {
+    // Filtrar por mes y coordinación
+    const listaParaExportar = this.proyecciones.filter(p =>
+      (!this.mesSeleccionado || p.mes === this.mesSeleccionado) &&
+      (!this.coordinacionSeleccionada || p.coordinacion === this.coordinacionSeleccionada)
+    );
+
+    // Construimos el workbook
+    const workbook = XLSX.utils.book_new();
+    // Una sola hoja con todo
+    const datosSheet = listaParaExportar.map(p => {
+      // Fecha base
+      const base = p.fechaEntregaAgendada
+        ? new Date(p.fechaEntregaAgendada)
+        : null;
+
+      // Calcula Renovación (+4 meses) y Refil (+2 meses)
+      const fechaRenov = base
+        ? new Date(base.getFullYear(), base.getMonth() + 4, base.getDate())
+        : null;
+      const fechaRefil = base
+        ? new Date(base.getFullYear(), base.getMonth() + 2, base.getDate())
+        : null;
+
+      // Formatea a ISO yyyy-MM-dd para que Excel lo reconozca
+      const fmt = (d: Date | null) =>
+        d ? d.toISOString().substring(0, 10) : '';
+
+      return {
+        ASESOR: p.asesor,
+        Cliente: p.cliente,
+        'Fecha proyectada envío ope.': p.fechaEntregaAgendadaOpe,
+        'Fecha de envío operativo APK': p.fechaEnvioOperativo,
+        Hora: p.hora,
+        'Incidencias operativo': p.incidenciasOperativo,
+        'Fecha agendada entrega crédito': p.fechaEntregaAgendada,
+        Renovado: p.renovado ? 'Sí' : 'No',
+        'Fecha límite entrega legal': p.fechaLimiteEntrega,
+        'Fecha de legal recibido': p.fechaRealReciboExpLegal,
+        'Días de retraso Op.': p.diasRetrasoExpOp,
+        // ¡Nuevas columnas!
+        'Renovación de crédito (+4 meses)': fmt(fechaRenov),
+        'Refil (+2 meses)': fmt(fechaRefil)
+      };
+    });
+
+    // Generar la hoja y descargar
+    const sheet = XLSX.utils.json_to_sheet(datosSheet);
+    XLSX.utils.book_append_sheet(workbook, sheet, 'Proyecciones');
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    FileSaver.saveAs(blob,
+      `Proyecciones_${this.mesSeleccionado || 'Todos'}_con_fechas_extra.xlsx`
+    );
+  }
+
 
   generarReportePDF(): void {
     // Mantener la implementación existente de generación de PDF
@@ -293,7 +378,7 @@ export class SeguimientoProyeccionesComponent implements OnInit {
     doc.setFontSize(14);
     doc.setTextColor(...colorSeccion);
     doc.setFont('helvetica', 'bold');
-    doc.text('Clientes Renovados', marginLeft, y);
+    doc.text('Creditos Renovados', marginLeft, y);
     y += 10;
     doc.setFontSize(11);
     doc.setTextColor(...colorTexto);
@@ -304,7 +389,7 @@ export class SeguimientoProyeccionesComponent implements OnInit {
       doc.text('No se encontraron clientes renovados.', marginLeft, y, { maxWidth });
       y += 10;
     } else {
-      const headersRen = ['Asesor', 'Cliente', 'Incidencias', 'Fecha Entrega', 'Días Retraso'];
+      const headersRen = ['Asesor', 'Credito', 'Incidencias', 'Fecha Entrega', 'Días Retraso'];
       const rowsRen = renovados.map(item => {
         const fechaEnt = item.fechaEntregaAgendada
           ? new Date(item.fechaEntregaAgendada).toLocaleDateString('es-MX')

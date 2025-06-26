@@ -1,0 +1,33 @@
+.app-title {
+  font-size: 1.75rem;
+}
+
+.app-subtitle {
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+.btn-group .btn {
+  margin-left: 0.5rem;
+}
+
+.btn-group .btn:first-child {
+  margin-left: 0;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  background-color: #43689f;
+}
+
+.app-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, #2c3e50, #4a6491);
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
