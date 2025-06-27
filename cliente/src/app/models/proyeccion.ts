@@ -14,6 +14,5 @@ export interface Proyeccion {
   fechaLimiteEntrega?: string;       
   fechaRealReciboExpLegal?: string; 
   renovado?: boolean;   
-  
-  editing?: boolean;    
+  editable?: boolean;
 }
