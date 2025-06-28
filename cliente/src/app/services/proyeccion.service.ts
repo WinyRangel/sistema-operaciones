@@ -44,8 +44,7 @@ export interface ProyeccionPayload {
 })
 
 export class ProyeccionesService {
-  // private baseUrl = 'https://servidor-operaciones.onrender.com/api/proyecciones';
-  private baseUrl = 'http://localhost:4000/proyecciones';
+  private baseUrl = 'https://servidor-operaciones.onrender.com/api/proyecciones';
 
   constructor(private http: HttpClient) {}
 
@@ -64,4 +63,6 @@ export class ProyeccionesService {
   deleteOne(id: string): Observable<any> {
     return this.http.delete(`${this.baseUrl}/${id}`);
   }
+
+  
 }
