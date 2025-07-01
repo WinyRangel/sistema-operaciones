@@ -271,7 +271,7 @@ exportarExcel(): void {
   const headers = [
     'Coordinación', 'Responsable', 'Fecha Pago', 'Hora Pago',
     'Fecha Reporte', 'Hora Reporte', 'Diferencia',
-    'Grupo', 'Concepto', 'Titular'
+    'Grupo', 'Observaciones', 'Titular'
   ];
 
   const body = this.filteredBauchers.map(b => ([
