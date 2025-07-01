@@ -19,6 +19,7 @@ export interface Proyeccion {
   fechaRealReciboExpLegal?: string;
   renovado?: boolean;
   refil?: string;
+   editable?: boolean;
 }
 
 export interface ProyeccionPayload {
@@ -41,8 +42,9 @@ export interface ProyeccionPayload {
 @Injectable({
   providedIn: 'root'
 })
+
 export class ProyeccionesService {
-  private baseUrl = 'https://supervisor-operacion.web.app/proyecciones';
+  private baseUrl = 'https://servidor-operaciones.onrender.com/api/proyecciones';
 
   constructor(private http: HttpClient) {}
 
@@ -61,4 +63,6 @@ export class ProyeccionesService {
   deleteOne(id: string): Observable<any> {
     return this.http.delete(`${this.baseUrl}/${id}`);
   }
+
+  
 }

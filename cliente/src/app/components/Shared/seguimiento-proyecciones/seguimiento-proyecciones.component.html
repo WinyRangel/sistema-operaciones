@@ -1,196 +1,327 @@
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Proyecciones - Seguimiento</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-</head>
-
 <body>
   <div class="app-container">
-    <header class="app-header">
-      <h1 class="app-title">Proyecciones</h1>
-      <p class="app-subtitle">Seguimiento de operativos y entregas</p>
-    </header>
-    <div class="controls-container">
-      <div class="row align-items-center controls-row">
-        <!-- Izquierda: Buscador y selector -->
-        <div class="col-lg-6 col-md-6 col-12">
-          <div class="input-group search-container">  
-            <span class="input-group-text bg-white">
-              <i class="bi bi-search text-secondary"></i>
-            </span>
-            <input type="text" class="form-control form-control-lg" placeholder="Buscar asesor o cliente"
-              [(ngModel)]="filterTerm" />
-            <div class="input-group" style="width: fit-content;">
-            <span class="input-group-text">
-              <i class="bi bi-calendar-range"></i>
-            </span>
-            <select class="form-select" [(ngModel)]="mesSeleccionado">
-              <option value="" disabled selected>Mes para exportar</option>
-              <option *ngFor="let m of meses" [value]="m">{{ m }}</option>
-            </select>
-            <button class="btn btn-outline-success" (click)="exportarExcelConFechasExtra()">
-              <i class="bi bi-download"></i> Exportar
-            </button>
-          </div>
-
-          </div>
-        </div>
-
-        <!-- Derecha: Botones alineados a la derecha -->
-        <div class="col-lg-6 col-md-6 col-12">
-          <div class="d-flex justify-content-end gap-2 mt-2 mt-md-0 actions-container">
-            <div class="d-flex flex-column gap-2">
-              <button class="btn btn-primary" (click)="saveChanges()" [disabled]="loading">
-                <i class="bi bi-save"></i> 
-                {{ loading ? 'Cargando...' : 'Guardar Cambios' }}
-              </button>
-          </div>
-          <div class="d-flex flex-column gap-2">
-            <button class="btn btn-secondary" routerLink="/proyecciones">
-              <i class="bi bi-plus-square"></i> 
-              Nueva Proyección
-            </button>
-          </div>
-          <div class="d-flex flex-column gap-2">
-            <!-- <button class="btn btn-success" (click)="exportarExcelPorCoordinacion()">
-              <i class="bi bi-file-earmark-excel"></i>  Excel
-            </button>
-            <button class="btn btn-success" (click)="exportarExcelConFechasExtra()">
-              <i class="bi bi-file-earmark-excel"></i>  Excel proyecciones
-            </button> -->
-            <button class="btn btn-danger" (click)="generarReportePDF()">
-              <i class="bi bi-file-earmark-pdf"></i>  PDF
-            </button>
-          </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-    <div class="filters-container">
-      <div class="footer-info">
-        <div>Total de registros: <span class="record-count">{{ filteredProyecciones.length }}</span></div>
-        <div class="justify-content-end instructions">
-          <i class="bi bi-info-circle"></i> Los campos en blanco pueden ser editados directamente
-        </div>
-      </div>
-      <br>
-      <h6 class="filter-title">Filtrar por coordinación:</h6>
-      <div class="filter-buttons">
-        <button *ngFor="let coord of coordinaciones" class="btn btn-primary filter-btn"
-          [class.active]="coord === coordinacionSeleccionada" (click)="coordinacionSeleccionada = coord">
-          {{ coord }}
-        </button>
-        <button class="btn btn-secondary filter-btn" [class.active]="!coordinacionSeleccionada"
-          (click)="coordinacionSeleccionada = null">
-          Todas
-        </button>
-        <button class="d-flex justify-content-end btn btn-secondary" (click)="addRow()">
-          <i class="bi bi-plus-lg"></i> 
-          Agregar Fila
-        </button>
-      </div>
-    </div>
-
-    <div *ngIf="loading" class="d-flex justify-content-center my-5">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Cargando...</span>
-      </div>
-    </div>
-
-    <div *ngIf="!loading" class="table-container">
-      <table class="app-table">
-        <thead>
-         <tr class="text-center">
-            <th>ASESOR</th>
-            <th>Credito</th>
-            <th>Fecha proyectada envío ope.</th>
-            <th>Fecha de envío operativo APK</th>
-            <th>Días de retraso Ope.</th>
-            <th>Hora</th>
-            <th>Incidencias operativo</th>
-            <th>Fecha agendada entrega crédito</th>
-            <th>Renovado</th>
-            <th>Fecha límite entrega legal</th>
-            <th>Fecha de legal recibido</th>
-            <th>Días de retraso Legal</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of proyeccionesFiltradasPorCoordinacion">
-            <td>
-              <span class="badge bg-info rounded-pill p-2">{{item.asesor}}</span>
-            </td>
-            <td>{{item.cliente}}</td>
-            <td>{{item.fechaEntregaAgendadaOpe | date:'dd/MM/yyyy'}}</td>
-            <td>
-              <input type="date" class="form-control" [(ngModel)]="item.fechaEnvioOperativo">
-            </td>
-            <td>
-              <span class="status-badge" [ngClass]="{
-                                    'status-ontime': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) === 0,
-                                    'status-pending': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) > 0 && getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) <= 3,
-                                    'status-delayed': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) > 3
-                                  }">
-                {{ getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo)
-                || 0 }} días
+    <div class="container-fluid">
+      <header class="app-header">
+        <h1 class="app-title">Proyecciones</h1>
+        <p class="app-subtitle">Seguimiento de operativos y entregas</p>
+      </header>
+      <div class="controls-container">
+        <div class="row align-items-center controls-row">
+          <!-- Izquierda: Buscador y selector -->
+          <div class="col-lg-6 col-md-6 col-12">
+            <div class="input-group search-container">
+              <span class="input-group-text bg-white">
+                <i class="bi bi-search text-secondary"></i>
               </span>
-            </td>
-            <td>
-              <input type="time" class="form-control" [(ngModel)]="item.hora">
-            </td>
-            <td>
-              <textarea class="form-control" [(ngModel)]="item.incidenciasOperativo" rows="2"></textarea>
-            </td>
-            <td>{{item.fechaEntregaAgendada | date:'dd/MM/yyyy'}}</td>
-            <td class="text-center">
-              <div class="form-check form-switch d-inline-block">
-                <input class="form-check-input" type="checkbox" [(ngModel)]="item.renovado">
+              <input type="text" class="form-control form-control-lg" placeholder="Buscar asesor o cliente"
+                [(ngModel)]="filterTerm" />
+              <div class="input-group" style="width: fit-content;">
+                <span class="input-group-text">
+                  <i class="bi bi-calendar-range"></i>
+                </span>
+                <select class="form-select" [(ngModel)]="mesSeleccionado">
+                  <option value="" disabled selected>Mes para exportar</option>
+                  <option *ngFor="let m of meses" [value]="m">{{ m }}</option>
+                </select>
+                <button class="btn btn-outline-success" (click)="exportarExcelConFechasExtra()">
+                  <i class="bi bi-download"></i> Exportar
+                </button>
+
+                <button class="btn btn-primary" (click)="guardarCambios()">
+                  <i class="bi bi-save"></i> Guardar cambios
+                </button>
               </div>
-            </td>
-            <td>
-              {{ getFechaLimiteEntrega(item.fechaEntregaAgendada) | date:'dd/MM/yyyy' }}
-            </td>
-            <td>
-              <input type="date" class="form-control" [(ngModel)]="item.fechaRealReciboExpLegal">
-            </td>
-            <td>
-              <span class="status-badge" [ngClass]="{
-                                    'status-ontime': getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal) === 0,
-                                    'status-pending': getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal) > 0 && getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal) <= 3,
-                                    'status-delayed': getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal) > 3
-                                  }">
-                {{ getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal)
-                || 0 }} días
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+            </div>
+          </div>
 
-  <!-- Modal de vista previa PDF -->
-  <div class="modal fade" id="pdfPreviewModal" tabindex="-1" aria-labelledby="pdfPreviewModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 90vw;">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="pdfPreviewModalLabel">Vista previa del Reporte PDF</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body" style="height: 80vh; padding:0;">
-          <iframe *ngIf="pdfSrcSafe" [src]="pdfSrcSafe" width="100%" height="100%" style="border:none;"></iframe>
-          <div *ngIf="!pdfSrcSafe" class="d-flex justify-content-center align-items-center" style="height:100%;">
-            <span>No se ha generado el PDF aún.</span>
+          <!-- Derecha: Botones alineados a la derecha -->
+          <div class="col-lg-6 col-md-6 col-12">
+            <div class="d-flex justify-content-end gap-2 mt-2 mt-md-0 actions-container">
+              <div class="d-flex flex-column gap-2">
+                <!-- Botón que abre el modal -->
+                <button class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#addProjectionModal">
+                  <i class="bi bi-plus-lg"></i> Agregar Credito
+                </button>
+              </div>
+              <div class="d-flex flex-column gap-2">
+                <button class="btn btn-secondary" routerLink="/proyecciones">
+                  <i class="bi bi-plus-square"></i>
+                  Nueva Proyección
+                </button>
+              </div>
+              <div class="d-flex flex-column gap-2">
+                <button class="btn btn-danger" (click)="generarReportePDF()">
+                  <i class="bi bi-file-earmark-pdf"></i> PDF
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-          <button type="button" class="btn btn-primary" (click)="downloadPDF()">Descargar PDF</button>
+      </div>
+      <div class="filters-container">
+        <div class="footer-info">
+          <div>Total de registros: <span class="record-count">{{ filteredProyecciones.length }}</span></div>
+          <div class="justify-content-end instructions">
+            <i class="bi bi-info-circle"></i> Los campos en blanco pueden ser editados directamente
+          </div>
+        </div>
+        <br>
+        <h6 class="filter-title">Filtrar por coordinación:</h6>
+        <div class="filter-buttons">
+          <button *ngFor="let coord of coordinaciones" class="btn btn-primary filter-btn"
+            [class.active]="coord === coordinacionSeleccionada" (click)="coordinacionSeleccionada = coord">
+            {{ coord }}
+          </button>
+          <button class="btn btn-secondary filter-btn" [class.active]="!coordinacionSeleccionada"
+            (click)="coordinacionSeleccionada = null">
+            Todas
+          </button>
+        </div>
+      </div>
+      <div *ngIf="loading" class="d-flex justify-content-center my-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+      <div *ngIf="!loading" class="table-container">
+        <table class="app-table">
+          <thead>
+            <tr class="text-center">
+              <th>Mes de Proyección</th>
+              <th>ASESOR</th>
+              <th>Credito</th>
+              <th>Fecha proyectada envío ope.</th>
+              <th>Fecha de envío operativo APK</th>
+              <th>Días de retraso Ope.</th>
+              <th>Hora</th>
+              <th>Incidencias operativo</th>
+              <th>Fecha agendada entrega crédito</th>
+              <th>Renovado</th>
+              <th>Fecha límite entrega legal</th>
+              <th>Fecha de legal recibido</th>
+              <th>Días de retraso Legal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of proyeccionesFiltradasPorCoordinacion">
+              <!-- Mes de Proyección -->
+              <td style="align-content: center;">
+                {{item.mes}}
+              </td>
+              <!-- Asesor -->
+              <td>
+                <ng-container *ngIf="item.editable; else mostrarAsesor">
+                  <input type="text" class="form-control" [(ngModel)]="item.asesor">
+                </ng-container>
+                <ng-template #mostrarAsesor>
+                  <span class="badge bg-info rounded-pill p-2">{{ item.asesor }}</span>
+                </ng-template>
+              </td>
+              <!-- Cliente -->
+              <td>
+                <ng-container *ngIf="item.editable; else mostrarCliente">
+                  <input type="text" class="form-control" [(ngModel)]="item.cliente">
+                </ng-container>
+                <ng-template #mostrarCliente>
+                  {{ item.cliente }}
+                </ng-template>
+              </td>
+              <!-- Fecha proyectada envío ope -->
+              <td>
+                <ng-container *ngIf="item.editable; else mostrarFechaEntregaOpe">
+                  <input type="date" class="form-control" [(ngModel)]="item.fechaEntregaAgendadaOpe">
+                </ng-container>
+                <ng-template #mostrarFechaEntregaOpe>
+                  {{ item.fechaEntregaAgendadaOpe | date:'dd/MM/yyyy' }}
+                </ng-template>
+              </td>
+              <!-- Fecha de envío operativo -->
+              <td>
+                <input type="date" class="form-control" [(ngModel)]="item.fechaEnvioOperativo">
+              </td>
+              <!-- Días de retraso Ope -->
+              <td>
+                <span class="status-badge" [ngClass]="{
+          'status-ontime': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) === 0,
+          'status-pending': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) > 0 && getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) <= 3,
+          'status-delayed': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) > 3
+        }">
+                  {{ getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) || 0 }} días
+                </span>
+              </td>
+              <!-- Hora -->
+              <td>
+                <input type="time" class="form-control" [(ngModel)]="item.hora">
+              </td>
+              <!-- Incidencias operativo -->
+              <td>
+                <textarea class="form-control" [(ngModel)]="item.incidenciasOperativo" rows="2"></textarea>
+              </td>
+              <!-- Fecha agendada entrega crédito -->
+              <td>
+                <ng-container *ngIf="item.editable; else mostrarFechaAgendada">
+                  <input type="date" class="form-control" [(ngModel)]="item.fechaEntregaAgendada">
+                </ng-container>
+                <ng-template #mostrarFechaAgendada>
+                  {{ item.fechaEntregaAgendada | date:'dd/MM/yyyy' }}
+                </ng-template>
+              </td>
+              <!-- Renovado -->
+              <td class="text-center">
+                <div class="form-check form-switch d-inline-block">
+                  <input class="form-check-input" type="checkbox" [(ngModel)]="item.renovado">
+                </div>
+              </td>
+              <!-- Fecha límite entrega legal (calculada) -->
+              <td>
+                {{ getFechaLimiteEntrega(item.fechaEntregaAgendada) | date:'dd/MM/yyyy' }}
+              </td>
+              <!-- Fecha legal recibido -->
+              <td>
+                <input type="date" class="form-control" [(ngModel)]="item.fechaRealReciboExpLegal">
+              </td>
+              <!-- Días de retraso Legal -->
+              <td>
+                <span class="status-badge" [ngClass]="{
+          'status-ontime': getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal) === 0,
+          'status-pending': getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal) > 0 && getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal) <= 3,
+          'status-delayed': getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal) > 3
+        }">
+                  {{ getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal)
+                  || 0 }} días
+                </span>
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal de vista previa PDF -->
+    <div class="modal fade" id="pdfPreviewModal" tabindex="-1" aria-labelledby="pdfPreviewModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 90vw;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="pdfPreviewModalLabel">Vista previa del Reporte PDF</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body" style="height: 80vh; padding:0;">
+            <iframe *ngIf="pdfSrcSafe" [src]="pdfSrcSafe" width="100%" height="100%" style="border:none;"></iframe>
+            <div *ngIf="!pdfSrcSafe" class="d-flex justify-content-center align-items-center" style="height:100%;">
+              <span>No se ha generado el PDF aún.</span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="button" class="btn btn-primary" (click)="downloadPDF()">Descargar PDF</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+
+
+
+
+
+    <!-- ================= MODAL “Agregar Proyección” ================= -->
+    <div class="modal fade" id="addProjectionModal" tabindex="-1" aria-labelledby="addProjectionModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addProjectionModalLabel">Nueva Proyección</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <form (ngSubmit)="createNew()" #formNew="ngForm">
+            <div class="modal-body">
+              <!-- Coordinación -->
+              <div class="mb-3">
+                <label for="coordSelect" class="form-label">Coordinación</label>
+                <select id="coordSelect" class="form-select" required [(ngModel)]="newItem.coordinacion"
+                  name="coordinacion">
+                  <option value="" disabled selected>Seleccione...</option>
+                  <option *ngFor="let coord of coordinaciones" [value]="coord">{{ coord }}</option>
+                </select>
+              </div>
+
+              <!-- Asesor -->
+              <div class="mb-3">
+                <label class="form-label">Asesor</label>
+                <input type="text" class="form-control" required [(ngModel)]="newItem.asesor" name="asesor">
+              </div>
+
+              <!-- Cliente -->
+              <div class="mb-3">
+                <label class="form-label">Cliente</label>
+                <input type="text" class="form-control" required [(ngModel)]="newItem.cliente" name="cliente">
+              </div>
+
+              <!-- Fecha proyectada envío ope -->
+              <div class="mb-3">
+                <label class="form-label">Fecha proyectada envío Ope.</label>
+                <input type="date" class="form-control" [(ngModel)]="newItem.fechaEntregaAgendadaOpe"
+                  name="fechaEntregaAgendadaOpe">
+              </div>
+
+              <!-- Fecha de envío operativo -->
+              <div class="mb-3">
+                <label class="form-label">Fecha envío operativo</label>
+                <input type="date" class="form-control" [(ngModel)]="newItem.fechaEnvioOperativo"
+                  name="fechaEnvioOperativo">
+              </div>
+
+              <!-- Hora -->
+              <div class="mb-3">
+                <label class="form-label">Hora</label>
+                <input type="time" class="form-control" [(ngModel)]="newItem.hora" name="hora">
+              </div>
+
+              <!-- Incidencias operativo -->
+              <div class="mb-3">
+                <label class="form-label">Incidencias Operativo</label>
+                <textarea class="form-control" rows="2" [(ngModel)]="newItem.incidenciasOperativo"
+                  name="incidenciasOperativo"></textarea>
+              </div>
+
+              <!-- Fecha agendada entrega crédito -->
+              <div class="mb-3">
+                <label class="form-label">Fecha entrega de crédito</label>
+                <input type="date" class="form-control" [(ngModel)]="newItem.fechaEntregaAgendada"
+                  name="fechaEntregaAgendada">
+              </div>
+
+              <!-- Renovado -->
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" [(ngModel)]="newItem.renovado" name="renovado"
+                  id="renovadoSwitch">
+                <label class="form-check-label" for="renovadoSwitch">Renovado</label>
+              </div>
+
+              <!-- Fecha de legal recibido -->
+              <div class="mb-3">
+                <label class="form-label">Fecha real recibido Legal</label>
+                <input type="date" class="form-control" [(ngModel)]="newItem.fechaRealReciboExpLegal"
+                  name="fechaRealReciboExpLegal">
+              </div>
+
+              <!-- Mes de proyección -->
+              <div class="mb-3">
+                <label class="form-label">Mes de proyección</label>
+                <input type="text" class="form-control" required [(ngModel)]="newItem.mes" name="Mes">
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="formNew.invalid || loading">
+                <i class="bi bi-check2"></i> Guardar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>

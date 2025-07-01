@@ -5,7 +5,11 @@ import { CoordinacionService } from '../../../services/coordinacion.service';
 import { Coordinacion, Persona } from '../../../models/coordinacion';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
 import { BaucherPipe } from '../../../pipes/baucher.pipe';
+
+
 @Component({
   selector: 'app-bauchers',
   standalone: false,
@@ -15,6 +19,7 @@ import { BaucherPipe } from '../../../pipes/baucher.pipe';
 
 })
 export class BauchersComponent implements OnInit{
+
   getPages(): any {
   throw new Error('Method not implemented.');
   }
@@ -262,5 +267,82 @@ export class BauchersComponent implements OnInit{
   }
   
 
+exportarExcel(): void {
+  const headers = [
+    'Coordinación', 'Responsable', 'Fecha Pago', 'Hora Pago',
+    'Fecha Reporte', 'Hora Reporte', 'Diferencia',
+    'Grupo', 'Concepto', 'Titular'
+  ];
 
+  const body = this.filteredBauchers.map(b => ([
+    b.coordinacion?.municipio,
+    b.ejecutiva || b.coordinador,
+    this.formatearFecha(b.fechaBaucher),
+    this.formatearHora(b.fechaBaucher),
+    this.formatearFecha(b.fechaReporte),
+    this.formatearHora(b.fechaReporte),
+    b.diasDiferencia,
+    b.grupo,
+    b.concepto,
+    b.titular
+  ]));
+
+  const data = [headers, ...body];
+  const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+  // Aplicar estilos condicionales a la columna "Diferencia" (índice 6)
+  const diferenciaCol = 6;
+  body.forEach((row, i) => {
+    const rowIndex = i + 2; // +2 porque AOA incluye encabezado y Excel es 1-indexed
+    const cellRef = XLSX.utils.encode_cell({ c: diferenciaCol, r: rowIndex - 1 });
+    const dias = row[diferenciaCol];
+
+    let fillColor = '';
+    if (dias > 3) fillColor = 'FFDC3545'; // rojo (danger)
+    else if (dias > 1) fillColor = 'FFFFC107'; // amarillo (warning)
+    else fillColor = 'FF198754'; // verde (success)
+
+    if (!worksheet[cellRef]) return;
+
+    worksheet[cellRef].s = {
+      fill: {
+        fgColor: { rgb: fillColor }
+      },
+      font: {
+        color: { rgb: 'FFFFFFFF' },
+        bold: true
+      },
+      alignment: {
+        horizontal: 'center'
+      }
+    };
+  });
+
+  // Crear el libro
+  const workbook: XLSX.WorkBook = {
+    Sheets: { 'Bauchers': worksheet },
+    SheetNames: ['Bauchers']
+  };
+
+  // Guardar
+  const excelBuffer: any = XLSX.write(workbook, {
+    bookType: 'xlsx',
+    type: 'array',
+    cellStyles: true
+  });
+  const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+  FileSaver.saveAs(blob, 'bauchers_condicional.xlsx');
+}
+
+
+
+  formatearFecha(fecha: string | Date): string {
+    const f = new Date(fecha);
+    return f.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  }
+
+  formatearHora(fecha: string | Date): string {
+    const f = new Date(fecha);
+    return f.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+  }
 }
