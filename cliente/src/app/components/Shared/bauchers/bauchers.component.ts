@@ -114,11 +114,11 @@ export class BauchersComponent implements OnInit{
     }
     crearVouchers(): FormGroup {
       return this.fb.group({
-        fechaBaucher: ['', Validators.required],
-        fechaReporte: [''],
+        fechaBaucher: [''],
+        fechaReporte: ['', Validators.required],
         grupo: [''],
-        concepto: ['', Validators.required],
-        titular: ['', Validators.required]
+        concepto: [''],
+        titular: ['']
       });
     }
 
