@@ -3,7 +3,7 @@ import { Baucher } from '../../../models/baucher';
 import { PagosService } from '../../../services/pagos.service';
 import { CoordinacionService } from '../../../services/coordinacion.service';
 import { Coordinacion, Persona } from '../../../models/coordinacion';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
@@ -20,6 +20,7 @@ import { BaucherPipe } from '../../../pipes/baucher.pipe';
 })
 export class BauchersComponent implements OnInit{
 
+
   getPages(): any {
   throw new Error('Method not implemented.');
   }
@@ -29,6 +30,7 @@ export class BauchersComponent implements OnInit{
   baucherForm: FormGroup;
   personasFiltradas: Persona[] = [];
   fechaFiltro: string = ''; // formato 'YYYY-MM-DD'
+  bauchersTemporales: Baucher[] = [];
 
 
   currentPage: number = 1;
@@ -47,11 +49,7 @@ export class BauchersComponent implements OnInit{
       this.baucherForm = this.fb.group({
         coordinacion: ['', Validators.required],
         ejecutiva: ['', Validators.required],
-        fechaBaucher: [''],
-        fechaReporte: [''],
-        grupo: [''],
-        concepto: [''],
-        titular: ['']
+        vouchers: this.fb.array([this.crearVouchers()])
       });      
     }
 
@@ -114,7 +112,27 @@ export class BauchersComponent implements OnInit{
         this.coordinaciones = data;
       });
     }
+    crearVouchers(): FormGroup {
+      return this.fb.group({
+        fechaBaucher: ['', Validators.required],
+        fechaReporte: [''],
+        grupo: [''],
+        concepto: ['', Validators.required],
+        titular: ['', Validators.required]
+      });
+    }
 
+    get vouchers(): FormArray {
+      return this.baucherForm.get('vouchers') as FormArray;
+    }
+
+    agregarVoucher(): void {
+      this.vouchers.push(this.crearVouchers());
+    }
+
+  eliminarVoucher(index: number): void {
+    this.vouchers.removeAt(index);
+  }
     // Modifica el método cargarBaucher
   cargarBaucherParaEditar(baucher: any) {
     this.isEditing = true;
@@ -154,22 +172,25 @@ export class BauchersComponent implements OnInit{
         const coordinacionSeleccionada = formValue.coordinacion;
         const ejecutivaSeleccionada = formValue.ejecutiva;
 
-        const baucherData: Baucher = {
-          coordinacion: coordinacionSeleccionada._id,
-          ejecutiva: ejecutivaSeleccionada?.nombre,
-          coordinador: ejecutivaSeleccionada?.tipo === 'Coordinador' ? ejecutivaSeleccionada.nombre : undefined,
-          fechaBaucher: formValue.fechaBaucher,
-          fechaReporte: formValue.fechaReporte,
-          grupo: formValue.grupo,
-          concepto: formValue.concepto,
-          titular: formValue.titular
-        };
+        for (const voucher of formValue.vouchers) {
+          const baucherData: Baucher = {
+            coordinacion: coordinacionSeleccionada._id,
+            ejecutiva: ejecutivaSeleccionada?.nombre,
+            coordinador: ejecutivaSeleccionada?.tipo === 'Coordinador' ? ejecutivaSeleccionada.nombre : undefined,
+            fechaBaucher: voucher.fechaBaucher,
+            fechaReporte: voucher.fechaReporte,
+            grupo: voucher.grupo,
+            concepto: voucher.concepto,
+            titular: voucher.titular
+          };
 
-        if (this.editingBaucherId) {
-          await this.actualizarBaucher(baucherData);
-        } else {
-          await this.crearNuevoBaucher(baucherData);
+          if (this.editingBaucherId) {
+            await this.actualizarBaucher(baucherData);
+          } else {
+            await this.crearNuevoBaucher(baucherData);
+          }
         }
+
 
         this.resetForm();
         this.obtenerBauchers();
@@ -179,9 +200,13 @@ export class BauchersComponent implements OnInit{
     }
   }
 
+
+
+
   private async crearNuevoBaucher(baucherData: Baucher) {
     await this._pagosService.agregarBaucher(baucherData).toPromise();
     this.mostrarExito('Guardado exitosamente');
+    this.vouchers.push(this.crearVouchers())
   }
 
   private async actualizarBaucher(baucherData: Baucher) {
@@ -191,12 +216,20 @@ export class BauchersComponent implements OnInit{
     this.mostrarExito('Actualizado exitosamente');
   }
 
-  public resetForm() {
-    this.baucherForm.reset();
-    this.editingBaucherId = null;
-    this.isEditing = false;
-    this.personasFiltradas = [];
+resetForm(mantenerCabecera = true): void {
+  const coord = this.baucherForm.get('coordinacion')?.value;
+  const ejecutiva = this.baucherForm.get('ejecutiva')?.value;
+
+  this.baucherForm.reset();
+
+  if (mantenerCabecera) {
+    this.baucherForm.patchValue({
+      coordinacion: coord,
+      ejecutiva: ejecutiva
+    });
   }
+}
+
 
   private mostrarExito(mensaje: string) {
     Swal.fire({

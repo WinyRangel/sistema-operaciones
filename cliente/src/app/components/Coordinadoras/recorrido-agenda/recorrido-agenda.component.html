@@ -209,7 +209,7 @@
                         <th class="text-center" style="width: 100px;">Estado</th>
                         <th class="text-center" style="width: 100px;">Inicio</th>
                         <th class="text-center" style="width: 100px;">Cierre</th>
-                        <th class="text-center" style="width: 100px;">Cumplimiento</th>
+                        <th class="text-center" style="width: 100px;">Agenda enviada a tiempo</th>
                         <th class="text-center" style="width: 100px;">Acciones</th>
                       </tr>
                     </thead>
@@ -228,16 +228,6 @@
                         <td class="text-center">
                           <span class="badge bg-light text-dark">{{ agenda.hora }}</span>
                         </td>
-                        
-                        <!-- Domicilio -->
-                        <!-- <td>
-                          <div class="d-flex align-items-center">
-                            <i class="bi bi-geo-alt-fill text-primary me-2"></i>
-                            <span class="text-truncate" style="max-width: 150px;" [title]="agenda.domicilio.nombre">
-                              {{ agenda.domicilio.nombre }}
-                            </span>
-                          </div>
-                        </td> -->
                         
                         <!-- Actividad -->
                         <td>
@@ -296,16 +286,7 @@
                             <span class="badge bg-light text-muted">--:--</span>
                           </ng-template>
                         </td>
-                        
-                        <!-- KM Recorridos -->
-                        <!-- <td class="text-center">
-                          <span class="badge bg-info-light text-info" *ngIf="agenda.kmRecorrido; else noKm">
-                            {{ agenda.kmRecorrido }} km
-                          </span>
-                          <ng-template #noKm>
-                            <span class="badge bg-light text-muted">--</span>
-                          </ng-template>
-                        </td> -->
+                                             
                         
                         <!-- Estado Cumplimiento -->
                         <td class="text-center">
@@ -357,7 +338,6 @@
                   </div>
                 </div>
               </div>
-              <!--Graficas-->
 
               <!---->
             </div>
