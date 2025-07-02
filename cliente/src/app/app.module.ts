@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
-import { ApplicationConfig } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import { TableModule } from 'primeng/table'
@@ -61,7 +60,8 @@ import { DirSegProyeccionComponent } from './components/Shared/dir-seg-proyeccio
     ProyeccionesComponent,
     SeguimientoProyeccionesComponent,
     DirSegProyeccionComponent,
-    LegalesComponent
+    LegalesComponent,
+    IniciarSesionComponent
   ],
   
   imports: [

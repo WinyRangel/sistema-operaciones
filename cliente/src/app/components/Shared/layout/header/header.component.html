@@ -13,13 +13,13 @@
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent" *ngIf="estaLogueado">
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
         <li class="nav-item">
           <a class="nav-link hover-effect" routerLink="/inicio" routerLinkActive="active">Inicio</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/agendas" routerLinkActive="active">Registrar agendas</a>
+          <a class="nav-link hover-effect" routerLink="/agendas" routerLinkActive="active">Crear agendas</a>
         </li>
         <li class="nav-item">
           <a class="nav-link hover-effect" routerLink="/recorrido-agenda" routerLinkActive="active">Seguimiento</a>
@@ -38,14 +38,17 @@
           <a class="nav-link hover-effect" routerLink="/ejecutivas" routerLinkActive="active">Ejecutivas</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/cumplimientoobjetivo" routerLinkActive="active">Cumplimiento de Objetivos</a>
+          <a class="nav-link hover-effect" routerLink="/cumplimientoobjetivo" routerLinkActive="active">Objetivos</a>
         </li>
         <li class="nav-item">
           <a class="nav-link hover-effect" routerLink="/seg-proyecciones" routerLinkActive="active">Proyecciones</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/dir-seg-proyeccion" routerLinkActive="active">Colocaciones</a>
-        </li>
+            <li class="nav-item" *ngIf="rolUsuario === 'admin'">
+              <a class="nav-link hover-effect" routerLink="/dir-seg-proyeccion" routerLinkActive="active">
+                Colocaciones
+              </a>
+            </li>
+            <button type="button" class="btn" (click)="cerrarSesion()">Cerrar sesión <i class="fa-solid fa-right-to-bracket"></i></button>
       </ul>
     </div>
   </div>

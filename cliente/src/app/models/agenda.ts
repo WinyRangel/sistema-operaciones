@@ -4,6 +4,7 @@ export interface Agenda {
     coordinador: string;
     fecha?: Date;
     objetivo?: string;
+    meta?: string;
     hora: string;
     domicilio?: string;
     actividad?: string;

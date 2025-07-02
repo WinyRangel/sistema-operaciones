@@ -13,22 +13,25 @@ import { ProyeccionesComponent } from './components/Shared/proyecciones/proyecci
 import { SeguimientoProyeccionesComponent } from './components/Shared/seguimiento-proyecciones/seguimiento-proyecciones.component';
 import { DirSegProyeccionComponent } from './components/Shared/dir-seg-proyeccion/dir-seg-proyeccion.component';
 import { LegalesComponent } from './components/Shared/legales/legales.component';
+import { IniciarSesionComponent } from './components/Shared/iniciar-sesion/iniciar-sesion.component';
+import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
-  { path: 'baucher', component: BauchersComponent },
-  { path: 'recorrido-agenda', component: RecorridoAgendaComponent },
-  { path: 'reporte-agendas', component: ReporteAgendasComponent },
-  { path: 'agendas', component: AgendasComponent },
-  { path: 'ejecutivas', component: EjecutivasComponent },
-  { path: 'depositos', component: DepositosComponent },
-  { path: 'inicio', component: InicioComponent },
-  { path: 'reportefichas', component: ReporteFichasComponent },
-  { path: 'cumplimientoobjetivo', component: CumplimientoAgendaComponent},
-  { path: 'proyecciones', component: ProyeccionesComponent },
-  { path: 'seg-proyecciones', component: SeguimientoProyeccionesComponent },
-  { path: 'dir-seg-proyeccion', component: DirSegProyeccionComponent},
-  { path: 'legales', component: LegalesComponent},
-  { path: '**', component: InicioComponent }
+  { path: 'baucher', component: BauchersComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'legales', component: LegalesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'recorrido-agenda', component: RecorridoAgendaComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'reporte-agendas', component: ReporteAgendasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'agendas', component: AgendasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'iniciar-sesion', component: IniciarSesionComponent},
+  { path: 'ejecutivas', component: EjecutivasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'depositos', component: DepositosComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'inicio', component: InicioComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'reportefichas', component: ReporteFichasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'cumplimientoobjetivo', component: CumplimientoAgendaComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']}},
+  { path: 'proyecciones', component: ProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'seg-proyecciones', component: SeguimientoProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']}  },
+  { path: 'dir-seg-proyeccion', component: DirSegProyeccionComponent, canActivate: [AuthGuard], data: { roles: ['admin']}},
+  { path: '**', redirectTo: 'iniciar-sesion' }
 ];
 
 

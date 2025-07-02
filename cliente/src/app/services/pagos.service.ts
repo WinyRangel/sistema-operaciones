@@ -24,7 +24,8 @@ export class PagosService {
     return this.http.put(this.url + id, rbaucher);
   }
 
-  eliminarBaucher(id: string): Observable<any>{
+  eliminarBaucher(id: string): Observable<any> {
     return this.http.delete(this.url + id);
   }
+///GUARDAR MÁS DE UN BAUCHER
 }
