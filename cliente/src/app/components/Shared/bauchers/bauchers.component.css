@@ -72,3 +72,55 @@ p {
 .hover-bg-danger:hover { background: #dc3545!important; }
 .hover-text-white:hover { color: white!important; }
 .transition-all { transition: all 0.2s ease; }
+
+.voucher-form-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .form-section-card {
+    border-radius: 0.5rem;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .form-section-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+  }
+  
+  .section-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+  }
+  
+  .section-body {
+    padding: 1.5rem;
+  }
+  
+  .bg-primary-soft {
+    background-color: rgba(13, 110, 253, 0.1);
+  }
+  
+  .border-primary-soft {
+    border-color: rgba(13, 110, 253, 0.2) !important;
+  }
+  
+  .form-control-lg, .form-select-lg {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+  
+  .form-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+  }
+  
+  @media (max-width: 767.98px) {
+    .section-body {
+      padding: 1rem;
+    }
+  }

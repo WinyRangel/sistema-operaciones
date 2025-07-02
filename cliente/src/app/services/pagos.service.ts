@@ -8,12 +8,16 @@ import { Observable } from 'rxjs';
 })
 export class PagosService {
 
-  private url = 'https://servidor-operaciones.onrender.com/baucher/'; 
+  private url = 'http://localhost:4000/baucher/'; 
 
   constructor(private http: HttpClient) {}
 
   agregarBaucher(baucher: Baucher): Observable<Baucher> {
     return this.http.post<Baucher>(this.url, baucher); 
+  }
+
+  agregarVariosBauchers(bauchers: Baucher[]): Observable<any> {
+    return this.http.post<any>(this.url + 'varios', bauchers);
   }
 
   obtenerBauchers(): Observable<Baucher[]> {
@@ -24,7 +28,8 @@ export class PagosService {
     return this.http.put(this.url + id, rbaucher);
   }
 
-  eliminarBaucher(id: string): Observable<any>{
+  eliminarBaucher(id: string): Observable<any> {
     return this.http.delete(this.url + id);
   }
+///GUARDAR MÁS DE UN BAUCHER
 }

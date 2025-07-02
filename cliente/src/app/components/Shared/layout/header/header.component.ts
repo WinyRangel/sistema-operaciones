@@ -1,5 +1,7 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -7,12 +9,39 @@ import { Router } from '@angular/router';
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })
-export class HeaderComponent {
-isScrolled = false;
+export class HeaderComponent implements OnInit, OnDestroy {
 
-  constructor(private router: Router) {}
+ isScrolled = false;
+  estaLogueado = false;
+  rolUsuario = '';
+  private authSubscription!: Subscription;
 
-  ngOnInit(): void {}
+  constructor(private router: Router, private authService: AuthService) {}
+
+  ngOnInit(): void {
+    // Suscribirse al estado de autenticación para actualizar en tiempo real
+    this.authSubscription = this.authService.autenticado$.subscribe((estado) => {
+      this.estaLogueado = estado;
+
+      if (estado) {
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            this.rolUsuario = payload.rol;
+          } catch {
+            this.rolUsuario = '';
+          }
+        }
+      } else {
+        this.rolUsuario = '';
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.authSubscription.unsubscribe(); // evitar fugas de memoria
+  }
 
   @HostListener('window:scroll', [])
   onWindowScroll() {
@@ -27,4 +56,9 @@ isScrolled = false;
       matrixParams: 'ignored'
     });
   }
+  cerrarSesion() {
+    this.authService.logout();  // Elimina el token y/o limpia sesión
+    this.router.navigate(['/iniciar-sesion']);  // Usa '/' y un array
+  }
+
 }

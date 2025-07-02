@@ -1,143 +1,184 @@
-<!-- Formulario de Registro de Vouchers -->
-<div class="accordion custom-accordion mt-3" id="accordionFormBaucher">
-  <div class="accordion-item border-0 shadow-sm">
-    <h2 class="accordion-header">
-      <button class="accordion-button rounded-top-3 bg-primary text-white fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-        <i class="fas fa-file-invoice-dollar me-2"></i>
-        Registro de Vouchers
-      </button>
-    </h2>
-    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionFormBaucher">
-      <div class="accordion-body bg-light">
-        <form class="p-3 p-md-4 bg-white rounded-bottom-3 shadow-sm" [formGroup]="baucherForm" (ngSubmit)="agregarBaucher()">
-          <h4 class="text-center mb-4 fw-bold fs-2 text-primary">
+<!-- Formulario de Registro de Vouchers Mejorado -->
+<div class="voucher-form-container">
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-primary text-white rounded-top-3">
+      <div class="d-flex align-items-center">
+        <i class="fas fa-file-invoice-dollar me-3 fs-4"></i>
+        <h2 class="mb-0 fw-bold fs-5">Registro de Vouchers</h2>
+      </div>
+    </div>
+    
+    <div class="card-body p-0">
+      <form class="p-3 p-md-4" [formGroup]="baucherForm" (ngSubmit)="agregarBaucher()">
+        <!-- Encabezado mejorado -->
+        <div class="text-center mb-4">
+          <h3 class="fw-bold text-primary mb-2">
             <i class="fas fa-file-alt me-2"></i>
-            Registro de Vouchers
-          </h4>
+            Complete los datos del voucher
+          </h3>
+          <p class="text-muted">Los campos marcados con <span class="text-danger">*</span> son obligatorios</p>
+        </div>
         
-          <div class="container-fluid px-0">
-            <div class="row g-4">
-              <!-- Columna de Datos de Coordinación -->
-              <div class="col-12 col-lg-6">
-                <section class="p-3 border-end-lg">
-                  <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="icon-container bg-primary-light">
-                      <i class="fas fa-users-cog text-primary"></i>
-                    </div>
-                    <h5 class="mb-0 fw-bold text-primary">Datos de Coordinación</h5>
-                  </div>
-        
-                  <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                      <label for="coordinacion" class="form-label fw-medium">Coordinación <span class="text-danger">*</span></label>
-                      <select class="form-select shadow-sm" id="coordinacion" formControlName="coordinacion" (change)="filtrarPersonas()">
-                        <option selected disabled value="">Seleccionar coordinación</option>
-                        <option *ngFor="let coord of coordinaciones" [ngValue]="coord">
-                          {{ coord.municipio }} - {{ coord.nombre }}
-                        </option>
-                      </select>
-                      <div class="invalid-feedback d-block" *ngIf="baucherForm.get('coordinacion')?.invalid && baucherForm.get('coordinacion')?.touched">
-                        Por favor seleccione una coordinación
-                      </div>
-                    </div>
-        
-                    <div class="col-12 col-md-6">
-                      <label for="ejecutiva" class="form-label fw-medium">Ejecutiva/Coordinador <span class="text-danger">*</span></label>
-                      <select class="form-select shadow-sm" id="ejecutiva" formControlName="ejecutiva">
-                        <option selected disabled value="">Seleccionar persona</option>
-                        <option *ngFor="let persona of personasFiltradas" [ngValue]="persona">
-                          {{ persona.nombre }}
-                        </option>
-                      </select>
-                      <div class="invalid-feedback d-block" *ngIf="baucherForm.get('ejecutiva')?.invalid && baucherForm.get('ejecutiva')?.touched">
-                        Por favor seleccione una persona
-                      </div>
-                    </div>
-        
-                    <div class="col-12">
-                      <label for="fechaBaucher" class="form-label fw-medium">Fecha y Hora de Pago <span class="text-danger">*</span></label>
-                      <div class="input-group">
-                        <span class="input-group-text bg-primary-light border-primary-light">
-                          <i class="fas fa-calendar-alt text-primary"></i>
-                        </span>
-                        <input type="datetime-local" class="form-control shadow-sm" id="fechaBaucher" formControlName="fechaBaucher">
-                      </div>
-                    </div>
-                  </div>
-                </section>
+        <!-- Contenedor principal de dos columnas -->
+        <div class="row g-4">
+          <!-- Columna izquierda - Datos de Coordinación -->
+          <div class="col-lg-6">
+            <div class="form-section-card h-100">
+              <div class="section-header bg-primary-soft">
+                <i class="fas fa-users-cog text-primary me-2"></i>
+                <h4 class="mb-0 fw-semibold">Datos de Coordinación</h4>
               </div>
-        
-              <!-- Columna de Reporte de Pago -->
-              <div class="col-12 col-lg-6">
-                <section class="p-3">
-                  <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="icon-container bg-primary-light">
-                      <i class="fas fa-file-invoice-dollar text-primary"></i>
-                    </div>
-                    <h5 class="mb-0 fw-bold text-primary">Detalles del Pago</h5>
+              
+              <div class="section-body">
+                <!-- Coordinación -->
+                <div class="mb-3">
+                  <label for="coordinacion" class="form-label fw-medium">
+                    <i class="fas fa-map-marker-alt text-primary me-1"></i>
+                    Coordinación <span class="text-danger">*</span>
+                  </label>
+                  <select class="form-select form-select-lg shadow-sm" id="coordinacion" formControlName="coordinacion" (change)="filtrarPersonas()">
+                    <option selected disabled value="">Seleccione una coordinación...</option>
+                    <option *ngFor="let coord of coordinaciones" [ngValue]="coord">
+                      {{ coord.municipio }} - {{ coord.nombre }}
+                    </option>
+                  </select>
+                  <div class="form-text">Seleccione la coordinación correspondiente</div>
+                  <div class="invalid-feedback d-block" *ngIf="baucherForm.get('coordinacion')?.invalid && baucherForm.get('coordinacion')?.touched">
+                    Por favor seleccione una coordinación válida
                   </div>
-        
-                  <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                      <label for="fechaReporte" class="form-label fw-medium">Fecha de Reporte</label>
-                      <div class="input-group">
-                        <span class="input-group-text bg-primary-light border-primary-light">
-                          <i class="fas fa-calendar-check text-primary"></i>
-                        </span>
-                        <input type="datetime-local" class="form-control shadow-sm" id="fechaReporte" formControlName="fechaReporte">
-                      </div>
-                    </div>
-        
-                    <div class="col-12 col-md-6">
-                      <label for="grupo" class="form-label fw-medium">Grupo</label>
-                      <div class="input-group">
-                        <span class="input-group-text bg-primary-light border-primary-light">
-                          <i class="fas fa-users text-primary"></i>
-                        </span>
-                        <input type="text" class="form-control shadow-sm" id="grupo" placeholder="Ej: Grupo 5" formControlName="grupo">
-                      </div>
-                    </div>
-        
-                    <div class="col-12">
-                      <label for="concepto" class="form-label fw-medium">Concepto <span class="text-danger">*</span></label>
-                      <div class="input-group">
-                        <span class="input-group-text bg-primary-light border-primary-light">
-                          <i class="fas fa-comment-dollar text-primary"></i>
-                        </span>
-                        <input type="text" class="form-control shadow-sm" id="concepto" placeholder="Ej: Pago mensual" formControlName="concepto">
-                      </div>
-                    </div>
-        
-                    <div class="col-12">
-                      <label for="titular" class="form-label fw-medium">Observaciones <span class="text-danger">*</span></label>
-                      <div class="input-group">
-                        <span class="input-group-text bg-primary-light border-primary-light">
-                          <i class="fas fa-user-tie text-primary"></i>
-                        </span>
-                        <input type="text" class="form-control shadow-sm" id="titular" placeholder="Ej: Juan Pérez" formControlName="titular">
-                      </div>
-                    </div>
+                </div>
+                
+                <!-- Ejecutiva/Coordinador -->
+                <div class="mb-3">
+                  <label for="ejecutiva" class="form-label fw-medium">
+                    <i class="fas fa-user-tie text-primary me-1"></i>
+                    Ejecutiva/Coordinador <span class="text-danger">*</span>
+                  </label>
+                  <select class="form-select form-select-lg shadow-sm" id="ejecutiva" formControlName="ejecutiva" [disabled]="!baucherForm.get('coordinacion')?.value">
+                    <option selected disabled value="">Seleccione una persona...</option>
+                    <option *ngFor="let persona of personasFiltradas" [ngValue]="persona">
+                      {{ persona.nombre }}
+                    </option>
+                  </select>
+                  <div class="form-text">Persona responsable del voucher</div>
+                  <div class="invalid-feedback d-block" *ngIf="baucherForm.get('ejecutiva')?.invalid && baucherForm.get('ejecutiva')?.touched">
+                    Por favor seleccione una persona válida
                   </div>
-                </section>
-              </div>
-            </div>
-            
-            <!-- Botones de Acción -->
-            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">              
-              <div class="d-flex gap-3">
-                <button type="button" class="btn btn-outline-secondary" (click)="resetForm()">
-                  <i class="fas fa-eraser me-2"></i>
-                  Limpiar
-                </button>
-                <button type="submit" class="btn btn-primary px-4" [disabled]="baucherForm.invalid">
-                  <i class="fas fa-save me-2"></i>
-                  {{ editingBaucherId ? 'Actualizar' : 'Guardar' }}
-                </button>
+                </div>
+                
+                <!-- Fecha y Hora de Pago -->
+                <div class="mb-3">
+                  <label for="fechaBaucher" class="form-label fw-medium">
+                    <i class="fas fa-clock text-primary me-1"></i>
+                    Fecha y Hora de Pago
+                  </label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-primary-soft border-primary-soft">
+                      <i class="fas fa-calendar-alt text-primary"></i>
+                    </span>
+                    <input type="datetime-local" class="form-control form-control-lg shadow-sm" id="fechaBaucher" formControlName="fechaBaucher">
+                  </div>
+                  <div class="form-text">Fecha y hora exacta del pago</div>
+                </div>
               </div>
             </div>
           </div>
-        </form>
-      </div>
+          
+          <!-- Columna derecha - Detalles del Pago -->
+          <div class="col-lg-6">
+            <div class="form-section-card h-100">
+              <div class="section-header bg-primary-soft">
+                <i class="fas fa-money-bill-wave text-primary me-2"></i>
+                <h4 class="mb-0 fw-semibold">Detalles del reporte</h4>
+              </div>
+              
+              <div class="section-body">
+                <!-- Fecha de Reporte -->
+                <div class="mb-3">
+                  <label for="fechaReporte" class="form-label fw-medium">
+                    <i class="fas fa-calendar-check text-primary me-1"></i>
+                    Fecha de Reporte  <span class="text-danger">*</span>
+                  </label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-primary-soft border-primary-soft">
+                      <i class="fas fa-calendar text-primary"></i>
+                    </span>
+                    <input type="datetime-local" class="form-control form-control-lg shadow-sm" id="fechaReporte" formControlName="fechaReporte">
+                  </div>
+                  <div class="form-text">Fecha cuando se reportó el pago</div>
+                </div>
+                
+                <!-- Grupo -->
+                <div class="mb-3">
+                  <label for="grupo" class="form-label fw-medium">
+                    <i class="fas fa-users text-primary me-1"></i>
+                    Grupo
+                  </label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-primary-soft border-primary-soft">
+                      <i class="fas fa-hashtag text-primary"></i>
+                    </span>
+                    <input type="text" class="form-control form-control-lg shadow-sm" id="grupo" placeholder="Ej: Grupo 5" formControlName="grupo">
+                  </div>
+                  <div class="form-text">Identificación del grupo (opcional)</div>
+                </div>
+                
+                <!-- Concepto -->
+                <div class="mb-3">
+                  <label for="concepto" class="form-label fw-medium">
+                    <i class="fas fa-comment-dollar text-primary me-1"></i>
+                    Concepto <span class="text-danger"></span>
+                  </label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-primary-soft border-primary-soft">
+                      <i class="fas fa-tag text-primary"></i>
+                    </span>
+                    <input type="text" class="form-control form-control-lg shadow-sm" id="concepto" placeholder="Ej: Pago mensual" formControlName="concepto">
+                  </div>
+                  <div class="form-text">Descripción breve del pago</div>
+                  <div class="invalid-feedback d-block" *ngIf="baucherForm.get('concepto')?.invalid && baucherForm.get('concepto')?.touched">
+                    Por favor ingrese un concepto válido
+                  </div>
+                </div>
+                
+                <!-- Observaciones -->
+                <div class="mb-3">
+                  <label for="titular" class="form-label fw-medium">
+                    <i class="fas fa-clipboard text-primary me-1"></i>
+                    Observaciones
+                  </label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-primary-soft border-primary-soft">
+                      <i class="fas fa-edit text-primary"></i>
+                    </span>
+                    <input type="text" class="form-control form-control-lg shadow-sm" id="titular" placeholder="Ej: Voucher borroso" formControlName="titular">
+                  </div>
+                  <div class="form-text">Información adicional relevante</div>
+                  <div class="invalid-feedback d-block" *ngIf="baucherForm.get('titular')?.invalid && baucherForm.get('titular')?.touched">
+                    Por favor ingrese observaciones válidas
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Botones de acción mejorados -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 pt-3 border-top gap-3">
+          <button type="button" class="btn btn-outline-success btn-lg flex-grow-1">
+            <i class="fas fa-broom me-2"></i>
+            Añadir formulario
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-lg flex-grow-1" (click)="resetForm()">
+            <i class="fas fa-broom me-2"></i>
+            Limpiar formulario
+          </button>
+          <button type="submit" class="btn btn-primary btn-lg flex-grow-1" [disabled]="baucherForm.invalid">
+            <i class="fas fa-save me-2"></i>
+            {{ editingBaucherId ? 'Actualizar Voucher' : 'Guardar Voucher' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

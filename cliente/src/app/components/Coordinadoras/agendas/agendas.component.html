@@ -74,11 +74,14 @@
                         </div>
                         
                         <!-- Objetivo -->
-                        <div class="col-12">
-                          <label for="objetivo" class="form-label fw-bold">Objetivo del día</label>
-                          <textarea class="form-control" id="objetivo" formControlName="objetivo" rows="2"></textarea>
+                        <div class="col-6">
+                          <label for="objetivo" class="form-label fw-bold">Objetivo semanal</label>
+                          <input type="text" class="form-control" id="objetivo" formControlName="objetivo" rows="2">
                         </div>
-                        
+                      <div class="col-6">
+                          <label for="meta" class="form-label fw-bold">Meta</label>
+                          <input type="number" class="form-control" id="meta" formControlName="meta" rows="2">
+                        </div>
                         <!-- Switch de cumplimiento -->
                         <div class="col-12">
                           <div class="form-check form-switch">

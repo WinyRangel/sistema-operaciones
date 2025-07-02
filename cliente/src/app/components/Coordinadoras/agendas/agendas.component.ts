@@ -78,20 +78,6 @@ toggleColumnVisibility(): void {
   // Esto podría abrir un modal con checkboxes para cada columna
 }
 
-// Al cargar agendas
-private loadAgendas(): void {
-  this.isLoading = true;
-  this._coordinacionService.obtenerAgendas().subscribe(response => {
-    this.agendas = response.map((agenda: { fecha: string; }) => ({
-      ...agenda,
-      fecha: this.fixUTCDateToLocal(agenda.fecha)
-    }));
-    this.isLoading = false;
-  }, error => {
-    this.isLoading = false;
-    this.showToast('error', 'Error cargando agendas');
-  });
-}
 
 
   ngOnInit(): void {
@@ -109,6 +95,7 @@ private loadAgendas(): void {
       semana: ['', Validators.required],
       fecha: ['', Validators.required],
       objetivo: [''],
+      meta: [''],
       cumplimientoAgenda: [false],
       actividades: this.fb.array([this.crearActividad()])
     });
@@ -210,6 +197,7 @@ private loadAgendas(): void {
         semana: datos.semana,
         fecha: datos.fecha,
         objetivo: datos.objetivo,
+        meta: datos.meta,
         cumplimientoAgenda: datos.cumplimientoAgenda,
         ...actividad
       };
@@ -254,7 +242,7 @@ private loadAgendas(): void {
 
   opcionesCodigo = [
     { value: 'AG', texto: 'AG | Aseo General', color: '#ffcccc' },
-    { value: 'AM', texto: 'AM | Actividades Matutinas', color: '#ffe6cc' },
+    { value: 'GA', texto: 'GA | Gestión Administrativa', color: '#ffe6cc' },
     { value: 'C', texto: 'C | Cobranza', color: '#d9ead3' },
     { value: 'D', texto: 'D | Domiciliar', color: '#cfe2f3' },
     { value: 'Dep', texto: 'Dep | Depósitar', color: '#d9d2e9' },
