@@ -19,7 +19,13 @@
       </nav>
     </div>
 
-    <!-- FORMULARIO Y TABLA -->
+        <div class="d-flex justify-content-end mb-3">
+      <button class="btn btn-success" (click)="exportarExcelPorCoordinaciones()" [disabled]="!mesSeleccionado">
+        <i class="fa fa-file-excel me-2"></i> Exportar Excel
+      </button>
+    </div>
+
+  <!-- FORMULARIO Y TABLA -->
     <div class="row mx-3" *ngIf="coordinacionSeleccionada">
       <!-- Formulario -->
       <div class="col-md-4 mb-4">

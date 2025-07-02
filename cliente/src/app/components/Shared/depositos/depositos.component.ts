@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { DepositosService } from '../../../services/depositos.service';
 import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
+import { forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-depositos',
@@ -28,7 +32,6 @@ export class DepositosComponent implements OnInit {
   // Estado actual
   coordinacionSeleccionada: string | null = null;
 
-  // **Nueva** propiedad del header
   nombreSeleccionado: string = '';
 
   //FILTRAR POR MES
@@ -73,13 +76,6 @@ mesSeleccionado: string = ''; // por ejemplo '05' para mayo
         this.depositos = data;
       });
   }
-
-  // seleccionarCoordinacion(nombre: string) {
-  //   this.coordinacionSeleccionada = nombre;
-  //   this.nombreSeleccionado = nombre;
-  //   this.obtenerDepositos();
-  // }
-
 
   guardarDeposito() {
     if (!this.nombre || !this.horaReporte || !this.fechaReporte || !this.coordinacionSeleccionada) {
@@ -127,4 +123,90 @@ mesSeleccionado: string = ''; // por ejemplo '05' para mayo
       .obtenerDepositosPorCoordinacion(this.coordinacionSeleccionada)
       .subscribe((data) => (this.depositos = data));
   }
+
+//   exportarExcelPorCoordinaciones(): void {
+//   if (!this.mesSeleccionado) {
+//     Swal.fire('Selecciona un mes para exportar.', '', 'warning');
+//     return;
+//   }
+
+//   const workbook = XLSX.utils.book_new();
+
+//   this.coordinaciones.forEach(coordinacion => {
+//     const depositosFiltrados = this.depositos.filter(d => {
+//       const mes = d.fechaReporte?.substring(5, 7);
+//       return d.coordinacion === coordinacion && mes === this.mesSeleccionado;
+//     });
+
+//     if (depositosFiltrados.length > 0) {
+//       const data = depositosFiltrados.map(d => ({
+//         '¿Quién reporta?': d.nombre,
+//         'Hora Reporte': d.horaReporte,
+//         'Fecha Reporte': d.fechaReporte,
+//       }));
+
+//       const worksheet = XLSX.utils.json_to_sheet(data);
+//       XLSX.utils.book_append_sheet(workbook, worksheet, coordinacion);
+//     }
+//   });
+
+//   const nombreArchivo = `Depositos_${this.mesSeleccionado}.xlsx`;
+//   const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+//   const blobData = new Blob([excelBuffer], { type: 'application/octet-stream' });
+//   FileSaver.saveAs(blobData, nombreArchivo);
+// }
+exportarExcelPorCoordinaciones(): void {
+  if (!this.mesSeleccionado) {
+    Swal.fire('Selecciona un mes para exportar.', '', 'warning');
+    return;
+  }
+
+  const headerRow = ['¿Quién reporta?', 'Hora Reporte', 'Fecha Reporte'];
+  const workbook = XLSX.utils.book_new();
+
+  // Creamos un array de observables: por cada coordinación pedimos sus depósitos
+  const requests = this.coordinaciones.map(coord =>
+    this.depositosService.obtenerDepositosPorCoordinacion(coord).pipe(
+      map(depositos =>
+        // aquí filtramos por mes directamente
+        depositos.filter(d => d.fechaReporte?.substring(5, 7) === this.mesSeleccionado)
+      )
+    )
+  );
+
+  // forkJoin espera a que todas las peticiones respondan
+  forkJoin(requests).subscribe(
+    resultadoPorCoordinacion => {
+      // resultadoPorCoordinacion es un array paralelo a `this.coordinaciones`
+      resultadoPorCoordinacion.forEach((depositosFiltrados, i) => {
+        const nombreHoja = this.coordinaciones[i].slice(0, 31); // Excel limita 31 chars
+        let ws;
+
+        if (depositosFiltrados.length) {
+          const data = depositosFiltrados.map(d => ({
+            '¿Quién reporta?': d.nombre,
+            'Hora Reporte': d.horaReporte,
+            'Fecha Reporte': d.fechaReporte
+          }));
+          ws = XLSX.utils.json_to_sheet(data, { header: headerRow });
+        } else {
+          // hoja vacía con encabezados
+          ws = XLSX.utils.aoa_to_sheet([headerRow]);
+        }
+
+        XLSX.utils.book_append_sheet(workbook, ws, nombreHoja);
+      });
+
+      // finalmente generamos el archivo
+      const fileName = `Depositos_${this.mesSeleccionado}_${new Date().getFullYear()}.xlsx`;
+      const wbout: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      FileSaver.saveAs(new Blob([wbout]), fileName);
+    },
+    err => {
+      console.error(err);
+      Swal.fire('Error al exportar', '', 'error');
+    }
+  );
+}
+
 }

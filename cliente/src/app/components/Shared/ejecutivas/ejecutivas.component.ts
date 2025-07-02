@@ -35,6 +35,7 @@ export class EjecutivasComponent implements OnInit {
   horaReporte = '';
   mesSeleccionado = '';
   diaSeleccionado = '';
+  filtroCodigo = '';
 
   cards = [
     { nombre: 'DH - Experiencias', ejecutiva: 'Guadalupe' },
@@ -111,6 +112,7 @@ export class EjecutivasComponent implements OnInit {
     this.actividadSeleccionada = '';
     this.codigoSeleccionado = '';
     this.horaReporte = '';
+    this.filtroCodigo = '';
 
     this.ejecutivasService.obtenerRegistros().subscribe(data => {
       this.registros = data;
@@ -118,19 +120,22 @@ export class EjecutivasComponent implements OnInit {
     });
   }
 
-  filtrarRegistros() {
-    this.registrosFiltrados = this.registros.filter(r => {
-      const [y, m, d] = r.fecha.split('-').map(Number);
-      const fechaObj = new Date(y, m - 1, d);
-      const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
-      const dia = fechaObj.getDate().toString().padStart(2, '0');
 
-      if (r.nombre !== this.nombreSeleccionado) return false;
-      if (this.mesSeleccionado && mes !== this.mesSeleccionado) return false;
-      if (this.diaSeleccionado && dia !== this.diaSeleccionado) return false;
-      return true;
-    });
-  }
+  // filtrarRegistros() {
+  //   this.registrosFiltrados = this.registros.filter(r => {
+  //     const [y, m, d] = r.fecha.split('-').map(Number);
+  //     const mes = (new Date(y, m - 1, d).getMonth() + 1).toString().padStart(2,'0');
+  //     const dia = new Date(y, m - 1, d).getDate().toString().padStart(2,'0');
+
+  //     if (r.nombre !== this.nombreSeleccionado) return false;
+  //     if (this.mesSeleccionado && mes !== this.mesSeleccionado) return false;
+  //     if (this.diaSeleccionado && dia !== this.diaSeleccionado) return false;
+  //     if (this.filtroCodigo && r.actRealizada !== this.filtroCodigo) return false;
+
+  //     return true;
+  //   });
+  // }
+  
 
   actualizarHora() {
     const act = this.actividades.find(a => a.nombre === this.actividadSeleccionada);
@@ -321,11 +326,11 @@ export class EjecutivasComponent implements OnInit {
 
     // 5) Tabla de totales
     autoTable(doc, {
-      head: [['Tipo', 'Cantidad', 'Prom. entregas']],
+      head: [['Tipo', 'Cantidad']],
       body: [
-        ['Reportadas (R)', tot.totalR, `${tot.puntualidad.toFixed(1)}%`],
-        ['No Reportadas (NR)', tot.totalNR, '-'],
-        ['Total Esperadas', tot.esperadas, '-']
+        ['Reportadas (R)', tot.totalR],
+        ['No Reportadas (NR)', tot.totalNR, ],
+        ['Total Esperadas', tot.esperadas, ]
       ],
       startY: y,
       margin: { left: 10, right: 10 },
@@ -336,7 +341,7 @@ export class EjecutivasComponent implements OnInit {
 
     // 6) Tabla de detalle
     autoTable(doc, {
-      head: [['Coordinación', 'Ejecutiva', 'R', 'NR', 'Esperadas', 'Puntualidad']],
+      head: [['Coordinación','Ejecutiva','R','Puntualidad','NR','Esperadas']],
       body: detalles,
       startY: y,
       margin: { left: 10, right: 10 },
@@ -363,7 +368,7 @@ export class EjecutivasComponent implements OnInit {
 
 
   // Generar PDF con grafica y tablas
-  async generarPDFConPie(totales: { totalR: number; totalNR: number; esperadas: number; puntualidad: number }) {
+  async generarPDFConPie(totales: { totalR: number; puntualidad: number; totalNR: number; esperadas: number;}) {
     if (totales.esperadas === 0) {
       Swal.fire('Error', 'No hay actividades registradas este mes', 'error');
       return;
@@ -474,5 +479,52 @@ export class EjecutivasComponent implements OnInit {
       }
     });
   }
+
+  page: number = 1;
+pageSize: number = 20;
+totalPages: number = 1;
+registrosPagina: any[] = [];
+
+nextPage() {
+  if (this.page < this.totalPages) {
+    this.page++;
+    this.actualizarRegistrosPaginados();
+  }
+}
+
+prevPage() {
+  if (this.page > 1) {
+    this.page--;
+    this.actualizarRegistrosPaginados();
+  }
+}
+
+actualizarRegistrosPaginados() {
+  const startIndex = (this.page - 1) * this.pageSize;
+  const endIndex = startIndex + this.pageSize;
+  this.registrosPagina = this.registrosFiltrados.slice(startIndex, endIndex);
+}
+
+filtrarRegistros() {
+  const filtrados = this.registros.filter(r => {
+    const [y, m, d] = r.fecha.split('-').map(Number);
+    const mes = (new Date(y, m - 1, d).getMonth() + 1).toString().padStart(2, '0');
+    const dia = new Date(y, m - 1, d).getDate().toString().padStart(2, '0');
+
+    if (r.nombre !== this.nombreSeleccionado) return false;
+    if (this.mesSeleccionado && mes !== this.mesSeleccionado) return false;
+    if (this.diaSeleccionado && dia !== this.diaSeleccionado) return false;
+    if (this.filtroCodigo && r.actRealizada !== this.filtroCodigo) return false;
+
+    return true;
+  });
+
+  this.registrosFiltrados = filtrados;
+  this.totalPages = Math.ceil(this.registrosFiltrados.length / this.pageSize);
+  this.page = 1;
+  this.actualizarRegistrosPaginados();
+}
+
+
 
 }

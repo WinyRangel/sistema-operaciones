@@ -60,7 +60,8 @@ import { DirSegProyeccionComponent } from './components/Shared/dir-seg-proyeccio
     ReporteAgendasComponent,
     ProyeccionesComponent,
     SeguimientoProyeccionesComponent,
-    DirSegProyeccionComponent
+    DirSegProyeccionComponent,
+    LegalesComponent
   ],
   
   imports: [

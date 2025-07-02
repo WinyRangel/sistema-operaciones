@@ -32,6 +32,8 @@ export class ReporteFichasComponent {
     return Object.keys(obj);
   }
 
+
+
   onFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files || []) as File[];
@@ -52,29 +54,37 @@ export class ReporteFichasComponent {
               const ws = wb.Sheets[sheetName];
               let data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
 
+              // 1) Filtrar filas con “total”, “no.”  
               data = data.filter(row =>
                 !row.some(cell =>
                   typeof cell === 'string' &&
                   (cell.toLowerCase().includes('total') || cell.toLowerCase().includes('no.'))
-                ));
+                )
+              );
 
+              // 2) Eliminar columnas 0, 3 y 4  
               const colsToRemove = [0, 3, 4];
-              data = data.map(row =>
-                row.filter((_, idx) => !colsToRemove.includes(idx))
-              );
+              data = data.map(row => row.filter((_, idx) => !colsToRemove.includes(idx)));
 
-              data = data.filter(row =>
-                !(row[0] && row[0].toString().trim() === '-')
-              );
+              // 3) Filtrar filas que empiecen con “-”  
+              data = data.filter(row => !(row[0]?.toString().trim() === '-'));
 
+              // 4) Filtrar filas totalmente vacías  
               data = data.filter(row =>
                 row.some(cell => cell !== null && cell !== undefined && cell !== '')
               );
+
+              // **Aquí validamos si la hoja quedó en blanco**:  
+              if (data.length === 0) {
+                // saltamos esta hoja
+                return;
+              }
 
               const cleanName = sheetName.trim();
               this.excelDataBySheet[cleanName] = this.excelDataBySheet[cleanName] || [];
               this.excelDataBySheet[cleanName].push(...data);
             });
+
 
             resolve();
           } catch (err) {
@@ -221,7 +231,7 @@ export class ReporteFichasComponent {
 
       autoTable(doc, {
         startY: 30,
-        head: [['Agendadas', 'Reportadas', 'No Reportadas']],
+        head: [['Agendadas', 'Cerradas reportadas', 'No Reportadas']],
         body: [[item.agendadas, item.reportadas, item.noReportadas]],
         theme: 'grid',
         styles: {
@@ -258,6 +268,8 @@ export class ReporteFichasComponent {
 
     doc.save(`reporte-${new Date().toISOString().slice(0, 10)}.pdf`);
   }
+
+  
 
   private generarGraficaPDF(item: any): Promise<HTMLCanvasElement> {
     return new Promise(resolve => {

@@ -13,6 +13,11 @@
     <!-- NAV DE COORDINACIONES SIEMPRE VISIBLE -->
     <div class="container mb-2">
       <div class="d-flex justify-content-end align-items-center gap-2 mt-3 mb-2">
+        <select class="form-select w-auto" [(ngModel)]="filtroCodigo" (change)="filtrarRegistros()">
+    <option value="">Todos</option>
+    <option value="R">Reportadas (R)</option>
+    <option value="NR">No Reportadas (NR)</option>
+  </select>
         <!-- Select del mes -->
         <select class="form-select w-auto" [(ngModel)]="mesSeleccionado" (change)="onMesChange()">
           <!-- llama a onMesChange() para regenerar días y filtrar -->
@@ -124,7 +129,9 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let registro of registrosFiltrados">
+                  <!-- <tr *ngFor="let registro of registrosFiltrados"> -->
+                  <tr *ngFor="let registro of registrosPagina">
+
                     <td class="text-center">{{ registro.fecha | date:'dd-MM-yyyy':'UTC' }}</td>
                     <td>{{ registro.actividad }}</td>
                     <td class="text-center">{{ registro.frecuencia }}</td>
@@ -151,10 +158,26 @@
               </table>
             </div>
           </div>
+          <!-- <nav aria-label="Page navigation example" class="mt-3"> -->
+            <nav *ngIf="totalPages > 1" aria-label="Page navigation example" class="mt-3">
+  <ul class="pagination justify-content-center mb-0">
+    <li class="page-item" [class.disabled]="page <= 1">
+      <a class="page-link" href="#" (click)="prevPage(); $event.preventDefault()"
+         tabindex="-1" [attr.aria-disabled]="page <= 1">Previous</a>
+    </li>
+    <!-- botones numéricos opcionales; si prefieres solo Prev/Next, omítelos -->
+    <li class="page-item" [class.active]="page===i+1" *ngFor="let _ of [].constructor(totalPages); let i = index">
+      <a class="page-link" href="#" (click)="page = i+1; $event.preventDefault()">{{ i+1 }}</a>
+    </li>
+    <li class="page-item" [class.disabled]="page >= totalPages">
+      <a class="page-link" href="#" (click)="nextPage(); $event.preventDefault()"
+         [attr.aria-disabled]="page >= totalPages">Next</a>
+    </li>
+  </ul>
+</nav>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 

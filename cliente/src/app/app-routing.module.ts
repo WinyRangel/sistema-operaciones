@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { InicioComponent } from './components/inicio/inicio.component';
 import { BauchersComponent } from './components/Shared/bauchers/bauchers.component';
-import { LegalesComponent } from './components/Shared/legales/legales.component';
 import { RecorridoAgendaComponent } from './components/Coordinadoras/recorrido-agenda/recorrido-agenda.component';
 import { EjecutivasComponent } from './components/Shared/ejecutivas/ejecutivas.component';
 import { DepositosComponent } from './components/Shared/depositos/depositos.component';
@@ -13,10 +12,10 @@ import { ReporteAgendasComponent } from './components/Coordinadoras/reporte-agen
 import { ProyeccionesComponent } from './components/Shared/proyecciones/proyecciones.component';
 import { SeguimientoProyeccionesComponent } from './components/Shared/seguimiento-proyecciones/seguimiento-proyecciones.component';
 import { DirSegProyeccionComponent } from './components/Shared/dir-seg-proyeccion/dir-seg-proyeccion.component';
+import { LegalesComponent } from './components/Shared/legales/legales.component';
 
 const routes: Routes = [
   { path: 'baucher', component: BauchersComponent },
-  { path: 'legales', component: LegalesComponent },
   { path: 'recorrido-agenda', component: RecorridoAgendaComponent },
   { path: 'reporte-agendas', component: ReporteAgendasComponent },
   { path: 'agendas', component: AgendasComponent },
@@ -28,6 +27,7 @@ const routes: Routes = [
   { path: 'proyecciones', component: ProyeccionesComponent },
   { path: 'seg-proyecciones', component: SeguimientoProyeccionesComponent },
   { path: 'dir-seg-proyeccion', component: DirSegProyeccionComponent},
+  { path: 'legales', component: LegalesComponent},
   { path: '**', component: InicioComponent }
 ];
 
