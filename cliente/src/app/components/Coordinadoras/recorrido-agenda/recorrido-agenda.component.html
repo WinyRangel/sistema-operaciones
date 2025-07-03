@@ -209,7 +209,7 @@
                         <th class="text-center" style="width: 100px;">Estado</th>
                         <th class="text-center" style="width: 100px;">Inicio</th>
                         <th class="text-center" style="width: 100px;">Cierre</th>
-                        <th class="text-center" style="width: 100px;">Agenda enviada a tiempo</th>
+                        <th class="text-center" style="width: 100px;">Agenda recibida a tiempo</th>
                         <th class="text-center" style="width: 100px;">Acciones</th>
                       </tr>
                     </thead>
@@ -655,12 +655,12 @@
                 <th class="text-center bg-light-blue text-primary">Hora</th>
                 <th class="bg-light-blue text-primary">Domicilio</th>
                 <th class="bg-light-blue text-primary">Actividad</th>
-                <th class="bg-light-blue text-primary">Código</th>
                 <th class="bg-light-blue text-primary">Actividad Reportada</th>
                 <th class="bg-light-blue text-primary">Código Reportado</th>
                 <th class="text-center bg-light-blue text-primary">Estado</th>
                 <th class="text-center bg-light-blue text-primary">Hora Inicio</th>
                 <th class="text-center bg-light-blue text-primary">Hora Cierre</th>
+                <!-- <th class="text-center bg-light-blue text-primary">Actividad Acorde a Objetivo</th> -->
                 <th class="text-center bg-light-blue text-primary">KM</th>
               </tr>
             </thead>
@@ -678,7 +678,7 @@
                 <td>
                   <input type="text" 
                          class="form-control form-control-sm border-primary" 
-                         [(ngModel)]="actividadSeleccionada.domicilio.nombre"
+                         [(ngModel)]="actividadSeleccionada.domicilio"
                          placeholder="Nombre domicilio">
                 </td>
                 
@@ -688,14 +688,6 @@
                             rows="2" 
                             [(ngModel)]="actividadSeleccionada.actividad"
                             placeholder="Descripción actividad"></textarea>
-                </td>
-                
-                <!-- Código -->
-                <td>
-                     <input type="text" 
-                         class="form-control form-control-sm border-primary" 
-                         [(ngModel)]="actividadSeleccionada.codigo"
-                         placeholder="Código seleccionada">
                 </td>
                 
                 <!-- Actividad Reportada -->
@@ -742,7 +734,7 @@
                          [(ngModel)]="actividadSeleccionada.horaCierre"
                          title="Hora de finalización">
                 </td>
-                
+
                 <!-- KM Recorridos -->
                 <td class="text-center">
                   <div class="input-group input-group-sm">

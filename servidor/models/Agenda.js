@@ -26,9 +26,8 @@ const AgendaSchema = new mongoose.Schema({
     required: false
   }, 
   domicilio: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Domicilio',
-        required: false
+    type: String,
+    required: false
 
   },
   actividad: {
@@ -69,6 +68,10 @@ const AgendaSchema = new mongoose.Schema({
     default: 0
   },
   cumplimientoAgenda: { 
+    type: Boolean,
+    required: false
+  },
+ acordeObjetivo: { 
     type: Boolean,
     required: false
   }

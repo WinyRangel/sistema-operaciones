@@ -52,33 +52,6 @@ export class AgendasComponent {
     return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
   }
 
-  // En tu componente
-statsExpanded = true;
-isLoading = true;
-visibleColumns = {
-  codigo: true,
-  actividadReportada: true,
-  horaReporte: true,
-  horaCierre: true
-};
-
-// Método para alternar visibilidad de estadísticas
-toggleStats(): void {
-  this.statsExpanded = !this.statsExpanded;
-}
-
-// Método para verificar visibilidad de columna
-showColumn(column: string): boolean {
-  return this.visibleColumns[column as keyof typeof this.visibleColumns];
-}
-
-// Método para alternar visibilidad de columnas
-toggleColumnVisibility(): void {
-  // Implementar lógica para mostrar modal o menú de personalización
-  // Esto podría abrir un modal con checkboxes para cada columna
-}
-
-
 
   ngOnInit(): void {
     this.loadCoordinaciones();

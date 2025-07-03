@@ -120,11 +120,8 @@
                           <!-- Domicilio -->
                           <div class="col-md-9">
                             <label class="form-label">Domicilio</label>
-                            <input type="text" class="form-control" list="listaDomicilios" 
-                                  formControlName="domicilio" placeholder="Ingrese dirección">
-                            <datalist id="listaDomicilios">
-                              <option *ngFor="let d of domicilios" [value]="d"></option>
-                            </datalist>
+                            <input type="text" class="form-control" formControlName="domicilio"
+                                placeholder="Domicilio donde se realizará la actividad">
                           </div>
                           
                           <!-- Actividad -->
@@ -133,7 +130,16 @@
                             <input type="text" class="form-control" formControlName="actividad" 
                                   placeholder="Descripción de la actividad">
                           </div>
-                          
+                          <!-- Check actividad orientada a objetivo -->
+                          <!-- <div class="col-md-6">
+                            <label class="form-label">¿Actividad acorde al objetivo?</label>
+                           <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="acordeObjetivo" id="acordeObjetivo" formControlName="acordeObjetivo">
+                            <label class="form-check-label text-body-secondary" for="checkDefault">
+                               Marcar casilla solo si la actividad es acorde al objetivo semanal
+                            </label>
+                          </div>
+                          </div> -->
                           <!-- Código -->
                           <select class="form-select" formControlName="codigo">
                             <option disabled selected value="">Seleccione código</option>
