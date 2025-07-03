@@ -45,7 +45,8 @@ const Agenda = require ('../models/Agenda');
         horaCierre: 1,
         kmRecorrido: 1,
         cumplimientoAgenda: 1,
-        domicilio: 1
+        domicilio: 1,
+        acordeObjetivo: 1
       };
 
       const [agendas, total] = await Promise.all([

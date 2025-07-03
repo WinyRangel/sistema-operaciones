@@ -127,19 +127,22 @@
                           <!-- Actividad -->
                           <div class="col-md-6">
                             <label class="form-label">Actividad</label>
-                            <input type="text" class="form-control" formControlName="actividad" 
-                                  placeholder="Descripción de la actividad">
+                            <textarea type="text" class="form-control" formControlName="actividad" 
+                                  placeholder="Descripción de la actividad"></textarea>
                           </div>
                           <!-- Check actividad orientada a objetivo -->
-                          <!-- <div class="col-md-6">
-                            <label class="form-label">¿Actividad acorde al objetivo?</label>
-                           <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="acordeObjetivo" id="acordeObjetivo" formControlName="acordeObjetivo">
-                            <label class="form-check-label text-body-secondary" for="checkDefault">
-                               Marcar casilla solo si la actividad es acorde al objetivo semanal
-                            </label>
+                          <div class="col-md-6 shadow-sm p-3 mb-5 bg-body-tertiary rounded">
+                          <label class="form-label">Actividad acorde al objetivo semanal</label>
+
+                            <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="switchAgenda" formControlName="acordeObjetivo">
+                            <label class="form-check-label text-body-secondary" for="checkChecked">
+                                Marcar casilla si la actividad es para cumplimiento del objetivo semanal
+                              </label>
                           </div>
-                          </div> -->
+                          </div>
+
+
                           <!-- Código -->
                           <select class="form-select" formControlName="codigo">
                             <option disabled selected value="">Seleccione código</option>

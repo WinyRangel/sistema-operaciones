@@ -269,7 +269,9 @@ export class RecorridoAgendaComponent implements OnInit {
       reportado: agenda.reportado,
       horaReporte: agenda.horaReporte,
       horaCierre: agenda.horaCierre,
+      acordeObjetivo: agenda.acordeObjetivo,
       kmRecorrido: agenda.kmRecorrido
+
     }).subscribe({
       next: () => this.showToast('success', 'Cambios guardados correctamente'),
       error: (error) => {

@@ -17,6 +17,7 @@ export interface Agenda {
     traslado?: string;
     kmRecorrido?: number;
     cumplimientoAgenda?: boolean;
+    acordeObjetivo?: boolean;
   }
   
 
