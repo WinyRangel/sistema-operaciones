@@ -1,105 +1,234 @@
-h5 { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
-    font-size: 20px; 
-    font-style: normal; 
-    font-variant: normal; 
-    font-weight: 700; 
-    line-height: 26.4px; 
-} 
+        :root {
+          --sidebar-expanded: 250px;
+          --sidebar-collapsed: 70px;
+          --primary-color: #4e73df;
+          --secondary-color: #858796;
+          --light-bg: #f8f9fc;
+          --dark-bg: #3a3b45;
+        }
 
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background-color: #f5f6fa;
+          overflow-x: hidden;
+          padding-top: 20px;
+        }
 
-h4 { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
-    font-size: 21px; 
-    font-style: normal; 
-    font-variant: normal; 
-    font-weight: 700; 
-    line-height: 26.4px; 
-} 
+        /* Sidebar Styles - Corrección completa */
+        .sidebar-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100vh;
+          z-index: 1000;
+          transition: all 0.3s ease;
+        }
 
-h3 { font-family: "Century Gothic"; 
-    font-size: 20px; 
-    font-style: normal; 
-    font-variant: normal; 
-    font-weight: 400; 
-    line-height: 11px; 
-} 
+        .sidebar {
+          background: linear-gradient(180deg, var(--primary-color) 0%, #2a48a3 100%);
+          color: white;
+          height: 100%;
+          overflow-x: hidden;
+          box-shadow: 3px 0 15px rgba(0, 0, 0, 0.1);
+          display: flex;
+          flex-direction: column;
+        }
 
-select{
-    font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
-    font-size: 16px; 
-    font-style: normal; 
-    font-variant: normal; 
-    font-weight: 400; 
-    line-height: 18.7px; 
-}
+        .sidebar.expanded {
+          width: var(--sidebar-expanded);
+        }
 
-.form-label{
-    font-family: Century Gothic,CenturyGothic,AppleGothic,sans-serif; 
-}
+        .sidebar.collapsed {
+          width: var(--sidebar-collapsed);
+        }
 
-.form-select{
-    font-family: Century Gothic,CenturyGothic,AppleGothic,sans-serif; 
-}
+        .toggle-btn {
+          padding: 20px 15px;
+          text-align: right;
+          cursor: pointer;
+          color: white;
+          font-size: 1.2rem;
+          background-color: rgba(0, 0, 0, 0.1);
+          transition: background-color 0.2s;
+        }
 
-th { 
-    font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
-    font-size: 16px; 
-    font-style: normal; 
-    font-variant: normal; 
-    font-weight: 700; 
-    line-height: 22.4px;
-}
+        .toggle-btn:hover {
+          background-color: rgba(0, 0, 0, 0.2);
+        }
 
-td { font-family: "Century Gothic"; 
-    font-size: 16px; 
-    font-style: normal; 
-    font-variant: normal; 
-    font-weight: 400; 
-    line-height: 18.7px; 
-}
+        .nav {
+          padding-top: 10px;
+          flex-grow: 1;
+        }
 
-p {
-    font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
-    font-size: 18px; 
-    font-style: normal; 
-    font-variant: normal; 
-    font-weight: 400; 
-    line-height: 18.7px; 
-}
+        .nav-item {
+          margin: 5px 10px;
+          border-radius: 5px;
+          overflow: hidden;
+        }
 
-/* Aplica layout fijo y que ocupe todo el contenedor */
-.fixed-table {
-  width: 100%;
-  table-layout: fixed; /* Fija las columnas según colgroup o CSS */
-}
+        .nav-link {
+          color: rgba(255, 255, 255, 0.85);
+          padding: 12px 15px;
+          display: flex;
+          align-items: center;
+          transition: all 0.2s;
+          border-left: 3px solid transparent;
+        }
 
-/* Permite que el texto se ajuste verticalmente */
-.cell-wrap {
-  white-space: normal !important;      /* Quita nowrap */
-  overflow-wrap: break-word;           /* Divide palabras largas */
-  vertical-align: top;                 /* Alinea la celda arriba */
-}
+        .nav-link:hover,
+        .nav-link.active {
+          color: white;
+          background-color: rgba(255, 255, 255, 0.1);
+          border-left: 3px solid white;
+        }
 
-/* src/app/components/cumplimiento-agenda/cumplimiento-agenda.component.css */
+        .nav-link i {
+          font-size: 1.2rem;
+          min-width: 25px;
+          text-align: center;
+        }
 
-/* Estilos básicos; ajústalos a tu paleta o framework */
-table {
-  border: 1px solid #d1d5db; /* gris claro */
-}
-th, td {
-  padding: 0.5rem 1rem;
-}
-th {
-  background-color: #f3f4f6; /* gris muy claro */
-  font-weight: 600;
-}
+        .nav-link span {
+          margin-left: 10px;
+          transition: opacity 0.3s;
+          white-space: nowrap;
+        }
 
+        .sidebar.collapsed .nav-link span {
+          opacity: 0;
+          display: none;
+        }
 
-/* Opcional: si no usas colgroup, puedes asignar anchos por columna */
-.fixed-table th:nth-child(1),
-.fixed-table td:nth-child(1) { width: 10%; }
-.fixed-table th:nth-child(2),
-.fixed-table td:nth-child(2) { width: 30%; }
-.fixed-table th:nth-child(3),
-.fixed-table td:nth-child(3) { width: 45; }
-.fixed-table th:nth-child(4),
-.fixed-table td:nth-child(4) { width: 15%; }
+        .logout-container {
+          padding: 10px;
+          margin-top: auto;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Content Area - Corrección para evitar superposición */
+        .content-area {
+          transition: all 0.3s ease;
+          min-height: 100vh;
+          padding: 20px;
+        }
+
+        .expanded~.content-area {
+          margin-left: var(--sidebar-expanded);
+        }
+
+        .collapsed~.content-area {
+          margin-left: var(--sidebar-collapsed);
+        }
+
+        /* Card Styles */
+        .dashboard-card {
+          background: white;
+          border-radius: 10px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+          padding: 20px;
+          height: 100%;
+          transition: transform 0.3s;
+          border: none;
+        }
+
+        .dashboard-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-card h3 {
+          color: var(--primary-color);
+          font-size: 1.1rem;
+          margin-bottom: 15px;
+          font-weight: 600;
+          border-bottom: 1px solid #eee;
+          padding-bottom: 10px;
+        }
+
+        .metric-value {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #2e3a59;
+        }
+
+        .metric-label {
+          color: var(--secondary-color);
+          font-size: 0.9rem;
+          margin-top: 5px;
+        }
+
+        /* Table Styles */
+        .custom-table {
+          width: 100%;
+          margin-top: 15px;
+          border-collapse: separate;
+          border-spacing: 0;
+        }
+
+        .custom-table thead {
+          background-color: #f0f3f8;
+        }
+
+        .custom-table th {
+          padding: 12px 15px;
+          text-align: left;
+          font-weight: 600;
+          color: #4a4a4a;
+          font-size: 0.85rem;
+        }
+
+        .custom-table td {
+          padding: 12px 15px;
+          border-top: 1px solid #eaecf4;
+          color: #5a5c69;
+          font-size: 0.9rem;
+        }
+
+        .custom-table tbody tr:hover {
+          background-color: #f8f9fc;
+        }
+
+        .progress-container {
+          margin-top: 20px;
+          background: #eaecf4;
+          border-radius: 20px;
+          height: 8px;
+        }
+
+        .progress-bar {
+          background: var(--primary-color);
+          border-radius: 20px;
+          height: 100%;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+          .sidebar-container {
+            z-index: 2000;
+          }
+
+          .sidebar.expanded {
+            width: 80%;
+          }
+
+          .expanded~.content-area {
+            margin-left: 0;
+            position: relative;
+          }
+
+          .sidebar.expanded~.content-area::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1500;
+          }
+
+          .metric-container {
+            margin-bottom: 20px;
+          }
+        }

@@ -29,7 +29,6 @@ import { ReporteFichasComponent } from './components/reporte-fichas/reporte-fich
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TagModule } from 'primeng/tag';
 import { FechaFormatPipe } from './pipes/fecha-format.pipe';
-import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-agenda/cumplimiento-agenda.component';
 import { AgendasComponent } from './components/Coordinadoras/agendas/agendas.component';
 import { ReporteAgendasComponent } from './components/Coordinadoras/reporte-agendas/reporte-agendas.component';
  
@@ -38,6 +37,7 @@ import { IniciarSesionComponent } from './components/Shared/iniciar-sesion/inici
 import { ProyeccionesComponent } from './components/Shared/proyecciones/proyecciones.component';
 import { SeguimientoProyeccionesComponent } from './components/Shared/seguimiento-proyecciones/seguimiento-proyecciones.component';
 import { DirSegProyeccionComponent } from './components/Shared/dir-seg-proyeccion/dir-seg-proyeccion.component';
+import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-agenda/cumplimiento-agenda.component';
 
 
 @NgModule({
@@ -54,14 +54,14 @@ import { DirSegProyeccionComponent } from './components/Shared/dir-seg-proyeccio
     DepositosComponent,
     ReporteFichasComponent,
     FechaFormatPipe,
-    CumplimientoAgendaComponent,
     AgendasComponent,
     ReporteAgendasComponent,
     ProyeccionesComponent,
     SeguimientoProyeccionesComponent,
     DirSegProyeccionComponent,
     LegalesComponent,
-    IniciarSesionComponent
+    IniciarSesionComponent,
+    CumplimientoAgendaComponent
   ],
   
   imports: [
