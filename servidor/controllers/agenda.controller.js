@@ -1,27 +1,32 @@
 const Agenda = require ('../models/Agenda');
 
 
-  const registrarAgenda = async (req, res) => {
-    try {
-      const { ...datosAgenda } = req.body;
+ const registrarAgenda = async (req, res) => {
+  try {
+    const datosAgenda = req.body;
 
-
-      const nuevaAgenda = new Agenda({
-        ...datosAgenda
-      });
-
-      const agendaGuardada = await nuevaAgenda.save();
-
-      res.status(201).json({
-        mensaje: 'Agenda registrada correctamente',
-        agenda: agendaGuardada,
-      });
-
-    } catch (error) {
-      console.error('Error al crear agenda y domicilio:', error);
-      res.status(500).json({ mensaje: 'Hubo un error al crear la agenda y domicilio' });
+    // Validación básica (puedes expandir esto según tu modelo)
+    if (!datosAgenda || Object.keys(datosAgenda).length === 0) {
+      return res.status(400).json({ mensaje: 'Los datos de agenda son requeridos' });
     }
-  };
+
+    const nuevaAgenda = new Agenda(datosAgenda);
+    const agendaGuardada = await nuevaAgenda.save();
+
+    res.status(201).json({
+      mensaje: 'Agenda registrada correctamente',
+      agenda: agendaGuardada,
+    });
+
+  } catch (error) {
+    console.error('Error al registrar agenda:', error);
+    res.status(500).json({
+      mensaje: 'Hubo un error al registrar la agenda',
+      error: error.message,
+    });
+  }
+};
+
 
   // Controlador para obtener todas las agendas
   const obtenerAgendas1 = async (req, res) => {
