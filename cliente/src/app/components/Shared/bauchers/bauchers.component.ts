@@ -367,6 +367,55 @@ exportarExcel(): void {
   FileSaver.saveAs(blob, 'bauchers_condicional.xlsx');
 }
 
+  generarReporte() {
+    const conteoCoordinaciones: { [key: string]: number } = {};
+    const conteoPersonas: { [key: string]: number } = {};
+
+    this.listarBauchers.forEach((baucher) => {
+      const coordinacion = baucher.coordinacion?.municipio || 'Desconocido';
+      const persona = baucher.ejecutiva || baucher.coordinador || 'Desconocido';
+
+      // Contar por coordinación
+      if (!conteoCoordinaciones[coordinacion]) {
+        conteoCoordinaciones[coordinacion] = 0;
+      }
+      conteoCoordinaciones[coordinacion]++;
+
+      // Contar por persona
+      if (!conteoPersonas[persona]) {
+        conteoPersonas[persona] = 0;
+      }
+      conteoPersonas[persona]++;
+    });
+
+    // Convertir a arrays y ordenar de mayor a menor
+    const topCoordinaciones = Object.entries(conteoCoordinaciones)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    const topPersonas = Object.entries(conteoPersonas)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    // Construir mensaje para mostrar
+    const mensaje = `
+      <strong>📊 Top Coordinaciones que más envían vouchers:</strong><br>
+      ${topCoordinaciones.map(([coord, count]) => `• ${coord}: ${count} vouchers`).join('<br>')}<br><br>
+      <strong>👤 Personas que más reportan:</strong><br>
+      ${topPersonas.map(([persona, count]) => `• ${persona}: ${count} vouchers`).join('<br>')}
+    `;
+
+    // Mostrar con SweetAlert
+    Swal.fire({
+      title: 'Reporte de Envíos',
+      html: mensaje,
+      icon: 'info',
+      confirmButtonText: 'Cerrar',
+      customClass: {
+        htmlContainer: 'text-start'
+      }
+    });
+  }
 
 
   formatearFecha(fecha: string | Date): string {
