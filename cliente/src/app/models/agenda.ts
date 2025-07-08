@@ -2,7 +2,7 @@ export interface Agenda {
     _id?: string;
     semana: string;
     coordinador: string;
-    fecha?: Date;
+    fecha?: string;
     objetivo?: string;
     meta?: string;
     hora: string;

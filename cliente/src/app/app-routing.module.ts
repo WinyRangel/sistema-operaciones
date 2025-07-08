@@ -15,13 +15,15 @@ import { DirSegProyeccionComponent } from './components/Shared/dir-seg-proyeccio
 import { LegalesComponent } from './components/Shared/legales/legales.component';
 import { IniciarSesionComponent } from './components/Shared/iniciar-sesion/iniciar-sesion.component';
 import { AuthGuard } from './guards/auth.guard';
+import { SubirAgendaComponent } from './components/Coordinadoras/subir-agenda/subir-agenda.component';
 
 const routes: Routes = [
   { path: 'baucher', component: BauchersComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'legales', component: LegalesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'recorrido-agenda', component: RecorridoAgendaComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'reporte-agendas', component: ReporteAgendasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
-  { path: 'agendas', component: AgendasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'registrar-agendas', component: AgendasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'subir-agendas', component: SubirAgendaComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'iniciar-sesion', component: IniciarSesionComponent},
   { path: 'ejecutivas', component: EjecutivasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'depositos', component: DepositosComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
