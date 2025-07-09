@@ -33,7 +33,7 @@ const routes: Routes = [
   { path: 'proyecciones', component: ProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'seg-proyecciones', component: SeguimientoProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']}  },
   { path: 'dir-seg-proyeccion', component: DirSegProyeccionComponent, canActivate: [AuthGuard], data: { roles: ['admin']}},
-  { path: '**', redirectTo: 'iniciar-sesion' }
+  { path: '**', redirectTo: 'inicio' }
 ];
 
 

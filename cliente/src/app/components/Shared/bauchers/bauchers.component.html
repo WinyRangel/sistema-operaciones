@@ -111,7 +111,7 @@
                       <label class="form-label fw-semibold">Observaciones</label>
                       <div class="input-group">
                         <span class="input-group-text bg-light"><i class="fas fa-notes-medical text-primary"></i></span>
-                        <textarea class="form-control" formControlName="observaciones" placeholder="Ej: Voucher ilegible" rows="2"></textarea>
+                        <textarea class="form-control" formControlName="titular" placeholder="Ej: Voucher ilegible" rows="2"></textarea>
                       </div>
                     </div>
                   </div>
@@ -194,7 +194,7 @@
 
         <!-- Botón exportar -->
         <div class="col-md-auto">
-                    <button class="btn btn-outline-primary shadow-sm me-2"
+          <button class="btn btn-outline-primary shadow-sm me-2"
           title="Generar reporte"
           (click)="generarReporte()">
               <i class="bi bi-bar-chart"></i> Reporte
@@ -229,7 +229,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let baucher of paginatedBauchers">
-            <td class="text-center">{{ baucher.coordinacion.municipio }}</td>
+            <td class="text-center">{{ baucher.coordinacion.nombre }}</td>
             <td class="text-center">{{ baucher.ejecutiva || baucher.coordinador }}</td>
             <td class="text-center">{{ baucher.fechaBaucher | date: 'dd-MM-yy' }}</td>
             <td class="text-center">{{ baucher.fechaBaucher | date: 'HH:mm' }}</td>
@@ -249,10 +249,13 @@
             <td class="text-center">{{ baucher.titular }}</td>
             <td class="text-center">
               <div class="d-flex justify-content-center gap-2">
-                <button class="btn btn-sm btn-outline-primary rounded-circle" 
-                  (click)="cargarBaucherParaEditar(baucher)" title="Editar">
-                  <i class="fas fa-edit"></i>
-                </button>
+                  <button class="btn btn-sm btn-outline-primary rounded-circle"
+                    (click)="cargarBaucherParaEditar(baucher)"
+                    data-bs-toggle="modal"
+                    data-bs-target="#staticBackdrop"
+                    title="Editar">
+                    <i class="fas fa-edit"></i>
+                  </button>
                 <button class="btn btn-sm btn-outline-danger rounded-circle" 
                   (click)="eliminarBaucher(baucher._id)" title="Eliminar">
                   <i class="fas fa-trash-alt"></i>
@@ -262,7 +265,11 @@
           </tr>
         </tbody>
       </table>
-
+      
+        <h6 class="fw-bold-2 text-end">
+          📄 Vouchers totales registrados:
+          <span class="badge bg-primary">{{vouchersTotales}}</span>
+        </h6>
       <!-- Paginación -->
       <div class="p-3 border-top" *ngIf="totalPages > 1">
         <nav aria-label="Paginación de vouchers">
@@ -289,4 +296,58 @@
   </div>
 </div>
 
-
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Editar </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="formGroupExampleInput" class="form-label">Coordinacion</label>
+          <select class="form-select" id="coordinacion" formControlName="coordinacion" (change)="filtrarPersonas()">
+            <option disabled selected value="">Seleccionar coordinación</option>
+            <option *ngFor="let coord of coordinaciones" [ngValue]="coord">
+              {{ coord.municipio }} - {{ coord.nombre }}
+            </option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="formGroupExampleInput2" class="form-label">Asesor/Coordinador/Ejecutiva</label>
+          <select class="form-select" id="ejecutiva" formControlName="ejecutiva">
+            <option disabled selected value="">Seleccionar persona</option>
+            <option *ngFor="let persona of personasFiltradas" [ngValue]="persona">
+              {{ persona.nombre }}
+            </option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="formGroupExampleInput2" class="form-label">Fecha y hora de pago</label>
+          <input type="datetime" class="form-control" id="formGroupExampleInput2" placeholder="Another input placeholder">
+        </div>
+        <div class="mb-3">
+          <label for="formGroupExampleInput2" class="form-label">Fecha y hora reportada</label>
+          <input type="datetime" class="form-control" id="formGroupExampleInput2" placeholder="Another input placeholder">
+        </div>
+          <div class="mb-3">
+          <label for="formGroupExampleInput2" class="form-label">Grupo</label>
+          <input type="text" class="form-control" id="formGroupExampleInput2" placeholder="Another input placeholder">
+        </div>
+        <div class="mb-3">
+          <label for="formGroupExampleInput2" class="form-label">Concepto</label>
+          <input type="text" class="form-control" id="formGroupExampleInput2" placeholder="Another input placeholder">
+        </div>
+        <div class="mb-3">
+          <label for="formGroupExampleInput2" class="form-label">Observaciones</label>
+          <textarea type="text" class="form-control" id="formGroupExampleInput2" placeholder="Another input placeholder"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Understood</button>
+      </div>
+    </div>
+  </div>
+</div>

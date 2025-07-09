@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { BaucherPipe } from '../../../pipes/baucher.pipe';
+import { Chart } from 'chart.js';
 
 
 @Component({
@@ -31,7 +32,7 @@ export class BauchersComponent implements OnInit{
   personasFiltradas: Persona[] = [];
   fechaFiltro: string = ''; // formato 'YYYY-MM-DD'
   bauchersTemporales: Baucher[] = [];
-
+  voucherSeleccionado: string = '';
 
   currentPage: number = 1;
   itemsPerPage: number = 25; // número de bauchers por página
@@ -135,27 +136,20 @@ export class BauchersComponent implements OnInit{
   }
     // Modifica el método cargarBaucher
   cargarBaucherParaEditar(baucher: any) {
-    this.isEditing = true;
-    this.editingBaucherId = baucher._id;
-    
-    const coordinacionCompleta = this.coordinaciones.find(
-      c => c._id === baucher.coordinacion
-    );
-    
-    const persona = this.personasFiltradas.find(
-      p => p.nombre === (baucher.ejecutiva || baucher.coordinador)
-    );
+    this.voucherSeleccionado = baucher;
 
+    // Establece valores en el formulario reactivo
     this.baucherForm.patchValue({
       coordinacion: baucher.coordinacion,
-      ejecutiva: baucher.ejecutiva,
-      fechaBaucher: this.formatDateForInput(baucher.fechaBaucher),
-      fechaReporte: this.formatDateForInput(baucher.fechaReporte),
+      ejecutiva: baucher.ejecutiva || baucher.coordinador,
+      fechaPago: baucher.fechaBaucher,
+      fechaReporte: baucher.fechaReporte,
       grupo: baucher.grupo,
       concepto: baucher.concepto,
-      titular: baucher.titular
+      observaciones: baucher.observaciones || ''
     });
-    
+
+    // Si usas filtrado de personas
     this.filtrarPersonas();
   }
 
@@ -193,6 +187,8 @@ export class BauchersComponent implements OnInit{
 
 
         this.resetForm();
+        this.vouchers.clear();
+        this.vouchers.push(this.crearVouchers())
         this.obtenerBauchers();
       } catch (error) {
         this.mostrarError();
@@ -308,7 +304,7 @@ exportarExcel(): void {
   ];
 
   const body = this.filteredBauchers.map(b => ([
-    b.coordinacion?.municipio,
+    b.coordinacion?.nombre,
     b.ejecutiva || b.coordinador,
     this.formatearFecha(b.fechaBaucher),
     this.formatearHora(b.fechaBaucher),
@@ -368,55 +364,12 @@ exportarExcel(): void {
 }
 
   generarReporte() {
-    const conteoCoordinaciones: { [key: string]: number } = {};
-    const conteoPersonas: { [key: string]: number } = {};
-
-    this.listarBauchers.forEach((baucher) => {
-      const coordinacion = baucher.coordinacion?.municipio || 'Desconocido';
-      const persona = baucher.ejecutiva || baucher.coordinador || 'Desconocido';
-
-      // Contar por coordinación
-      if (!conteoCoordinaciones[coordinacion]) {
-        conteoCoordinaciones[coordinacion] = 0;
-      }
-      conteoCoordinaciones[coordinacion]++;
-
-      // Contar por persona
-      if (!conteoPersonas[persona]) {
-        conteoPersonas[persona] = 0;
-      }
-      conteoPersonas[persona]++;
-    });
-
-    // Convertir a arrays y ordenar de mayor a menor
-    const topCoordinaciones = Object.entries(conteoCoordinaciones)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-    const topPersonas = Object.entries(conteoPersonas)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-    // Construir mensaje para mostrar
-    const mensaje = `
-      <strong>📊 Top Coordinaciones que más envían vouchers:</strong><br>
-      ${topCoordinaciones.map(([coord, count]) => `• ${coord}: ${count} vouchers`).join('<br>')}<br><br>
-      <strong>👤 Personas que más reportan:</strong><br>
-      ${topPersonas.map(([persona, count]) => `• ${persona}: ${count} vouchers`).join('<br>')}
-    `;
-
-    // Mostrar con SweetAlert
-    Swal.fire({
-      title: 'Reporte de Envíos',
-      html: mensaje,
-      icon: 'info',
-      confirmButtonText: 'Cerrar',
-      customClass: {
-        htmlContainer: 'text-start'
-      }
-    });
+    
   }
 
+  get vouchersTotales(): number {
+    return this.listarBauchers.filter(a => a.coordinacion).length;
+  }
 
   formatearFecha(fecha: string | Date): string {
     const f = new Date(fecha);

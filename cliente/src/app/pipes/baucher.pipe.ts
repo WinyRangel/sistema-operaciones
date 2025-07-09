@@ -12,7 +12,7 @@ export class BaucherPipe implements PipeTransform {
 
     return value.filter(rbaucher =>
       [
-        rbaucher.coordinacion?.municipio,
+        rbaucher.coordinacion?.nombre,
         rbaucher.ejecutiva,
         rbaucher.coordinador,
         rbaucher.fechaBaucher,
