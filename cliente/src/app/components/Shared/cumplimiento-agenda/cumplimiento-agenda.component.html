@@ -1,215 +1,598 @@
-
 <body>
     <div class="container-fluid p-0">
-        <!-- Sidebar Container -->
-        <div class="sidebar-container expanded" id="sidebarContainer">
-            <div class="sidebar expanded" id="sidebar">
-                <div class="toggle-btn" id="toggleBtn">
-                    <i class="fas fa-times"></i>
-                </div>
-                
-                <!-- Menú -->
-                <!-- <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">
-                            <i class="fas fa-home"></i>
-                            <span>Home</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-envelope"></i>
-                            <span>Messages</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-cog"></i>
-                            <span>Settings</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Reports</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-users"></i>
-                            <span>Team</span>
-                        </a>
-                    </li>
-                </ul> -->
-                
-                <!-- Logout -->
-                <div class="logout-container">
-                    <a class="nav-link" href="#">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-        
         <!-- CONTENIDO PRINCIPAL -->
         <div class="content-area">
             <div class="row mb-4">
                 <div class="col-md-12">
-                    <h1 class="mb-0">Dashboard de Gestión</h1>
-                    <p class="text-muted">Seguimiento de objetivos semanales</p>
+                    <h1 class="mb-0">Seguimiento de objetivos semanales</h1>
                 </div>
             </div>
-            
+
+            <div>
+                <ul class="nav justify-content-center">
+                    <li *ngFor="let coord of coordinadores" class="nav-item">
+                        <button class="btn btn-outline-primary m-1" [class.active]="coord === coordinadorSeleccionado"
+                            (click)="seleccionarCoordinador(coord)">
+                            <i class="fas fa-user"></i>
+                            <span *ngIf="isExpanded">{{ coord }}</span>
+                        </button>
+                    </li>
+                </ul>
+
+            </div>
+
             <!-- Selector de semana -->
-            <div class="row mb-4">
+            <div class="row align-items-end mb-3">
+                <!-- Selector individual a la izquierda -->
                 <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Selecciona la semana:</label>
-                        <select class="form-select">
-                            <option>SEMANA 1 (1-7 Julio)</option>
-                            <option>SEMANA 2 (8-14 Julio)</option>
-                            <option selected>SEMANA 3 (15-21 Julio)</option>
-                            <option>SEMANA 4 (22-28 Julio)</option>
-                        </select>
+                    <label>Selecciona una semana:</label>
+                    <select name="semana" class="form-select" [(ngModel)]="semanaSeleccionada"
+                        (ngModelChange)="seleccionarSemana($event)">
+                        <option value="" disabled>-- Elige una semana --</option>
+                        <option *ngFor="let s of semanas" [value]="s">{{ s }}</option>
+                    </select>
+                </div>
+
+                <!-- Selector múltiple a la derecha -->
+                <div class="col-md-6 text-end">
+                    <label>Selecciona hasta 5 semanas:</label>
+                    <select class="form-select" multiple [(ngModel)]="semanasSeleccionadasParaReporte">
+                        <option *ngFor="let s of semanas" [value]="s">{{ s }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Botón centrado debajo -->
+            <div class="text-end mb-4">
+                <button class="btn btn-success" (click)="generarReportePDF()">
+                    Descargar reporte PDF
+                </button>
+            </div>
+
+
+            <!-- CONTENEDOR IZQUIERDO: OBJETIVO -->
+            <div class="container-fluid">
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-bullseye me-2"></i> Objetivo</h3>
+                    <div class="mb-4">
+                        <p class="mb-1 fw-bold fs-5">{{ objetivoSeleccionado }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="metric-value">{{ porcentajeCumplimientoObjetivo }}%</span>
+                        </div>
+                        <div class="metric-label">Actividades para lograr el objetivo</div>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-bar" [ngStyle]="{
+        width: porcentajeCumplimientoObjetivo + '%',
+        background: colorBarraCumplimiento
+      }"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <small>0%</small>
+                        <small>100%</small>
+                    </div>
+
+                    <div class="mt-4 table-responsive">
+                        <table class="table custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Actividad</th>
+                                    <th>Actividad Reportada</th>
+                                    <th>Código Reportado</th>
+                                    <th>Cumplimiento Agenda</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let act of actividadesObjetivo">
+                                    <td>{{ act.codigo }}</td>
+                                    <td>{{ act.actividad }}</td>
+                                    <td>{{ act.actividadReportada }}</td>
+                                    <td>{{ act.codigoReportado }}</td>
+                                    <td>
+                                        <i class="fas" [ngClass]="{
+                'fa-check-circle text-success': act.cumplimientoAgenda,
+                'fa-times-circle text-danger': !act.cumplimientoAgenda
+              }"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-            
-            <!-- Objetivo y Meta -->
-            <div class="row g-4">
-                <!-- CONTENEDOR IZQUIERDO: OBJETIVO -->
-                <div class="col-md-6">
+            <br>
+
+            <!-- CONTENEDOR DERECHO: META -->
+            <div class="container-fluid">
+                <div class="">
                     <div class="dashboard-card">
-                        <h3><i class="fas fa-bullseye me-2"></i> Objetivo</h3>
+                        <h3><i class="fas fa-flag-checkered me-2"></i>Meta</h3>
                         <div class="mb-4">
-                            <p class="mb-1 fw-bold">Reducir Mora</p>
+                            <p class="mb-1 fw-bold">{{ metaSeleccionada }}</p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="metric-value">7.8%</span>
-                                <span class="badge bg-success">En progreso</span>
+                                <span class="metric-value">10%</span>
+                                <span class="badge bg-info">En rogreso</span>
                             </div>
-                            <div class="metric-label">Porcentaje de mora actual</div>
+                            <div class="metric-label">Meta a alcanzar esta semana</div>
                         </div>
-                        
+
                         <div class="progress-container">
-                            <div class="progress-bar" style="width: 78%"></div>
+                            <div class="progress-bar" style="width: 78%; background: #5ad7eb;"></div>
                         </div>
                         <div class="d-flex justify-content-between mt-2">
                             <small>0%</small>
-                            <small>Meta: 10%</small>
                             <small>100%</small>
                         </div>
-                        
-                        <div class="mt-4">
-                            <table class="custom-table">
-                                <thead>
-                                    <tr>
-                                        <th>Código</th>
-                                        <th>Actividad</th>
-                                        <th>Reporte</th>
-                                        <th>Cumplido</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>M001</td>
-                                        <td>Seguimiento clientes</td>
-                                        <td>98%</td>
-                                        <td><i class="fas fa-check-circle text-success"></i></td>
-                                    </tr>
-                                    <tr>
-                                        <td>M002</td>
-                                        <td>Actualización de datos</td>
-                                        <td>75%</td>
-                                        <td><i class="fas fa-sync-alt text-warning"></i></td>
-                                    </tr>
-                                    <tr>
-                                        <td>M003</td>
-                                        <td>Revisión de cartera</td>
-                                        <td>60%</td>
-                                        <td><i class="fas fa-sync-alt text-warning"></i></td>
-                                    </tr>
-                                    <tr>
-                                        <td>M004</td>
-                                        <td>Contacto morosos</td>
-                                        <td>45%</td>
-                                        <td><i class="fas fa-exclamation-circle text-danger"></i></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <br>
+                        <div class="d-flex align-items-center">
+                            <!-- Grupo de controles a la izquierda -->
+                            <div class="d-flex align-items-center">
+                                <select class="form-select me-2" style="width: auto;">
+                                    <option *ngIf="semanaSeleccionada">{{ semanaSeleccionada }}</option>
+                                </select>
+                                <button class="btn btn-outline-secondary me-1"
+                                    (click)="mostrarFormulario('mora')">Mora</button>
+                                <button class="btn btn-outline-secondary me-1"
+                                    (click)="mostrarFormulario('fichas')">Fichas</button>
+                                <button class="btn btn-outline-secondary me-1"
+                                    (click)="mostrarFormulario('creditos')">GPO/IND Nuevos</button>
+                                <button class="btn btn-outline-secondary me-1"
+                                    (click)="mostrarFormulario('renovacion')">Renovaciones</button>
+                                <button class="btn btn-primary me-1" (click)="guardarSeguimientoFormulario()">
+                                    <i class="fas fa-save"></i>
+                                </button>
+                            </div>
+
+                            <!-- Botón refresh queda a la derecha -->
+                            <button type="button" class="btn btn-light ms-auto">
+                                <i class="fas fa-refresh"></i>
+                            </button>
                         </div>
+                        <br>
+                        <div class="formulario-container mt-4">
+                            <!-- FORMULARIO PARA AGREGAR MORA -->
+                            <div class="mt-4 formulario-borde" id="form-mora" *ngIf="formularioVisible === 'mora'"
+                                style="border: #5ad7eb;">
+                                <!-- Mora inicial y final -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-auto text-end">
+                                        <label class="fw-bold">Mora inicial</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" [(ngModel)]="moraInicial" class="form-control"
+                                                style="width: 100px;">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-auto text-end">
+                                        <label class="fw-bold">Mora final</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" [(ngModel)]="moraFinal" class="form-control"
+                                                style="width: 100px;">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Meta Mora -->
+                                <div class="row align-items-center">
+                                    <div class="col-auto text-end">
+                                        <label class="fw-bold">GPO/IND</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="text" [(ngModel)]="gpoindm" class="form-control"
+                                            placeholder="Gpo/IND" style="width: 180px;">
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" [(ngModel)]="metaM" class="form-control"
+                                                placeholder="Meta" style="width: 100px;">
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" [(ngModel)]="recupM" class="form-control"
+                                                placeholder="Recup." style="width: 100px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- FORMULARIO PARA AGREGAR CLIENTES -->
+                            <div class="mt-4 formulario-borde" id="form-creditos"
+                                *ngIf="formularioVisible === 'creditos'">
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-auto text-end">
+                                        <label class="fw-bold">GPO/IND iniciales</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" [(ngModel)]="gpoindInicial" class="form-control"
+                                            style="width: 100px;">
+                                    </div>
+                                    <div class="col-auto text-end">
+                                        <label class="fw-bold">GPO/IND finales</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" [(ngModel)]="gpoindFinal" class="form-control"
+                                            style="width: 100px;">
+                                    </div>
+                                </div>
+
+                                <div class="row align-items-center">
+                                    <div class="col-auto text-end">
+                                        <label class="fw-bold">Meta de GPO a la semana</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" [(ngModel)]="metaGpo" class="form-control"
+                                            placeholder="Meta GPO" style="width: 100px;">
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" [(ngModel)]="completadoGpo" class="form-control"
+                                            placeholder="Completado GPO" style="width: 100px;">
+                                    </div>
+
+                                    <div class="col-auto text-end">
+                                        <label class="fw-bold">Meta de IND a la semana</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" [(ngModel)]="metaInd" class="form-control"
+                                            placeholder="Meta IND" style="width: 100px;">
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" [(ngModel)]="completadoInd" class="form-control"
+                                            placeholder="Completado IND" style="width: 100px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- FORMULARIO PARA AGREGAR FICHAS -->
+                            <div class="mt-4 formulario-borde" id="form-fichas" *ngIf="formularioVisible === 'fichas'">
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-auto text-end">
+                                        <label class="fw-bold">Fichas por Cerrar</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" [(ngModel)]="fichasCerrar" class="form-control"
+                                            style="width: 100px;">
+                                    </div>
+
+                                    <div class="col-auto text-end">
+                                        <label class="fw-bold">Fichas Faltantes</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" [(ngModel)]="fichasFaltantes" class="form-control"
+                                            style="width: 100px;">
+                                    </div>
+                                </div>
+
+                                <div class="row align-items-center">
+                                    <div class="col-auto text-end">
+                                        <label class="fw-bold">Fichas Cerradas</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" [(ngModel)]="fichasCerradas" class="form-control"
+                                            placeholder="Cerradas" style="width: 150px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- FORMULARIO PARA REALIZAR RENOVACIONES -->
+                            <div class="mt-4 formulario-borde" id="form-renovacion"
+                                *ngIf="formularioVisible === 'renovacion'">
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-auto text-end">
+                                        <label class="fw-bold">GPO/IND Proyectados</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" [(ngModel)]="gpoindProyectado" class="form-control"
+                                            style="width: 100px;">
+                                    </div>
+
+                                    <div class="col-auto text-end">
+                                        <label class="fw-bold">GPO/IND Renovados</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" [(ngModel)]="gpoindRenovado" class="form-control"
+                                            style="width: 100px;">
+                                    </div>
+                                </div>
+
+                                <div class="row align-items-center">
+                                    <div class="col-auto text-end">
+                                        <label class="fw-bold">Meta semanal</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" [(ngModel)]="metaProyec" class="form-control"
+                                            placeholder="Meta" style="width: 100px;">
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" [(ngModel)]="completadosProyec" class="form-control"
+                                            placeholder="Completado" style="width: 100px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''' -->
+                        <div class="mt-4">
+                            <ng-container *ngIf="semanaSeleccionada && coordinadorSeleccionado">
+
+
+                                <!-- MORA -->
+                                <h5 class="text-primary" *ngIf="showMora">Mora</h5>
+                                <table class="table table-bordered table-striped table-responsive" *ngIf="showMora">
+                                    <thead class="table-dark text-center">
+                                        <tr>
+                                            <th>Mora Inicial</th>
+                                            <th>Mora Final</th>
+                                            <th>GPO/IND</th>
+                                            <th>Meta</th>
+                                            <th>Recuperado</th>
+                                            <th>Editar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let reg of cumplimientos">
+                                            <td>{{ reg.moraInicial }}</td>
+                                            <td>{{ reg.moraFinal }}</td>
+                                            <td>{{ reg.gpoindm }}</td>
+                                            <td>{{ reg.metaM }}</td>
+                                            <td>{{ reg.recupM }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-warning"
+                                                    (click)="editarRegistro(reg, 'mora')">
+                                                    Editar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <!--  FICHAS -->
+                                <h5 class="text-warning" *ngIf="showFichas">Fichas</h5>
+                                <table class="table table-bordered table-striped table-responsive" *ngIf="showFichas">
+                                    <thead class="table-dark text-center">
+                                        <tr>
+                                            <th>Por Cerrar</th>
+                                            <th>Faltantes</th>
+                                            <th>Cerradas</th>
+                                            <th>Editar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let reg of cumplimientos">
+                                            <td>{{ reg.fichasCerrar }}</td>
+                                            <td>{{ reg.fichasFaltantes }}</td>
+                                            <td>{{ reg.fichasCerradas }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-warning"
+                                                    (click)="editarRegistro(reg, 'fichas')">
+                                                    Editar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <!--  CRÉDITOS -->
+                                <h5 class="text-success" *ngIf="showCreditos">Créditos (GPO/IND)</h5>
+                                <table class="table table-bordered table-striped table-responsive" *ngIf="showCreditos">
+                                    <thead class="table-dark text-center">
+                                        <tr>
+                                            <th>Iniciales</th>
+                                            <th>Finales</th>
+                                            <th>Meta GPO</th>
+                                            <th>Completado GPO</th>
+                                            <th>Meta IND</th>
+                                            <th>Completado IND</th>
+                                            <th>Editar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let reg of cumplimientos">
+                                            <td>{{ reg.gpoindInicial }}</td>
+                                            <td>{{ reg.gpoindFinal }}</td>
+                                            <td>{{ reg.metaGpo }}</td>
+                                            <td>{{ reg.completadoGpo }}</td>
+                                            <td>{{ reg.metaInd }}</td>
+                                            <td>{{ reg.completadoInd }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-warning"
+                                                    (click)="editarRegistro(reg, 'creditos')">
+                                                    Editar
+                                                </button>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <!--  RENOVACIONES -->
+                                <h5 class="text-danger" *ngIf="showRenovaciones">Renovaciones</h5>
+                                <table class="table table-bordered table-striped table-responsive"
+                                    *ngIf="showRenovaciones">
+                                    <thead class="table-dark text-center">
+                                        <tr>
+                                            <th>Proyectados</th>
+                                            <th>Renovados</th>
+                                            <th>Meta</th>
+                                            <th>Completado</th>
+                                            <th>Editar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let reg of cumplimientos">
+                                            <td>{{ reg.gpoindProyectado }}</td>
+                                            <td>{{ reg.gpoindRenovado }}</td>
+                                            <td>{{ reg.metaProyec }}</td>
+                                            <td>{{ reg.completadosProyec }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-warning"
+                                                    (click)="editarRegistro(reg, 'renovacion')">
+                                                    Editar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </ng-container>
+                        </div>
+
                     </div>
                 </div>
-                
-                <!-- CONTENEDOR DERECHO: META -->
-                <div class="col-md-6">
-                    <div class="dashboard-card">
-                        <h3><i class="fas fa-flag-checkered me-2"></i> Meta</h3>
-                        <div class="mb-4">
-                            <p class="mb-1 fw-bold">Reducción de mora objetivo</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="metric-value">10%</span>
-                                <span class="badge bg-info">Objetivo</span>
+            </div>
+
+            <!-- Modal Bootstrap -->
+            <div class="modal fade" tabindex="-1" [class.show]="modalVisible"
+                [style.display]="modalVisible ? 'block' : 'none'">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Editar Registro</h5>
+                            <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+                        </div>
+                        <div class="modal-body" *ngIf="modalData">
+                            <!-- Campos comunes -->
+                            <div class="mb-3">
+                                <label class="form-label">Coordinador</label>
+                                <input class="form-control" [(ngModel)]="modalData.coordinador" disabled />
                             </div>
-                            <div class="metric-label">Meta a alcanzar este mes</div>
+                            <div class="mb-3">
+                                <label class="form-label">Semana</label>
+                                <input class="form-control" [(ngModel)]="modalData.semana" disabled />
+                            </div>
+
+                            <!-- MORA -->
+                            <ng-container *ngIf="modalData.tipo === 'mora'">
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <label>Mora Inicial</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.moraInicial">
+                                    </div>
+                                    <div class="col">
+                                        <label>Mora Final</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.moraFinal">
+                                    </div>
+                                </div>
+                                <div class="row g-2 mt-2">
+                                    <div class="col">
+                                        <label>GPO/IND</label>
+                                        <input type="text" class="form-control" [(ngModel)]="modalData.gpoindm">
+                                    </div>
+                                    <div class="col">
+                                        <label>Meta</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.metaM">
+                                    </div>
+                                    <div class="col">
+                                        <label>Recup.</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.recupM">
+                                    </div>
+                                </div>
+                            </ng-container>
+
+                            <!-- FICHAS -->
+                            <ng-container *ngIf="modalData.tipo === 'fichas'">
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <label>Por Cerrar</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.fichasCerrar">
+                                    </div>
+                                    <div class="col">
+                                        <label>Faltantes</label>
+                                        <input type="number" class="form-control"
+                                            [(ngModel)]="modalData.fichasFaltantes">
+                                    </div>
+                                    <div class="col">
+                                        <label>Cerradas</label>
+                                        <input type="number" class="form-control"
+                                            [(ngModel)]="modalData.fichasCerradas">
+                                    </div>
+                                </div>
+                            </ng-container>
+
+                            <!-- CREDITOS -->
+                            <ng-container *ngIf="modalData.tipo === 'creditos'">
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <label>Iniciales</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.gpoindInicial">
+                                    </div>
+                                    <div class="col">
+                                        <label>Finales</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.gpoindFinal">
+                                    </div>
+                                </div>
+                                <div class="row g-2 mt-2">
+                                    <div class="col">
+                                        <label>Meta GPO</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.metaGpo">
+                                    </div>
+                                    <div class="col">
+                                        <label>Completado GPO</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.completadoGpo">
+                                    </div>
+                                    <div class="col">
+                                        <label>Meta IND</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.metaInd">
+                                    </div>
+                                    <div class="col">
+                                        <label>Completado IND</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.completadoInd">
+                                    </div>
+                                </div>
+                            </ng-container>
+
+                            <!-- RENOVACIONES -->
+                            <ng-container *ngIf="modalData.tipo === 'renovacion'">
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <label>Proyectados</label>
+                                        <input type="number" class="form-control"
+                                            [(ngModel)]="modalData.gpoindProyectado">
+                                    </div>
+                                    <div class="col">
+                                        <label>Renovados</label>
+                                        <input type="number" class="form-control"
+                                            [(ngModel)]="modalData.gpoindRenovado">
+                                    </div>
+                                </div>
+                                <div class="row g-2 mt-2">
+                                    <div class="col">
+                                        <label>Meta</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.metaProyec">
+                                    </div>
+                                    <div class="col">
+                                        <label>Completado</label>
+                                        <input type="number" class="form-control"
+                                            [(ngModel)]="modalData.completadosProyec">
+                                    </div>
+                                </div>
+                            </ng-container>
+
+                            <!-- Fallback -->
+                            <ng-container *ngIf="!['mora','fichas','creditos','renovacion'].includes(modalData.tipo!)">
+                                <p class="text-danger">Tipo de formulario desconocido: {{ modalData.tipo }}</p>
+                            </ng-container>
                         </div>
-                        
-                        <div class="progress-container">
-                            <div class="progress-bar" style="width: 78%; background: #36b9cc;"></div>
-                        </div>
-                        <div class="d-flex justify-content-between mt-2">
-                            <small>Inicio: 12.5%</small>
-                            <small>Actual: 7.8%</small>
-                            <small>Meta: 10%</small>
-                        </div>
-                        
-                        <div class="mt-4">
-                            <table class="custom-table">
-                                <thead>
-                                    <tr>
-                                        <th>Código</th>
-                                        <th>Actividad</th>
-                                        <th>Reporte</th>
-                                        <th>Cumplido</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>G001</td>
-                                        <td>Análisis de riesgo</td>
-                                        <td>100%</td>
-                                        <td><i class="fas fa-check-circle text-success"></i></td>
-                                    </tr>
-                                    <tr>
-                                        <td>G002</td>
-                                        <td>Plan de pagos</td>
-                                        <td>85%</td>
-                                        <td><i class="fas fa-check-circle text-success"></i></td>
-                                    </tr>
-                                    <tr>
-                                        <td>G003</td>
-                                        <td>Reestructuración</td>
-                                        <td>45%</td>
-                                        <td><i class="fas fa-exclamation-circle text-danger"></i></td>
-                                    </tr>
-                                    <tr>
-                                        <td>G004</td>
-                                        <td>Negociación</td>
-                                        <td>30%</td>
-                                        <td><i class="fas fa-exclamation-circle text-danger"></i></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+                            <button class="btn btn-primary" (click)="guardarDesdeModal()">Guardar cambios</button>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Resumen adicional -->
             <div class="row mt-4">
                 <div class="col-md-12">
                     <div class="dashboard-card">
-                        <h3><i class="fas fa-chart-bar me-2"></i> Progreso Mensual</h3>
+                        <h3><i class="fas fa-chart-bar me-2"></i> Progreso</h3>
                         <div class="row">
                             <div class="col-md-3 text-center">
                                 <div class="metric-value text-success">78%</div>
@@ -233,50 +616,4 @@
             </div>
         </div>
     </div>
-
-    <!-- Bootstrap JS con Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebarContainer = document.getElementById('sidebarContainer');
-            const sidebar = document.getElementById('sidebar');
-            const toggleBtn = document.getElementById('toggleBtn');
-            const contentArea = document.querySelector('.content-area');
-            
-            // Estado inicial
-            let isExpanded = true;
-            
-            // Función para alternar el sidebar
-            function toggleSidebar() {
-                isExpanded = !isExpanded;
-                
-                if (isExpanded) {
-                    sidebarContainer.classList.remove('collapsed');
-                    sidebarContainer.classList.add('expanded');
-                    sidebar.classList.remove('collapsed');
-                    sidebar.classList.add('expanded');
-                    toggleBtn.innerHTML = '<i class="fas fa-times"></i>';
-                } else {
-                    sidebarContainer.classList.remove('expanded');
-                    sidebarContainer.classList.add('collapsed');
-                    sidebar.classList.remove('expanded');
-                    sidebar.classList.add('collapsed');
-                    toggleBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-                }
-            }
-            
-            // Event listener para el botón de toggle
-            toggleBtn.addEventListener('click', toggleSidebar);
-            
-            // Cerrar menú al hacer clic fuera en móviles
-            // document.addEventListener('click', function(event) {
-            //     if (window.innerWidth <= 768 && isExpanded) {
-            //         if (!sidebar.contains(event.target) {
-            //             toggleSidebar();
-            //         }
-                    
-            //     }
-            // });
-        });
-    </script>
 </body>

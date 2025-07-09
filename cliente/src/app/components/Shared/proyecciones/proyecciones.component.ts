@@ -100,57 +100,6 @@ export class ProyeccionesComponent {
     }
   }
 
-  // saveChanges() {
-  //   if (!this.currentSheet) {
-  //     this.Toast.fire({
-  //       icon: 'warning',
-  //       title: 'Primero carga y selecciona una hoja.'
-  //     });
-  //     return;
-  //   }
-
-  //   const rows = this.getRows(this.currentSheet);
-  //   const payload: ProyeccionPayload[] = rows
-  //     .filter(r => Array.isArray(r) && r.length > 0 && r.some(cell => cell !== null && cell !== undefined && cell !== ''))
-  //     .map(r => ({
-  //       coordinacion: this.currentSheet + '-',
-  //       asesor: r[0] || '',
-  //       cliente: r[1] || '',
-  //       fechaEntregaAgendadaOpe: this.toISODate(r[2]),
-  //       fechaEntregaAgendada: this.toISODate(r[3]),
-  //       fechaEnvioOperativo: this.toISODate(r[4]),
-  //       refil: r[5] || '',   // ¿Está aquí o en otro índice? Verifica
-  //       mes: r[6] || '',     // ¿Está aquí o en otro índice?
-  //       hora: r[7] || '',
-  //       diasRetrasoExpOp: r[8] !== undefined && r[8] !== '' ? Number(r[8]) : undefined,
-  //       incidenciasOperativo: r[9] || '',
-  //       fechaLimiteEntrega: this.toISODate(r[10]),
-  //       fechaRealReciboExpLegal: this.toISODate(r[11]),
-  //       renovado: typeof r[12] === 'string' ? r[12].toLowerCase() === 'sí' : !!r[12]
-  //     }))
-  //   console.log('Payload a enviar:', payload);
-
-  //   this.proyeccionesSvc.saveBulk(payload).subscribe({
-  //     next: res => {
-  //       const insertedCount = res.inserted ?? payload.length;
-  //       this.Toast.fire({
-  //         icon: 'success',
-  //         title: `Se guardaron ${insertedCount} registro${insertedCount !== 1 ? 's' : ''} correctamente.`
-  //       });
-  //     },
-  //     error: (error: HttpErrorResponse) => {
-  //       console.error('Error HTTP status:', error.status);
-  //       console.error('Error backend (body):', error.error);
-  //       const mensajeBackend = error.error?.message || error.message || 'Error desconocido';
-
-  //       this.Toast.fire({
-  //         icon: 'error',
-  //         title: 'Error al guardar en el servidor'
-  //       });
-  //     }
-  //   });
-  // }
-
   saveChanges() {
     if (!this.currentSheet) {
       this.Toast.fire({
@@ -188,7 +137,6 @@ export class ProyeccionesComponent {
           fechaEntregaAgendadaOpe: this.toISODate(r[2]),
           fechaEntregaAgendada: this.toISODate(r[3]),
 
-          // ¡Aquí la corrección!
           refil: textRefil,
           mes: textMes,
 
@@ -224,8 +172,6 @@ export class ProyeccionesComponent {
       }
     });
   }
-
-
 
   exportExcel() {
     if (!this.originalWorkbook) return;
