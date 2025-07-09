@@ -26,7 +26,8 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label for="coordinacion" class="form-label fw-semibold">Coordinación <span class="text-danger">*</span></label>
-                  <select class="form-select" id="coordinacion" formControlName="coordinacion" (change)="filtrarPersonas()">
+                  <select class="form-select" id="coordinacion" formControlName="coordinacion" 
+                          (change)="filtrarPersonas()" [disabled]="isEditing">
                     <option disabled selected value="">Seleccionar coordinación</option>
                     <option *ngFor="let coord of coordinaciones" [ngValue]="coord">
                       {{ coord.municipio }} - {{ coord.nombre }}
@@ -39,7 +40,7 @@
 
                 <div class="col-md-6">
                   <label for="ejecutiva" class="form-label fw-semibold">Ejecutiva/Coordinador <span class="text-danger">*</span></label>
-                  <select class="form-select" id="ejecutiva" formControlName="ejecutiva">
+                  <select class="form-select" id="ejecutiva" formControlName="ejecutiva" [disabled]="isEditing">
                     <option disabled selected value="">Seleccionar persona</option>
                     <option *ngFor="let persona of personasFiltradas" [ngValue]="persona">
                       {{ persona.nombre }}
@@ -249,13 +250,10 @@
             <td class="text-center">{{ baucher.titular }}</td>
             <td class="text-center">
               <div class="d-flex justify-content-center gap-2">
-                  <button class="btn btn-sm btn-outline-primary rounded-circle"
-                    (click)="cargarBaucherParaEditar(baucher)"
-                    data-bs-toggle="modal"
-                    data-bs-target="#staticBackdrop"
-                    title="Editar">
-                    <i class="fas fa-edit"></i>
-                  </button>
+                <button class="btn btn-sm btn-outline-primary rounded-circle" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                  (click)="cargarBaucherParaEditar(baucher)" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </button>
                 <button class="btn btn-sm btn-outline-danger rounded-circle" 
                   (click)="eliminarBaucher(baucher._id)" title="Eliminar">
                   <i class="fas fa-trash-alt"></i>
@@ -280,10 +278,6 @@
               </a>
             </li>
 
-            <li class="page-item" *ngFor="let page of getPages()" [class.active]="currentPage === page">
-              <a class="page-link" (click)="changePage(page)">{{ page }}</a>
-            </li>
-
             <li class="page-item" [class.disabled]="currentPage === totalPages">
               <a class="page-link" (click)="changePage(currentPage + 1)">
                 <i class="fas fa-chevron-right"></i>
@@ -291,62 +285,6 @@
             </li>
           </ul>
         </nav>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">Editar </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label for="formGroupExampleInput" class="form-label">Coordinacion</label>
-          <select class="form-select" id="coordinacion" formControlName="coordinacion" (change)="filtrarPersonas()">
-            <option disabled selected value="">Seleccionar coordinación</option>
-            <option *ngFor="let coord of coordinaciones" [ngValue]="coord">
-              {{ coord.municipio }} - {{ coord.nombre }}
-            </option>
-          </select>
-        </div>
-        <div class="mb-3">
-          <label for="formGroupExampleInput2" class="form-label">Asesor/Coordinador/Ejecutiva</label>
-          <select class="form-select" id="ejecutiva" formControlName="ejecutiva">
-            <option disabled selected value="">Seleccionar persona</option>
-            <option *ngFor="let persona of personasFiltradas" [ngValue]="persona">
-              {{ persona.nombre }}
-            </option>
-          </select>
-        </div>
-        <div class="mb-3">
-          <label for="formGroupExampleInput2" class="form-label">Fecha y hora de pago</label>
-          <input type="datetime" class="form-control" id="formGroupExampleInput2" placeholder="Another input placeholder">
-        </div>
-        <div class="mb-3">
-          <label for="formGroupExampleInput2" class="form-label">Fecha y hora reportada</label>
-          <input type="datetime" class="form-control" id="formGroupExampleInput2" placeholder="Another input placeholder">
-        </div>
-          <div class="mb-3">
-          <label for="formGroupExampleInput2" class="form-label">Grupo</label>
-          <input type="text" class="form-control" id="formGroupExampleInput2" placeholder="Another input placeholder">
-        </div>
-        <div class="mb-3">
-          <label for="formGroupExampleInput2" class="form-label">Concepto</label>
-          <input type="text" class="form-control" id="formGroupExampleInput2" placeholder="Another input placeholder">
-        </div>
-        <div class="mb-3">
-          <label for="formGroupExampleInput2" class="form-label">Observaciones</label>
-          <textarea type="text" class="form-control" id="formGroupExampleInput2" placeholder="Another input placeholder"></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Understood</button>
       </div>
     </div>
   </div>

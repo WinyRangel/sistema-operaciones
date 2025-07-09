@@ -6,6 +6,13 @@ h5 { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
     line-height: 26.4px; 
 } 
 
+/* En tu archivo de estilos */
+select:disabled {
+  background-color: #f8f9fa;
+  opacity: 1; /* Mantiene el color completo */
+  cursor: not-allowed;
+}
+
 
 h4 { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
     font-size: 24px; 
