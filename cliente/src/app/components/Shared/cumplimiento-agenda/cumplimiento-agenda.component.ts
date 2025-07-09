@@ -65,9 +65,23 @@ export class CumplimientoAgendaComponent implements OnInit, OnDestroy {
   gpoindRenovado: number = 0;
   metaProyec: number = 0;
   completadosProyec: number = 0;
+
+  // Totales
+  totalMoraFinal: number = 0;
+  totalFichasFaltantes: number = 0;
+  totalCreditosFinales: number = 0;
+  totalRenovados: number = 0;
+  totalRecuperado: number = 0;
+
   // Propiedades para el Modal
   modalVisible = false;
   modalData: CumplimientoObjetivo | null = null;
+  totalFichasCerradas: any;
+  totalFichasIniciales: any;
+  totalCreditosIniciales: any;
+  totalCreditosCreados: any;
+  totalProyecIniciales: any;
+  totalProyecFaltantes: any;
 
   /** ¿Mostrar tabla Mora? */
   get showMora(): boolean {
@@ -88,6 +102,23 @@ export class CumplimientoAgendaComponent implements OnInit, OnDestroy {
       r.fichasCerradas! > 0
     );
   }
+  esFilaVaciaFichas(reg: any): boolean {
+    return (
+      (reg.fichasCerrar ?? 0) === 0 &&
+      (reg.fichasFaltantes ?? 0) === 0 &&
+      (reg.fichasCerradas ?? 0) === 0
+    );
+  }
+  /** No mostrar filas vacias de Mora */
+  esFilaVaciaMora(reg: any): boolean {
+    return (
+      (reg.moraInicial ?? 0) === 0 &&
+      (reg.moraFinal ?? 0) === 0 &&
+      (reg.metaM ?? 0) === 0 &&
+      (reg.recupM ?? 0) === 0
+    );
+  }
+
 
   /** ¿Mostrar tabla Créditos? */
   get showCreditos(): boolean {
@@ -101,6 +132,17 @@ export class CumplimientoAgendaComponent implements OnInit, OnDestroy {
     );
   }
 
+  esFilaVaciaCredito(reg: any): boolean {
+    return (
+      (reg.gpoindInicial ?? 0) === 0 &&
+      (reg.metaGpo ?? 0) === 0 &&
+      (reg.completadoGpo ?? 0) === 0 &&
+      (reg.metaInd ?? 0) === 0 &&
+      (reg.completadoInd ?? 0) === 0
+    );
+  }
+
+
   /** ¿Mostrar tabla Renovaciones? */
   get showRenovaciones(): boolean {
     return !!this.cumplimientos?.some(r =>
@@ -108,6 +150,14 @@ export class CumplimientoAgendaComponent implements OnInit, OnDestroy {
       r.gpoindRenovado! > 0 ||
       r.metaProyec! > 0 ||
       r.completadosProyec! > 0
+    );
+  }
+  esFilaVaciaRenovaciones(reg: any): boolean {
+    return (
+      (reg.gpoindProyectado ?? 0) === 0 &&
+      (reg.gpoindRenovado ?? 0) === 0 &&
+      (reg.metaProyec ?? 0) === 0 &&
+      (reg.completadosProyec ?? 0) === 0
     );
   }
 
@@ -203,6 +253,7 @@ export class CumplimientoAgendaComponent implements OnInit, OnDestroy {
             ...reg,
             tipo: this.inferirTipo(reg)
           }));
+          this.calcularTotales();
           console.log('Cumplimientos cargados con tipo:', this.cumplimientos);
         },
         error: (err) => {
@@ -292,15 +343,15 @@ export class CumplimientoAgendaComponent implements OnInit, OnDestroy {
     this.formularioVisible = tipo;
   }
 
-editarRegistro(registro: CumplimientoObjetivo, tipo: FormularioTipo): void {
-  console.log('Registro a editar:', registro, 'Tipo forzado:', tipo);
+  editarRegistro(registro: CumplimientoObjetivo, tipo: FormularioTipo): void {
+    console.log('Registro a editar:', registro, 'Tipo forzado:', tipo);
 
-  // Clonamos el objeto para no mutar el array original
-  this.modalData = { ...registro, tipo };
+    // Clonamos el objeto para no mutar el array original
+    this.modalData = { ...registro, tipo };
 
-  // Ahora sí abrimos el modal
-  this.modalVisible = true;
-}
+    // Ahora sí abrimos el modal
+    this.modalVisible = true;
+  }
 
 
   // Cerrar modal sin guardar
@@ -310,36 +361,64 @@ editarRegistro(registro: CumplimientoObjetivo, tipo: FormularioTipo): void {
   }
 
   // Guardar cambios desde el modal
-// guardarDesdeModal(): void {
-//   if (!this.modalData?._id) return;
+  guardarDesdeModal(): void {
+    if (!this.modalData?._id) return;
 
-//   this.seguimientoSvc.actualizarSeguimiento(this.modalData).subscribe({
-//     next: updated => {
-//       const idx = this.cumplimientos.findIndex(c => c._id === updated._id);
-//       if (idx >= 0) this.cumplimientos[idx] = updated;
-//       this.cerrarModal();
-//     },
-//     error: err => {
-//       console.error('Error actualizando registro:', err);
-//       alert('No se pudo actualizar el registro.');
-//     }
-//   });
-// }
-guardarDesdeModal(): void {
-  if (!this.modalData?._id) return;
+    this.seguimientoSvc.actualizarSeguimiento(this.modalData).subscribe({
+      next: updated => {
+        const idx = this.cumplimientos.findIndex(c => c._id === updated._id);
+        if (idx >= 0) this.cumplimientos[idx] = updated;
+        this.cerrarModal();
+      },
+      error: err => {
+        console.error('Error actualizando registro:', err);
+        alert('No se pudo actualizar el registro.');
+      }
+    });
+  }
 
-  this.seguimientoSvc.actualizarSeguimiento(this.modalData).subscribe({
-    next: updated => {
-      const idx = this.cumplimientos.findIndex(c => c._id === updated._id);
-      if (idx >= 0) this.cumplimientos[idx] = updated;
-      this.cerrarModal();
-    },
-    error: err => {
-      console.error('Error actualizando registro:', err);
-      alert('No se pudo actualizar el registro.');
-    }
-  });
-}
+  calcularTotales(): void {
+    // Calcular totales de Mora
+    const totalMoraInicial = this.cumplimientos.reduce((sum, reg) => sum + (reg.moraInicial ?? 0), 0);
+    const totalRecuperado = this.cumplimientos.reduce((sum, reg) => sum + (reg.recupM ?? 0), 0);
+    this.totalMoraFinal = totalMoraInicial - totalRecuperado;
+    this.totalRecuperado = totalRecuperado;
+
+    // Calcular totales de Fichas
+    this.totalFichasIniciales = this.cumplimientos.reduce((sum, reg) => sum + (reg.fichasCerrar || 0), 0);
+    this.totalFichasCerradas = this.cumplimientos.reduce((sum, reg) => sum + (reg.fichasCerradas || 0), 0);
+    this.totalFichasFaltantes = Math.max(this.totalFichasIniciales - this.totalFichasCerradas, 0);
+    this.totalFichasCerradas = this.totalFichasCerradas;
+
+    // Calcular total de Grupos/Ind nuevos
+    this.totalCreditosIniciales = this.cumplimientos.reduce((sum, reg) => sum + (reg.gpoindInicial || 0), 0);
+    this.totalCreditosCreados = this.cumplimientos.reduce((sum, reg) => sum + (reg.completadoGpo || 0), 0);
+    this.totalCreditosFinales = Math.max(this.totalCreditosIniciales + this.totalCreditosCreados, 0);
+    this.totalCreditosCreados = this.totalCreditosCreados;
+
+    this.totalProyecIniciales = this.cumplimientos.reduce((sum, reg) => sum + (reg.gpoindProyectado || 0), 0);
+    this.totalRenovados = this.cumplimientos.reduce((sum, reg) => sum + (reg.completadosProyec || 0), 0);
+    this.totalProyecFaltantes = Math.max(this.totalProyecIniciales - this.totalRenovados, 0);
+    this.totalRenovados = this.totalRenovados;
+  }
+  recargarTablas(): void {
+    this.seguimientoSvc.obtenerSeguimiento(this.coordinadorSeleccionado, this.semanaSeleccionada)
+      .subscribe({
+        next: (data) => {
+          this.cumplimientos = data.map(reg => ({
+            ...reg,
+            tipo: this.inferirTipo(reg)
+          }));
+
+          this.calcularTotales(); // Calcula los nuevos totales
+          console.log('Datos recargados correctamente');
+        },
+        error: (err) => {
+          console.error('Error al recargar los datos:', err);
+          alert('No se pudieron recargar los datos.');
+        }
+      });
+  }
 
 
 

@@ -145,10 +145,11 @@
                                 </button>
                             </div>
 
-                            <!-- Botón refresh queda a la derecha -->
-                            <button type="button" class="btn btn-light ms-auto">
+                            <!-- Botón refresh de las tablas-->
+                            <button type="button" class="btn btn-light ms-auto" (click)="recargarTablas()">
                                 <i class="fas fa-refresh"></i>
                             </button>
+
                         </div>
                         <br>
                         <div class="formulario-container mt-4">
@@ -167,21 +168,6 @@
                                                 style="width: 100px;">
                                         </div>
                                     </div>
-
-                                    <div class="col-auto text-end">
-                                        <label class="fw-bold">Mora final</label>
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class="input-group">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" [(ngModel)]="moraFinal" class="form-control"
-                                                style="width: 100px;">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Meta Mora -->
-                                <div class="row align-items-center">
                                     <div class="col-auto text-end">
                                         <label class="fw-bold">GPO/IND</label>
                                     </div>
@@ -216,18 +202,11 @@
                                         <input type="number" [(ngModel)]="gpoindInicial" class="form-control"
                                             style="width: 100px;">
                                     </div>
-                                    <div class="col-auto text-end">
-                                        <label class="fw-bold">GPO/IND finales</label>
-                                    </div>
-                                    <div class="col-auto">
-                                        <input type="number" [(ngModel)]="gpoindFinal" class="form-control"
-                                            style="width: 100px;">
-                                    </div>
                                 </div>
 
                                 <div class="row align-items-center">
                                     <div class="col-auto text-end">
-                                        <label class="fw-bold">Meta de GPO a la semana</label>
+                                        <label class="fw-bold">Meta de GPO/IND</label>
                                     </div>
                                     <div class="col-auto">
                                         <input type="number" [(ngModel)]="metaGpo" class="form-control"
@@ -237,47 +216,17 @@
                                         <input type="number" [(ngModel)]="completadoGpo" class="form-control"
                                             placeholder="Completado GPO" style="width: 100px;">
                                     </div>
-
-                                    <div class="col-auto text-end">
-                                        <label class="fw-bold">Meta de IND a la semana</label>
-                                    </div>
-                                    <div class="col-auto">
-                                        <input type="number" [(ngModel)]="metaInd" class="form-control"
-                                            placeholder="Meta IND" style="width: 100px;">
-                                    </div>
-                                    <div class="col-auto">
-                                        <input type="number" [(ngModel)]="completadoInd" class="form-control"
-                                            placeholder="Completado IND" style="width: 100px;">
-                                    </div>
                                 </div>
                             </div>
                             <!-- FORMULARIO PARA AGREGAR FICHAS -->
                             <div class="mt-4 formulario-borde" id="form-fichas" *ngIf="formularioVisible === 'fichas'">
                                 <div class="row mb-3 align-items-center">
                                     <div class="col-auto text-end">
-                                        <label class="fw-bold">Fichas por Cerrar</label>
+                                        <label class="fw-bold">Meta de fichas por Cerrar</label>
                                     </div>
                                     <div class="col-auto">
                                         <input type="number" [(ngModel)]="fichasCerrar" class="form-control"
                                             style="width: 100px;">
-                                    </div>
-
-                                    <div class="col-auto text-end">
-                                        <label class="fw-bold">Fichas Faltantes</label>
-                                    </div>
-                                    <div class="col-auto">
-                                        <input type="number" [(ngModel)]="fichasFaltantes" class="form-control"
-                                            style="width: 100px;">
-                                    </div>
-                                </div>
-
-                                <div class="row align-items-center">
-                                    <div class="col-auto text-end">
-                                        <label class="fw-bold">Fichas Cerradas</label>
-                                    </div>
-                                    <div class="col-auto">
-                                        <input type="number" [(ngModel)]="fichasCerradas" class="form-control"
-                                            placeholder="Cerradas" style="width: 150px;">
                                     </div>
                                 </div>
                             </div>
@@ -292,27 +241,12 @@
                                         <input type="number" [(ngModel)]="gpoindProyectado" class="form-control"
                                             style="width: 100px;">
                                     </div>
-
-                                    <div class="col-auto text-end">
-                                        <label class="fw-bold">GPO/IND Renovados</label>
-                                    </div>
-                                    <div class="col-auto">
-                                        <input type="number" [(ngModel)]="gpoindRenovado" class="form-control"
-                                            style="width: 100px;">
-                                    </div>
-                                </div>
-
-                                <div class="row align-items-center">
                                     <div class="col-auto text-end">
                                         <label class="fw-bold">Meta semanal</label>
                                     </div>
                                     <div class="col-auto">
                                         <input type="number" [(ngModel)]="metaProyec" class="form-control"
                                             placeholder="Meta" style="width: 100px;">
-                                    </div>
-                                    <div class="col-auto">
-                                        <input type="number" [(ngModel)]="completadosProyec" class="form-control"
-                                            placeholder="Completado" style="width: 100px;">
                                     </div>
                                 </div>
                             </div>
@@ -321,15 +255,12 @@
                         <!-- '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''' -->
                         <div class="mt-4">
                             <ng-container *ngIf="semanaSeleccionada && coordinadorSeleccionado">
-
-
                                 <!-- MORA -->
                                 <h5 class="text-primary" *ngIf="showMora">Mora</h5>
                                 <table class="table table-bordered table-striped table-responsive" *ngIf="showMora">
                                     <thead class="table-dark text-center">
                                         <tr>
                                             <th>Mora Inicial</th>
-                                            <th>Mora Final</th>
                                             <th>GPO/IND</th>
                                             <th>Meta</th>
                                             <th>Recuperado</th>
@@ -337,9 +268,8 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr *ngFor="let reg of cumplimientos">
+                                        <tr *ngFor="let reg of cumplimientos" [hidden]="esFilaVaciaMora(reg)">
                                             <td>{{ reg.moraInicial }}</td>
-                                            <td>{{ reg.moraFinal }}</td>
                                             <td>{{ reg.gpoindm }}</td>
                                             <td>{{ reg.metaM }}</td>
                                             <td>{{ reg.recupM }}</td>
@@ -351,6 +281,15 @@
                                             </td>
                                         </tr>
                                     </tbody>
+                                    <tfoot *ngIf="cumplimientos.length">
+                                        <tr class="table-info text-center">
+                                            <td colspan="1"><strong>Total Mora Final</strong></td>
+                                            <td><strong>{{totalMoraFinal}}</strong></td>
+                                            <td colspan="1"><strong>Total Recuperado</strong></td>
+                                            <td><strong>{{ totalRecuperado }}</strong></td>
+                                            <td colspan="4"></td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
 
                                 <!--  FICHAS -->
@@ -359,15 +298,13 @@
                                     <thead class="table-dark text-center">
                                         <tr>
                                             <th>Por Cerrar</th>
-                                            <th>Faltantes</th>
                                             <th>Cerradas</th>
                                             <th>Editar</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr *ngFor="let reg of cumplimientos">
+                                        <tr *ngFor="let reg of cumplimientos" [hidden]="esFilaVaciaFichas(reg)">
                                             <td>{{ reg.fichasCerrar }}</td>
-                                            <td>{{ reg.fichasFaltantes }}</td>
                                             <td>{{ reg.fichasCerradas }}</td>
                                             <td class="text-center">
                                                 <button class="btn btn-sm btn-warning"
@@ -377,6 +314,13 @@
                                             </td>
                                         </tr>
                                     </tbody>
+                                    <tfoot *ngIf="cumplimientos.length">
+                                        <tr class="table-info text-center">
+                                            <td><strong>Total de Faltantes = {{ totalFichasFaltantes }}</strong></td>
+                                            <td><strong>Fichas Cerradas = {{totalFichasCerradas}}</strong></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
 
                                 <!--  CRÉDITOS -->
@@ -385,22 +329,16 @@
                                     <thead class="table-dark text-center">
                                         <tr>
                                             <th>Iniciales</th>
-                                            <th>Finales</th>
-                                            <th>Meta GPO</th>
-                                            <th>Completado GPO</th>
-                                            <th>Meta IND</th>
-                                            <th>Completado IND</th>
+                                            <th>Meta GPO/IND</th>
+                                            <th>Completado GPO/IND</th>
                                             <th>Editar</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr *ngFor="let reg of cumplimientos">
+                                        <tr *ngFor="let reg of cumplimientos" [hidden]="esFilaVaciaCredito(reg)">
                                             <td>{{ reg.gpoindInicial }}</td>
-                                            <td>{{ reg.gpoindFinal }}</td>
                                             <td>{{ reg.metaGpo }}</td>
                                             <td>{{ reg.completadoGpo }}</td>
-                                            <td>{{ reg.metaInd }}</td>
-                                            <td>{{ reg.completadoInd }}</td>
                                             <td class="text-center">
                                                 <button class="btn btn-sm btn-warning"
                                                     (click)="editarRegistro(reg, 'creditos')">
@@ -410,6 +348,17 @@
                                             </td>
                                         </tr>
                                     </tbody>
+                                    <tfoot *ngIf="cumplimientos.length">
+                                        <tr class="table-info text-center">
+                                            <td><strong>Total de GPO/IND =
+                                                {{ totalCreditosFinales }}</strong></td>
+                                            <td></td>
+                                            <!-- <td><strong>{{ totalCreditosFinales }}</strong></td> -->
+                                            <td colspan=""><strong>Total de GPO/IND Nuevos = {{totalCreditosCreados}}</strong></td>
+                                            <!-- <td><strong>{{totalCreditosCreados}}</strong></td> -->
+                                             <td></td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
 
                                 <!--  RENOVACIONES -->
@@ -419,16 +368,14 @@
                                     <thead class="table-dark text-center">
                                         <tr>
                                             <th>Proyectados</th>
-                                            <th>Renovados</th>
                                             <th>Meta</th>
                                             <th>Completado</th>
                                             <th>Editar</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr *ngFor="let reg of cumplimientos">
+                                        <tr *ngFor="let reg of cumplimientos" [hidden]="esFilaVaciaRenovaciones(reg)">
                                             <td>{{ reg.gpoindProyectado }}</td>
-                                            <td>{{ reg.gpoindRenovado }}</td>
                                             <td>{{ reg.metaProyec }}</td>
                                             <td>{{ reg.completadosProyec }}</td>
                                             <td class="text-center">
@@ -439,11 +386,17 @@
                                             </td>
                                         </tr>
                                     </tbody>
+                                    <tfoot *ngIf="cumplimientos.length">
+                                        <tr class="table-info text-center">
+                                            <td><strong>Total de faltantes = {{ totalProyecFaltantes }}</strong></td>
+                                            <td></td>
+                                            <td><strong>Total de renovados = {{ totalRenovados }}</strong></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
-
                             </ng-container>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -475,10 +428,6 @@
                                         <label>Mora Inicial</label>
                                         <input type="number" class="form-control" [(ngModel)]="modalData.moraInicial">
                                     </div>
-                                    <div class="col">
-                                        <label>Mora Final</label>
-                                        <input type="number" class="form-control" [(ngModel)]="modalData.moraFinal">
-                                    </div>
                                 </div>
                                 <div class="row g-2 mt-2">
                                     <div class="col">
@@ -500,16 +449,7 @@
                             <ng-container *ngIf="modalData.tipo === 'fichas'">
                                 <div class="row g-2">
                                     <div class="col">
-                                        <label>Por Cerrar</label>
-                                        <input type="number" class="form-control" [(ngModel)]="modalData.fichasCerrar">
-                                    </div>
-                                    <div class="col">
-                                        <label>Faltantes</label>
-                                        <input type="number" class="form-control"
-                                            [(ngModel)]="modalData.fichasFaltantes">
-                                    </div>
-                                    <div class="col">
-                                        <label>Cerradas</label>
+                                        <label>Fichas Cerradas</label>
                                         <input type="number" class="form-control"
                                             [(ngModel)]="modalData.fichasCerradas">
                                     </div>
@@ -523,52 +463,20 @@
                                         <label>Iniciales</label>
                                         <input type="number" class="form-control" [(ngModel)]="modalData.gpoindInicial">
                                     </div>
-                                    <div class="col">
-                                        <label>Finales</label>
-                                        <input type="number" class="form-control" [(ngModel)]="modalData.gpoindFinal">
-                                    </div>
                                 </div>
                                 <div class="row g-2 mt-2">
                                     <div class="col">
-                                        <label>Meta GPO</label>
-                                        <input type="number" class="form-control" [(ngModel)]="modalData.metaGpo">
-                                    </div>
-                                    <div class="col">
-                                        <label>Completado GPO</label>
+                                        <label>Completado GPO/IND</label>
                                         <input type="number" class="form-control" [(ngModel)]="modalData.completadoGpo">
-                                    </div>
-                                    <div class="col">
-                                        <label>Meta IND</label>
-                                        <input type="number" class="form-control" [(ngModel)]="modalData.metaInd">
-                                    </div>
-                                    <div class="col">
-                                        <label>Completado IND</label>
-                                        <input type="number" class="form-control" [(ngModel)]="modalData.completadoInd">
                                     </div>
                                 </div>
                             </ng-container>
 
                             <!-- RENOVACIONES -->
                             <ng-container *ngIf="modalData.tipo === 'renovacion'">
-                                <div class="row g-2">
-                                    <div class="col">
-                                        <label>Proyectados</label>
-                                        <input type="number" class="form-control"
-                                            [(ngModel)]="modalData.gpoindProyectado">
-                                    </div>
-                                    <div class="col">
-                                        <label>Renovados</label>
-                                        <input type="number" class="form-control"
-                                            [(ngModel)]="modalData.gpoindRenovado">
-                                    </div>
-                                </div>
                                 <div class="row g-2 mt-2">
                                     <div class="col">
-                                        <label>Meta</label>
-                                        <input type="number" class="form-control" [(ngModel)]="modalData.metaProyec">
-                                    </div>
-                                    <div class="col">
-                                        <label>Completado</label>
+                                        <label>Creditos Renovados</label>
                                         <input type="number" class="form-control"
                                             [(ngModel)]="modalData.completadosProyec">
                                     </div>
