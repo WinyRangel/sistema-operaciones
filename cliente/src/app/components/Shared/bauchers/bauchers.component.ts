@@ -8,8 +8,11 @@ import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { BaucherPipe } from '../../../pipes/baucher.pipe';
-import { Chart } from 'chart.js';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
+import { Chart, registerables } from 'chart.js';
 
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-bauchers',
@@ -20,6 +23,8 @@ import { Chart } from 'chart.js';
 
 })
 export class BauchersComponent implements OnInit{
+  reporteResumen: any;
+  grafica: any; // referencia al chart
 
 
   getPages(): any {
@@ -184,20 +189,6 @@ export class BauchersComponent implements OnInit{
         }, 100);
       }
 
-      // Método para hacer scroll al formulario
-private scrollToForm(): void {
-  const element = document.getElementById('formularioBaucher');
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    
-    // También puedes expandir el acordeón si está colapsado
-    const collapseElement = document.getElementById('collapseOne');
-    if (collapseElement && !collapseElement.classList.contains('show')) {
-      const button = document.querySelector('[data-bs-target="#collapseOne"]') as HTMLElement;
-      if (button) button.click();
-    }
-  }
-}
 
       // Método mejorado para formatear fechas
       private formatDateForInput(dateString: string): string {
@@ -348,156 +339,74 @@ private scrollToForm(): void {
   }
   
 
-exportarExcel(): void {
-  const headers = [
-    'Coordinación', 'Responsable', 'Fecha Pago', 'Hora Pago',
-    'Fecha Reporte', 'Hora Reporte', 'Diferencia',
-    'Grupo', 'Concepto', 'Observaciones'
-  ];
+  exportarExcel(): void {
+    const headers = [
+      'Coordinación', 'Responsable', 'Fecha Pago', 'Hora Pago',
+      'Fecha Reporte', 'Hora Reporte', 'Diferencia',
+      'Grupo', 'Concepto', 'Observaciones'
+    ];
 
-  const body = this.filteredBauchers.map(b => ([
-    b.coordinacion?.nombre,
-    b.ejecutiva || b.coordinador,
-    this.formatearFecha(b.fechaBaucher),
-    this.formatearHora(b.fechaBaucher),
-    this.formatearFecha(b.fechaReporte),
-    this.formatearHora(b.fechaReporte),
-    b.diasDiferencia,
-    b.grupo,
-    b.concepto,
-    b.titular
-  ]));
+    const body = this.filteredBauchers.map(b => ([
+      b.coordinacion?.nombre,
+      b.ejecutiva || b.coordinador,
+      this.formatearFecha(b.fechaBaucher),
+      this.formatearHora(b.fechaBaucher),
+      this.formatearFecha(b.fechaReporte),
+      this.formatearHora(b.fechaReporte),
+      b.diasDiferencia,
+      b.grupo,
+      b.concepto,
+      b.titular
+    ]));
 
-  const data = [headers, ...body];
-  const worksheet = XLSX.utils.aoa_to_sheet(data);
+    const data = [headers, ...body];
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
 
-  // Aplicar estilos condicionales a la columna "Diferencia" (índice 6)
-  const diferenciaCol = 6;
-  body.forEach((row, i) => {
-    const rowIndex = i + 2; // +2 porque AOA incluye encabezado y Excel es 1-indexed
-    const cellRef = XLSX.utils.encode_cell({ c: diferenciaCol, r: rowIndex - 1 });
-    const dias = row[diferenciaCol];
+    // Aplicar estilos condicionales a la columna "Diferencia" (índice 6)
+    const diferenciaCol = 6;
+    body.forEach((row, i) => {
+      const rowIndex = i + 2; // +2 porque AOA incluye encabezado y Excel es 1-indexed
+      const cellRef = XLSX.utils.encode_cell({ c: diferenciaCol, r: rowIndex - 1 });
+      const dias = row[diferenciaCol];
 
-    let fillColor = '';
-    if (dias > 3) fillColor = 'FFDC3545'; // rojo (danger)
-    else if (dias > 1) fillColor = 'FFFFC107'; // amarillo (warning)
-    else fillColor = 'FF198754'; // verde (success)
+      let fillColor = '';
+      if (dias > 3) fillColor = 'FFDC3545'; // rojo (danger)
+      else if (dias > 1) fillColor = 'FFFFC107'; // amarillo (warning)
+      else fillColor = 'FF198754'; // verde (success)
 
-    if (!worksheet[cellRef]) return;
+      if (!worksheet[cellRef]) return;
 
-    worksheet[cellRef].s = {
-      fill: {
-        fgColor: { rgb: fillColor }
-      },
-      font: {
-        color: { rgb: 'FFFFFFFF' },
-        bold: true
-      },
-      alignment: {
-        horizontal: 'center'
-      }
+      worksheet[cellRef].s = {
+        fill: {
+          fgColor: { rgb: fillColor }
+        },
+        font: {
+          color: { rgb: 'FFFFFFFF' },
+          bold: true
+        },
+        alignment: {
+          horizontal: 'center'
+        }
+      };
+    });
+
+    // Crear el libro
+    const workbook: XLSX.WorkBook = {
+      Sheets: { 'Bauchers': worksheet },
+      SheetNames: ['Bauchers']
     };
-  });
 
-  // Crear el libro
-  const workbook: XLSX.WorkBook = {
-    Sheets: { 'Bauchers': worksheet },
-    SheetNames: ['Bauchers']
-  };
-
-  // Guardar
-  const excelBuffer: any = XLSX.write(workbook, {
-    bookType: 'xlsx',
-    type: 'array',
-    cellStyles: true
-  });
-  const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-  FileSaver.saveAs(blob, 'bauchers_condicional.xlsx');
-}
-
-  generarReporte() {
-    const conteoCoordinaciones: { [key: string]: number } = {};
-    const conteoPersonas: { [key: string]: number } = {};
-
-    this.listarBauchers.forEach((baucher) => {
-      const coordinacion = baucher.coordinacion?.nombre || 'Desconocido';
-      const persona = baucher.ejecutiva || baucher.coordinador || 'Desconocido';
-
-      conteoCoordinaciones[coordinacion] = (conteoCoordinaciones[coordinacion] || 0) + 1;
-      conteoPersonas[persona] = (conteoPersonas[persona] || 0) + 1;
+    // Guardar
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+      cellStyles: true
     });
-
-    const topCoordinaciones = Object.entries(conteoCoordinaciones)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-    const topPersonas = Object.entries(conteoPersonas)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-    // Mostrar modal con canvas para las gráficas
-    Swal.fire({
-      title: '📊 Reporte de Envíos',
-      html: `
-        <div style="width:100%; max-height:400px;">
-          <strong>Top Coordinaciones</strong>
-          <canvas id="graficaCoordinaciones" style="margin-bottom:30px;"></canvas>
-          <strong>Top Personas</strong>
-          <canvas id="graficaPersonas"></canvas>
-        </div>
-      `,
-      didOpen: () => {
-        // Gráfica de Coordinaciones
-        new Chart(document.getElementById('graficaCoordinaciones') as HTMLCanvasElement, {
-          type: 'bar',
-          data: {
-            labels: topCoordinaciones.map(([coord]) => coord),
-            datasets: [{
-              label: 'Vouchers enviados',
-              data: topCoordinaciones.map(([, count]) => count),
-              backgroundColor: 'rgba(54, 162, 235, 0.6)',
-              borderColor: 'rgba(54, 162, 235, 1)',
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
-          }
-        });
-
-        // Gráfica de Personas
-        new Chart(document.getElementById('graficaPersonas') as HTMLCanvasElement, {
-          type: 'pie',
-          data: {
-            labels: topPersonas.map(([persona]) => persona),
-            datasets: [{
-              label: 'Reportes',
-              data: topPersonas.map(([, count]) => count),
-              backgroundColor: [
-                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
-              ]
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: {
-                position: 'bottom'
-              }
-            }
-          }
-        });
-      },
-      width: 700,
-      showConfirmButton: true,
-      confirmButtonText: 'Cerrar',
-      customClass: {
-        htmlContainer: 'text-start'
-      }
-    });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    FileSaver.saveAs(blob, 'bauchers_condicional.xlsx');
   }
+
+
 
   get vouchersTotales(): number {
     return this.listarBauchers.filter(a => a.coordinacion).length;
@@ -512,4 +421,171 @@ exportarExcel(): void {
     const f = new Date(fecha);
     return f.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
   }
+
+  // Método para generar datos del reporte
+  generarDatosReporte() {
+    const datos: any[] = [];
+
+    const agrupado = this.listarBauchers.reduce((acc, baucher) => {
+      const key = baucher.ejecutiva || baucher.coordinador || 'Desconocido';
+      if (!acc[key]) {
+        acc[key] = {
+          responsable: key,
+          totalTitulares: 0,
+          totalVouchers: 0,
+          diasAtraso: 0,
+          coordinacion: baucher.coordinacion?.nombre || 'Desconocida'
+        };
+      }
+
+      acc[key].totalVouchers++;
+      if (baucher.titular && baucher.titular.trim() !== '') {
+        acc[key].totalTitulares++;
+      }
+      if (baucher.diasDiferencia > 0) {
+        acc[key].diasAtraso += baucher.diasDiferencia;
+      }
+
+      return acc;
+    }, {});
+
+    this.reporteResumen = Object.values(agrupado)
+      .sort((a: any, b: any) => b.totalVouchers - a.totalVouchers)
+      .slice(0, 10);
+
+    this.generarGrafica();
+    this.generarGraficaAtraso(); 
+
+  }
+
+  generarGrafica() {
+  const labels = this.reporteResumen.map((r: { responsable: any; }) => r.responsable);
+  const data = this.reporteResumen.map((r: { totalVouchers: any; }) => r.totalVouchers);
+
+  if (this.grafica) {
+    this.grafica.destroy(); // Evitar duplicados si se vuelve a generar
+  }
+
+  this.grafica = new Chart('graficaVouchers', {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Total de Vouchers',
+        data: data,
+        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
+  graficaAtraso: any;
+
+  generarGraficaAtraso() {
+    const responsablesConAtraso = this.reporteResumen.filter((r: { diasAtraso: number; }) => r.diasAtraso > 0);
+
+    const labels = responsablesConAtraso.map((r: { responsable: any; }) => r.responsable);
+    const data = responsablesConAtraso.map((r: { diasAtraso: any; }) => r.diasAtraso);
+
+    if (this.graficaAtraso) {
+      this.graficaAtraso.destroy(); // Elimina la anterior si existe
+    }
+
+    this.graficaAtraso = new Chart('graficaAtraso', {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Días de Atraso',
+          data: data,
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Personas con días de atraso en el envío de vouchers'
+          },
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+
+  // Método mejorado para descargar PDF
+  async descargarPDF() {
+    // Generar datos actualizados
+    this.generarDatosReporte();
+    
+    // Esperar un ciclo de detección de cambios
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    const contenido = document.getElementById('contenidoReporte');
+    if (!contenido) return;
+
+    try {
+      // Mostrar loading
+      Swal.fire({
+        title: 'Generando PDF',
+        text: 'Por favor espere...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading(Swal.getDenyButton());
+        }
+      });
+
+      // Configuración de html2canvas
+      const canvas = await html2canvas(contenido, {
+        logging: false,
+        useCORS: true,
+        allowTaint: true
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth() - 20; // Margen
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      // Agregar título y fecha
+      pdf.setFontSize(18);
+      pdf.text('Reporte de Vouchers', 105, 15, { align: 'center' });
+      pdf.setFontSize(12);
+      pdf.text(`Generado el: ${new Date().toLocaleDateString()}`, 105, 22, { align: 'center' });
+
+      // Agregar imagen del contenido
+      pdf.addImage(imgData, 'PNG', 10, 30, pdfWidth, pdfHeight);
+
+      // Guardar PDF
+      pdf.save(`reporte_vouchers_${new Date().toISOString().slice(0, 10)}.pdf`);
+
+      // Cerrar loading
+      Swal.close();
+    } catch (error) {
+      Swal.fire('Error', 'No se pudo generar el PDF', 'error');
+      console.error('Error al generar PDF:', error);
+    }
+  }
+    
 }

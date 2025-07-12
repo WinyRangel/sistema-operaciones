@@ -195,11 +195,15 @@
 
         <!-- Botón exportar -->
         <div class="col-md-auto">
-          <button class="btn btn-outline-primary shadow-sm me-2"
-          title="Generar reporte"
-          (click)="generarReporte()">
-              <i class="bi bi-bar-chart"></i> Reporte
+        <!-- Botón para abrir el modal -->
+        <button class="btn btn-outline-primary shadow-sm me-2"
+                title="Generar reporte"
+                (click)="generarDatosReporte()" 
+                data-bs-toggle="modal" data-bs-target="#reporteModal">
+          <i class="bi bi-bar-chart me-1"></i> Reporte
         </button>
+
+
           <button class="btn btn-outline-success shadow-sm"
           title="Exportar a excel"
           (click)="exportarExcel()">
@@ -285,6 +289,53 @@
             </li>
           </ul>
         </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!---MODAL DE REPORTES-->
+<!-- Modal del reporte -->
+<div class="modal fade" id="reporteModal" tabindex="-1" aria-labelledby="reporteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="reporteModalLabel">Reporte General</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Contenido del reporte a capturar como PDF -->
+        <div id="contenidoReporte">
+          <h5>Personas con mayor número de incidencias, vouchers enviados, mayores atrasos, coordinaciones que más reportan</h5>
+          <!-- Aquí puedes insertar tablas o gráficos con tus datos -->
+          <canvas id="graficaVouchers" width="400" height="200"></canvas>
+          <table class="table table-bordered table-sm">
+            <thead>
+              <tr>
+                <th>Responsable</th>
+                <th>Total Incidencias</th>
+                <th>Total Vouchers</th>
+                <th>Días de Atraso</th>
+                <th>Coordinación</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of reporteResumen">
+                <td>{{ r.responsable }}</td>
+                <td>{{ r.totalTitulares }}</td>
+                <td>{{ r.totalVouchers }}</td>
+                <td>{{ r.diasAtraso }}</td>
+                <td>{{ r.coordinacion }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <canvas id="graficaAtraso" width="400" height="200"></canvas>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-success" (click)="descargarPDF()">Descargar PDF</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>
