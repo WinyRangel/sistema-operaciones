@@ -78,7 +78,8 @@ import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-ag
     DatePickerModule,
     ScrollingModule,
     ButtonModule,
-    CommonModule               
+    CommonModule
+
   ],
     providers: [
         provideAnimationsAsync(),
