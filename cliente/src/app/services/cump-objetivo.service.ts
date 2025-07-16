@@ -7,7 +7,7 @@ import { CumplimientoObjetivo } from '../models/cump-objetivo';
 
 @Injectable({ providedIn: 'root' })
 export class CumpObjetivoService {
-  private apiUrl = 'http://localhost:4000/api/seguimiento_agenda';
+  private apiUrl = 'https://servidor-operaciones.onrender.com/api/seguimiento_agenda';
 
   constructor(private http: HttpClient) { }
 

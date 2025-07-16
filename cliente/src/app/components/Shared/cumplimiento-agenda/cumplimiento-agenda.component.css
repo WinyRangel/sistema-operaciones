@@ -23,6 +23,7 @@ body {
   padding-top: 20px;
 }
 
+
 /* Sidebar */
 .sidebar-container {
   position: fixed;
@@ -49,6 +50,16 @@ body {
 
 .sidebar.collapsed {
   width: var(--sidebar-collapsed);
+}
+
+.app-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, #2c3e50, #4a6491);
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .toggle-btn {
@@ -120,7 +131,7 @@ body {
 .dashboard-header {
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   color: rgb(7, 37, 94);
-  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  border-radius: 8px;
   box-shadow: var(--card-shadow);
   padding: 1.5rem 0;
   margin-bottom: 2rem;
@@ -130,7 +141,7 @@ body {
 /* Tarjetas y métricas */
 .dashboard-card {
   background: #fff;
-  border-radius: var(--border-radius);
+  border-radius: 10px;
   box-shadow: var(--card-shadow);
   padding: 24px;
   margin-bottom: 20px;
@@ -200,8 +211,9 @@ body {
 .table-responsive {
   width: 100%;
   overflow-x: auto;
-  border-radius: var(--border-radius);
+  border-radius: 8px;
 }
+
 
 .custom-table {
   width: 100%;
@@ -231,7 +243,7 @@ body {
 
 .filter-section {
   background: white;
-  border-radius: var(--border-radius);
+  border-radius: 10px;
   padding: 1.5rem;
   box-shadow: var(--card-shadow);
   margin-bottom: 1.5rem;
@@ -281,7 +293,7 @@ input.form-control {
 
 /* Modal */
 .modal-content {
-  border-radius: var(--border-radius);
+  border-radius: 8px;
   box-shadow: var(--card-shadow);
 }
 
