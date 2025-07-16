@@ -1,193 +1,711 @@
-<div class="container-fluid py-4">
-  <div class="row justify-content-center">
-    <div class="col-xxl-10 col-xl-12">
-      <div class="card shadow-lg rounded-4 border-0 bg-light">
-        <div class="card-header bg-primary text-white rounded-top-3 py-4">
-          <h3 class="text-center mb-0 fw-bold display-6">Cumplimiento de Objetivos y Metas Semanales</h3>
-        </div>
+<body>
+    <div class="container-fluid p-0 min-vh-100">
+        <!-- Encabezado -->
+        <header class="app-header">
+            <h2><i class="fas fa-chart-line me-2"></i>Seguimiento de Objetivos y Metas Semanales</h2>
+        </header>
 
-        <div class="card-body p-4 mb-3">
-          <!-- Selector de Coordinador -->
-          <nav class="nav nav-pills nav-justified flex-column flex-md-row mb-4">
-            <a
-              *ngFor="let coord of coordinadores"
-              class="nav-link"
-              [class.active]="coord === coordinadorSeleccionado"
-              (click)="seleccionarCoordinador(coord)"
-              href="javascript:void(0);"
-            >
-              {{ coord }}
-            </a>
-          </nav>
-
-          <!-- Fila para selector y objetivo -->
-          <div class="row align-items-center g-3 mb-3">
-            <!-- Selector de semana -->
-            <div class="col-md-4">
-              <select
-                class="form-select form-select-sm shadow-sm"
-                [(ngModel)]="semanaSeleccionada"
-                (change)="seleccionarSemana(semanaSeleccionada)"
-              >
-                <option value="" disabled selected>Seleccionar semana</option>
-                <option *ngFor="let semana of semanas" [value]="semana">
-                  {{ semana }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Objetivo y verificación de coincidencia -->
-            <div class="col-md-8 mb">
-              <p class="mb-0"><strong>Objetivo:</strong> {{ objetivo }}</p>
-              <p class="mb-0" *ngIf="coordinadorSeleccionado && semanaSeleccionada">
-                <!-- <strong>¿Existe actividad reportada con código del objetivo?</strong> -->
-                <!-- <span
-                  [ngClass]="{
-                    'text-success': existeCoincidenciaEnReportadas,
-                    'text-danger': !existeCoincidenciaEnReportadas
-                  }"
-                >
-                  {{ existeCoincidenciaEnReportadas ? 'Sí' : 'No' }}
-                </span> -->
-              </p>
-            </div>
-          </div>
-
-          <!-- Tabla de resultados -->
-          <div class="table-responsive">
-            <table class="table table-striped table-bordered">
-              <thead>
-                <tr>
-                  <th>Semana</th>
-                  <th>Códigos correspondientes</th>
-                  <th>Agendados</th>
-                  <th>Reportados</th>
-                  <th>% Cumplimiento</th>
-                </tr>
-              </thead>
-              <tbody>
-                <ng-container *ngFor="let fila of dataTabla">
-                  <tr *ngIf="fila.semana === semanaSeleccionada">
-                    <td>{{ fila.semana }}</td>
-                    <td>{{ fila.codigos.join(', ') }}</td>
-                    <td>{{ fila.agendados }}</td>
-                    <td>{{ fila.reportados }}</td>
-                    <td
-                      [ngClass]="{
-                        'text-danger': fila.porcentaje < 50,
-                        'text-warning': fila.porcentaje >= 50 && fila.porcentaje < 90,
-                        'text-success': fila.porcentaje >= 90
-                      }"
-                      [title]="
-                        fila.porcentaje >= 90
-                          ? 'Se ha cumplido el objetivo'
-                          : 'No se ha cumplido el objetivo'
-                      "
-                    >
-                      <div class="d-flex align-items-center gap-2">
-                        <!-- Ícono -->
-                        <i
-                          class="bi"
-                          [ngClass]="{
-                            'bi-x-circle-fill text-danger': fila.porcentaje < 50,
-                            'bi-exclamation-triangle-fill text-warning':
-                              fila.porcentaje >= 50 && fila.porcentaje < 90,
-                            'bi-check-circle-fill text-success': fila.porcentaje >= 90
-                          }"
-                        ></i>
-                        <!-- Barra de progreso -->
-                        <div
-                          class="progress flex-grow-1"
-                          style="height: 20px; border-radius: 10px; overflow: hidden;"
-                        >
-                          <div
-                            class="progress-bar progress-bar-striped progress-bar-animated"
-                            role="progressbar"
-                            [ngClass]="{
-                              'bg-danger': fila.porcentaje < 50,
-                              'bg-warning': fila.porcentaje >= 50 && fila.porcentaje < 90,
-                              'bg-success': fila.porcentaje >= 90
-                            }"
-                            [style.width.%]="fila.porcentaje"
-                            [attr.aria-valuenow]="fila.porcentaje"
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                            [title]="
-                              fila.porcentaje < 50
-                                ? 'El progreso es bajo. Es necesario mejorar.'
-                                : fila.porcentaje < 90
-                                ? 'Progreso aceptable, pero aún se puede mejorar.'
-                                : '¡Excelente! Se ha cumplido el objetivo.'
-                            "
-                          >
-                            {{ fila.porcentaje }}%
-                          </div>
+        <div class="container-fluid">
+            <!-- Filtros -->
+            <div class="filter-section">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3 text-center">
+                            <label class="form-label fw-bold">Selecciona coordinador:</label>
+                            <div class="d-flex flex-wrap justify-content-center">
+                                <button *ngFor="let coord of coordinadores" class="coordinador-btn"
+                                    [class.active]="coord === coordinadorSeleccionado"
+                                    (click)="seleccionarCoordinador(coord)">
+                                    <i class="fas fa-user me-2"></i>{{ coord }}
+                                </button>
+                            </div>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                </ng-container>
-              </tbody>
-              <tbody *ngIf="!dataTabla.length">
-                <tr>
-                  <td colspan="5" class="text-center">No hay datos disponibles.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div *ngIf="objetivoCantidad > 0" class="mt-4 text-end">
-            <p><strong>Cantidad reportada:</strong> {{ cantidadReportada }}</p>
-            <p><strong>Faltante para cumplir:</strong> {{ cantidadRestante }}</p>
-          </div>
-
-          <!-- Tabla de detalles de actividades cumplidas -->
-          <div *ngIf="detalleActividades.length" class="mt-4">
-            <h5 class="mb-3">Detalle de Actividades</h5>
-            <div class="table-responsive">
-              <table class="table table-striped table-bordered fixed-table">
-                <!-- Definimos anchos relativos o absolutos -->
-                <colgroup>
-                  <col style="width: 10%;" />
-                  <col style="width: 30%;" />
-                  <col style="width: 45%;" />
-                  <col style="width: 15%;" />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th>Código</th>
-                    <th>Actividad Agendada</th>
-                    <th>Actividad Reportada</th>
-                    <th>Cumplimiento</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    *ngFor="let actividad of detalleActividades"
-                    [ngClass]="{
-                      'bg-warning': !actividad.cumplida &&
-                                     actividadReportadaContieneCualquierClave(actividad.actividadReportada)
-                    }"
-                  >
-                    <td class="cell-wrap">{{ actividad.codigo }}</td>
-                    <td class="cell-wrap">{{ actividad.actividadAgendada }}</td>
-                    <td class="cell-wrap">{{ actividad.actividadReportada }}</td>
-                    <td class="cell-wrap">
-                      <span
-                        [class.text-success]="actividad.cumplida"
-                        [class.text-danger]="!actividad.cumplida"
-                        class="fw-bold"
-                      >
-                        {{ actividad.cumplida ? 'Sí' : 'No' }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Selecciona semana:</label>
+                        <div class="d-flex align-items-center">
+                            <select name="semana" class="form-select me-2 select-pequeno"
+                                [(ngModel)]="semanaSeleccionada" (ngModelChange)="seleccionarSemana($event)">
+                                <option value="" disabled>-- Elige una semana --</option>
+                                <option *ngFor="let s of semanas" [value]="s">{{ s }}</option>
+                            </select>
+                            <button class="btn btn-success btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal">
+                                Reporte
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+
+            <div class="row">
+                <!-- Objetivo -->
+                <div class="col-lg-12">
+                    <div class="dashboard-card">
+                        <h3 class="card-title"><i class="fas fa-bullseye me-2 text-primary"></i>Objetivo Semanal</h3>
+
+                        <div class="row align-items-center mb-4">
+                            <div class="col-md-8">
+                                <h5>Objetivo: {{ objetivoSeleccionado }}</h5>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="bg-light p-3 rounded text-center">
+                                    <div class="metric-label">Porcentaje de Cumplimiento </div>
+                                    <div class="metric-value" [ngStyle]="{color: colorBarraCumplimiento}">
+                                        {{ porcentajeCumplimientoObjetivo }}% <i
+                                            class="fas fa-chart-pie fa-2x text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-bar" [ngStyle]="{
+                                width: porcentajeCumplimientoObjetivo + '%',
+                                background: colorBarraCumplimiento
+                            }"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <small>0%</small>
+                            <small>100%</small>
+                        </div>
+
+
+
+                        <h5 class="mt-4 mb-3"><i class="fas fa-tasks me-2 text-primary"></i>Actividades</h5>
+                        <div class="table-responsive">
+                            <table class="table custom-table">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Actividad</th>
+                                        <th>Actividad Reportada</th>
+                                        <th>Código Reportado</th>
+                                        <th>Cumplimiento Agenda</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let act of actividadesObjetivo">
+                                        <td>{{ act.codigo }}</td>
+                                        <td>{{ act.actividad }}</td>
+                                        <td>{{ act.actividadReportada }}</td>
+                                        <td>{{ act.codigoReportado }}</td>
+                                        <td>
+                                            <i class="fas" [ngClass]="{
+                                                'fa-check-circle text-success': act.cumplimientoAgenda,
+                                                'fa-times-circle text-danger': !act.cumplimientoAgenda
+                                            }"></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+            <div class="dashboard-card p-4">
+                <div class="row">
+                    <div class="text-end">
+                        <button class="btn btn-primary btn-sm me-2" (click)="recargarTablas()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <h3 class="card-title "><i class="fas fa-chart-line text-primary me-2"></i>Metas Semanales</h3>
+                    <h5 class="text-muted mb-3 ms-2">Meta: {{ metaSeleccionada }}</h5>
+
+                    <!-- IZQUIERDA: Botones y formularios -->
+                    <div class="col-md-3">
+                        <h5 class="card-title"><i class="fas fa-edit me-2 text-primary"></i>Registrar Seguimiento</h5>
+                        <div class="d-flex flex-column align-items-stretch mb-3">
+                            <button class="btn btn-outline-warning btn-action w-100 mb-2"
+                                (click)="mostrarFormulario('mora')">
+                                <i class="fas fa-money-bill-wave me-1"></i> Mora
+                            </button>
+                            <button class="btn btn-outline-info btn-action w-100 mb-2"
+                                (click)="mostrarFormulario('fichas')">
+                                <i class="fas fa-file-alt me-1"></i> Fichas
+                            </button>
+                            <button class="btn btn-outline-secondary btn-action w-100 mb-2"
+                                (click)="mostrarFormulario('creditos')">
+                                <i class="fas fa-credit-card me-1"></i> Créditos Nuevos
+                            </button>
+                            <button class="btn btn-outline-success btn-action w-100 mb-2"
+                                (click)="mostrarFormulario('renovacion')">
+                                <i class="fas fa-sync-alt me-1"></i> Renovaciones
+                            </button>
+                            <br>
+                            <button class="btn btn-primary btn-action w-100" (click)="guardarSeguimientoFormulario()">
+                                <i class="fas fa-save me-1"></i> Guardar
+                            </button>
+                        </div>
+
+
+                        <!-- Formularios -->
+                        <div *ngIf="formularioVisible === 'mora'">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Mora inicial</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" [(ngModel)]="moraInicial">
+                                </div>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col">
+                                    <label class="form-label fw-bold">GPO/IND</label>
+                                    <input type="text" class="form-control" [(ngModel)]="gpoindm">
+                                </div>
+                                <div class="col">
+                                    <label class="form-label fw-bold">Meta</label>
+                                    <input type="number" class="form-control" [(ngModel)]="metaM">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div *ngIf="formularioVisible === 'fichas'">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Meta de Fichas por Cerrar </label>
+                                <input type="number" class="form-control" [(ngModel)]="fichasCerrar">
+                            </div>
+                        </div>
+
+                        <div *ngIf="formularioVisible === 'creditos'">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">GPO/IND Iniciales</label>
+                                <input type="number" class="form-control" [(ngModel)]="gpoindInicial">
+                            </div>
+                            <div class="row g-2">
+                                <div class="col">
+                                    <label class="form-label fw-bold">Meta GPO</label>
+                                    <input type="number" class="form-control" [(ngModel)]="metaGpo">
+                                </div>
+                            </div>
+
+                            <!-- NUEVO BLOQUE -->
+                            <div class="row g-2 mt-3">
+                                <div class="col">
+                                    <label class="form-label fw-bold">Meta IND</label>
+                                    <input type="number" class="form-control" [(ngModel)]="metaInd">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div *ngIf="formularioVisible === 'renovacion'">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">GPO/IND Proyectados</label>
+                                <input type="number" class="form-control" [(ngModel)]="gpoindProyectado">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Meta semanal</label>
+                                <input type="number" class="form-control" [(ngModel)]="metaProyec">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CENTRO: Tablas de resultados -->
+                    <div class="col-md-6">
+                        <h3 class="card-title"><i class="fas fa-table me-2 text-info"></i>Detalle de Metas</h3>
+                        <ng-container *ngIf="semanaSeleccionada && coordinadorSeleccionado">
+                            <!-- MORA -->
+                            <div *ngIf="showMora">
+                                <h5 class="text-primary">Mora</h5>
+                                <table class="table table-bordered table-striped table-responsive">
+                                    <thead class="table-dark text-center">
+                                        <tr>
+                                            <th>Mora Inicial</th>
+                                            <th>GPO/IND</th>
+                                            <th>Meta</th>
+                                            <th>Recuperado</th>
+                                            <th>Editar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let reg of cumplimientos" [hidden]="esFilaVaciaMora(reg)">
+                                            <td>{{ reg.moraInicial }}</td>
+                                            <td>{{ reg.gpoindm }}</td>
+                                            <td>{{ reg.metaM }}</td>
+                                            <td>{{ reg.recupM }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-warning"
+                                                    (click)="editarRegistro(reg, 'mora')">Editar</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot class="tfoot-total text-end">
+                                        <tr class="table-info text-center">
+                                            <td><strong>Mora restante = {{ totalMoraFinal }}</strong></td>
+                                            <td></td>
+                                                <td><strong>Total de mora meta = {{totalMetaMora}}</strong></td>
+                                                <td><strong>Total recuperado = {{ totalRecuperado }}</strong></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <!-- FICHAS -->
+                            <div *ngIf="showFichas">
+                                <h5 class="text-warning">Fichas</h5>
+                                <table class="table table-bordered table-striped table-responsive">
+                                    <thead class="table-dark text-center">
+                                        <tr>
+                                            <th>Por Cerrar</th>
+                                            <th>Cerradas</th>
+                                            <th>Editar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let reg of cumplimientos" [hidden]="esFilaVaciaFichas(reg)">
+                                            <td>{{ reg.fichasCerrar }}</td>
+                                            <td>{{ reg.fichasCerradas }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-warning"
+                                                    (click)="editarRegistro(reg, 'fichas')">Editar</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot class="tfoot-total text-end">
+                                        <tr class="table-info text-center">
+                                            <td>{{ totalFichasIniciales }}</td>
+                                            <td>{{ totalFichasCerradas }}</td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <!-- CRÉDITOS -->
+                            <!-- <div *ngIf="showCreditos">
+                                <h5 class="text-success">Créditos Nuevos (GPO/IND)</h5>
+                                <table class="table table-bordered table-striped table-responsive">
+                                    <thead class="table-dark text-center">
+                                        <tr>
+                                            <th>Iniciales</th>
+                                            <th>Meta GPO/IND</th>
+                                            <th>Completado GPO/IND</th>
+                                            <th>Editar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let reg of cumplimientos" [hidden]="esFilaVaciaCredito(reg)">
+                                            <td>{{ reg.gpoindInicial }}</td>
+                                            <td>{{ reg.metaGpo }}</td>
+                                            <td>{{ reg.completadoGpo }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-warning"
+                                                    (click)="editarRegistro(reg, 'creditos')">Editar</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div> -->
+                            <div *ngIf="showCreditos">
+                                <h5 class="text-success">Créditos Nuevos (GPO/IND)</h5>
+                                <table class="table table-bordered table-striped table-responsive">
+                                    <thead class="table-dark text-center">
+                                        <tr>
+                                            <th>Iniciales</th>
+                                            <th>Meta GPO</th>
+                                            <th>Completado GPO</th>
+                                            <th>Meta IND</th>
+                                            <th>Completado IND</th>
+                                            <th>Editar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let reg of cumplimientos" [hidden]="esFilaVaciaCredito(reg)">
+                                            <td>{{ reg.gpoindInicial }}</td>
+                                            <td>{{ reg.metaGpo }}</td>
+                                            <td>{{ reg.completadoGpo }}</td>
+                                            <td>{{ reg.metaInd }}</td>
+                                            <td>{{ reg.completadoInd }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-warning"
+                                                    (click)="editarRegistro(reg, 'creditos')">Editar</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot class="tfoot-total text-end">
+                                        <tr class="table-info text-center">
+                                            <td><strong>Resultado = {{ totalCreditosIniciales }}</strong></td>
+                                            <td><strong>Total = {{ totalMetaGpo }} </strong></td>
+                                            <td><strong>Total GPO = {{ totalCompletadoGpo }}</strong></td>
+                                            <td><strong>Total = {{ totalMetaInd }}</strong></td>
+                                            <td><strong>Total IND = {{ totalCompletadoInd }}</strong></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <!-- RENOVACIONES -->
+                            <div *ngIf="showRenovaciones">
+                                <h5 class="text-danger">Renovaciones</h5>
+                                <table class="table table-bordered table-striped table-responsive">
+                                    <thead class="table-dark text-center">
+                                        <tr>
+                                            <th>Proyectados</th>
+                                            <th>Meta</th>
+                                            <th>Completado</th>
+                                            <th>Editar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let reg of cumplimientos" [hidden]="esFilaVaciaRenovaciones(reg)">
+                                            <td>{{ reg.gpoindProyectado }}</td>
+                                            <td>{{ reg.metaProyec }}</td>
+                                            <td>{{ reg.completadosProyec }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-warning"
+                                                    (click)="editarRegistro(reg, 'renovacion')">Editar</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot class="tfoot-total text-end">
+                                        <tr>
+                                            <td>{{ totalProyecIniciales }}</td>
+                                            <td>{{ totalProyecFaltantes }}</td>
+                                            <td>{{ totalRenovados }}</td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                        </ng-container>
+                    </div>
+
+                    <!-- DERECHA: Barras de porcentaje -->
+                    <div class="col-md-3">
+                        <h5 class="card-title"><i class="fas fa-percent me-2 text-success"></i>Avance</h5>
+
+                        <ng-container *ngIf="showMora">
+                            <div class="metric-card mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>Mora</div>
+                                    <div class="fw-bold">{{ porcentajeMora }}%</div>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar" role="progressbar" [style.width.%]="porcentajeMora"
+                                        [style.backgroundColor]="colorMora">
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+
+                        <ng-container *ngIf="showFichas">
+                            <div class="metric-card mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>Fichas</div>
+                                    <div class="fw-bold">{{ porcentajeFichas }}%</div>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar" role="progressbar" [style.width.%]="porcentajeFichas"
+                                        [style.backgroundColor]="colorFichas">
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+
+                        <ng-container *ngIf="showCreditos">
+                            <div class="metric-card mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>Créditos</div>
+                                    <div class="fw-bold">{{ porcentajeCreditos }}%</div>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar" role="progressbar" [style.width.%]="porcentajeCreditos"
+                                        [style.backgroundColor]="colorCreditos">
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+
+
+                        <!-- <ng-container *ngIf="showCreditos">
+                            <div class="metric-card mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>Créditos</div>
+                                    <div class="fw-bold">{{ porcentajeCreditos }}%</div>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar" role="progressbar" [style.width.%]="porcentajeCreditos"
+                                        [style.backgroundColor]="colorCreditos">
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container> -->
+
+                        <ng-container *ngIf="showRenovaciones">
+                            <div class="metric-card mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>Renovación</div>
+                                    <div class="fw-bold">{{ porcentajeRenovacion }}%</div>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar" role="progressbar" [style.width.%]="porcentajeRenovacion"
+                                        [style.backgroundColor]="colorRenovacion">
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal de edición -->
+            <div class="modal fade" tabindex="-1" [class.show]="modalVisible"
+                [style.display]="modalVisible ? 'block' : 'none'">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Editar Registro</h5>
+                            <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+                        </div>
+                        <div class="modal-body" *ngIf="modalData">
+                            <!-- Campos comunes -->
+                            <div class="mb-3">
+                                <label class="form-label">Coordinador</label>
+                                <input class="form-control" [(ngModel)]="modalData.coordinador" disabled />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Semana</label>
+                                <input class="form-control" [(ngModel)]="modalData.semana" disabled />
+                            </div>
+
+                            <!-- MORA -->
+                            <ng-container *ngIf="modalData.tipo === 'mora'">
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <label>Mora Inicial</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.moraInicial">
+                                    </div>
+                                </div>
+                                <div class="row g-2 mt-2">
+                                    <div class="col">
+                                        <label>GPO/IND</label>
+                                        <input type="text" class="form-control" [(ngModel)]="modalData.gpoindm">
+                                    </div>
+                                    <div class="col">
+                                        <label>Meta</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.metaM">
+                                    </div>
+                                    <div class="col">
+                                        <label>Recup.</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.recupM">
+                                    </div>
+                                </div>
+                            </ng-container>
+
+                            <!-- FICHAS -->
+                            <ng-container *ngIf="modalData.tipo === 'fichas'">
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <label>Fichas Cerradas</label>
+                                        <input type="number" class="form-control"
+                                            [(ngModel)]="modalData.fichasCerradas">
+                                    </div>
+                                </div>
+                            </ng-container>
+
+                            <!-- CREDITOS -->
+                            <ng-container *ngIf="modalData.tipo === 'creditos'">
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <label>Grupos e Individuales Iniciales</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.gpoindInicial">
+                                    </div>
+                                    <div class="col">
+                                        <label>Meta GPO</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.metaGpo">
+                                    </div>
+                                </div>
+
+                                <div class="row g-2 mt-2">
+                                    <div class="col">
+                                        <label>Completado GPO</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.completadoGpo">
+                                    </div>
+                                    <div class="col">
+                                        <label>Meta IND</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.metaInd">
+                                    </div>
+                                </div>
+
+                                <div class="row g-2 mt-2">
+                                    <div class="col">
+                                        <label>Completado IND</label>
+                                        <input type="number" class="form-control" [(ngModel)]="modalData.completadoInd">
+                                    </div>
+                                </div>
+                            </ng-container>
+
+                            <!-- RENOVACIONES -->
+                            <ng-container *ngIf="modalData.tipo === 'renovacion'">
+                                <div class="row g-2 mt-2">
+                                    <div class="col">
+                                        <label>Creditos Renovados</label>
+                                        <input type="number" class="form-control"
+                                            [(ngModel)]="modalData.completadosProyec">
+                                    </div>
+                                </div>
+                            </ng-container>
+
+                            <!-- Fallback -->
+                            <ng-container *ngIf="!['mora','fichas','creditos','renovacion'].includes(modalData.tipo!)">
+                                <p class="text-danger">Tipo de formulario desconocido: {{ modalData.tipo }}</p>
+                            </ng-container>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+                            <button class="btn btn-primary" (click)="guardarDesdeModal()">Guardar cambios</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Modal de reporte -->
+            <!-- MODAL PARA DESCARGAR REPORTE -->
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Selecciona semanas para el reporte</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label>Coordinador:</label>
+                                    <select class="form-select" [(ngModel)]="coordinadorSeleccionado"
+                                        (change)="filtrarSemanasPorCoordinador()">
+                                        <option *ngFor="let c of coordinadores" [value]="c">{{ c }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <label>Selecciona hasta 5 semanas:</label>
+                                    <select class="form-select" multiple [(ngModel)]="semanasSeleccionadasParaReporte"
+                                        (change)="validarLimiteSemanas()">
+                                        <option *ngFor="let s of semanas" [value]="s">{{ s }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button class="btn btn-success"
+                                [disabled]="!semanasSeleccionadasParaReporte.length || !coordinadorSeleccionado"
+                                (click)="generarReportePDF()">
+                                <i class="fas fa-download me-1"></i> Descargar PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <script>
+                // Inicializar gráficos después de que el DOM esté cargado
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Gráfico de actividades (Pie Chart)
+                    const actividadesCtx = document.getElementById('actividadesChart').getContext('2d');
+                    new Chart(actividadesCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Completadas', 'Pendientes'],
+                            datasets: [{
+                                data: [14, 4],
+                                backgroundColor: ['#27ae60', '#e74c3c'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        font: {
+                                            size: 12
+                                        },
+                                        padding: 20
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Estado de Actividades',
+                                    font: {
+                                        size: 16,
+                                        weight: 'bold'
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // Gráfico de metas (Radar Chart)
+                    const metasCtx = document.getElementById('metasChart').getContext('2d');
+                    new Chart(metasCtx, {
+                        type: 'radar',
+                        data: {
+                            labels: ['Mora', 'Fichas', 'Créditos', 'Renovación'],
+                            datasets: [{
+                                label: 'Cumplimiento',
+                                data: [65, 82, 45, 73],
+                                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                                borderColor: '#3498db',
+                                borderWidth: 2,
+                                pointBackgroundColor: '#3498db',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: '#3498db'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                r: {
+                                    angleLines: {
+                                        display: true
+                                    },
+                                    suggestedMin: 0,
+                                    suggestedMax: 100,
+                                    ticks: {
+                                        stepSize: 25
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Cumplimiento de Metas',
+                                    font: {
+                                        size: 16,
+                                        weight: 'bold'
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // Eventos para botones de coordinadores
+                    const coordinadorBtns = document.querySelectorAll('.coordinador-btn');
+                    coordinadorBtns.forEach(btn => {
+                        btn.addEventListener('click', function () {
+                            coordinadorBtns.forEach(b => b.classList.remove('active'));
+                            this.classList.add('active');
+                        });
+                    });
+                });
+            </script>

@@ -1,22 +1,33 @@
-import { Component, OnInit } from '@angular/core';
-import { CoordinacionService } from '../../../services/coordinacion.service';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { lastValueFrom, Subscription, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { ObjetivosService } from '../../../services/objetivos.service';
+import { CumpObjetivoService } from '../../../services/cump-objetivo.service';
 import { Agenda } from '../../../models/agenda';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
-// Interfaz para filas de la tabla
-interface FilaCumplimiento {
-  semana: string;
-  codigos: string[];
-  agendados: number;
-  reportados: number;
-  porcentaje: number;
+
+
+import { CumplimientoObjetivo } from '../../../models/cump-objetivo';
+import Swal from 'sweetalert2';
+
+type FormularioTipo = 'mora' | 'creditos' | 'fichas' | 'renovacion';
+
+interface FilasFormulario {
+  mora: { grupo: string; meta: string; recup: string }[];
+  creditos: { meta: string; completado: string }[];
+  fichas: { meta: string; completado: string }[];
+  renovacion: { meta: string; completado: string }[];
+
 }
 
-interface DetalleActividad {
-  actividadAgendada: string;
-  codigo: string;
-  actividadReportada: string;
-  cumplida: boolean;
-  motivo?: string;
+interface DataRow {
+  coordinador: string;
+  semana: string;
+  total: number;
+  logrado: number;
+  porcentaje: number;
 }
 
 @Component({
@@ -25,378 +36,1031 @@ interface DetalleActividad {
   templateUrl: './cumplimiento-agenda.component.html',
   styleUrls: ['./cumplimiento-agenda.component.css']
 })
-export class CumplimientoAgendaComponent implements OnInit {
-  agendas: Agenda[] = [];
+export class CumplimientoAgendaComponent implements OnInit, OnDestroy {
+  isExpanded = true;
+
   coordinadores: string[] = [];
   semanas: string[] = [];
-  detalleActividades: DetalleActividad[] = [];
+  agendas: Agenda[] = [];
+  cumplimientos: any[] = [];
+  semanasSeleccionadasParaReporte: string[] = [];
 
   coordinadorSeleccionado = '';
   semanaSeleccionada = '';
-  objetivo = '';
+  objetivoSeleccionado = '';
+  metaSeleccionada = '';
+  formularioVisible!: FormularioTipo;
 
-  dataTabla: FilaCumplimiento[] = [];
+  actividadesObjetivo: Agenda[] = [];
+  actividadesMeta: Agenda[] = [];
 
-  // Nueva bandera para indicar si existe alguna actividad reportada que coincida
-  existeCoincidenciaEnReportadas: boolean = false;
+  moraInicial: number = 0;
+  moraFinal: number = 0;
+  gpoindm: string = '';
+  metaM: number = 0;
+  recupM: number = 0;
 
-  // Mapeo de palabra clave a códigos
-  codigoClave: Record<string, string[]> = {
-    'Mora': ['C'],
-    'Supervisión': ['Sup'],
-    'Fichas': ['CF', 'R'],
-    'Ficha': ['CF', 'R'],
-    'Nuevo': ['GN', 'VTA'],
-    'Venta': ['VTA'],
-    'ventas': ['VTA'],
-    'Ventas': ['VTA'],
-    'Renovación': ['S/Renov'],
-    'Renovacion': ['S/Renov'],
-    'ficha cerrada': ['R'],   
-    'cierre fichas': ['R'],
+  fichasCerrar: number = 0;
+  fichasFaltantes: number = 0;
+  fichasCerradas: number = 0;
+
+  gpoindInicial: number = 0;
+  gpoindFinal: number = 0;
+  metaGpo: number = 0;
+  completadoGpo: number = 0;
+  metaInd: number = 0;
+  completadoInd: number = 0;
+
+  gpoindProyectado: number = 0;
+  gpoindRenovado: number = 0;
+  metaProyec: number = 0;
+  completadosProyec: number = 0;
+
+  // Totales
+  totalMoraFinal: number = 0;
+  totalFichasFaltantes: number = 0;
+  totalCreditosFinales: number = 0;
+  totalRenovados: number = 0;
+  totalRecuperado: number = 0;
+
+  // Propiedades para el Modal
+  modalVisible = false;
+  modalData: CumplimientoObjetivo | null = null;
+  totalFichasCerradas: any;
+  totalFichasIniciales: any;
+  totalCreditosIniciales: any;
+  totalCreditosCreados: any;
+  totalProyecIniciales: any;
+  totalProyecFaltantes: any;
+
+  moraMetaReal: number = 0;
+  moraRecuperadoReal: number = 0;
+  totalMetaMora: any;
+
+  reportePreview: DataRow[] = [];
+  totalCreditosMeta: any;
+  totalCreditosCompletado: any;
+  totalMetaGpo: any;
+  totalMetaInd: any;
+  totalCompletadoGpo: any;
+  totalCompletadoInd: any;
+
+
+  /** ¿Mostrar tabla Mora? */
+  get showMora(): boolean {
+    return !!this.cumplimientos?.some(r =>
+      r.moraInicial! > 0 ||
+      r.moraFinal! > 0 ||
+      (r.gpoindm?.trim() ?? '') !== '' ||
+      r.metaM! > 0 ||
+      r.recupM! > 0
+    );
+  }
+
+  /** ¿Mostrar tabla Fichas? */
+  get showFichas(): boolean {
+    return !!this.cumplimientos?.some(r =>
+      r.fichasCerrar! > 0 ||
+      r.fichasFaltantes! > 0 ||
+      r.fichasCerradas! > 0
+    );
+  }
+  esFilaVaciaFichas(reg: any): boolean {
+    return (
+      (reg.fichasCerrar ?? 0) === 0 &&
+      (reg.fichasFaltantes ?? 0) === 0 &&
+      (reg.fichasCerradas ?? 0) === 0
+    );
+  }
+  /** No mostrar filas vacias de Mora */
+  esFilaVaciaMora(reg: any): boolean {
+    return (
+      (reg.moraInicial ?? 0) === 0 &&
+      (reg.moraFinal ?? 0) === 0 &&
+      (reg.metaM ?? 0) === 0 &&
+      (reg.recupM ?? 0) === 0
+    );
+  }
+
+
+  /** ¿Mostrar tabla Créditos? */
+  get showCreditos(): boolean {
+    return !!this.cumplimientos?.some(r =>
+      r.gpoindInicial! > 0 ||
+      r.gpoindFinal! > 0 ||
+      r.metaGpo! > 0 ||
+      r.completadoGpo! > 0 ||
+      r.metaInd! > 0 ||
+      r.completadoInd! > 0
+    );
+  }
+
+  esFilaVaciaCredito(reg: any): boolean {
+    return (
+      (reg.gpoindInicial ?? 0) === 0 &&
+      (reg.metaGpo ?? 0) === 0 &&
+      (reg.completadoGpo ?? 0) === 0 &&
+      (reg.metaInd ?? 0) === 0 &&
+      (reg.completadoInd ?? 0) === 0
+    );
+  }
+
+
+  /** ¿Mostrar tabla Renovaciones? */
+  get showRenovaciones(): boolean {
+    return !!this.cumplimientos?.some(r =>
+      r.gpoindProyectado! > 0 ||
+      r.gpoindRenovado! > 0 ||
+      r.metaProyec! > 0 ||
+      r.completadosProyec! > 0
+    );
+  }
+  esFilaVaciaRenovaciones(reg: any): boolean {
+    return (
+      (reg.gpoindProyectado ?? 0) === 0 &&
+      (reg.gpoindRenovado ?? 0) === 0 &&
+      (reg.metaProyec ?? 0) === 0 &&
+      (reg.completadosProyec ?? 0) === 0
+    );
+  }
+
+  private subs = new Subscription();
+
+  private readonly codigoObjetivoMap: Record<string, string[]> = {
+    mora: ['C'],
+    supervisión: ['SUP'],
+    ficha: ['CF', 'R'],
+    fichas: ['CF', 'R'],
+    nuevos: ['GN', 'VTA'],
+    nuevo: ['GN', 'VTA'],
+    cambaceo: ['VTA'],
+    renovación: ['S/Renov'],
+    renovacion: ['S/Renov'],
+    cerrada: ['R'],
+    cierre: ['R']
   };
-  
-  validacionCodigos: Record<string, string[]> = {
-    'C': ['cobranza', 'cobranzas', 'precobranza'],
-    'Sup': ['supervision','supervisión', 'supervisando', 'supervisar'],
-    'R': ['ficha cerrada', 'cierre fichas'],
-    'CF': ['ficha cerrada', 'cierre fichas'],
-    'GN': ['grupo nuevo', 'cliente nuevo'],
-    'VTA': ['nuevo', 'cliente nuevo', 'ventas', 'venta', 'promoción', 'cambaceo', 'contactos', 'volanteo'],
-    'S/Renov': ['renovacion','renovación', 'renovar', 'renovando']
-  };
 
-  // 1) Definimos un set de stop words en español (artículos, preposiciones, conjunciones, pronombres básicos)
-  private stopWords: Set<string> = new Set([
-    'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas',
-    'de', 'del', 'al', 'a', 'en', 'y', 'o', 'u', 'e', 'que',
-    'con', 'sin', 'por', 'para', 'se', 'su', 'sus', 'lo',
-    'le', 'les', 'mi', 'mis', 'tu', 'tus', 'su', 'sus'
-  ]);
-
-  objetivoCantidad = 0;
-  cantidadReportada = 0;
-  cantidadRestante = 0;
-
-  constructor(private servicio: CoordinacionService) { }
+  constructor(
+    private objetivosSvc: ObjetivosService,
+    private seguimientoSvc: CumpObjetivoService
+  ) { }
 
   ngOnInit(): void {
-    this.generarSemanas();
-    this.servicio.obtenerAgendas().subscribe((datos) => {
-      this.agendas = datos;
-      this.coordinadores = Array.from(new Set(this.agendas.map(a => a.coordinador)));
-      this.actualizarTotales();
-    });
-  }
+    this.subs.add(
+      this.objetivosSvc.obtenerAgendas()
+        .pipe(
+          catchError(err => {
+            console.error('Error al obtener agendas:', err);
+            return throwError(err);
+          })
+        )
+        .subscribe(data => {
+          console.log('API Agendas respondió:', data);
+          this.agendas = data;
+          this.coordinadores = Array.from(new Set(
+            data.map(a => a.coordinador?.trim() || '').filter(Boolean)
+          ));
+          this.semanas = Array.from(new Set(
+            data.map(a => a.semana?.trim() || '').filter(Boolean)
+          )).sort(this.sortSemanas);
 
-  generarSemanas(): void {
-    for (let i = 1; i <= 52; i++) {
-      this.semanas.push(`SEMANA ${i}`);
-    }
-  }
-
-  seleccionarCoordinador(nombre: string): void {
-    this.coordinadorSeleccionado = nombre;
-    this.buscarObjetivo();
-    this.actualizarTotales();
-    this.actualizarDetalleActividades();
-  }
-
-  seleccionarSemana(semana: string): void {
-    this.semanaSeleccionada = semana;
-    this.buscarObjetivo();
-    this.actualizarDetalleActividades();
-  }
-
-  // --------------------------------------------------
-  // 2) Función de normalización: minúsculas, sin acentos, sin caracteres especiales
-  private normalizarTexto(texto: string): string {
-    return texto
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
-      .replace(/[^a-z0-9\s]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
-
-  // 3) Tokenizar y filtrar stop words
-  private obtenerTokensSignificativos(texto: string): string[] {
-    const normalizado = this.normalizarTexto(texto);
-    const palabras = normalizado.split(' ');
-    return palabras.filter(palabra =>
-      palabra.length > 1 && !this.stopWords.has(palabra)
+          console.log('coordinadores cargados:', this.coordinadores);
+          console.log('semanas cargadas:', this.semanas);
+        })
     );
   }
 
-  // 4) Validación genérica por similitud entre actividad agendada y reportada
-  private cumplePorSimilitud(
-    actividadAgendada: string | undefined,
-    actividadReportada: string | undefined
-  ): boolean {
-    if (!actividadAgendada || !actividadReportada) {
-      return false;
-    }
-
-    const tokensAgendada = this.obtenerTokensSignificativos(actividadAgendada);
-    const actRepNorm = this.normalizarTexto(actividadReportada);
-
-    return tokensAgendada.some(token => actRepNorm.includes(token));
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 
-  // 5) Validación por relación entre actividad reportada y objetivo
-  private cumpleActividadConObjetivo(
-    actividadReportada: string | undefined,
-    objetivo: string | undefined
-  ): boolean {
-    if (!actividadReportada || !objetivo) {
-      return false;
-    }
+  seleccionarCoordinador(coord: string): void {
+    this.coordinadorSeleccionado = coord;
+    this.resetSelecciones();
+    this.semanas = Array.from(new Set(
+      this.agendas
+        .filter(a => a.coordinador === coord)
+        .map(a => a.semana || '')
+        .filter(Boolean)
+    )).sort(this.sortSemanas);
 
-    const tokensObjetivo = this.obtenerTokensSignificativos(objetivo);
-    const actRepNorm = this.normalizarTexto(actividadReportada);
-
-    return tokensObjetivo.some(token => actRepNorm.includes(token));
+    console.log('Elegido coordinador:', coord, 'Semanas filtradas:', this.semanas);
   }
 
-  /**
-   * Valida si la actividad reportada corresponde al código,
-   * si no coincide por código, valida similitud con la actividad agendada (requiere palabra clave de código),
-   * y finalmente si no cumple ninguno de esos dos, verifica relación con el objetivo.
-   */
-  validarActividad(
-    codigo: string | undefined,
-    actividadReportada: string | undefined,
-    actividadAgendada: string | undefined,
-    objetivo: string | undefined
-  ): boolean {
-    // Si no hay actividad agendada ni reportada, no cumple
-    if (!actividadAgendada || !actividadReportada) {
-      return false;
+  seleccionarSemana(sem: string): void {
+    this.semanaSeleccionada = sem;
+    const registros = this.agendas.filter(a =>
+      a.coordinador === this.coordinadorSeleccionado && a.semana === sem
+    );
+    if (registros.length) {
+      const { objetivo = '', meta = '' } = registros[0];
+      this.objetivoSeleccionado = objetivo;
+      this.metaSeleccionada = meta;
+
+      const cods = this.obtenerCodigosDeObjetivo(objetivo);
+      this.actividadesObjetivo = registros
+        .filter(a => a.codigo && cods.includes(a.codigo))
+        .map(a => ({
+          ...a,
+          cumplimientoAgenda: a.codigo?.trim() === a.codigoReportado?.trim()
+        }));
+
+      this.actividadesMeta = registros.filter(a => a.acordeObjetivo === true);
     }
 
-    const actRepNorm = this.normalizarTexto(actividadReportada);
 
-    // 1) Intentar lógica por código, si existe en validacionCodigos
-    if (codigo && this.validacionCodigos[codigo]) {
-      const clavesCodigo = this.validacionCodigos[codigo]!.map(c => this.normalizarTexto(c));
-      const coincideCodigo = clavesCodigo.some(palabraClave => actRepNorm.includes(palabraClave));
-      if (coincideCodigo) {
-        return true;
-      }
-    }
-
-    // 2) Si no coincide por código, usar similitud entre actividad agendada y reportada,
-    // pero VALIDAR que también exista palabra clave de validación de código
-    if (this.cumplePorSimilitud(actividadAgendada, actividadReportada)) {
-      if (codigo && this.validacionCodigos[codigo]) {
-        const clavesCodigo = this.validacionCodigos[codigo]!.map(c => this.normalizarTexto(c));
-        const coincideCodigoPorSimilitud = clavesCodigo.some(palabraClave => actRepNorm.includes(palabraClave));
-        if (coincideCodigoPorSimilitud) {
-          return true;
-        } else {
-          // No existe palabra clave de validación de código, no se considera cumplida
-          return false;
+    this.seguimientoSvc.obtenerSeguimiento(this.coordinadorSeleccionado, this.semanaSeleccionada)
+      .subscribe({
+        next: (data) => {
+          this.cumplimientos = data.map(reg => ({
+            ...reg,
+            tipo: this.inferirTipo(reg)
+          }));
+          this.calcularTotales();
+          console.log('Cumplimientos cargados con tipo:', this.cumplimientos);
+        },
+        error: (err) => {
+          console.error('Error al cargar cumplimientos:', err);
+          alert('Error al cargar datos del formulario.');
         }
-      } else {
-        // No hay validación de código definida, no se considera cumplida
-        return false;
-      }
-    }
-
-    // 3) Si aún no cumple, verificar si actividad reportada contiene palabra del objetivo
-    if (this.cumpleActividadConObjetivo(actividadReportada, objetivo)) {
-      return true;
-    }
-
-    return false;
-  }
-
-  obtenerMotivoNoCumplimiento(
-    codigo: string | undefined,
-    actividadReportada: string | undefined
-  ): string {
-    if (!actividadReportada) {
-      return 'Actividad no reportada';
-    }
-    return 'Actividad no relacionada con el objetivo ni con el código';
-  }
-
-  actualizarDetalleActividades(): void {
-    this.detalleActividades = [];
-    if (!this.coordinadorSeleccionado || !this.semanaSeleccionada) {
-      return;
-    }
-
-    const agendaSem = this.agendas.find(a =>
-      a.coordinador === this.coordinadorSeleccionado && a.semana === this.semanaSeleccionada
-    );
-    if (!agendaSem) return;
-
-    // 1) Detectar códigos en el texto de objetivo
-    const clavesDetectadas = this.detectarPalabrasClave(agendaSem.objetivo);
-    const codigos = Array.from(new Set(clavesDetectadas.flatMap(c => c.codigos)));
-
-    // 2) Verificar si existe alguna actividad reportada que coincida con alguno de esos códigos
-    this.existeCoincidenciaEnReportadas = this.verificarCoincidenciaEnReportadas(codigos);
-
-    // 3) Filtrar las actividades agendadas que pertenezcan a esos códigos y construir el array de detalleActividades
-    this.agendas
-      .filter(a =>
-        a.coordinador === this.coordinadorSeleccionado &&
-        a.semana === this.semanaSeleccionada &&
-        codigos.includes(a.codigo || '')
-      )
-      .forEach(a => {
-        const actividadAgendada = a.actividad || '';
-        const actividadReportada = a.actividadReportada || '';
-        const objetivoTexto = agendaSem.objetivo || '';
-
-        const cumplida = this.validarActividad(
-          a.codigo,
-          actividadReportada,
-          actividadAgendada,
-          objetivoTexto
-        );
-
-        this.detalleActividades.push({
-          actividadAgendada: actividadAgendada || 'Sin actividad',
-          codigo: a.codigo || '',
-          actividadReportada: actividadReportada || 'No reportada',
-          cumplida,
-          motivo: cumplida ? '' : this.obtenerMotivoNoCumplimiento(a.codigo, actividadReportada)
-        });
       });
   }
 
-  // Recorre todas las agendas de ese coordinador y semana para ver si hay
-  // al menos una fila reportada cuyo código esté en 'codigosObjetivo'
-  // y tenga actividadReportada no vacía.
-  verificarCoincidenciaEnReportadas(codigosObjetivo: string[]): boolean {
-    if (!this.coordinadorSeleccionado || !this.semanaSeleccionada) {
-      return false;
+
+  private inferirTipo(reg: CumplimientoObjetivo): FormularioTipo {
+    // Mora
+    if (
+      (reg.moraInicial ?? 0) > 0 ||
+      (reg.moraFinal ?? 0) > 0 ||
+      (reg.gpoindm?.trim() ?? '') !== '' ||
+      (reg.metaM ?? 0) > 0 ||
+      (reg.recupM ?? 0) > 0
+    ) {
+      return 'mora';
     }
-
-    return this.agendas.some(a =>
-      a.coordinador === this.coordinadorSeleccionado &&
-      a.semana === this.semanaSeleccionada &&
-      codigosObjetivo.includes(a.codigo || '') &&
-      a.actividadReportada && a.actividadReportada.trim().length > 0
-    );
+    // Fichas
+    if (
+      (reg.fichasCerrar ?? 0) > 0 ||
+      (reg.fichasFaltantes ?? 0) > 0 ||
+      (reg.fichasCerradas ?? 0) > 0
+    ) {
+      return 'fichas';
+    }
+    // Créditos
+    if (
+      (reg.gpoindInicial ?? 0) > 0 ||
+      (reg.gpoindFinal ?? 0) > 0 ||
+      (reg.metaGpo ?? 0) > 0 ||
+      (reg.completadoGpo ?? 0) > 0 ||
+      (reg.metaInd ?? 0) > 0 ||
+      (reg.completadoInd ?? 0) > 0
+    ) {
+      return 'creditos';
+    }
+    // Renovaciones
+    if (
+      (reg.gpoindProyectado ?? 0) > 0 ||
+      (reg.gpoindRenovado ?? 0) > 0 ||
+      (reg.metaProyec ?? 0) > 0 ||
+      (reg.completadosProyec ?? 0) > 0
+    ) {
+      return 'renovacion';
+    }
+    // Por defecto
+    return 'mora';
   }
 
-  buscarObjetivo(): void {
-    const ag = this.agendas.find(a =>
-      a.coordinador === this.coordinadorSeleccionado && a.semana === this.semanaSeleccionada
-    );
-
-    this.objetivo = ag?.objetivo || '';
-
-    // 1) Detectamos los códigos que vienen del texto de objetivo
-    const clavesDetectadas = this.detectarPalabrasClave(this.objetivo);
-    const codigos = Array.from(new Set(clavesDetectadas.flatMap(c => c.codigos)));
-
-    // 2) Convertimos el texto para extraer la cantidad numérica del objetivo
-    this.objetivoCantidad = this.extraerNumeroDeTexto(this.objetivo);
-
-    // 3) Calculamos cuántas unidades se han reportado
-    this.cantidadReportada = this.sumarReportadoRelacionado(codigos, this.semanaSeleccionada);
-    this.cantidadRestante = this.objetivoCantidad - this.cantidadReportada;
-
-    // 4) Verificar si existe alguna actividad reportada que coincida con los códigos del objetivo
-    this.existeCoincidenciaEnReportadas = this.verificarCoincidenciaEnReportadas(codigos);
+  private resetSelecciones(): void {
+    this.semanaSeleccionada = '';
+    this.objetivoSeleccionado = '';
+    this.metaSeleccionada = '';
+    this.actividadesObjetivo = [];
+    this.actividadesMeta = [];
   }
 
-  detectarPalabrasClave(objetivo?: string): { clave: string; codigos: string[] }[] {
-    if (!objetivo) return [];
+  private sortSemanas = (a: string, b: string): number => {
+    const na = parseInt(a.replace(/\D+/g, ''), 10);
+    const nb = parseInt(b.replace(/\D+/g, ''), 10);
+    return na - nb;
+  }
 
-    const objNorm = this.normalizarTexto(objetivo);
-    const coincidencias: { clave: string; codigos: string[] }[] = [];
+  private obtenerCodigosDeObjetivo(obj: string): string[] {
+    const texto = obj.toLowerCase();
+    // Claves ordenadas de mayor a menor longitud
+    const claves = Object.keys(this.codigoObjetivoMap)
+      .sort((a, b) => b.length - a.length);
 
-    for (const palabra in this.codigoClave) {
-      if (objNorm.includes(this.normalizarTexto(palabra))) {
-        coincidencias.push({ clave: palabra, codigos: this.codigoClave[palabra] });
+    const codigosSet = new Set<string>();
+
+    for (const clave of claves) {
+      // Expresión regular con límite de palabra y case‑insensitive
+      const regex = new RegExp(`\\b${clave}\\b`, 'i');
+      if (regex.test(texto)) {
+        this.codigoObjetivoMap[clave].forEach(code => codigosSet.add(code));
       }
     }
 
-    return coincidencias;
+    return Array.from(codigosSet);
   }
 
-  actualizarTotales(): void {
-    this.dataTabla = [];
-    if (!this.coordinadorSeleccionado) return;
 
-    this.semanas.forEach(semana => {
-      const agSem = this.agendas.find(a =>
-        a.coordinador === this.coordinadorSeleccionado && a.semana === semana
-      );
-      const clavesDetectadas = agSem ? this.detectarPalabrasClave(agSem.objetivo) : [];
-      const listaCod = Array.from(new Set(clavesDetectadas.flatMap(c => c.codigos)));
+  get porcentajeCumplimientoObjetivo(): number {
+    const total = this.actividadesObjetivo.length;
+    const hechas = this.actividadesObjetivo.filter(a => a.cumplimientoAgenda).length;
+    return total ? Math.round((hechas / total) * 100) : 0;
+  }
 
-      const items = this.agendas.filter(a =>
-        a.coordinador === this.coordinadorSeleccionado &&
-        a.semana === semana &&
-        listaCod.includes(a.codigo || '')
-      );
+  get colorBarraCumplimiento(): string {
+    const pct = this.porcentajeCumplimientoObjetivo;
+    return pct < 70 ? 'red' : pct <= 90 ? 'orange' : 'green';
+  }
 
-      const totalAg = items.length;
-      // Para contar reportados, usamos validarActividad con el objetivo de esa semana:
-      const totalRp = items.filter(a =>
-        this.validarActividad(
-          a.codigo,
-          a.actividadReportada || '',
-          a.actividad || '',
-          agSem ? agSem.objetivo : ''
-        )
-      ).length;
+  // Porcentaje de Mora
+  get porcentajeMora(): number {
+    const meta = this.cumplimientos.reduce((sum, reg) => sum + (reg.metaM ?? 0), 0);
+    const recup = this.cumplimientos.reduce((sum, reg) => sum + (reg.recupM ?? 0), 0);
 
-      const porcentaje = totalAg === 0 ? 0 : Math.round((totalRp / totalAg) * 100);
+    // Guardar valores reales para el color
+    this.moraMetaReal = meta;
+    this.moraRecuperadoReal = recup;
 
-      this.dataTabla.push({ semana, codigos: listaCod, agendados: totalAg, reportados: totalRp, porcentaje });
+    // Calcular el porcentaje, aunque haya superado la meta (no limitar con Math.min)
+    return meta ? Math.round((recup / meta) * 100) : 0;
+  }
+
+  // Porcentaje de Fichas
+  get porcentajeFichas(): number {
+    const total = this.totalFichasIniciales || 0;
+    const hechas = this.totalFichasCerradas || 0;
+    return total ? Math.min(100, Math.round((hechas / total) * 100)) : 0;
+  }
+
+  // Porcentaje de Créditos
+  get porcentajeCreditos(): number {
+    const metaGpo = this.cumplimientos.reduce((sum, reg) => sum + (reg.metaGpo ?? 0), 0);
+    const metaInd = this.cumplimientos.reduce((sum, reg) => sum + (reg.metaInd ?? 0), 0);
+    const totalMeta = metaGpo + metaInd;
+
+    const completadoGpo = this.cumplimientos.reduce((sum, reg) => sum + (reg.completadoGpo ?? 0), 0);
+    const completadoInd = this.cumplimientos.reduce((sum, reg) => sum + (reg.completadoInd ?? 0), 0);
+    const totalCompletado = completadoGpo + completadoInd;
+
+    return totalMeta > 0 ? Math.min(100, Math.round((totalCompletado / totalMeta) * 100)) : 0;
+  }
+
+
+  // Porcentaje de Renovación
+  get porcentajeRenovacion(): number {
+    const meta = this.totalProyecIniciales || 0;
+    const logrado = this.totalRenovados || 0;
+    return meta ? Math.min(100, Math.round((logrado / meta) * 100)) : 0;
+  }
+
+
+  get colorMora(): string {
+    if (this.moraRecuperadoReal > this.moraMetaReal && this.moraMetaReal > 0) {
+      return '#007700';
+    }
+
+    if (this.moraRecuperadoReal === this.moraMetaReal && this.moraMetaReal > 0) {
+      return 'green';
+    }
+
+    const porcentaje = this.porcentajeMora;
+    if (porcentaje < 70) return 'red';
+    if (porcentaje <= 90) return 'orange';
+
+    return 'green';
+  }
+
+
+  get colorFichas(): string {
+    const p = this.porcentajeFichas;
+    return p < 70 ? '#dc3545' : p <= 90 ? '#ffc107' : '#28a745';
+  }
+
+  get colorCreditos(): string {
+    const p = this.porcentajeCreditos;
+    return p < 70 ? '#dc3545' : p <= 90 ? '#ffc107' : '#28a745';
+  }
+
+  get colorRenovacion(): string {
+    const p = this.porcentajeRenovacion;
+    return p < 70 ? '#dc3545' : p <= 90 ? '#ffc107' : '#28a745';
+  }
+
+
+  mostrarFormulario(tipo: FormularioTipo): void {
+    this.formularioVisible = tipo;
+  }
+
+  editarRegistro(registro: CumplimientoObjetivo, tipo: FormularioTipo): void {
+    console.log('Registro a editar:', registro, 'Tipo forzado:', tipo);
+
+    // Clonamos el objeto para no mutar el array original
+    this.modalData = { ...registro, tipo };
+
+    // Ahora sí abrimos el modal
+    this.modalVisible = true;
+  }
+
+  // Cerrar modal sin guardar
+  cerrarModal(): void {
+    this.modalVisible = false;
+    this.modalData = null;
+  }
+
+
+  guardarDesdeModal(): void {
+    if (!this.modalData?._id) return;
+
+    this.seguimientoSvc.actualizarSeguimiento(this.modalData).subscribe({
+      next: updated => {
+        const idx = this.cumplimientos.findIndex(c => c._id === updated._id);
+        if (idx >= 0) this.cumplimientos[idx] = updated;
+        this.cerrarModal();
+
+        // Toast de éxito
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          }
+        });
+
+        Toast.fire({
+          icon: 'success',
+          title: 'Registro actualizado correctamente'
+        });
+      },
+      error: err => {
+        console.error('Error actualizando registro:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo actualizar el registro.'
+        });
+      }
     });
   }
 
-  calcularPorcentaje(semana: string): number {
-    const fila = this.dataTabla.find(f => f.semana === semana);
-    return fila ? fila.porcentaje : 0;
+  calcularTotales(): void {
+    // Calcular totales de Mora
+    const totalMoraInicial = this.cumplimientos.reduce((sum, reg) => sum + (reg.moraInicial ?? 0), 0);
+    const totalRecuperado = this.cumplimientos.reduce((sum, reg) => sum + (reg.recupM ?? 0), 0);
+
+    this.totalMoraFinal = Math.abs(totalMoraInicial - totalRecuperado); // ✅ siempre positivo
+    this.totalRecuperado = totalRecuperado;
+    this.totalMetaMora = this.cumplimientos.reduce((sum, reg) => sum + (reg.metaM ?? 0), 0);
+
+
+    // Calcular totales de Fichas
+    this.totalFichasIniciales = this.cumplimientos.reduce((sum, reg) => sum + (reg.fichasCerrar || 0), 0);
+    this.totalFichasCerradas = this.cumplimientos.reduce((sum, reg) => sum + (reg.fichasCerradas || 0), 0);
+    this.totalFichasFaltantes = Math.max(this.totalFichasIniciales - this.totalFichasCerradas, 0);
+    this.totalFichasCerradas = this.totalFichasCerradas;
+
+    // Calcular total de Grupos/Ind nuevos
+    // Sumar metas
+    const totalMetaGpo = this.cumplimientos.reduce((sum, reg) => sum + (reg.metaGpo || 0), 0);
+    const totalMetaInd = this.cumplimientos.reduce((sum, reg) => sum + (reg.metaInd || 0), 0);
+    const totalMetas = totalMetaGpo + totalMetaInd;
+
+    // Sumar completados
+    const totalCompletadoGpo = this.cumplimientos.reduce((sum, reg) => sum + (reg.completadoGpo || 0), 0);
+    const totalCompletadoInd = this.cumplimientos.reduce((sum, reg) => sum + (reg.completadoInd || 0), 0);
+    const totalCompletados = totalCompletadoGpo + totalCompletadoInd;
+
+    // Suma de créditos iniciales
+    const gpoindInicial = this.cumplimientos.reduce((sum, reg) => sum + (reg.gpoindInicial || 0), 0);
+
+    // Asignación de totales
+    this.totalCreditosCompletado = totalCompletados;
+    this.gpoindInicial = gpoindInicial;
+    this.totalCreditosIniciales = gpoindInicial + totalCompletados;
+
+    // (Opcional) Otros totales
+    this.totalCreditosMeta = totalMetas;
+    this.totalMetaGpo = totalMetaGpo;
+    this.totalMetaInd = totalMetaInd;
+    this.totalCompletadoGpo = totalCompletadoGpo;
+    this.totalCompletadoInd = totalCompletadoInd;
+
+
+
+
+    // Calcular Renovaciones
+    this.totalProyecIniciales = this.cumplimientos.reduce((sum, reg) => sum + (reg.gpoindProyectado || 0), 0);
+    this.totalRenovados = this.cumplimientos.reduce((sum, reg) => sum + (reg.completadosProyec || 0), 0);
+    this.totalProyecFaltantes = Math.max(this.totalProyecIniciales - this.totalRenovados, 0);
+    this.totalRenovados = this.totalRenovados;
   }
 
-  // Identificar si hay mora en cantidad para ver cuándo redujo
-  extraerNumeroDeTexto(texto: string): number {
-    const match = texto.match(/\d+/);
-    return match ? parseInt(match[0], 10) : 0;
-  }
+  recargarTablas(): void {
+    this.seguimientoSvc.obtenerSeguimiento(this.coordinadorSeleccionado, this.semanaSeleccionada)
+      .subscribe({
+        next: (data) => {
+          this.cumplimientos = data.map(reg => ({
+            ...reg,
+            tipo: this.inferirTipo(reg)
+          }));
 
-  sumarReportadoRelacionado(codigos: string[], semana: string): number {
-    let total = 0;
-
-    this.agendas.forEach(a => {
-      if (
-        a.coordinador === this.coordinadorSeleccionado &&
-        a.semana === semana &&
-        codigos.includes(a.codigo || '')
-      ) {
-        const match = a.actividadReportada?.match(/\d+/);
-        if (match) {
-          total += parseInt(match[0], 10);
+          this.calcularTotales();
+          console.log('Datos recargados correctamente');
+        },
+        error: (err) => {
+          console.error('Error al recargar los datos:', err);
+          alert('No se pudieron recargar los datos.');
         }
+      });
+  }
+
+  guardarSeguimientoFormulario(): void {
+    const tipo = this.formularioVisible;
+
+    if (!tipo || !this.semanaSeleccionada || !this.coordinadorSeleccionado) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Selecciona coordinador, semana y tipo de formulario.',
+      });
+      return;
+    }
+
+    const payload: any = {
+      coordinador: this.coordinadorSeleccionado,
+      semana: this.semanaSeleccionada,
+      tipo,
+      fechaRegistro: new Date().toISOString(),
+
+      moraInicial: this.moraInicial ?? 0,
+      moraFinal: this.moraFinal ?? 0,
+      gpoindm: this.gpoindm ?? '',
+      metaM: this.metaM ?? 0,
+      recupM: this.recupM ?? 0,
+      fichasCerrar: this.fichasCerrar ?? 0,
+      fichasFaltantes: this.fichasFaltantes ?? 0,
+      fichasCerradas: this.fichasCerradas ?? 0,
+      gpoindInicial: this.gpoindInicial ?? 0,
+      gpoindFinal: this.gpoindFinal ?? 0,
+      metaGpo: this.metaGpo ?? 0,
+      completadoGpo: this.completadoGpo ?? 0,
+      metaInd: this.metaInd ?? 0,
+      completadoInd: this.completadoInd ?? 0,
+      gpoindProyectado: this.gpoindProyectado ?? 0,
+      gpoindRenovado: this.gpoindRenovado ?? 0,
+      metaProyec: this.metaProyec ?? 0,
+      completadosProyec: this.completadosProyec ?? 0
+    };
+
+    this.seguimientoSvc.guardarSeguimiento(payload).subscribe({
+      next: () => {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          }
+        });
+        Toast.fire({
+          icon: 'success',
+          title: 'Registro guardado correctamente'
+        });
+      },
+      error: (error) => {
+        console.error('Error al guardar registro:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un problema al guardar el registro.'
+        });
       }
     });
-
-    return total;
   }
 
-  // Método auxiliar original (no modificado) para comprobar si en cualquier
-  // parte de actividadReportada aparece alguna palabra de validacionCodigos.
-  actividadReportadaContieneCualquierClave(actividadReportada: string): boolean {
-    const actNorm = this.normalizarTexto(actividadReportada);
-    for (const claves of Object.values(this.validacionCodigos)) {
-      for (const palabraClave of claves) {
-        if (actNorm.includes(this.normalizarTexto(palabraClave))) {
-          return true;
-        }
+
+  validarLimiteSemanas(): void {
+    if (this.semanasSeleccionadasParaReporte.length > 5) {
+      this.semanasSeleccionadasParaReporte.pop();
+      Swal.fire('Límite alcanzado', 'Solo puedes seleccionar hasta 5 semanas.', 'warning');
+    }
+  }
+
+  // Filtra las semanas disponibles tras elegir coordinador
+  filtrarSemanasPorCoordinador(): void {
+    this.semanas = Array.from(new Set(
+      this.agendas
+        .filter(a => a.coordinador === this.coordinadorSeleccionado)
+        .map(a => a.semana || '')
+        .filter(Boolean)
+    )).sort(this.sortSemanas);
+    this.semanasSeleccionadasParaReporte = [];
+  }
+
+
+// async generarReportePDF() {
+//   // — Validaciones —
+//   if (!this.semanasSeleccionadasParaReporte.length) {
+//     alert('Selecciona al menos una semana.');
+//     return;
+//   }
+//   if (this.semanasSeleccionadasParaReporte.length > 5) {
+//     alert('Máximo 5 semanas.');
+//     return;
+//   }
+//   if (!this.coordinadorSeleccionado) {
+//     alert('Selecciona un coordinador.');
+//     return;
+//   }
+
+//   // — 1) Datos de Objetivos —
+//   interface ObjRow { semana: string; objetivo: string; total: number; logrado: number; porcentaje: number; }
+//   const objetivos: ObjRow[] = this.semanasSeleccionadasParaReporte.map(sem => {
+//     const regs = this.agendas.filter(a =>
+//       a.coordinador === this.coordinadorSeleccionado && a.semana === sem
+//     );
+//     const objetivoText = regs[0]?.objetivo || '';
+//     const cods = this.obtenerCodigosDeObjetivo(objetivoText);
+//     const acts = regs.filter(a => a.codigo && cods.includes(a.codigo));
+//     const total = acts.length;
+//     const logrado = acts.filter(a => a.codigo === a.codigoReportado).length;
+//     return {
+//       semana: sem,
+//       objetivo: objetivoText,
+//       total,
+//       logrado,
+//       porcentaje: total ? Math.round((logrado / total) * 100) : 0
+//     };
+//   });
+
+//   // — 2) Iniciar PDF —
+//   const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+
+//   // Cabecera principal
+//   doc.setFillColor(13, 71, 161);
+//   doc.rect(0, 0, doc.internal.pageSize.getWidth(), 50, 'F');
+//   doc.setFontSize(18);
+//   doc.setTextColor('#ffffff');
+//   doc.text('Reporte de Cumplimiento de Objetivos', 40, 32);
+//   doc.setFontSize(10);
+//   doc.setTextColor('#000000');
+//   doc.text(`Coordinador: ${this.coordinadorSeleccionado}`, 40, 70);
+//   doc.text(`Semanas: ${this.semanasSeleccionadasParaReporte.join(', ')}`, 300, 70);
+
+//   // — 3) Tabla de Objetivos —
+//   let cursorY = 90;
+//   autoTable(doc, {
+//     startY: cursorY,
+//     head: [[
+//       { content: 'Semanas',   styles: { fillColor: [30,144,255], textColor: '#fff' } },
+//       { content: 'Objetivos', styles: { fillColor: [30,144,255], textColor: '#fff' } },
+//       { content: 'Act. Agendadas',    styles: { fillColor: [30,144,255], textColor: '#fff' } },
+//       { content: 'Act. Cumplidas',  styles: { fillColor: [30,144,255], textColor: '#fff' } },
+//       { content: '% Cumplido', styles: { fillColor: [30,144,255], textColor: '#fff' } }
+//     ]],
+//     body: objetivos.map(o => [
+//       o.semana,
+//       o.objetivo,
+//       o.total.toString(),
+//       o.logrado.toString(),
+//       o.porcentaje + '%'
+//     ]),
+//     margin: { left: 40, right: 40 },
+//     styles: {
+//       fontSize: 9,
+//       halign: 'center',
+//       valign: 'middle',
+//       cellPadding: 4
+//     },
+//     theme: 'grid',
+//     alternateRowStyles: { fillColor: [209, 196, 233] }
+//   });
+
+//   cursorY = (doc as any).lastAutoTable.finalY + 30;
+
+//   // — 4) Tablas de Metas por categoría —
+//   const categorias = [
+//     {
+//       titulo: 'MORA',
+//       headers: ['Semana', 'Meta Mora', 'Recuperado', '% MORA'],
+//       extract: (c: any) => {
+//         const m = c.metaM || 0, r = c.recupM || 0;
+//         const pct = m ? Math.round(r / m * 100) + '%' : '0%';
+//         return [m.toString(), r.toString(), pct];
+//       }
+//     },
+//     {
+//       titulo: 'CRÉDITOS',
+//       headers: ['Semana', 'Meta GPO', 'Cump. GPO', 'Meta IND', 'Comp. IND', '% CRÉDITOS'],
+//       extract: (c: any) => {
+//         const mg = c.metaGpo || 0, cg = c.completadoGpo || 0;
+//         const mi = c.metaInd || 0, ci = c.completadoInd || 0;
+//         const totalMeta = mg + mi, totalComp = cg + ci;
+//         const pct = totalMeta ? Math.round(totalComp / totalMeta * 100) + '%' : '0%';
+//         return [mg.toString(), cg.toString(), mi.toString(), ci.toString(), pct];
+//       }
+//     },
+//     {
+//       titulo: 'FICHAS',
+//       headers: ['Semana', 'Meta por Cerrar', 'Cerradas', '% FICHAS'],
+//       extract: (c: any) => {
+//         const i = c.fichasCerrar || 0, f = c.fichasCerradas || 0;
+//         const pct = i ? Math.round(f / i * 100) + '%' : '0%';
+//         return [i.toString(), f.toString(), pct];
+//       }
+//     },
+//     {
+//       titulo: 'RENOVACIONES',
+//       headers: ['Semana', 'Meta Proyectada.', 'Renovados', '% RENOV'],
+//       extract: (c: any) => {
+//         const p = c.metaProyec || 0, r = c.completadosProyec || 0;
+//         const pct = p ? Math.round(r / p * 100) + '%' : '0%';
+//         return [p.toString(), r.toString(), pct];
+//       }
+//     }
+//   ];
+
+//   for (const cat of categorias) {
+//     // Construir filas
+//     const body: string[][] = [];
+//     for (const sem of this.semanasSeleccionadasParaReporte) {
+//       const cumpl = await lastValueFrom(
+//         this.seguimientoSvc.obtenerSeguimiento(this.coordinadorSeleccionado, sem)
+//       );
+//       const agreg = cumpl.reduce((acc: any, r: any) => ({
+//         metaM: (acc.metaM || 0) + (r.metaM || 0),
+//         recupM: (acc.recupM || 0) + (r.recupM || 0),
+//         metaGpo: (acc.metaGpo || 0) + (r.metaGpo || 0),
+//         completadoGpo: (acc.completadoGpo || 0) + (r.completadoGpo || 0),
+//         metaInd: (acc.metaInd || 0) + (r.metaInd || 0),
+//         completadoInd: (acc.completadoInd || 0) + (r.completadoInd || 0),
+//         fichasCerrar: (acc.fichasCerrar || 0) + (r.fichasCerrar || 0),
+//         fichasCerradas: (acc.fichasCerradas || 0) + (r.fichasCerradas || 0),
+//         metaProyec: (acc.metaProyec || 0) + (r.metaProyec || 0),
+//         completadosProyec: (acc.completadosProyec || 0) + (r.completadosProyec || 0),
+//       }), {});
+//       body.push([sem, ...cat.extract(agreg)]);
+//     }
+
+//     // Saltar si todos cero
+//     if (body.every(r => r.slice(1).every(cell => cell === '0' || cell === '0%'))) {
+//       continue;
+//     }
+
+//     // Título de categoría
+//     doc.setFillColor(30,144,255);
+//     doc.rect(40, cursorY - 12, doc.internal.pageSize.getWidth() - 80, 18, 'F');
+//     doc.setTextColor('#ffffff');
+//     doc.setFontSize(12);
+//     doc.text(cat.titulo, 45, cursorY);
+//     doc.setTextColor('#000000');
+//     cursorY += 20;
+
+//     // Tabla estilizada
+//     autoTable(doc, {
+//       startY: cursorY,
+//       head: [cat.headers.map(h => ({ content: h, styles: { fillColor: [0,102,204], textColor: '#fff' } }))],
+//       body,
+//       margin: { left: 40, right: 40 },
+//       styles: { fontSize: 9, halign: 'center', cellPadding: 4 },
+//       alternateRowStyles: { fillColor: [209, 196, 233] },
+//       theme: 'grid'
+//     });
+
+//     cursorY = (doc as any).lastAutoTable.finalY + 30;
+//     if (cursorY > doc.internal.pageSize.getHeight() - 60) {
+//       doc.addPage();
+//       cursorY = 40;
+//     }
+//   }
+
+//   // — Pie de página con numeración corregido —
+//   const pageCount = doc.getNumberOfPages();
+//   for (let i = 1; i <= pageCount; i++) {
+//     doc.setPage(i);
+//     doc.setFontSize(8);
+//     doc.setTextColor('#666');
+//     doc.text(`Página ${i} de ${pageCount}`,
+//       doc.internal.pageSize.getWidth() - 100,
+//       doc.internal.pageSize.getHeight() - 10
+//     );
+//   }
+
+//   // — Guardar PDF —
+//   doc.save(`reporte_cumplimiento_${this.coordinadorSeleccionado}.pdf`);
+// }
+
+async generarReportePDF() {
+  // — Validaciones —
+  if (!this.semanasSeleccionadasParaReporte.length) {
+    alert('Selecciona al menos una semana.');
+    return;
+  }
+  if (this.semanasSeleccionadasParaReporte.length > 5) {
+    alert('Máximo 5 semanas.');
+    return;
+  }
+  if (!this.coordinadorSeleccionado) {
+    alert('Selecciona un coordinador.');
+    return;
+  }
+
+  // — 1) Datos de Objetivos —
+  interface ObjRow { semana: string; objetivo: string; total: number; logrado: number; porcentaje: number; }
+  const objetivos: ObjRow[] = this.semanasSeleccionadasParaReporte.map(sem => {
+    const regs = this.agendas.filter(a =>
+      a.coordinador === this.coordinadorSeleccionado && a.semana === sem
+    );
+    const objetivoText = regs[0]?.objetivo || '';
+    const cods = this.obtenerCodigosDeObjetivo(objetivoText);
+    const acts = regs.filter(a => a.codigo && cods.includes(a.codigo));
+    const total = acts.length;
+    const logrado = acts.filter(a => a.codigo === a.codigoReportado).length;
+    return {
+      semana: sem,
+      objetivo: objetivoText,
+      total,
+      logrado,
+      porcentaje: total ? Math.round((logrado / total) * 100) : 0
+    };
+  });
+
+  // — 2) Iniciar PDF —
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  // Cabecera principal
+  doc.setFillColor(13, 71, 161);
+  doc.rect(0, 0, doc.internal.pageSize.getWidth(), 50, 'F');
+  doc.setFontSize(18);
+  doc.setTextColor('#fff');
+  doc.text('Reporte de Cumplimiento de Objetivos Semanales', 40, 32);
+  doc.setFontSize(10);
+  doc.setTextColor('#000');
+  doc.text(`Coordinador: ${this.coordinadorSeleccionado}`, 40, 70);
+  doc.text(`Semanas: ${this.semanasSeleccionadasParaReporte.join(', ')}`, 300, 70);
+
+  // — 3) Subtítulo Objetivos —
+  let cursorY = 90;
+  doc.setFontSize(14);
+  doc.setTextColor('#333');
+  doc.text('1. Detalle de Objetivos por Semana', 40, cursorY);
+  cursorY += 4;
+
+  // Tabla Objetivos
+  autoTable(doc, {
+    startY: cursorY,
+    head: [[
+      { content: 'Semana',     styles: { fillColor: [30,144,255], textColor: '#fff' } },
+      { content: 'Objetivo',   styles: { fillColor: [30,144,255], textColor: '#fff' } },
+      { content: 'Act. Agendadas', styles: { fillColor: [30,144,255], textColor: '#fff' } },
+      { content: 'Act. Cumplidas', styles: { fillColor: [30,144,255], textColor: '#fff' } },
+      { content: '% Cumplido', styles: { fillColor: [30,144,255], textColor: '#fff' } }
+    ]],
+    body: objetivos.map(o => [
+      o.semana,
+      o.objetivo,
+      o.total.toString(),
+      o.logrado.toString(),
+      o.porcentaje + '%'
+    ]),
+    margin: { left: 40, right: 40 },
+    styles: { fontSize: 9, halign: 'center', cellPadding: 4 },
+    theme: 'grid',
+    alternateRowStyles: { fillColor: [227, 242, 253] }
+  });
+  cursorY = (doc as any).lastAutoTable.finalY + 30;
+
+  // — 4) Subtítulo Metas —
+  doc.setFontSize(14);
+  doc.setTextColor('#333');
+  doc.text('2. Cumplimiento de Metas', 40, cursorY);
+  cursorY += 22;
+
+  // — Tablas de Metas —
+  const categorias = [
+    {
+      titulo: 'MORA',
+      headers: ['Semana', 'Meta Mora', 'Recuperado', '% MORA'],
+      extract: (c: any) => {
+        const m = c.metaM || 0, r = c.recupM || 0;
+        const pct = m ? Math.round(r / m * 100) + '%' : '0%';
+        return [m.toString(), r.toString(), pct];
+      }
+    },
+    {
+      titulo: 'CRÉDITOS',
+      headers: ['Semana', 'Meta GPO', 'Cump. GPO', 'Meta IND', 'Comp. IND', '% CRÉDITOS'],
+      extract: (c: any) => {
+        const mg = c.metaGpo || 0, cg = c.completadoGpo || 0;
+        const mi = c.metaInd || 0, ci = c.completadoInd || 0;
+        const totalMeta = mg + mi, totalComp = cg + ci;
+        const pct = totalMeta ? Math.round(totalComp / totalMeta * 100) + '%' : '0%';
+        return [mg.toString(), cg.toString(), mi.toString(), ci.toString(), pct];
+      }
+    },
+    {
+      titulo: 'FICHAS',
+      headers: ['Semana', 'Meta por Cerrar', 'Cerradas', '% FICHAS'],
+      extract: (c: any) => {
+        const i = c.fichasCerrar || 0, f = c.fichasCerradas || 0;
+        const pct = i ? Math.round(f / i * 100) + '%' : '0%';
+        return [i.toString(), f.toString(), pct];
+      }
+    },
+    {
+      titulo: 'RENOVACIONES',
+      headers: ['Semana', 'Meta Proyectada', 'Renovados', '% RENOV'],
+      extract: (c: any) => {
+        const p = c.metaProyec || 0, r = c.completadosProyec || 0;
+        const pct = p ? Math.round(r / p * 100) + '%' : '0%';
+        return [p.toString(), r.toString(), pct];
       }
     }
-    return false;
+  ];
+
+  for (const cat of categorias) {
+    // Construir body
+    const body: string[][] = [];
+    for (const sem of this.semanasSeleccionadasParaReporte) {
+      const cumpl = await lastValueFrom(
+        this.seguimientoSvc.obtenerSeguimiento(this.coordinadorSeleccionado, sem)
+      );
+      const agreg = cumpl.reduce((acc: any, r: any) => ({
+        metaM: (acc.metaM || 0) + (r.metaM || 0),
+        recupM: (acc.recupM || 0) + (r.recupM || 0),
+        metaGpo: (acc.metaGpo || 0) + (r.metaGpo || 0),
+        completadoGpo: (acc.completadoGpo || 0) + (r.completadoGpo || 0),
+        metaInd: (acc.metaInd || 0) + (r.metaInd || 0),
+        completadoInd: (acc.completadoInd || 0) + (r.completadoInd || 0),
+        fichasCerrar: (acc.fichasCerrar || 0) + (r.fichasCerrar || 0),
+        fichasCerradas: (acc.fichasCerradas || 0) + (r.fichasCerradas || 0),
+        metaProyec: (acc.metaProyec || 0) + (r.metaProyec || 0),
+        completadosProyec: (acc.completadosProyec || 0) + (r.completadosProyec || 0),
+      }), {});
+      body.push([sem, ...cat.extract(agreg)]);
+    }
+
+    // Saltar si todos cero
+    if (body.every(r => r.slice(1).every(cell => cell === '0' || cell === '0%'))) {
+      continue;
+    }
+
+    // Banda de color con título
+    doc.setFillColor(255, 255, 255);
+    doc.rect(40, cursorY - 14, doc.internal.pageSize.getWidth() - 80, 18, 'F');
+    doc.setTextColor(1, 87, 155);
+    doc.setFontSize(12);
+    doc.text(cat.titulo, 45, cursorY);
+    doc.setTextColor('#000');
+    cursorY += 15;
+
+    // Tabla estilizada
+    autoTable(doc, {
+      startY: cursorY,
+      head: [cat.headers.map(h => ({ content: h, styles: { fillColor: [0,102,204], textColor: '#fff' } }))],
+      body,
+      margin: { left: 40, right: 40 },
+      styles: { fontSize: 9, halign: 'center', cellPadding: 4 },
+      alternateRowStyles: { fillColor: [227, 242, 253] },
+      theme: 'grid'
+    });
+
+    cursorY = (doc as any).lastAutoTable.finalY + 25;
+    if (cursorY > doc.internal.pageSize.getHeight() - 60) {
+      doc.addPage();
+      cursorY = 40;
+    }
   }
+
+  // — Pie de página con numeración —
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor('#666');
+    doc.text(`Página ${i} de ${pageCount}`,
+      doc.internal.pageSize.getWidth() - 100,
+      doc.internal.pageSize.getHeight() - 10
+    );
+  }
+
+  // — Guardar PDF —
+  doc.save(`reporte_cumplimiento_${this.coordinadorSeleccionado}.pdf`);
 }
+
+
+
+}
+
+
+
+
+
