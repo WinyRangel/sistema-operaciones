@@ -122,7 +122,7 @@ export class AgendasComponent {
       domicilio: [''],
       actividad: [''],
       codigo: [''],
-      acordeObjetivo: [''],
+      acordeObjetivo: [false],
       traslado: ['', Validators.required],
       kmRecorrido: ['']
     });

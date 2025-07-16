@@ -1,6 +1,5 @@
 const Agenda = require ('../models/Agenda');
 
-
   const registrarAgenda = async (req, res) => {
     try {
       const { ...datosAgenda } = req.body;
@@ -23,6 +22,10 @@ const Agenda = require ('../models/Agenda');
     }
   };
 
+  // contralador para guardar agendas importadas
+  const importarAgenda = async(req, res) => {
+
+  }
   // Controlador para obtener todas las agendas
   const obtenerAgendas1 = async (req, res) => {
     try {
@@ -84,7 +87,6 @@ const Agenda = require ('../models/Agenda');
     }
   };
 
-
   const actualizarAgenda = async (req, res) => {
       console.info('Seguimiento Agenda');
 
@@ -130,13 +132,11 @@ const Agenda = require ('../models/Agenda');
     }
   };
 
-
-
 module.exports = {
     registrarAgenda,
     obtenerAgenda,
     actualizarAgenda,
     eliminarAgenda,
-    obtenerAgendas1
+    obtenerAgendas1,
+    importarAgenda
 }
-

@@ -26,7 +26,8 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label for="coordinacion" class="form-label fw-semibold">Coordinación <span class="text-danger">*</span></label>
-                  <select class="form-select" id="coordinacion" formControlName="coordinacion" (change)="filtrarPersonas()">
+                  <select class="form-select" id="coordinacion" formControlName="coordinacion" 
+                          (change)="filtrarPersonas()" [disabled]="isEditing">
                     <option disabled selected value="">Seleccionar coordinación</option>
                     <option *ngFor="let coord of coordinaciones" [ngValue]="coord">
                       {{ coord.municipio }} - {{ coord.nombre }}
@@ -39,7 +40,7 @@
 
                 <div class="col-md-6">
                   <label for="ejecutiva" class="form-label fw-semibold">Ejecutiva/Coordinador <span class="text-danger">*</span></label>
-                  <select class="form-select" id="ejecutiva" formControlName="ejecutiva">
+                  <select class="form-select" id="ejecutiva" formControlName="ejecutiva" [disabled]="isEditing">
                     <option disabled selected value="">Seleccionar persona</option>
                     <option *ngFor="let persona of personasFiltradas" [ngValue]="persona">
                       {{ persona.nombre }}
@@ -111,7 +112,7 @@
                       <label class="form-label fw-semibold">Observaciones</label>
                       <div class="input-group">
                         <span class="input-group-text bg-light"><i class="fas fa-notes-medical text-primary"></i></span>
-                        <textarea class="form-control" formControlName="observaciones" placeholder="Ej: Voucher ilegible" rows="2"></textarea>
+                        <textarea class="form-control" formControlName="titular" placeholder="Ej: Voucher ilegible" rows="2"></textarea>
                       </div>
                     </div>
                   </div>
@@ -194,7 +195,18 @@
 
         <!-- Botón exportar -->
         <div class="col-md-auto">
-          <button class="btn btn-outline-success shadow-sm" (click)="exportarExcel()">
+        <!-- Botón para abrir el modal -->
+        <button class="btn btn-outline-primary shadow-sm me-2"
+                title="Generar reporte"
+                (click)="generarDatosReporte()" 
+                data-bs-toggle="modal" data-bs-target="#reporteModal">
+          <i class="bi bi-bar-chart me-1"></i> Reporte
+        </button>
+
+
+          <button class="btn btn-outline-success shadow-sm"
+          title="Exportar a excel"
+          (click)="exportarExcel()">
             <i class="fas fa-file-excel me-2"></i>Exportar
           </button>
         </div>
@@ -222,7 +234,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let baucher of paginatedBauchers">
-            <td class="text-center">{{ baucher.coordinacion.municipio }}</td>
+            <td class="text-center">{{ baucher.coordinacion.nombre }}</td>
             <td class="text-center">{{ baucher.ejecutiva || baucher.coordinador }}</td>
             <td class="text-center">{{ baucher.fechaBaucher | date: 'dd-MM-yy' }}</td>
             <td class="text-center">{{ baucher.fechaBaucher | date: 'HH:mm' }}</td>
@@ -242,7 +254,7 @@
             <td class="text-center">{{ baucher.titular }}</td>
             <td class="text-center">
               <div class="d-flex justify-content-center gap-2">
-                <button class="btn btn-sm btn-outline-primary rounded-circle" 
+                <button class="btn btn-sm btn-outline-primary rounded-circle" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
                   (click)="cargarBaucherParaEditar(baucher)" title="Editar">
                   <i class="fas fa-edit"></i>
                 </button>
@@ -255,7 +267,11 @@
           </tr>
         </tbody>
       </table>
-
+      
+        <h6 class="fw-bold-2 text-end">
+          📄 Vouchers totales registrados:
+          <span class="badge bg-primary">{{vouchersTotales}}</span>
+        </h6>
       <!-- Paginación -->
       <div class="p-3 border-top" *ngIf="totalPages > 1">
         <nav aria-label="Paginación de vouchers">
@@ -266,10 +282,6 @@
               </a>
             </li>
 
-            <li class="page-item" *ngFor="let page of getPages()" [class.active]="currentPage === page">
-              <a class="page-link" (click)="changePage(page)">{{ page }}</a>
-            </li>
-
             <li class="page-item" [class.disabled]="currentPage === totalPages">
               <a class="page-link" (click)="changePage(currentPage + 1)">
                 <i class="fas fa-chevron-right"></i>
@@ -277,6 +289,53 @@
             </li>
           </ul>
         </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!---MODAL DE REPORTES-->
+<!-- Modal del reporte -->
+<div class="modal fade" id="reporteModal" tabindex="-1" aria-labelledby="reporteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="reporteModalLabel">Reporte General</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Contenido del reporte a capturar como PDF -->
+        <div id="contenidoReporte">
+          <h5>Personas con mayor número de incidencias, vouchers enviados, mayores atrasos, coordinaciones que más reportan</h5>
+          <!-- Aquí puedes insertar tablas o gráficos con tus datos -->
+          <canvas id="graficaVouchers" width="400" height="200"></canvas>
+          <table class="table table-bordered table-sm">
+            <thead>
+              <tr>
+                <th>Responsable</th>
+                <th>Total Incidencias</th>
+                <th>Total Vouchers</th>
+                <th>Días de Atraso</th>
+                <th>Coordinación</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of reporteResumen">
+                <td>{{ r.responsable }}</td>
+                <td>{{ r.totalTitulares }}</td>
+                <td>{{ r.totalVouchers }}</td>
+                <td>{{ r.diasAtraso }}</td>
+                <td>{{ r.coordinacion }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <canvas id="graficaAtraso" width="400" height="200"></canvas>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-success" (click)="descargarPDF()">Descargar PDF</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>

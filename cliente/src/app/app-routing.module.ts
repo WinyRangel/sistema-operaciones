@@ -15,6 +15,7 @@ import { LegalesComponent } from './components/Shared/legales/legales.component'
 import { IniciarSesionComponent } from './components/Shared/iniciar-sesion/iniciar-sesion.component';
 import { AuthGuard } from './guards/auth.guard';
 import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-agenda/cumplimiento-agenda.component';
+import { SubirAgendaComponent } from './components/Coordinadoras/subir-agenda/subir-agenda.component';
 
 const routes: Routes = [
   { path: 'baucher', component: BauchersComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
@@ -23,6 +24,8 @@ const routes: Routes = [
   { path: 'reporte-agendas', component: ReporteAgendasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'agendas', component: AgendasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'cumplimiento-agenda', component: CumplimientoAgendaComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'registrar-agendas', component: AgendasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'subir-agendas', component: SubirAgendaComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'iniciar-sesion', component: IniciarSesionComponent},
   { path: 'ejecutivas', component: EjecutivasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'depositos', component: DepositosComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
@@ -31,7 +34,7 @@ const routes: Routes = [
   { path: 'proyecciones', component: ProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'seg-proyecciones', component: SeguimientoProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']}  },
   { path: 'dir-seg-proyeccion', component: DirSegProyeccionComponent, canActivate: [AuthGuard], data: { roles: ['admin']}},
-  { path: '**', redirectTo: 'iniciar-sesion' }
+  { path: '**', redirectTo: 'inicio' }
 ];
 
 

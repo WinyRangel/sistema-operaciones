@@ -1,6 +1,7 @@
 // src/app/guards/auth.guard.ts
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Injectable({
   providedIn: 'root'
@@ -21,11 +22,27 @@ export class AuthGuard implements CanActivate {
     const payload = JSON.parse(atob(token.split('.')[1]));
     const rol = payload.rol;
 
-    // Aquí defines qué roles pueden acceder
+    // roles que pueden ingresar
     const rolesPermitidos = route.data['roles'] as Array<string>;
 
     if (rolesPermitidos && !rolesPermitidos.includes(rol)) {
-      this.router.navigate(['/no-autorizado']); // o a otra ruta
+      
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
+        }
+      });
+      Toast.fire({
+        icon: "error",
+        title: "Acceso restringido. No tiene autorización para ingresar a esta liga."
+      });
+      this.router.navigate(['/inicio']); // o a otra ruta
       return false;
     }
 
