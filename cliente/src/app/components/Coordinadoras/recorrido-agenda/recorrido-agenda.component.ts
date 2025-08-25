@@ -300,9 +300,47 @@ export class RecorridoAgendaComponent implements OnInit {
     return +(this.litrosGasolina * this.precioPorLitro).toFixed(2);
   }
 
-  get horasAgendadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(a => a.hora).length;
-  }
+      // Normaliza "9:00", "09:30", "9 am", "9 a.m.", "03:15 PM", "15:30", etc. -> "HH" (00–23)
+    private toHourKey(hora: string): string {
+      if (!hora) return '';
+      const s = hora.trim().toLowerCase();
+
+      // extrae hh, mm y am/pm opcional (soporta "am", "a.m.", "pm", "p.m.")
+      const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?$/);
+      if (!m) {
+        // si no coincide, intenta quedarte con los dos primeros dígitos como hora
+        const h2 = parseInt(s.slice(0, 2), 10);
+        return isNaN(h2) ? '' : String(Math.max(0, Math.min(23, h2))).padStart(2, '0');
+      }
+
+      let h = parseInt(m[1], 10);
+      const ampm = m[3]?.replace(/\./g, ''); // "am" | "pm" | undefined
+
+      // Si trae am/pm y es formato 12h válido (1..12), conviértelo.
+      // Si trae am/pm pero la hora es >12, asumimos que ya venía en 24h y lo dejamos.
+      if (ampm && h >= 1 && h <= 12) {
+        if (ampm === 'pm' && h !== 12) h += 12;
+        if (ampm === 'am' && h === 12) h = 0;
+      }
+
+      // Normaliza a 00–23
+      h = Math.max(0, Math.min(23, h));
+      return String(h).padStart(2, '0');
+    }
+
+    get horasAgendadas(): number {
+      const claves = new Set<string>();
+      for (const a of this.agendasFiltradasPorCoordinador) {
+        if (!a?.fecha || !a?.hora) continue;
+        const hourKey = this.toHourKey(a.hora);
+        if (!hourKey) continue;
+        claves.add(`${a.fecha}#${hourKey}`);
+      }
+      return claves.size;
+    }
+
+
+
 
   get horasReportadas(): number {
     return this.agendasFiltradasPorCoordinador.filter(
@@ -458,13 +496,13 @@ export class RecorridoAgendaComponent implements OnInit {
 	// DOCE
   get horasAM(): number {
     return this.agendasFiltradasPorCoordinador.filter(
-      a => a.hora && a.codigo === 'AM'
+      a => a.hora && a.codigo === 'GA'
     ).length;
   }
 
   get horasAMReportadas(): number {
     return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true && a.codigo === 'AM'
+      a => a.horaReporte && a.reportado === true && a.codigo === 'GA'
     ).length;
   }
 
@@ -507,7 +545,7 @@ export class RecorridoAgendaComponent implements OnInit {
 
   opcionesCodigo = [
     { value: 'AG', texto: 'AG | Aseo General' },
-    { value: 'AM', texto: 'AM | Actividades Matutinas' },
+    { value: 'GA', texto: 'GA | Gestión Administrativa' },
     { value: 'C', texto: 'C | Cobranza' },
     { value: 'D', texto: 'D | Domiciliar' },
     { value: 'Dep', texto: 'Dep | Depósitar' },

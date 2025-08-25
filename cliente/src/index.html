@@ -20,5 +20,36 @@
   <app-root></app-root>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script>
+        // Función para simular el cierre de sesión
+        function cerrarSesion() {
+            alert('Función de cierre de sesión activada');
+            // Aquí iría la lógica real de cierre de sesión
+        }
+        
+        // Efecto de desenfoque cuando el menú está abierto (solo en móviles)
+        document.getElementById('navbarToggler').addEventListener('click', function() {
+            const navbarCollapse = document.getElementById('navbarSupportedContent');
+            const navbarBlur = document.getElementById('navbarBlur');
+            
+            if (!navbarCollapse.classList.contains('show')) {
+                navbarBlur.style.display = 'block';
+            } else {
+                setTimeout(() => {
+                    navbarBlur.style.display = 'none';
+                }, 300);
+            }
+        });
+        
+        // Cerrar el menú al hacer clic fuera de él (solo en móviles)
+        document.getElementById('navbarBlur').addEventListener('click', function() {
+            const navbarToggler = document.getElementById('navbarToggler');
+            const navbarCollapse = document.getElementById('navbarSupportedContent');
+            
+            if (navbarCollapse.classList.contains('show')) {
+                navbarToggler.click();
+            }
+        });
+    </script>
 </body>
 </html>

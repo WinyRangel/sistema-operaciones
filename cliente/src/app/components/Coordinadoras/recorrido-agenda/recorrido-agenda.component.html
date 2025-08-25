@@ -451,7 +451,7 @@
                   <tbody>
                     <!-- Revisión Matutina -->
                     <tr>
-                      <th scope="row">Revisión Matutina</th>
+                      <th scope="row">Gestión Administrativa</th>
                       <td>{{ horasAM }}</td>
                       <td>{{ horasAMReportadas }}</td>
                       <td>
@@ -459,7 +459,7 @@
                           'text-bg-success': horasAMReportadas === horasAM,
                           'text-bg-danger': horasAMReportadas < horasAM
                         }">
-                          {{ horasAMReportadas === horasAM ? 'Logrado' : 'No logrado' }}
+                          {{ (horasAMReportadas === horasAM && horasAMReportadas !== 0) ? 'Logrado' : 'No logrado' }}
                         </span>
                       </td>
                     </tr>
@@ -474,7 +474,7 @@
                           'text-bg-success': horasSupReportadas === horasSup,
                           'text-bg-danger': horasSupReportadas < horasSup
                         }">
-                          {{ horasSupReportadas === horasSup ? 'Logrado' : 'No logrado' }}
+                          {{ (horasSupReportadas === horasSup && horasSupReportadas !== 0) ? 'Logrado' : 'No logrado' }}
                         </span>
                       </td>
                     </tr>
@@ -489,7 +489,7 @@
                           'text-bg-success': horasEntregasReportadas === horasEntregas,
                           'text-bg-danger': horasEntregasReportadas < horasEntregas
                         }">
-                          {{ horasEntregasReportadas === horasEntregas ? 'Logrado' : 'No logrado' }}
+                          {{ (horasEntregasReportadas === horasEntregas && horasEntregasReportadas !== 0) ? 'Logrado' : 'No logrado' }}
                         </span>
                       </td>
                     </tr>
@@ -504,7 +504,7 @@
                           'text-bg-success': horasCobranzasReportadas === horasCobranza,
                           'text-bg-danger': horasCobranzasReportadas < horasCobranza
                         }">
-                          {{ horasCobranzasReportadas === horasCobranza ? 'Logrado' : 'No logrado' }}
+                          {{ (horasCobranzasReportadas === horasCobranza && horasCobranzasReportadas !== 0) ? 'Logrado' : 'No logrado' }}
                         </span>
                       </td>
                     </tr>
@@ -519,7 +519,7 @@
                           'text-bg-success': horasVentasReportadas === horasVentas,
                           'text-bg-danger': horasVentasReportadas < horasVentas
                         }">
-                          {{ horasVentasReportadas === horasVentas ? 'Logrado' : 'No logrado' }}
+                          {{( horasVentasReportadas === horasVentas && horasVentasReportadas !== 0) ? 'Logrado' : 'No logrado' }}
                         </span>
                       </td>
                     </tr>
@@ -534,7 +534,7 @@
                           'text-bg-success': horasRenovReportadas === horasRenov,
                           'text-bg-danger': horasRenovReportadas < horasRenov
                         }">
-                          {{ horasRenovReportadas === horasRenov ? 'Logrado' : 'No logrado' }}
+                          {{ (horasRenovReportadas === horasRenov && horasRenovReportadas !== 0) ? 'Logrado' : 'No logrado' }}
                         </span>
                       </td>
                     </tr>
@@ -549,7 +549,7 @@
                           'text-bg-success': horasSCReportadas === horasSC,
                           'text-bg-danger': horasSCReportadas < horasSC
                         }">
-                          {{ horasSCReportadas === horasSC ? 'Logrado' : 'No logrado' }}
+                          {{ (horasSCReportadas === horasSC && horasSCReportadas !== 0 ) ? 'Logrado' : 'No logrado' }}
                         </span>
                       </td>
                     </tr>
@@ -564,7 +564,7 @@
                           'text-bg-success': horasReAReportadas === horasReA,
                           'text-bg-danger': horasReAReportadas < horasReA
                         }">
-                          {{ horasReAReportadas === horasReA ? 'Logrado' : 'No logrado' }}
+                          {{ (horasReAReportadas === horasReA && horasReAReportadas !== 0 ) ? 'Logrado' : 'No logrado' }}
                         </span>
                       </td>
                     </tr>
@@ -579,7 +579,7 @@
                           'text-bg-success': horasReunionesRep === horasReunion,
                           'text-bg-danger': horasReunionesRep < horasReunion
                         }">
-                          {{ horasReunionesRep === horasReunion ? 'Logrado' : 'No logrado' }}
+                          {{ (horasReunionesRep === horasReunion && horasReunionesRep !== 0) ? 'Logrado' : 'No logrado' }}
                         </span>
                       </td>
                     </tr>

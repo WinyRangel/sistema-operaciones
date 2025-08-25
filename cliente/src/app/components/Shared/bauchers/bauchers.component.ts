@@ -46,7 +46,9 @@ export class BauchersComponent implements OnInit{
   editingBaucherId: string | null = null;
   isEditing = false;
 
-
+  mesSeleccionado: string = '';
+  meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   constructor(
     private fb: FormBuilder,
     private _pagosService: PagosService,
