@@ -339,13 +339,15 @@ export class RecorridoAgendaComponent implements OnInit {
       return claves.size;
     }
 
-
-
-
   get horasReportadas(): number {
-    return this.agendasFiltradasPorCoordinador.filter(
-      a => a.horaReporte && a.reportado === true
-    ).length;
+      const claves = new Set<string>();
+      for (const a of this.agendasFiltradasPorCoordinador) {
+        if (!a?.fecha || !a?.horaReporte) continue;
+        const hourKey = this.toHourKey(a.hora);
+        if (!hourKey) continue;
+        claves.add(`${a.fecha}#${hourKey}`);
+      }
+      return claves.size;
   }
 
 
