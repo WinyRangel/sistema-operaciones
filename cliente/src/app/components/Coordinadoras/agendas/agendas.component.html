@@ -131,10 +131,21 @@
                       <div class="card-body">
                         <div class="row g-3">
                           <!-- Hora -->
-                          <div class="col-md-3">
-                            <label class="form-label">Hora</label>
-                            <input type="time" class="form-control" formControlName="hora">
+                        <div class="col-md-3">
+                          <label class="form-label">Hora</label>
+                          <input type="time" class="form-control" formControlName="hora" min="09:00" max="17:30">
+
+                          <!-- Mensaje de error -->
+                          <div *ngIf="actividad.get('hora')?.touched && actividad.get('hora')?.invalid" class="text-danger">
+                            <span *ngIf="actividades.get('hora')?.hasError('required')">
+                              La hora es obligatoria.
+                            </span>
+                            <span *ngIf="actividad.get('hora')?.hasError('horaInvalida')">
+                              La hora debe estar entre 09:00 a.m. y 05:30 p.m.
+                            </span>
                           </div>
+                        </div>
+
                           
                           <!-- Domicilio -->
                           <div class="col-md-9">

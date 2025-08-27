@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { CoordinacionService } from '../../../services/coordinacion.service';
 import { Coordinacion } from '../../../models/coordinacion';
 import { Agenda, Domicilio } from '../../../models/agenda';
@@ -125,7 +125,7 @@ export class AgendasComponent {
 
   crearActividad(): FormGroup {
     return this.fb.group({
-      hora: ['', Validators.required],
+      hora: ['', [Validators.required, horaLaboralValidator]],
       domicilio: [''],
       actividad: [''],
       codigo: [''],
@@ -304,4 +304,25 @@ export class AgendasComponent {
           this.registrarAgenda.get('objetivo')?.setValue(this.selectedObjetivos.join(','));
         }
 
+
+
+}
+
+
+
+export function horaLaboralValidator(control: AbstractControl): ValidationErrors | null {
+  if (!control.value) return null;
+
+  const horaSeleccionada = control.value; // formato "HH:mm"
+  const [hora, minuto] = horaSeleccionada.split(':').map(Number);
+  const totalMinutos = hora * 60 + minuto;
+
+  const inicio = 9 * 60;       // 9:00 am en minutos
+  const fin = 17 * 60 + 30;    // 5:30 pm en minutos
+
+  if (totalMinutos < inicio || totalMinutos > fin) {
+    return { horaInvalida: true };
+  }
+
+  return null;
 }
