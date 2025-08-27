@@ -63,7 +63,7 @@ import { ActividadPipe } from './pipes/actividad.pipe';
     DirSegProyeccionComponent,
     LegalesComponent,
     IniciarSesionComponent,
-    CumplimientoAgendaComponent
+    CumplimientoAgendaComponent,
     SubirAgendaComponent,
     ActividadPipe
   ],
