@@ -26,7 +26,8 @@ export class DepositosComponent implements OnInit {
     'MEJORANDO FAMILIAS',
     'CUMPLIENDO SUEÑOS',
     'DE CORAZÓN',
-    'SAN FELIPE'
+    'SAN FELIPE',
+    'SAN MIGUEL'
   ];
 
   // Estado actual
@@ -43,7 +44,7 @@ export class DepositosComponent implements OnInit {
   constructor(private depositosService: DepositosService) {}
 
   ngOnInit(): void {}
-mesSeleccionado: string = ''; // por ejemplo '05' para mayo
+mesSeleccionado: string = ''; 
 
   // Getter para filtrar por mes (en cualquier año)
   get filteredDepositos(): any[] {
@@ -59,17 +60,14 @@ mesSeleccionado: string = ''; // por ejemplo '05' para mayo
 
   // Llama a este método siempre que cambie mes ó cambie coordenación
   applyFilters() {
-    // No hace falta volver a pedir al servidor,
-    // sólo aplicamos el .filter() al array existente.
-    // Para “refrescar” la vista, basta con reasignar:
     this.depositos = [...this.depositos];
   }
 
   seleccionarCoordinacion(nombre: string) {
     this.coordinacionSeleccionada = nombre;
     this.nombreSeleccionado = nombre;
-    this.filterMonth = '';         // opcional: resetear mes al cambiar coord.
-    this.depositos = [];           // vaciamos antes de obtener
+    this.filterMonth = '';         
+    this.depositos = [];           
     this.depositosService
       .obtenerDepositosPorCoordinacion(nombre)
       .subscribe(data => {
@@ -98,8 +96,6 @@ mesSeleccionado: string = ''; // por ejemplo '05' para mayo
 
     this.depositosService.agregarDeposito(nuevoDeposito).subscribe(() => {
       this.obtenerDepositos();
-
-      // Sólo resetea los campos del form, pero no cierres el formulario ni el nav
       this.nombre = '';
       this.horaReporte = '';
       this.fechaReporte = '';
@@ -179,7 +175,7 @@ exportarExcelPorCoordinaciones(): void {
     resultadoPorCoordinacion => {
       // resultadoPorCoordinacion es un array paralelo a `this.coordinaciones`
       resultadoPorCoordinacion.forEach((depositosFiltrados, i) => {
-        const nombreHoja = this.coordinaciones[i].slice(0, 31); // Excel limita 31 chars
+        const nombreHoja = this.coordinaciones[i].slice(0, 31); 
         let ws;
 
         if (depositosFiltrados.length) {
@@ -197,7 +193,7 @@ exportarExcelPorCoordinaciones(): void {
         XLSX.utils.book_append_sheet(workbook, ws, nombreHoja);
       });
 
-      // finalmente generamos el archivo
+      // generamos el archivo
       const fileName = `Depositos_${this.mesSeleccionado}_${new Date().getFullYear()}.xlsx`;
       const wbout: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       FileSaver.saveAs(new Blob([wbout]), fileName);

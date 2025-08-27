@@ -23,7 +23,6 @@ export class EjecutivasComponent implements OnInit {
     totalR: number;
     totalNR: number;
     esperadas: number;
-    puntualidad: number;
   } | null = null;
 
   mostrarForm = false;
@@ -68,6 +67,25 @@ export class EjecutivasComponent implements OnInit {
     'Reportar pagos diarios': [1, 2, 3, 4, 5, 6],
     'Solicitud de Garantias': [3]
   };
+
+  private norm(s: any): string {
+    return String(s ?? '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quita acentos
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, ' ');
+  }
+
+  private mesDe(fecha: string): string {
+    const parts = (fecha || '').split('-');
+    return (parts[1] || '').padStart(2, '0');
+  }
+
+  private anioDe(fecha: string): number {
+    const parts = (fecha || '').split('-');
+    return Number(parts[0] || '0');
+}
+
 
   registros: any[] = [];
   registrosFiltrados: any[] = [];
@@ -166,10 +184,33 @@ export class EjecutivasComponent implements OnInit {
   }
 
 
+  // actualizarVistaPreviaYEsperar(): Promise<void> {
+  //   return new Promise((resolve) => {
+  //     this.ejecutivasService.obtenerRegistros().subscribe(all => {
+  //       const regs = all.filter(r => (new Date(r.fecha).getMonth() + 1).toString().padStart(2, '0') === this.mesSeleccionado);
+  //       this.totales = this.calcularTotales(regs);
+
+  //       // Destruir gráfico anterior si existe
+  //       if (this.chartInstance) {
+  //         this.chartInstance.destroy();
+  //       }
+
+  //       // Crear gráfico y esperar al próximo ciclo de renderizado
+  //       const ctx = this.previewChart.nativeElement.getContext('2d');
+  //       this.chartInstance = new Chart(ctx, this.getChartConfig());
+
+  //       // Esperamos un ciclo de render para asegurar que el canvas esté listo
+  //       setTimeout(() => resolve(), 2000); 
+  //     });
+  //   });
+  // }
+
   actualizarVistaPreviaYEsperar(): Promise<void> {
     return new Promise((resolve) => {
       this.ejecutivasService.obtenerRegistros().subscribe(all => {
-        const regs = all.filter(r => (new Date(r.fecha).getMonth() + 1).toString().padStart(2, '0') === this.mesSeleccionado);
+        // FILTRADO consistente: usar mesDe() (evita problemas TZ con new Date)
+        const regs = all.filter(r => this.mesDe(r.fecha) === this.mesSeleccionado);
+
         this.totales = this.calcularTotales(regs);
 
         // Destruir gráfico anterior si existe
@@ -182,45 +223,35 @@ export class EjecutivasComponent implements OnInit {
         this.chartInstance = new Chart(ctx, this.getChartConfig());
 
         // Esperamos un ciclo de render para asegurar que el canvas esté listo
-        setTimeout(() => resolve(), 2000); 
+        setTimeout(() => resolve(), 2000);
       });
     });
-  }
+}
 
 
   calcularTotales(registros: Ejecutivas[]): any {
-    let totalR = 0, totalNR = 0, puntuales = 0;
+    let totalR = 0, totalNR = 0;
     const year = new Date().getFullYear();
     const month = Number(this.mesSeleccionado);
 
-
     registros.forEach(r => {
-      if (r.actRealizada === 'R') {
-        totalR++;
-        const hrRep = new Date(`1970-01-01T${r.horaReporte}`);
-        const hrLimite = new Date(`1970-01-01T${r.hora}`);
-        if (hrRep <= hrLimite) puntuales++;
-      } else {
-        totalNR++;
-      }
+      const code = this.norm(r.actRealizada);
+      if (code === 'R') totalR++;
+      else if (code === 'NR') totalNR++;
+      // si viene otro code, lo ignoramos intencionalmente (o podemos logearlo)
     });
 
     const actividadesPorEjecutiva = this.actividades.reduce((sum, actividad) => {
       const dias = this.frecuenciaSemanal[actividad.nombre] || [];
-      console.log(dias);
-      console.log("suma de actividades", sum);
       return sum + this.contarOcurrenciasEnMes(year, month, dias);
     }, 0);
 
     const esperadas = actividadesPorEjecutiva * this.cards.length;
-    console.log('Esperadas:', esperadas);
+    console.log('Totales en R', totalR, 'Totales en NR', totalNR, 'esperadas', esperadas);
 
-
-    const puntualidad = totalR > 0 ? (puntuales / totalR) * 100 : 0;
-
-    return { totalR, totalNR, esperadas, puntualidad };
-
+    return { totalR, totalNR, esperadas };
   }
+
 
   contarOcurrenciasEnMes(year: number, month: number, diasSemana: number[]): number {
     const totalDias = new Date(year, month, 0).getDate();
@@ -237,7 +268,7 @@ export class EjecutivasComponent implements OnInit {
     const { totalR, totalNR, esperadas } = this.totales;
     const porcentajeR = (totalR / esperadas) * 100 || 0;
     const porcentajeNR = (totalNR / esperadas) * 100 || 0;
-    const porcentajeE = 100 - (porcentajeR + porcentajeNR);
+    // const porcentajeE = 100 - (porcentajeR + porcentajeNR);
 
     return {
       type: 'pie',
@@ -245,11 +276,11 @@ export class EjecutivasComponent implements OnInit {
         labels: [
           `Reportadas (R) ${porcentajeR.toFixed(1)}%`,
           `No Reportadas (NR) ${porcentajeNR.toFixed(1)}%`,
-          `Faltantes ${porcentajeE.toFixed(1)}%`
+
         ],
         datasets: [{
-          data: [porcentajeR, porcentajeNR, porcentajeE],
-          backgroundColor: ['#24548b', '#ab1a3a', '#329f20'],
+          data: [porcentajeR, porcentajeNR],
+          backgroundColor: ['#24548b', '#ab1a3a'],
           borderColor: '#ffffff',
           borderWidth: 2
         }]
@@ -273,7 +304,6 @@ export class EjecutivasComponent implements OnInit {
     };
   }
 
-  
   // Generar reporte de las 
   async generarPDF(): Promise<void> {
     if (!this.mesSeleccionado) {
@@ -285,37 +315,61 @@ export class EjecutivasComponent implements OnInit {
     await this.actualizarVistaPreviaYEsperar();
     await new Promise(res => setTimeout(res, 500));
     
-
-    // 2) Obtiene registros filtrados del mes
+    // 2) Obtiene registros filtrados del mes (sin usar new Date() para mes)
     const allRegs: Ejecutivas[] = await lastValueFrom(this.ejecutivasService.obtenerRegistros());
-    const regsMes = allRegs.filter(r => {
-      const m = (new Date(r.fecha).getMonth() + 1).toString().padStart(2, '0');
-      return m === this.mesSeleccionado;
-    });
+    const regsMes = allRegs.filter(r => this.mesDe(r.fecha) === this.mesSeleccionado);
+
+    // TEST DIAGNOSTICO PARA IDENTIFICAR LAS R PERDIDAS
+    // Ejecuta esto justo después de crear regsMes
+    const codes = regsMes.map(r => ({id: (r as any)._id ?? '(sin id)', fecha: r.fecha, nombre: r.nombre, ejecutiva: r.ejecutiva, raw: r.actRealizada, norm: this.norm(r.actRealizada) }));
+    console.log('Códigos normalizados:', codes);
+    // Registros con códigSo inesperado
+    const inesperados = codes.filter(c => c.norm !== 'R' && c.norm !== 'NR');
+    console.log('Registros con código inesperado (no R/NR):', inesperados);
+    // Suma rápida para validar
+    const sumaR = codes.filter(c => c.norm === 'R').length;
+    const sumaNR = codes.filter(c => c.norm === 'NR').length;
+    const totalR = regsMes.filter(r => this.norm(r.actRealizada) === 'R').length;
+    const totalNR = regsMes.filter(r => this.norm(r.actRealizada) === 'NR').length;
+    console.log('SumaR:', sumaR, 'SumaNR:', sumaNR, 'Total regsMes:', regsMes.length);
+    console.log('Totales en R', totalR, 'Totales en NR', totalNR);
+    // CIERRE TEST DIAGNOSTICO PARA IDENTIFICAR LAS R PERDIDAS
 
     // 3) Calcula totales y detalles
     const tot = this.calcularTotales(regsMes);
-    const detalles = this.cards.map(card => {
-      const regsCard = regsMes.filter(r => r.nombre === card.nombre && r.ejecutiva === card.ejecutiva);
-      let totalR = 0, totalNR = 0, puntuales = 0;
-      regsCard.forEach(r => {
-        if (r.actRealizada === 'R') {
-          totalR++;
-          const hrRep = new Date(`1970-01-01T${r.horaReporte}`);
-          const hrLim = new Date(`1970-01-01T${r.hora}`);
-          if (hrRep <= hrLim) puntuales++;
-        } else {
-          totalNR++;
-        }
-      });
-      const esperadas = this.actividades
-        .reduce((sum, act) => sum + this.contarOcurrenciasEnMes(new Date().getFullYear(),
-          Number(this.mesSeleccionado),
-          this.frecuenciaSemanal[act.nombre] || []),
-          0);
-      const punt = totalR > 0 ? `${((puntuales / totalR) * 100).toFixed(1)}%` : '0%';
-      return [card.nombre, card.ejecutiva, totalR, totalNR, esperadas, punt];
-    });
+    const detalles = this.calcularDetallesPorCoordinacion(regsMes);
+
+
+    // // 2) Obtiene registros filtrados del mes
+    // const allRegs: Ejecutivas[] = await lastValueFrom(this.ejecutivasService.obtenerRegistros());
+    // const regsMes = allRegs.filter(r => {
+    //   const m = (new Date(r.fecha).getMonth() + 1).toString().padStart(2, '0');
+    //   return m === this.mesSeleccionado;
+    // });
+
+    // // 3) Calcula totales y detalles
+    // const tot = this.calcularTotales(regsMes);
+    // const detalles = this.cards.map(card => {
+    //   const regsCard = regsMes.filter(r => r.nombre === card.nombre && r.ejecutiva === card.ejecutiva);
+    //   let totalR = 0, totalNR = 0;
+    //   regsCard.forEach(r => {
+    //     if (r.actRealizada === 'R') {
+    //       totalR++;
+    //       // const hrRep = new Date(`1970-01-01T${r.horaReporte}`);
+    //       // const hrLim = new Date(`1970-01-01T${r.hora}`);
+    //       // if (hrRep <= hrLim) puntuales++;
+    //     } else {
+    //       totalNR++;
+    //     }
+    //   });
+    //   const esperadas = this.actividades
+    //     .reduce((sum, act) => sum + this.contarOcurrenciasEnMes(new Date().getFullYear(),
+    //       Number(this.mesSeleccionado),
+    //       this.frecuenciaSemanal[act.nombre] || []),
+    //       0);
+    //   // const punt = totalR > 0 ? `${((puntuales / totalR) * 100).toFixed(1)}%` : '0%';
+    //   return [card.nombre, card.ejecutiva, totalR, totalNR, esperadas];
+    // });
 
     // 4) Prepara PDF
     const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
@@ -341,7 +395,7 @@ export class EjecutivasComponent implements OnInit {
 
     // 6) Tabla de detalle
     autoTable(doc, {
-      head: [['Coordinación','Ejecutiva','R','Puntualidad','NR','Esperadas']],
+      head: [['Coordinación','Ejecutiva','R','NR','Esperadas']],
       body: detalles,
       startY: y,
       margin: { left: 10, right: 10 },
@@ -367,94 +421,43 @@ export class EjecutivasComponent implements OnInit {
   }
 
 
-  // Generar PDF con grafica y tablas
-  async generarPDFConPie(totales: { totalR: number; puntualidad: number; totalNR: number; esperadas: number;}) {
-    if (totales.esperadas === 0) {
-      Swal.fire('Error', 'No hay actividades registradas este mes', 'error');
-      return;
-    }
 
-    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    let y = 10;
-    doc.setFontSize(16);
-    doc.text(`Reporte Mensual - Mes ${this.mesSeleccionado}`, 10, y);
-    y += 10;
-
-    autoTable(doc, {
-      head: [['Tipo', 'Cantidad', 'Promedio de entregas']],
-      body: [
-        ['Reportadas (R)', totales.totalR, `${totales.puntualidad.toFixed(1)}%`],
-        ['No Reportadas (NR)', totales.totalNR, '-'],
-        ['Total Esperadas', totales.esperadas, '-']
-      ],
-      startY: y,
-      margin: { horizontal: 10 },
-      headStyles: { fillColor: [36, 84, 139] },
-      columnStyles: { 2: { cellWidth: 30 } }
-    });
-    y = (doc as any).lastAutoTable.finalY + 10;
-
-    const detalles = this.calcularDetallesPorCoordinacion();
-    autoTable(doc, {
-      head: [['Coordinación', 'Ejecutiva', 'R', 'NR', 'Esperadas', 'Puntualidad']],
-      body: detalles,
-      startY: y,
-      margin: { horizontal: 10 },
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [36, 84, 139] }
-    });
-
-    doc.save(`reporte_ejecutivas_mes_${this.mesSeleccionado}.pdf`);
-  }
-
-  calcularDetallesPorCoordinacion(): any[][] {
+  calcularDetallesPorCoordinacion(regsMes: Ejecutivas[]): any[][] {
     const year = new Date().getFullYear();
     const month = Number(this.mesSeleccionado);
 
     return this.cards.map(card => {
-      const regs = this.registros.filter((r: Ejecutivas) => {
-        const d = new Date(r.fecha);
+      // Filtramos usando normalización de nombre y ejecutiva
+      const regs = regsMes.filter((r: Ejecutivas) => {
         return (
-          r.nombre === card.nombre &&
-          r.ejecutiva === card.ejecutiva &&
-          d.getFullYear() === year &&
-          (d.getMonth() + 1) === month
+          this.norm(r.nombre) === this.norm(card.nombre) &&
+          this.norm(r.ejecutiva) === this.norm(card.ejecutiva)
         );
       });
 
-      let totalR = 0, totalNR = 0, puntuales = 0;
-
+      let totalR = 0, totalNR = 0;
       regs.forEach(r => {
-        if (r.actRealizada === 'R') {
-          totalR++;
-          if (r.horaReporte && r.horaReporte !== '-') {
-            const hrRep = new Date(`1970-01-01T${r.horaReporte}`);
-            const hrLimite = new Date(`1970-01-01T${r.hora}`);
-            if (hrRep <= hrLimite) puntuales++;
-          }
-        }
-        else {
-          totalNR++;
-        }
+        const code = this.norm(r.actRealizada);
+        if (code === 'R') totalR++;
+        else if (code === 'NR') totalNR++;
       });
 
+      // Esperadas por coordinación = suma de ocurrencias en el mes (por ejecutiva)
       const esperadas = this.actividades.reduce((sum, actividad) => {
         const dias = this.frecuenciaSemanal[actividad.nombre] || [];
         return sum + this.contarOcurrenciasEnMes(year, month, dias);
       }, 0);
-
-      const puntualidad = totalR > 0 ? `${((puntuales / totalR) * 100).toFixed(1)}%` : '0%';
 
       return [
         card.nombre,
         card.ejecutiva,
         totalR,
         totalNR,
-        esperadas,
-        puntualidad
+        esperadas
       ];
     });
   }
+
 
   eliminarRegistro(id: string) {
     Swal.fire({
@@ -480,7 +483,7 @@ export class EjecutivasComponent implements OnInit {
     });
   }
 
-  page: number = 1;
+page: number = 1;
 pageSize: number = 20;
 totalPages: number = 1;
 registrosPagina: any[] = [];
@@ -507,17 +510,18 @@ actualizarRegistrosPaginados() {
 
 filtrarRegistros() {
   const filtrados = this.registros.filter(r => {
-    const [y, m, d] = r.fecha.split('-').map(Number);
-    const mes = (new Date(y, m - 1, d).getMonth() + 1).toString().padStart(2, '0');
-    const dia = new Date(y, m - 1, d).getDate().toString().padStart(2, '0');
+    const mes = this.mesDe(r.fecha);
+    const dia = (r.fecha || '').split('-')[2]?.padStart(2, '0') ?? '';
 
-    if (r.nombre !== this.nombreSeleccionado) return false;
+    // Normalizar comparaciones de texto para evitar diferencias por mayúsculas/espacios/acentos
+    if (this.nombreSeleccionado && this.norm(r.nombre) !== this.norm(this.nombreSeleccionado)) return false;
     if (this.mesSeleccionado && mes !== this.mesSeleccionado) return false;
     if (this.diaSeleccionado && dia !== this.diaSeleccionado) return false;
-    if (this.filtroCodigo && r.actRealizada !== this.filtroCodigo) return false;
+    if (this.filtroCodigo && this.norm(r.actRealizada) !== this.norm(this.filtroCodigo)) return false;
 
     return true;
   });
+  filtrados.sort((a, b) => b.fecha.localeCompare(a.fecha));
 
   this.registrosFiltrados = filtrados;
   this.totalPages = Math.ceil(this.registrosFiltrados.length / this.pageSize);
@@ -526,5 +530,24 @@ filtrarRegistros() {
 }
 
 
+// filtrarRegistros() {
+//   const filtrados = this.registros.filter(r => {
+//     const [y, m, d] = r.fecha.split('-').map(Number);
+//     const mes = (new Date(y, m - 1, d).getMonth() + 1).toString().padStart(2, '0');
+//     const dia = new Date(y, m - 1, d).getDate().toString().padStart(2, '0');
+
+//     if (r.nombre !== this.nombreSeleccionado) return false;
+//     if (this.mesSeleccionado && mes !== this.mesSeleccionado) return false;
+//     if (this.diaSeleccionado && dia !== this.diaSeleccionado) return false;
+//     if (this.filtroCodigo && r.actRealizada !== this.filtroCodigo) return false;
+
+//     return true;
+//   });
+
+//   this.registrosFiltrados = filtrados;
+//   this.totalPages = Math.ceil(this.registrosFiltrados.length / this.pageSize);
+//   this.page = 1;
+//   this.actualizarRegistrosPaginados();
+// }
 
 }
