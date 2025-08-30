@@ -103,12 +103,12 @@ export class AgendasComponent {
   }
 
   private setRendimientos(coordinaciones: Coordinacion[]): void {
-    coordinaciones.forEach(coord => {
-      coord.coordinador.forEach((c: any) => {
-        this.rendimientosCoordinadores[c.nombre] = c.rendimiento ?? RENDIMIENTO_POR_DEFECTO;
-      });
-    });
+    this.rendimientosCoordinadores = coordinaciones.reduce((acc, coord) => {
+      acc[coord.coordinador] = coord.rendimiento ?? RENDIMIENTO_POR_DEFECTO;
+      return acc;
+    }, {} as { [nombre: string]: number });
   }
+
 
   // Configurar listeners del formulario
   private setupFormListeners(): void {
@@ -118,9 +118,9 @@ export class AgendasComponent {
     });
   }
 
-  mostrarDiv(nombre: string): void {
-    this.coordinadorVisible = nombre;
-    this.registrarAgenda.get('coordinador')?.setValue(nombre);
+  mostrarDiv(coordinador: string): void {
+    this.coordinadorVisible = coordinador;
+    this.registrarAgenda.get('coordinador')?.setValue(coordinador);
   }
 
   crearActividad(): FormGroup {
@@ -203,8 +203,8 @@ export class AgendasComponent {
   seleccionarCoordinador(coord: Coordinacion | null): void {
     this.selectedCoord = coord;
 
-    if (coord?.coordinador?.[0]?.nombre) {
-      this.registrarAgenda.get('coordinador')?.setValue(coord.coordinador[0].nombre);
+    if (coord?.coordinador) {
+      this.registrarAgenda.get('coordinador')?.setValue(coord.coordinador);
     } else {
       this.registrarAgenda.get('coordinador')?.setValue('');
     }

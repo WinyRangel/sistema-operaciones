@@ -31,9 +31,9 @@
                                     style="height: 60px; font-size: 1.1rem;">
                               <option disabled selected value="">Seleccione el coordinador</option>
                               <option *ngFor="let coord of coordinaciones" 
-                                      [value]="coord.coordinador[0].nombre"
+                                      [value]="coord.coordinador"
                                       class="fw-medium">
-                                {{ coord.coordinador[0].nombre }}
+                                {{ coord.coordinador }}
                               </option>
                             </select>
                             <label for="coordinador" class="fw-bold text-primary">

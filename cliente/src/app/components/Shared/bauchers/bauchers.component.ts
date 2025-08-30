@@ -98,21 +98,20 @@ export class BauchersComponent implements OnInit{
   this.currentPage = 1;
 }
 
-    filtrarPersonas() {
-      const coord: Coordinacion = this.baucherForm.get('coordinacion')?.value;
-      if (coord) {
-        this.personasFiltradas = [
-          ...(coord.ejecutivas || []).map(e => ({ ...e, tipo: 'Ejecutiva' })),
-          ...(coord.coordinador || []).map(c => ({ ...c, tipo: 'Coordinador' }))
-        ];
-        
-        this.baucherForm.get('ejecutiva')?.setValue(null); // Resetea la selección
-      } else {
-        this.personasFiltradas = [];
-      }
-    }
+      filtrarPersonas() {
+        const coord: Coordinacion = this.baucherForm.get('coordinacion')?.value;
+        if (coord) {
+          this.personasFiltradas = [
+            ...(coord.ejecutivas || []).map(e => ({ ...e, tipo: 'Ejecutiva' })),
+          ];
 
-    
+          this.baucherForm.get('ejecutiva')?.setValue(null); // Resetea la selección
+        } else {
+          this.personasFiltradas = [];
+        }
+      }
+
+          
 
     ngOnInit(): void {
       this.obtenerBauchers();

@@ -26,22 +26,22 @@
         </li>
 
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/baucher" routerLinkActive="active">Vouchers</a>
+          <a class="nav-link hover-effect" routerLink="/baucher" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'supervisor'">Vouchers</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/depositos" routerLinkActive="active">Depósitos</a>
+          <a class="nav-link hover-effect" routerLink="/depositos" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'supervisor'">Depósitos</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/reportefichas" routerLinkActive="active">Reporte de Fichas</a>
+          <a class="nav-link hover-effect" routerLink="/reportefichas" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'supervisor'">Reporte de Fichas</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/ejecutivas" routerLinkActive="active">Ejecutivas</a>
+          <a class="nav-link hover-effect" routerLink="/ejecutivas" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'supervisor'">Ejecutivas</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/cumplimiento-agenda" routerLinkActive="active">Objetivos</a>
+          <a class="nav-link hover-effect" routerLink="/cumplimiento-agenda" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'supervisor'">Objetivos</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/seg-proyecciones" routerLinkActive="active">Proyecciones</a>
+          <a class="nav-link hover-effect" routerLink="/seg-proyecciones" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'supervisor'">Proyecciones</a>
         </li>
             <li class="nav-item" *ngIf="rolUsuario === 'admin'">
               <a class="nav-link hover-effect" routerLink="/dir-seg-proyeccion" routerLinkActive="active">

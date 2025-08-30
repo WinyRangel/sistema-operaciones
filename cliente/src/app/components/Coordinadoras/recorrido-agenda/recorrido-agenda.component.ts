@@ -50,9 +50,9 @@ export class RecorridoAgendaComponent implements OnInit {
   domicilios: string[] = ["NA"];
   rendimientosCoordinadores: { [nombre: string]: number } = {};
 
-    meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 
   actividadSeleccionada: any = null;
@@ -132,14 +132,13 @@ export class RecorridoAgendaComponent implements OnInit {
 
 
 
+    private setRendimientos(coordinaciones: Coordinacion[]): void {
+      this.rendimientosCoordinadores = coordinaciones.reduce((acc, coord) => {
+        acc[coord.coordinador] = coord.rendimiento ?? RENDIMIENTO_POR_DEFECTO;
+        return acc;
+      }, {} as { [nombre: string]: number });
+    }
 
-  private setRendimientos(coordinaciones: Coordinacion[]): void {
-    coordinaciones.forEach(coord => {
-      coord.coordinador.forEach((c: any) => {
-        this.rendimientosCoordinadores[c.nombre] = c.rendimiento ?? RENDIMIENTO_POR_DEFECTO;
-      });
-    });
-  }
 
     mostrarDiv(nombre: string): void {
       this.coordinadorVisible = nombre;
