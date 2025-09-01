@@ -63,7 +63,7 @@ export class RegistrarAgendaComponent {
   ngOnInit(): void {
     this.loadCoordinaciones();
     this.loadDomicilios();
-    this.setupFormListeners();
+    // this.setupFormListeners();
      this._coordinacionService.obtenerCoordinacion().subscribe(data => {
         this.coordinaciones = data;
       });
@@ -117,12 +117,12 @@ export class RegistrarAgendaComponent {
 
 
   // Configurar listeners del formulario
-  private setupFormListeners(): void {
-    this.registrarAgenda.get('traslado')?.valueChanges.subscribe(value => {
-      const kmControl = this.registrarAgenda.get('kmRecorrido');
-      value === 'SI' ? kmControl?.enable() : kmControl?.disable();
-    });
-  }
+  // private setupFormListeners(): void {
+  //   this.registrarAgenda.get('traslado')?.valueChanges.subscribe(value => {
+  //     const kmControl = this.registrarAgenda.get('kmRecorrido');
+  //     value === 'SI' ? kmControl?.enable() : kmControl?.disable();
+  //   });
+  // }
 
   crearActividad(): FormGroup {
     return this.fb.group({
@@ -132,7 +132,7 @@ export class RegistrarAgendaComponent {
       codigo: [''],
       acordeObjetivo: [false],
       traslado: ['', Validators.required],
-      kmRecorrido: ['']
+      // kmRecorrido: ['']
     });
 
   }

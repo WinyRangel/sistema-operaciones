@@ -236,7 +236,8 @@ getClaseCoordinador(i: number): any {
       horaReporte: agenda.horaReporte,
       horaCierre: agenda.horaCierre,
       acordeObjetivo: agenda.acordeObjetivo,
-      kmRecorrido: agenda.kmRecorrido
+      kmRecorrido: agenda.kmRecorrido,
+      resultado: agenda.resultado
 
     }).subscribe({
       next: () => this.showToast('success', 'Cambios guardados correctamente'),

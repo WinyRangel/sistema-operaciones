@@ -90,11 +90,11 @@ const Agenda = require ('../models/Agenda');
 
       try {
           const { id } = req.params;
-          const { fecha, hora, domicilio, codigo, codigoReportado, actividadReportada, reportado, horaReporte, horaCierre, cumplimientoAgenda, kmRecorrido, acordeObjetivo } = req.body;
+          const { fecha, hora, domicilio, codigo, codigoReportado, actividadReportada, reportado, horaReporte, horaCierre, cumplimientoAgenda, kmRecorrido, acordeObjetivo, resultado } = req.body;
 
           const agendaActualizada = await Agenda.findByIdAndUpdate(
               id,
-              { fecha, hora, domicilio, codigo, codigoReportado, actividadReportada, reportado, horaReporte, horaCierre, cumplimientoAgenda, kmRecorrido, acordeObjetivo },
+              { fecha, hora, domicilio, codigo, codigoReportado, actividadReportada, reportado, horaReporte, horaCierre, cumplimientoAgenda, kmRecorrido, acordeObjetivo, resultado },
               { new: true }
           );
 
