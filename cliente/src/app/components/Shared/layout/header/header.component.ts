@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 })
 export class HeaderComponent implements OnInit, OnDestroy {
 
- isScrolled = false;
+  isScrolled = false;
   estaLogueado = false;
   rolUsuario = '';
   private authSubscription!: Subscription;
