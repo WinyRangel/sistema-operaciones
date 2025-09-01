@@ -328,27 +328,55 @@ export class RecorridoAgendaComponent implements OnInit {
       return String(h).padStart(2, '0');
     }
 
-    get horasAgendadas(): number {
-      const claves = new Set<string>();
-      for (const a of this.agendasFiltradasPorCoordinador) {
-        if (!a?.fecha || !a?.hora) continue;
-        const hourKey = this.toHourKey(a.hora);
-        if (!hourKey) continue;
-        claves.add(`${a.fecha}#${hourKey}`);
-      }
-      return claves.size;
+get horasAgendadas(): number {
+  const claves = new Set<string>();
+  for (const a of this.agendasFiltradasPorCoordinador) {
+    if (!a?.fecha || !a?.hora) continue;
+
+    // Normaliza actividad y domicilio
+    const actividad = (a.actividad || '').trim().toLowerCase();
+    const domicilio = (a.domicilio || '').trim().toLowerCase();
+
+    // Regla 1: Si es "comida" y no está reportado → no cuenta
+    if ((actividad.includes('comida') || domicilio.includes('comida')) && !a.reportado) {
+      continue;
     }
 
-  get horasReportadas(): number {
-      const claves = new Set<string>();
-      for (const a of this.agendasFiltradasPorCoordinador) {
-        if (!a?.fecha || !a?.horaReporte) continue;
-        const hourKey = this.toHourKey(a.hora);
-        if (!hourKey) continue;
-        claves.add(`${a.fecha}#${hourKey}`);
-      }
-      return claves.size;
+    const hourKey = this.toHourKey(a.hora);
+    if (!hourKey) continue;
+
+    // Regla 2: Excluir horas después de 17:30
+    const [h, m] = a.hora.split(':').map(Number);
+    const minutos = h * 60 + (m || 0);
+    if (minutos > 17 * 60 + 30) continue;
+
+    claves.add(`${a.fecha}#${hourKey}`);
   }
+  return claves.size;
+}
+
+
+
+  get horasReportadas(): number {
+    const claves = new Set<string>();
+    for (const a of this.agendasFiltradasPorCoordinador) {
+      if (!a?.fecha || !a?.horaReporte) continue;
+
+      const actividad = (a.actividad || '').trim().toLowerCase();
+      const domicilio = (a.domicilio || '').trim().toLowerCase();
+
+      // En reportadas igual, si es comida y aún no está reportado, no cuenta
+      if ((actividad === 'comida' || domicilio === 'comida') && !a.reportado) {
+        continue;
+      }
+
+      const hourKey = this.toHourKey(a.hora);
+      if (!hourKey) continue;
+      claves.add(`${a.fecha}#${hourKey}`);
+    }
+    return claves.size;
+  }
+
 
 
   /////////////////////////////////////////////////////////////////////////////////////
