@@ -5,7 +5,6 @@ import { jsPDF } from 'jspdf';
 import autoTable, { UserOptions } from 'jspdf-autotable';
 import { Chart, registerables } from 'chart.js';
 
-// Extender tipo de jsPDF para autotable
 declare module 'jspdf' {
   interface jsPDF {
     lastAutoTable: {
@@ -31,8 +30,6 @@ export class ReporteFichasComponent {
   objectKeys(obj: any): string[] {
     return Object.keys(obj);
   }
-
-
 
   onFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -74,9 +71,8 @@ export class ReporteFichasComponent {
                 row.some(cell => cell !== null && cell !== undefined && cell !== '')
               );
 
-              // **Aquí validamos si la hoja quedó en blanco**:  
+              // 5) Validar hojas en blanco 
               if (data.length === 0) {
-                // saltamos esta hoja
                 return;
               }
 
@@ -211,7 +207,6 @@ export class ReporteFichasComponent {
     }
   }
 
-
   async crearPDF(resumen: any[]) {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
@@ -227,7 +222,7 @@ export class ReporteFichasComponent {
       const columnWidths = [60, 40, 50];
       const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
       const pageWidth = doc.internal.pageSize.width;
-      const leftMargin = (pageWidth - tableWidth) / 2; // Margen izquierdo calculado
+      const leftMargin = (pageWidth - tableWidth) / 2;
 
       autoTable(doc, {
         startY: 30,
@@ -252,7 +247,7 @@ export class ReporteFichasComponent {
           1: { cellWidth: columnWidths[1] },
           2: { cellWidth: columnWidths[2] }
         },
-        margin: { left: leftMargin } // Posicionamiento horizontal
+        margin: { left: leftMargin }
       });
 
       // Gráfica
@@ -264,17 +259,68 @@ export class ReporteFichasComponent {
       const imgX = (pageWidth - imgWidth) / 2;
 
       doc.addImage(imgData, 'PNG', imgX, finalY, imgWidth, imgHeight);
+
+      // Solo para TOTAL GENERAL: Mostrar KPI de Cumplimiento
+      if (item.sheet === 'TOTAL GENERAL') {
+        const cumplimiento = item.agendadas > 0
+          ? (item.reportadas / item.agendadas) * 100
+          : 0;
+
+        const kpiY = finalY + imgHeight + 20;
+
+        doc.setFontSize(14);
+        doc.text('KPI de Cumplimiento:', 20, kpiY);
+        doc.setFontSize(12);
+        doc.text(`Porcentaje: ${cumplimiento.toFixed(2)}%`, 20, kpiY + 8);
+
+        // Barra segmentada con colores de rojo (izquierda) a verde (derecha)
+        const barX = 20;
+        const barY = kpiY + 15;
+        const barWidth = 170;
+        const barHeight = 10;
+        const segmentCount = 6;
+        const segmentWidth = barWidth / segmentCount;
+
+        // Colores invertidos: de rojo a verde
+        const segmentColors: [number, number, number][] = [
+          [200, 48, 63],    // Rojo
+          [255, 87, 34],    // Naranja-rojo
+          [255, 193, 7],    // Amarillo-naranja
+          [255, 235, 59],   // Amarillo
+          [128, 191, 40],   // Verde claro
+          [50, 159, 32],    // Verde oscuro
+        ];
+
+        // Dibujar cada segmento
+        for (let i = 0; i < segmentCount; i++) {
+          doc.setFillColor(...segmentColors[i]);
+          doc.rect(barX + i * segmentWidth, barY, segmentWidth, barHeight, 'F');
+        }
+
+        // Dibujar borde de la barra
+        doc.setDrawColor(0);
+        doc.setLineWidth(0.2);
+        doc.rect(barX, barY, barWidth, barHeight);
+
+        // Indicador en forma de triángulo invertido
+        const indicadorX = barX + (Math.min(cumplimiento, 100) / 100) * barWidth;
+        doc.setFillColor(0, 0, 0); // Negro
+        doc.triangle(
+          indicadorX - 2.5, barY + barHeight + 2,  // Izquierda
+          indicadorX + 2.5, barY + barHeight + 2,  // Derecha
+          indicadorX, barY + barHeight + 6         // Punta inferior
+          , 'F');
+      }
     }
 
     doc.save(`reporte-${new Date().toISOString().slice(0, 10)}.pdf`);
   }
 
-  
 
   private generarGraficaPDF(item: any): Promise<HTMLCanvasElement> {
     return new Promise(resolve => {
       const canvas = document.createElement('canvas');
-      canvas.width = 800; // Tamaño aumentado para mejor calidad
+      canvas.width = 800;
       canvas.height = 400;
       const ctx = canvas.getContext('2d');
 
@@ -297,14 +343,14 @@ export class ReporteFichasComponent {
             legend: {
               position: 'right',
               labels: {
-                font: { size: 20 }, // Texto más grande
+                font: { size: 20 },
                 usePointStyle: true,
               }
             },
             title: {
               display: true,
               text: `Distribución ${item.sheet}`,
-              font: { size: 18 } // Título más grande
+              font: { size: 18 }
             }
           }
         }
