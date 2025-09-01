@@ -33,6 +33,12 @@ export class AuthService {
     );
   }
 
+
+    getUsuario(): string | null {
+      return localStorage.getItem('usuario');
+    }
+
+
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');

@@ -14,7 +14,10 @@ const app = express();
 conectarDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:4200', // tu frontend
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

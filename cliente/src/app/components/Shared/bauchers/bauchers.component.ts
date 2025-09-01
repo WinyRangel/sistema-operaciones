@@ -98,18 +98,31 @@ export class BauchersComponent implements OnInit{
   this.currentPage = 1;
 }
 
-      filtrarPersonas() {
-        const coord: Coordinacion = this.baucherForm.get('coordinacion')?.value;
-        if (coord) {
-          this.personasFiltradas = [
-            ...(coord.ejecutivas || []).map(e => ({ ...e, tipo: 'Ejecutiva' })),
-          ];
+filtrarPersonas() {
+  const coord: Coordinacion = this.baucherForm.get('coordinacion')?.value;
 
-          this.baucherForm.get('ejecutiva')?.setValue(null); // Resetea la selección
-        } else {
-          this.personasFiltradas = [];
-        }
-      }
+  if (coord) {
+    // Si el coordinador existe lo agregamos como Persona
+    const personas: any[] = [];
+
+    if (coord.coordinador) {
+      personas.push({
+        _id: coord._id + '-coord', // 🔑 ID único para evitar choques
+        nombre: coord.coordinador,
+        tipo: 'Coordinador'
+      });
+    }
+
+    if (coord.ejecutivas?.length) {
+      personas.push(...coord.ejecutivas.map(e => ({ ...e, tipo: 'Ejecutiva' })));
+    }
+
+    this.personasFiltradas = personas;
+    this.baucherForm.get('ejecutiva')?.setValue(null); // resetea selección
+  } else {
+    this.personasFiltradas = [];
+  }
+}
 
           
 

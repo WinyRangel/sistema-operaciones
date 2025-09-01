@@ -12,6 +12,7 @@ export class CoordinacionService {
   url = 'http://localhost:4000/coordinacion'
   url3 = 'http://localhost:4000/agendas?page=1&limit=10000'
   url2 = 'http://localhost:4000/agenda'
+  url4 = 'http://localhost:4000/obtenerAgenda'
   constructor(private http: HttpClient) { }
 
   obtenerCoordinacion(): Observable<Coordinacion[]> {
@@ -52,5 +53,12 @@ export class CoordinacionService {
   }
 
 
+  obtenerMiAgenda(page: number = 1, limit: number = 50): Observable<any> {
+      const params = new HttpParams()
+        .set('page', page.toString())
+        .set('limit', limit.toString());
+
+      return this.http.get(this.url3, { params });
+  }
 
 }
