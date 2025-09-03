@@ -197,8 +197,7 @@
         <div class="col-md-auto">
         <!-- Botón para abrir el modal -->
         <button class="btn btn-outline-primary shadow-sm me-2"
-                title="Generar reporte"
-                (click)="generarDatosReporte()" 
+                title="Generar reporte" 
                 data-bs-toggle="modal" data-bs-target="#reporteModal">
           <i class="bi bi-bar-chart me-1"></i> Reporte
         </button>
@@ -296,46 +295,203 @@
 
 
 <!---MODAL DE REPORTES-->
-<!-- Modal del reporte -->
 <div class="modal fade" id="reporteModal" tabindex="-1" aria-labelledby="reporteModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="reporteModalLabel">Reporte General</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <h5 class="modal-title" id="reporteModalLabel">
+          <i class="fas fa-chart-line me-2"></i>Reporte General de Actividades
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <!-- Contenido del reporte a capturar como PDF -->
-        <div id="contenidoReporte">
-          <h5>Personas con mayor número de incidencias, vouchers enviados, mayores atrasos, coordinaciones que más reportan</h5>
-          <!-- Aquí puedes insertar tablas o gráficos con tus datos -->
-          <canvas id="graficaVouchers" width="400" height="200"></canvas>
-          <table class="table table-bordered table-sm">
-            <thead>
-              <tr>
-                <th>Responsable</th>
-                <th>Total Incidencias</th>
-                <th>Total Vouchers</th>
-                <th>Días de Atraso</th>
-                <th>Coordinación</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let r of reporteResumen">
-                <td>{{ r.responsable }}</td>
-                <td>{{ r.totalTitulares }}</td>
-                <td>{{ r.totalVouchers }}</td>
-                <td>{{ r.diasAtraso }}</td>
-                <td>{{ r.coordinacion }}</td>
-              </tr>
-            </tbody>
-          </table>
-          <canvas id="graficaAtraso" width="400" height="200"></canvas>
+        <!-- Sección de Filtros -->
+        <div class="card shadow-sm p-4 mb-4 border-0" style="border-radius: 12px;">
+          <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-filter text-primary me-2 fs-5"></i>
+            <h4 class="mb-0 text-primary">Filtros de Reporte</h4>
+          </div>
+          <div class="row g-4">
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Mes</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>
+                <select class="form-select" id="mesSelect" [(ngModel)]="mesSeleccionado">
+                  <option value="" disabled selected>Seleccione mes</option>
+                  <option *ngFor="let mes of meses; let i = index" [value]="i+1">{{ mes }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Coordinación</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="fas fa-map-marker-alt text-primary"></i></span>
+                <select class="form-select" id="coordinacion"
+                        [(ngModel)]="coordinacionSeleccionada" (change)="filtrarPersonas()">
+                  <option [ngValue]="null" disabled selected>Seleccionar coordinación</option>
+                  <option *ngFor="let coord of coordinaciones" [ngValue]="coord">
+                    {{ coord.municipio }} - {{ coord.nombre }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <button class="btn btn-primary w-100 py-2 fw-semibold" type="button" (click)="generarDatosReporte()">
+                <i class="fas fa-sync-alt me-2"></i>Generar Reporte
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenido del reporte -->
+        <div id="contenidoReporte" class="reporte-container">
+          <!-- Resumen Estadístico -->
+          <div class="row mb-4" *ngIf="reporteResumen && reporteResumen.length > 0">
+            <div class="col-md-3 mb-3">
+              <div class="card stat-card bg-primary text-white h-100">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                      <h6 class="card-title mb-0">Total Personas</h6>
+                      <h4 class="fw-bold mt-2 mb-0">{{ reporteResumen.length }}</h4>
+                    </div>
+                    <div class="flex-shrink-0">
+                      <i class="fas fa-users fa-2x opacity-50"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="card stat-card bg-success text-white h-100">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                      <h6 class="card-title mb-0">Total Vouchers</h6>
+                      <h4 class="fw-bold mt-2 mb-0">{{ calcularTotalVouchers() }}</h4>
+                    </div>
+                    <div class="flex-shrink-0">
+                      <i class="fas fa-file-invoice fa-2x opacity-50"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="card stat-card bg-warning text-dark h-100">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                      <h6 class="card-title mb-0">Total Incidencias</h6>
+                      <h4 class="fw-bold mt-2 mb-0">{{ calcularTotalIncidencias() }}</h4>
+                    </div>
+                    <div class="flex-shrink-0">
+                      <i class="fas fa-exclamation-triangle fa-2x opacity-50"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="card stat-card bg-info text-white h-100">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                      <h6 class="card-title mb-0">Promedio Atraso</h6>
+                      <h4 class="fw-bold mt-2 mb-0">{{ calcularPromedioAtraso() }} días</h4>
+                    </div>
+                    <div class="flex-shrink-0">
+                      <i class="fas fa-clock fa-2x opacity-50"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabla de resultados -->
+          <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
+            <div class="card-header bg-light border-0 py-3">
+              <h5 class="mb-0 text-primary">
+                <i class="fas fa-table me-2"></i>Total Vouchers Reportados por Persona
+              </h5>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="ps-4">Responsable</th>
+                      <th class="text-center">Total Vouchers</th>
+                      <th class="text-center">Total Incidencias</th>
+                      <th class="text-center">Días de Atraso</th>
+                      <th class="pe-4">Coordinación</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let r of reporteResumen">
+                      <td class="ps-4 fw-semibold">{{ r.responsable }}</td>
+                      <td class="text-center">
+                        <span class="badge bg-primary rounded-pill px-3 py-2">{{ r.totalVouchers }}</span>
+                      </td>
+                      <td class="text-center">
+                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2">{{ r.totalTitulares }}</span>
+                      </td>
+                      <td class="text-center">
+                        <span 
+                          class="badge rounded-pill px-3 py-2"
+                          [ngClass]="{
+                            'bg-success': r.diasAtraso === 0,
+                            'bg-warning text-dark': r.diasAtraso > 0 && r.diasAtraso <= 5,
+                            'bg-danger': r.diasAtraso > 5
+                          }">
+                          {{ r.diasAtraso }} días
+                        </span>
+                      </td>
+                      <td class="pe-4 text-muted">{{ r.coordinacion }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gráficas -->
+          <div class="row">
+            <div class="col-lg-6 mb-4">
+              <div class="card shadow-sm border-0 h-100" style="border-radius: 12px;">
+                <div class="card-header bg-light border-0 py-3">
+                  <h5 class="mb-0 text-primary">
+                    <i class="fas fa-chart-bar me-2"></i>Vouchers por Persona
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <canvas id="graficaVouchers" height="250"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+              <div class="card shadow-sm border-0 h-100" style="border-radius: 12px;">
+                <div class="card-header bg-light border-0 py-3">
+                  <h5 class="mb-0 text-primary">
+                    <i class="fas fa-chart-pie me-2"></i>Vouchers con Retraso
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <canvas id="graficaAtraso" height="250"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline-success" (click)="descargarPDF()">Descargar PDF</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      <div class="modal-footer bg-light">
+        <button class="btn btn-success px-4 py-2 fw-semibold" (click)="descargarPDF()">
+          <i class="fas fa-download me-2"></i>Descargar PDF
+        </button>
+        <button type="button" class="btn btn-outline-secondary px-4 py-2" data-bs-dismiss="modal">
+          <i class="fas fa-times me-2"></i>Cerrar
+        </button>
       </div>
     </div>
   </div>

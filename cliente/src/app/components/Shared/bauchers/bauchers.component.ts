@@ -37,6 +37,8 @@ export class BauchersComponent implements OnInit{
   personasFiltradas: Persona[] = [];
   fechaFiltro: string = ''; // formato 'YYYY-MM-DD'
   bauchersTemporales: Baucher[] = [];
+  coordinacionSeleccionada: any = null;
+  personaSeleccionada: any = null;
 
 
   currentPage: number = 1;
@@ -408,7 +410,22 @@ export class BauchersComponent implements OnInit{
     FileSaver.saveAs(blob, 'bauchers_condicional.xlsx');
   }
 
+  calcularTotalVouchers(): number {
+    if (!this.reporteResumen) return 0;
+    return this.reporteResumen.reduce((total: number, item: any) => total + (item.totalVouchers || 0), 0);
+  }
 
+  calcularTotalIncidencias(): number {
+    if (!this.reporteResumen) return 0;
+    return this.reporteResumen.reduce((total: number, item: any) => total + (item.totalTitulares || 0), 0);
+  }
+
+  calcularPromedioAtraso(): number {
+    if (!this.reporteResumen || this.reporteResumen.length === 0) return 0;
+    
+    const totalAtraso = this.reporteResumen.reduce((total: number, item: any) => total + (item.diasAtraso || 0), 0);
+    return Math.round(totalAtraso / this.reporteResumen.length);
+  }
 
   get vouchersTotales(): number {
     return this.listarBauchers.filter(a => a.coordinacion).length;
@@ -425,40 +442,67 @@ export class BauchersComponent implements OnInit{
   }
 
   // Método para generar datos del reporte
-  generarDatosReporte() {
-    const datos: any[] = [];
+generarDatosReporte() {
+  // 1. Aplicar filtros
+  let filtrados = [...this.listarBauchers];
 
-    const agrupado = this.listarBauchers.reduce((acc, baucher) => {
-      const key = baucher.ejecutiva || baucher.coordinador || 'Desconocido';
-      if (!acc[key]) {
-        acc[key] = {
-          responsable: key,
-          totalTitulares: 0,
-          totalVouchers: 0,
-          diasAtraso: 0,
-          coordinacion: baucher.coordinacion?.nombre || 'Desconocida'
-        };
-      }
-
-      acc[key].totalVouchers++;
-      if (baucher.titular && baucher.titular.trim() !== '') {
-        acc[key].totalTitulares++;
-      }
-      if (baucher.diasDiferencia > 0) {
-        acc[key].diasAtraso += baucher.diasDiferencia;
-      }
-
-      return acc;
-    }, {});
-
-    this.reporteResumen = Object.values(agrupado)
-      .sort((a: any, b: any) => b.totalVouchers - a.totalVouchers)
-      .slice(0, 10);
-
-    this.generarGrafica();
-    this.generarGraficaAtraso(); 
-
+  // 🔹 Filtro por mes (usa fechaReporte)
+  if (this.mesSeleccionado) {
+    filtrados = filtrados.filter(b => {
+      const fecha = new Date(b.fechaReporte);
+      return fecha.getMonth() + 1 === +this.mesSeleccionado; // getMonth() devuelve 0–11
+    });
   }
+
+  // 🔹 Filtro por coordinación
+  if (this.coordinacionSeleccionada) {
+    filtrados = filtrados.filter(
+      b => b.coordinacion?.nombre === this.coordinacionSeleccionada.nombre
+    );
+  }
+
+  // 🔹 Filtro por persona
+  if (this.personaSeleccionada) {
+    filtrados = filtrados.filter(
+      b => b.ejecutiva === this.personaSeleccionada.nombre ||
+           b.coordinador === this.personaSeleccionada.nombre
+    );
+  }
+
+  // 2. Agrupar por persona
+  const agrupado = filtrados.reduce((acc, baucher) => {
+    const key = baucher.ejecutiva || baucher.coordinador || 'Desconocido';
+    if (!acc[key]) {
+      acc[key] = {
+        responsable: key,
+        totalTitulares: 0,
+        totalVouchers: 0,
+        diasAtraso: 0,
+        coordinacion: baucher.coordinacion?.nombre || 'Desconocida'
+      };
+    }
+
+    acc[key].totalVouchers++;
+    if (baucher.titular && baucher.titular.trim() !== '') {
+      acc[key].totalTitulares++;
+    }
+    if (baucher.diasDiferencia > 0) {
+      acc[key].diasAtraso += baucher.diasDiferencia;
+    }
+
+    return acc;
+  }, {});
+
+  // 3. Ordenar y asignar al reporte
+  this.reporteResumen = Object.values(agrupado)
+    .sort((a: any, b: any) => b.totalVouchers - a.totalVouchers)
+    .slice(0, 10);
+
+  // 4. Actualizar gráficas
+  this.generarGrafica();
+  this.generarGraficaAtraso();
+}
+
 
   generarGrafica() {
   const labels = this.reporteResumen.map((r: { responsable: any; }) => r.responsable);
