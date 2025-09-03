@@ -5,6 +5,9 @@ import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 
 @Component({
   selector: 'app-depositos',
@@ -27,7 +30,7 @@ export class DepositosComponent implements OnInit {
     'CUMPLIENDO SUEÑOS',
     'DE CORAZÓN',
     'SAN FELIPE',
-    'SAN MIGUEL'
+    'LEALTAD'
   ];
 
   // Estado actual
@@ -41,10 +44,10 @@ export class DepositosComponent implements OnInit {
 
   depositos: any[] = [];
 
-  constructor(private depositosService: DepositosService) {}
+  constructor(private depositosService: DepositosService) { }
 
-  ngOnInit(): void {}
-mesSeleccionado: string = ''; 
+  ngOnInit(): void { }
+  mesSeleccionado: string = '';
 
   // Getter para filtrar por mes (en cualquier año)
   get filteredDepositos(): any[] {
@@ -66,8 +69,8 @@ mesSeleccionado: string = '';
   seleccionarCoordinacion(nombre: string) {
     this.coordinacionSeleccionada = nombre;
     this.nombreSeleccionado = nombre;
-    this.filterMonth = '';         
-    this.depositos = [];           
+    this.filterMonth = '';
+    this.depositos = [];
     this.depositosService
       .obtenerDepositosPorCoordinacion(nombre)
       .subscribe(data => {
@@ -119,90 +122,124 @@ mesSeleccionado: string = '';
       .obtenerDepositosPorCoordinacion(this.coordinacionSeleccionada)
       .subscribe((data) => (this.depositos = data));
   }
+  exportarExcelPorCoordinaciones(): void {
+    if (!this.mesSeleccionado) {
+      Swal.fire('Selecciona un mes para exportar.', '', 'warning');
+      return;
+    }
 
-//   exportarExcelPorCoordinaciones(): void {
-//   if (!this.mesSeleccionado) {
-//     Swal.fire('Selecciona un mes para exportar.', '', 'warning');
-//     return;
-//   }
+    const headerRow = ['¿Quién reporta?', 'Hora Reporte', 'Fecha Reporte'];
+    const workbook = XLSX.utils.book_new();
 
-//   const workbook = XLSX.utils.book_new();
+    // Creamos un array de observables: por cada coordinación pedimos sus depósitos
+    const requests = this.coordinaciones.map(coord =>
+      this.depositosService.obtenerDepositosPorCoordinacion(coord).pipe(
+        map(depositos =>
+          // aquí filtramos por mes directamente
+          depositos.filter(d => d.fechaReporte?.substring(5, 7) === this.mesSeleccionado)
+        )
+      )
+    );
 
-//   this.coordinaciones.forEach(coordinacion => {
-//     const depositosFiltrados = this.depositos.filter(d => {
-//       const mes = d.fechaReporte?.substring(5, 7);
-//       return d.coordinacion === coordinacion && mes === this.mesSeleccionado;
-//     });
+    // forkJoin espera a que todas las peticiones respondan
+    forkJoin(requests).subscribe(
+      resultadoPorCoordinacion => {
+        // resultadoPorCoordinacion es un array paralelo a `this.coordinaciones`
+        resultadoPorCoordinacion.forEach((depositosFiltrados, i) => {
+          const nombreHoja = this.coordinaciones[i].slice(0, 31);
+          let ws;
 
-//     if (depositosFiltrados.length > 0) {
-//       const data = depositosFiltrados.map(d => ({
-//         '¿Quién reporta?': d.nombre,
-//         'Hora Reporte': d.horaReporte,
-//         'Fecha Reporte': d.fechaReporte,
-//       }));
+          if (depositosFiltrados.length) {
+            const data = depositosFiltrados.map(d => ({
+              '¿Quién reporta?': d.nombre,
+              'Hora Reporte': d.horaReporte,
+              'Fecha Reporte': d.fechaReporte
+            }));
+            ws = XLSX.utils.json_to_sheet(data, { header: headerRow });
+          } else {
+            // hoja vacía con encabezados
+            ws = XLSX.utils.aoa_to_sheet([headerRow]);
+          }
 
-//       const worksheet = XLSX.utils.json_to_sheet(data);
-//       XLSX.utils.book_append_sheet(workbook, worksheet, coordinacion);
-//     }
-//   });
+          XLSX.utils.book_append_sheet(workbook, ws, nombreHoja);
+        });
 
-//   const nombreArchivo = `Depositos_${this.mesSeleccionado}.xlsx`;
-//   const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-//   const blobData = new Blob([excelBuffer], { type: 'application/octet-stream' });
-//   FileSaver.saveAs(blobData, nombreArchivo);
-// }
-exportarExcelPorCoordinaciones(): void {
+        // generamos el archivo
+        const fileName = `Depositos_${this.mesSeleccionado}_${new Date().getFullYear()}.xlsx`;
+        const wbout: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        FileSaver.saveAs(new Blob([wbout]), fileName);
+      },
+      err => {
+        console.error(err);
+        Swal.fire('Error al exportar', '', 'error');
+      }
+    );
+  }
+
+generarReportePDF(): void {
   if (!this.mesSeleccionado) {
-    Swal.fire('Selecciona un mes para exportar.', '', 'warning');
+    Swal.fire('Selecciona un mes para generar el reporte.', '', 'warning');
     return;
   }
 
-  const headerRow = ['¿Quién reporta?', 'Hora Reporte', 'Fecha Reporte'];
-  const workbook = XLSX.utils.book_new();
-
-  // Creamos un array de observables: por cada coordinación pedimos sus depósitos
   const requests = this.coordinaciones.map(coord =>
     this.depositosService.obtenerDepositosPorCoordinacion(coord).pipe(
       map(depositos =>
-        // aquí filtramos por mes directamente
         depositos.filter(d => d.fechaReporte?.substring(5, 7) === this.mesSeleccionado)
       )
     )
   );
 
-  // forkJoin espera a que todas las peticiones respondan
-  forkJoin(requests).subscribe(
-    resultadoPorCoordinacion => {
-      // resultadoPorCoordinacion es un array paralelo a `this.coordinaciones`
-      resultadoPorCoordinacion.forEach((depositosFiltrados, i) => {
-        const nombreHoja = this.coordinaciones[i].slice(0, 31); 
-        let ws;
+  forkJoin(requests).subscribe(resultadoPorCoordinacion => {
+    const doc = new jsPDF();
+    let y = 20;
 
-        if (depositosFiltrados.length) {
-          const data = depositosFiltrados.map(d => ({
-            '¿Quién reporta?': d.nombre,
-            'Hora Reporte': d.horaReporte,
-            'Fecha Reporte': d.fechaReporte
-          }));
-          ws = XLSX.utils.json_to_sheet(data, { header: headerRow });
-        } else {
-          // hoja vacía con encabezados
-          ws = XLSX.utils.aoa_to_sheet([headerRow]);
+    this.coordinaciones.forEach((coordinacion, index) => {
+      const depositosFiltrados = resultadoPorCoordinacion[index];
+
+      if (depositosFiltrados.length > 0) {
+        // Contar reportes por asesor
+        const conteo: Record<string, number> = {};
+        depositosFiltrados.forEach(d => {
+          conteo[d.nombre] = (conteo[d.nombre] || 0) + 1;
+        });
+
+        // Pasar a arreglo y ordenar descendente
+        const datosOrdenados = Object.entries(conteo)
+          .map(([nombre, cantidad]) => ({ nombre, cantidad }))
+          .sort((a, b) => b.cantidad - a.cantidad);
+
+        // Encabezado
+        doc.setFontSize(14);
+        doc.text(`Coordinación: ${coordinacion}`, 14, y);
+        y += 6;
+
+        // Tabla con asesores
+        autoTable(doc, {
+          startY: y,
+          head: [['Asesor', 'Cantidad de reportes']],
+          body: datosOrdenados.map(d => [d.nombre, d.cantidad.toString()]),
+          theme: 'grid',
+          headStyles: { fillColor: [41, 128, 185] },
+          styles: { halign: 'center' }
+        });
+
+        y = (doc as any).lastAutoTable.finalY + 10;
+
+        // Nueva página si no cabe otra tabla
+        if (index < this.coordinaciones.length - 1 && y > 250) {
+          doc.addPage();
+          y = 20;
         }
+      }
+    });
 
-        XLSX.utils.book_append_sheet(workbook, ws, nombreHoja);
-      });
-
-      // generamos el archivo
-      const fileName = `Depositos_${this.mesSeleccionado}_${new Date().getFullYear()}.xlsx`;
-      const wbout: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      FileSaver.saveAs(new Blob([wbout]), fileName);
-    },
-    err => {
-      console.error(err);
-      Swal.fire('Error al exportar', '', 'error');
-    }
-  );
+    // Guardar PDF
+    const fileName = `ReporteDepositos_${this.mesSeleccionado}_${new Date().getFullYear()}.pdf`;
+    doc.save(fileName);
+  });
 }
+
+
 
 }

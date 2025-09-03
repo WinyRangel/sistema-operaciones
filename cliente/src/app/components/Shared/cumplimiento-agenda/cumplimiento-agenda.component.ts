@@ -380,13 +380,13 @@ export class CumplimientoAgendaComponent implements OnInit, OnDestroy {
     const meta = this.cumplimientos.reduce((sum, reg) => sum + (reg.metaM ?? 0), 0);
     const recup = this.cumplimientos.reduce((sum, reg) => sum + (reg.recupM ?? 0), 0);
 
-    // Guardar valores reales para el color
     this.moraMetaReal = meta;
     this.moraRecuperadoReal = recup;
 
-    // Calcular el porcentaje, aunque haya superado la meta (no limitar con Math.min)
-    return meta ? Math.round((recup / meta) * 100) : 0;
+    // ✅ Ahora lo limitamos al 100%
+    return meta ? Math.min(100, Math.round((recup / meta) * 100)) : 0;
   }
+
 
   // Porcentaje de Fichas
   get porcentajeFichas(): number {
@@ -635,6 +635,7 @@ export class CumplimientoAgendaComponent implements OnInit, OnDestroy {
           icon: 'success',
           title: 'Registro guardado correctamente'
         });
+        this.resetFormulario();
       },
       error: (error) => {
         console.error('Error al guardar registro:', error);
@@ -665,199 +666,6 @@ export class CumplimientoAgendaComponent implements OnInit, OnDestroy {
     )).sort(this.sortSemanas);
     this.semanasSeleccionadasParaReporte = [];
   }
-
-
-// async generarReportePDF() {
-//   // — Validaciones —
-//   if (!this.semanasSeleccionadasParaReporte.length) {
-//     alert('Selecciona al menos una semana.');
-//     return;
-//   }
-//   if (this.semanasSeleccionadasParaReporte.length > 5) {
-//     alert('Máximo 5 semanas.');
-//     return;
-//   }
-//   if (!this.coordinadorSeleccionado) {
-//     alert('Selecciona un coordinador.');
-//     return;
-//   }
-
-//   // — 1) Datos de Objetivos —
-//   interface ObjRow { semana: string; objetivo: string; total: number; logrado: number; porcentaje: number; }
-//   const objetivos: ObjRow[] = this.semanasSeleccionadasParaReporte.map(sem => {
-//     const regs = this.agendas.filter(a =>
-//       a.coordinador === this.coordinadorSeleccionado && a.semana === sem
-//     );
-//     const objetivoText = regs[0]?.objetivo || '';
-//     const cods = this.obtenerCodigosDeObjetivo(objetivoText);
-//     const acts = regs.filter(a => a.codigo && cods.includes(a.codigo));
-//     const total = acts.length;
-//     const logrado = acts.filter(a => a.codigo === a.codigoReportado).length;
-//     return {
-//       semana: sem,
-//       objetivo: objetivoText,
-//       total,
-//       logrado,
-//       porcentaje: total ? Math.round((logrado / total) * 100) : 0
-//     };
-//   });
-
-//   // — 2) Iniciar PDF —
-//   const doc = new jsPDF({ unit: 'pt', format: 'letter' });
-
-//   // Cabecera principal
-//   doc.setFillColor(13, 71, 161);
-//   doc.rect(0, 0, doc.internal.pageSize.getWidth(), 50, 'F');
-//   doc.setFontSize(18);
-//   doc.setTextColor('#ffffff');
-//   doc.text('Reporte de Cumplimiento de Objetivos', 40, 32);
-//   doc.setFontSize(10);
-//   doc.setTextColor('#000000');
-//   doc.text(`Coordinador: ${this.coordinadorSeleccionado}`, 40, 70);
-//   doc.text(`Semanas: ${this.semanasSeleccionadasParaReporte.join(', ')}`, 300, 70);
-
-//   // — 3) Tabla de Objetivos —
-//   let cursorY = 90;
-//   autoTable(doc, {
-//     startY: cursorY,
-//     head: [[
-//       { content: 'Semanas',   styles: { fillColor: [30,144,255], textColor: '#fff' } },
-//       { content: 'Objetivos', styles: { fillColor: [30,144,255], textColor: '#fff' } },
-//       { content: 'Act. Agendadas',    styles: { fillColor: [30,144,255], textColor: '#fff' } },
-//       { content: 'Act. Cumplidas',  styles: { fillColor: [30,144,255], textColor: '#fff' } },
-//       { content: '% Cumplido', styles: { fillColor: [30,144,255], textColor: '#fff' } }
-//     ]],
-//     body: objetivos.map(o => [
-//       o.semana,
-//       o.objetivo,
-//       o.total.toString(),
-//       o.logrado.toString(),
-//       o.porcentaje + '%'
-//     ]),
-//     margin: { left: 40, right: 40 },
-//     styles: {
-//       fontSize: 9,
-//       halign: 'center',
-//       valign: 'middle',
-//       cellPadding: 4
-//     },
-//     theme: 'grid',
-//     alternateRowStyles: { fillColor: [209, 196, 233] }
-//   });
-
-//   cursorY = (doc as any).lastAutoTable.finalY + 30;
-
-//   // — 4) Tablas de Metas por categoría —
-//   const categorias = [
-//     {
-//       titulo: 'MORA',
-//       headers: ['Semana', 'Meta Mora', 'Recuperado', '% MORA'],
-//       extract: (c: any) => {
-//         const m = c.metaM || 0, r = c.recupM || 0;
-//         const pct = m ? Math.round(r / m * 100) + '%' : '0%';
-//         return [m.toString(), r.toString(), pct];
-//       }
-//     },
-//     {
-//       titulo: 'CRÉDITOS',
-//       headers: ['Semana', 'Meta GPO', 'Cump. GPO', 'Meta IND', 'Comp. IND', '% CRÉDITOS'],
-//       extract: (c: any) => {
-//         const mg = c.metaGpo || 0, cg = c.completadoGpo || 0;
-//         const mi = c.metaInd || 0, ci = c.completadoInd || 0;
-//         const totalMeta = mg + mi, totalComp = cg + ci;
-//         const pct = totalMeta ? Math.round(totalComp / totalMeta * 100) + '%' : '0%';
-//         return [mg.toString(), cg.toString(), mi.toString(), ci.toString(), pct];
-//       }
-//     },
-//     {
-//       titulo: 'FICHAS',
-//       headers: ['Semana', 'Meta por Cerrar', 'Cerradas', '% FICHAS'],
-//       extract: (c: any) => {
-//         const i = c.fichasCerrar || 0, f = c.fichasCerradas || 0;
-//         const pct = i ? Math.round(f / i * 100) + '%' : '0%';
-//         return [i.toString(), f.toString(), pct];
-//       }
-//     },
-//     {
-//       titulo: 'RENOVACIONES',
-//       headers: ['Semana', 'Meta Proyectada.', 'Renovados', '% RENOV'],
-//       extract: (c: any) => {
-//         const p = c.metaProyec || 0, r = c.completadosProyec || 0;
-//         const pct = p ? Math.round(r / p * 100) + '%' : '0%';
-//         return [p.toString(), r.toString(), pct];
-//       }
-//     }
-//   ];
-
-//   for (const cat of categorias) {
-//     // Construir filas
-//     const body: string[][] = [];
-//     for (const sem of this.semanasSeleccionadasParaReporte) {
-//       const cumpl = await lastValueFrom(
-//         this.seguimientoSvc.obtenerSeguimiento(this.coordinadorSeleccionado, sem)
-//       );
-//       const agreg = cumpl.reduce((acc: any, r: any) => ({
-//         metaM: (acc.metaM || 0) + (r.metaM || 0),
-//         recupM: (acc.recupM || 0) + (r.recupM || 0),
-//         metaGpo: (acc.metaGpo || 0) + (r.metaGpo || 0),
-//         completadoGpo: (acc.completadoGpo || 0) + (r.completadoGpo || 0),
-//         metaInd: (acc.metaInd || 0) + (r.metaInd || 0),
-//         completadoInd: (acc.completadoInd || 0) + (r.completadoInd || 0),
-//         fichasCerrar: (acc.fichasCerrar || 0) + (r.fichasCerrar || 0),
-//         fichasCerradas: (acc.fichasCerradas || 0) + (r.fichasCerradas || 0),
-//         metaProyec: (acc.metaProyec || 0) + (r.metaProyec || 0),
-//         completadosProyec: (acc.completadosProyec || 0) + (r.completadosProyec || 0),
-//       }), {});
-//       body.push([sem, ...cat.extract(agreg)]);
-//     }
-
-//     // Saltar si todos cero
-//     if (body.every(r => r.slice(1).every(cell => cell === '0' || cell === '0%'))) {
-//       continue;
-//     }
-
-//     // Título de categoría
-//     doc.setFillColor(30,144,255);
-//     doc.rect(40, cursorY - 12, doc.internal.pageSize.getWidth() - 80, 18, 'F');
-//     doc.setTextColor('#ffffff');
-//     doc.setFontSize(12);
-//     doc.text(cat.titulo, 45, cursorY);
-//     doc.setTextColor('#000000');
-//     cursorY += 20;
-
-//     // Tabla estilizada
-//     autoTable(doc, {
-//       startY: cursorY,
-//       head: [cat.headers.map(h => ({ content: h, styles: { fillColor: [0,102,204], textColor: '#fff' } }))],
-//       body,
-//       margin: { left: 40, right: 40 },
-//       styles: { fontSize: 9, halign: 'center', cellPadding: 4 },
-//       alternateRowStyles: { fillColor: [209, 196, 233] },
-//       theme: 'grid'
-//     });
-
-//     cursorY = (doc as any).lastAutoTable.finalY + 30;
-//     if (cursorY > doc.internal.pageSize.getHeight() - 60) {
-//       doc.addPage();
-//       cursorY = 40;
-//     }
-//   }
-
-//   // — Pie de página con numeración corregido —
-//   const pageCount = doc.getNumberOfPages();
-//   for (let i = 1; i <= pageCount; i++) {
-//     doc.setPage(i);
-//     doc.setFontSize(8);
-//     doc.setTextColor('#666');
-//     doc.text(`Página ${i} de ${pageCount}`,
-//       doc.internal.pageSize.getWidth() - 100,
-//       doc.internal.pageSize.getHeight() - 10
-//     );
-//   }
-
-//   // — Guardar PDF —
-//   doc.save(`reporte_cumplimiento_${this.coordinadorSeleccionado}.pdf`);
-// }
 
 async generarReportePDF() {
   // — Validaciones —
@@ -890,7 +698,9 @@ async generarReportePDF() {
       objetivo: objetivoText,
       total,
       logrado,
-      porcentaje: total ? Math.round((logrado / total) * 100) : 0
+      // porcentaje: total ? Math.round((logrado / total) * 100) : 0
+      porcentaje: total ? Math.min(100, Math.round((logrado / total) * 100)) : 0
+
     };
   });
 
@@ -951,7 +761,7 @@ async generarReportePDF() {
       headers: ['Semana', 'Meta Mora', 'Recuperado', '% MORA'],
       extract: (c: any) => {
         const m = c.metaM || 0, r = c.recupM || 0;
-        const pct = m ? Math.round(r / m * 100) + '%' : '0%';
+        const pct = m ? Math.min(100, Math.round((r / m) * 100)) + '%' : '0%';
         return [m.toString(), r.toString(), pct];
       }
     },
@@ -962,7 +772,7 @@ async generarReportePDF() {
         const mg = c.metaGpo || 0, cg = c.completadoGpo || 0;
         const mi = c.metaInd || 0, ci = c.completadoInd || 0;
         const totalMeta = mg + mi, totalComp = cg + ci;
-        const pct = totalMeta ? Math.round(totalComp / totalMeta * 100) + '%' : '0%';
+        const pct = totalMeta ? Math.min(100, Math.round((totalComp / totalMeta) * 100)) + '%' : '0%';
         return [mg.toString(), cg.toString(), mi.toString(), ci.toString(), pct];
       }
     },
@@ -971,7 +781,7 @@ async generarReportePDF() {
       headers: ['Semana', 'Meta por Cerrar', 'Cerradas', '% FICHAS'],
       extract: (c: any) => {
         const i = c.fichasCerrar || 0, f = c.fichasCerradas || 0;
-        const pct = i ? Math.round(f / i * 100) + '%' : '0%';
+        const pct = i ? Math.min(100, Math.round((f / i) * 100)) + '%' : '0%';
         return [i.toString(), f.toString(), pct];
       }
     },
@@ -980,7 +790,7 @@ async generarReportePDF() {
       headers: ['Semana', 'Meta Proyectada', 'Renovados', '% RENOV'],
       extract: (c: any) => {
         const p = c.metaProyec || 0, r = c.completadosProyec || 0;
-        const pct = p ? Math.round(r / p * 100) + '%' : '0%';
+        const pct = p ? Math.min(100, Math.round((r / p) * 100)) + '%' : '0%';
         return [p.toString(), r.toString(), pct];
       }
     }
@@ -1056,6 +866,32 @@ async generarReportePDF() {
   doc.save(`reporte_cumplimiento_${this.coordinadorSeleccionado}.pdf`);
 }
 
+private resetFormulario(): void {
+  this.moraInicial = 0;
+  this.moraFinal = 0;
+  this.gpoindm = '';
+  this.metaM = 0;
+  this.recupM = 0;
+
+  this.fichasCerrar = 0;
+  this.fichasFaltantes = 0;
+  this.fichasCerradas = 0;
+
+  this.gpoindInicial = 0;
+  this.gpoindFinal = 0;
+  this.metaGpo = 0;
+  this.completadoGpo = 0;
+  this.metaInd = 0;
+  this.completadoInd = 0;
+
+  this.gpoindProyectado = 0;
+  this.gpoindRenovado = 0;
+  this.metaProyec = 0;
+  this.completadosProyec = 0;
+
+  // También limpias la vista de formulario
+  this.formularioVisible = undefined!;
+}
 
 
 }
