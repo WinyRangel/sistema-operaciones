@@ -19,33 +19,41 @@
           <a class="nav-link hover-effect" routerLink="/inicio" routerLinkActive="active">Inicio</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/registrar-agendas" routerLinkActive="active">Crear agendas</a>
+          <a class="nav-link hover-effect" routerLink="/registrar-agendas" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">Crear agendas</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/recorrido-agenda" routerLinkActive="active">Seguimiento</a>
+          <a class="nav-link hover-effect" routerLink="/registrar-agenda" routerLinkActive="active" *ngIf="rolUsuario === 'coordinador'" >Registrar agendas</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link hover-effect" routerLink="/recorrido-agenda" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">Seguimiento</a>
         </li>
 
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/baucher" routerLinkActive="active">Vouchers</a>
+          <a class="nav-link hover-effect" routerLink="/baucher" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">Vouchers</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/depositos" routerLinkActive="active">Depósitos</a>
+          <a class="nav-link hover-effect" routerLink="/depositos" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">Depósitos</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/reportefichas" routerLinkActive="active">Reporte de Fichas</a>
+          <a class="nav-link hover-effect" routerLink="/reportefichas" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">Reporte de Fichas</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/ejecutivas" routerLinkActive="active">Ejecutivas</a>
+          <a class="nav-link hover-effect" routerLink="/ejecutivas" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">Ejecutivas</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/cumplimiento-agenda" routerLinkActive="active">Objetivos COP´s</a>
+          <a class="nav-link hover-effect" routerLink="/cumplimiento-agenda" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">Objetivos</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link hover-effect" routerLink="/seg-proyecciones" routerLinkActive="active">Proyecciones</a>
+          <a class="nav-link hover-effect" routerLink="/seg-proyecciones" routerLinkActive="active" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">Proyecciones</a>
         </li>
             <li class="nav-item" *ngIf="rolUsuario === 'admin'">
               <a class="nav-link hover-effect" routerLink="/dir-seg-proyeccion" routerLinkActive="active">
                 Colocaciones
+              </a>
+            </li>
+          <li class="nav-item" *ngIf="rolUsuario === 'coordinador'">
+              <a class="nav-link hover-effect" routerLink="/mi-agenda" routerLinkActive="active">
+                Mi Agenda
               </a>
             </li>
             <button type="button" class="btn" (click)="cerrarSesion()">Cerrar sesión <i class="fa-solid fa-right-to-bracket"></i></button>

@@ -1,7 +1,5 @@
 
 <div class="container-fluid mt-4 mb-4">
-  <button type="button" class="btn btn-success mt-2 mb-2 me-2" title="Importar agendas desde excel" routerLink="/subir-agendas">Importar agenda <i class="bi bi-box-arrow-in-down"></i></button>
-  <button type="button" class="btn btn-outline-primary mt-2 mb-2" title="Seguimiento" routerLink="/recorrido-agenda">Seguimiento Agendas <i class="fa-regular fa-square-check"></i></button>
   <div class="card shadow-sm bg-body-tertiary rounded w-100 overflow-hidden">
     <div class="card-body p-0">
         <!-- CONTENIDO PRINCIPAL -->
@@ -25,17 +23,13 @@
                       <div class="row g-3 mb-4">
                         <div class="col-md-12">
                           <div class="form-floating">
-                            <select class="form-select border-2 border-primary rounded-3 shadow-sm" 
-                                    id="coordinador" 
-                                    formControlName="coordinador"
-                                    style="height: 60px; font-size: 1.1rem;">
-                              <option disabled selected value="">Seleccione el coordinador</option>
-                              <option *ngFor="let coord of coordinaciones" 
-                                      [value]="coord.coordinador"
-                                      class="fw-medium">
-                                {{ coord.coordinador }}
-                              </option>
-                            </select>
+                                    <input type="text" 
+                                            id="coordinador" 
+                                            class="form-control border-2 border-primary rounded-3 shadow-sm fw-medium"
+                                            formControlName="coordinador"
+                                            readonly
+                                            style="height: 60px; font-size: 1.1rem;">
+
                             <label for="coordinador" class="fw-bold text-primary">
                               <i class="bi bi-person-badge me-2"></i>Coordinador
                             </label>
@@ -217,13 +211,13 @@
                           </div>
                           
                           <!-- KM Recorridos (condicional) -->
-                          <div class="col-md-6" *ngIf="actividad.get('traslado')?.value === 'SI'">
+                          <!-- <div class="col-md-6" *ngIf="actividad.get('traslado')?.value === 'SI'">
                             <label class="form-label">KM Recorridos</label>
                             <div class="input-group">
                               <input type="number" class="form-control" formControlName="kmRecorrido" min="0" step="0.1">
                               <span class="input-group-text">km</span>
                             </div>
-                          </div>
+                          </div> -->
                         </div>
                       </div>
                     </div>

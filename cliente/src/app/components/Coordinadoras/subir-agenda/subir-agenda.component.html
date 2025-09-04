@@ -169,9 +169,9 @@
             <select id="coordinadorSelect" class="form-select" [(ngModel)]="selectedCoordinador">
               <option disabled selected value="">Seleccione el coordinador</option>
               <option *ngFor="let coord of coordinaciones" 
-                      [value]="coord.coordinador[0].nombre"
+                      [value]="coord.coordinador"
                       class="fw-medium">
-                {{ coord.coordinador[0].nombre }}
+                {{ coord.coordinador }}
               </option>
             </select>
           </div>

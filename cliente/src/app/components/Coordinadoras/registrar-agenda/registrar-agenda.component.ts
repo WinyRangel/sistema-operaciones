@@ -4,20 +4,19 @@ import { CoordinacionService } from '../../../services/coordinacion.service';
 import { Coordinacion } from '../../../models/coordinacion';
 import { Agenda, Domicilio } from '../../../models/agenda';
 import Swal from 'sweetalert2';
-
+import { horaLaboralValidator } from '../agendas/agendas.component';
+import { AuthService } from '../../../services/auth.service';
 
 // Constantes para evitar "magic numbers/strings"
 const RENDIMIENTO_POR_DEFECTO = 13;
 const SEMANAS_ANIO = 52;
-
-
 @Component({
-  selector: 'app-agendas',
+  selector: 'app-registrar-agenda',
   standalone: false,
-  templateUrl: './agendas.component.html',
-  styleUrl: './agendas.component.css'
+  templateUrl: './registrar-agenda.component.html',
+  styleUrl: './registrar-agenda.component.css'
 })
-export class AgendasComponent {
+export class RegistrarAgendaComponent {
 // En tu componente RecorridoAgendaComponent
   coordinacion: string[] = []; // Debes poblarlo en loadCoordinaciones
 
@@ -47,7 +46,8 @@ export class AgendasComponent {
 
   constructor(
     private fb: FormBuilder,
-    private _coordinacionService: CoordinacionService) {
+    private _coordinacionService: CoordinacionService,
+    private authService: AuthService) {
     this.registrarAgenda = this.initForm();
     this.generateWeeks();
     codigo: this.fb.array([]) // almacenará un array de valores seleccionados
@@ -63,15 +63,19 @@ export class AgendasComponent {
   ngOnInit(): void {
     this.loadCoordinaciones();
     this.loadDomicilios();
-    this.setupFormListeners();
+    // this.setupFormListeners();
      this._coordinacionService.obtenerCoordinacion().subscribe(data => {
         this.coordinaciones = data;
       });
 
   }
+
+
   private initForm(): FormGroup {
+    const coordinadorLogueado = this.authService.getUsuario();
+
     return this.fb.group({
-      coordinador: ['', Validators.required],
+      coordinador: [coordinadorLogueado || '', Validators.required],
       semana: ['', Validators.required],
       fecha: ['', Validators.required],
       objetivo: [''],
@@ -80,6 +84,8 @@ export class AgendasComponent {
       actividades: this.fb.array([this.crearActividad()])
     });
   }
+
+
 
 
   private generateWeeks(): void {
@@ -111,17 +117,12 @@ export class AgendasComponent {
 
 
   // Configurar listeners del formulario
-  private setupFormListeners(): void {
-    this.registrarAgenda.get('traslado')?.valueChanges.subscribe(value => {
-      const kmControl = this.registrarAgenda.get('kmRecorrido');
-      value === 'SI' ? kmControl?.enable() : kmControl?.disable();
-    });
-  }
-
-  mostrarDiv(coordinador: string): void {
-    this.coordinadorVisible = coordinador;
-    this.registrarAgenda.get('coordinador')?.setValue(coordinador);
-  }
+  // private setupFormListeners(): void {
+  //   this.registrarAgenda.get('traslado')?.valueChanges.subscribe(value => {
+  //     const kmControl = this.registrarAgenda.get('kmRecorrido');
+  //     value === 'SI' ? kmControl?.enable() : kmControl?.disable();
+  //   });
+  // }
 
   crearActividad(): FormGroup {
     return this.fb.group({
@@ -131,7 +132,7 @@ export class AgendasComponent {
       codigo: [''],
       acordeObjetivo: [false],
       traslado: ['', Validators.required],
-      kmRecorrido: ['']
+      // kmRecorrido: ['']
     });
 
   }
@@ -304,25 +305,4 @@ export class AgendasComponent {
           this.registrarAgenda.get('objetivo')?.setValue(this.selectedObjetivos.join(','));
         }
 
-
-
-}
-
-
-
-export function horaLaboralValidator(control: AbstractControl): ValidationErrors | null {
-  if (!control.value) return null;
-
-  const horaSeleccionada = control.value; // formato "HH:mm"
-  const [hora, minuto] = horaSeleccionada.split(':').map(Number);
-  const totalMinutos = hora * 60 + minuto;
-
-  const inicio = 9 * 60;       // 9:00 am en minutos
-  const fin = 17 * 60 + 30;    // 5:30 pm en minutos
-
-  if (totalMinutos < inicio || totalMinutos > fin) {
-    return { horaInvalida: true };
-  }
-
-  return null;
 }

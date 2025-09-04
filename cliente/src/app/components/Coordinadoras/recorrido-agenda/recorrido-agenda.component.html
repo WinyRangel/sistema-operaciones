@@ -17,17 +17,17 @@
               'coordinador-6': i === 6,
               'coordinador-7': i === 7
             }"
-            [class.active]="coordinadorVisible === c.coordinador[0].nombre"
-            [id]="'nav-' + c.coordinador[0].nombre + '-tab'"
+            [class.active]="coordinadorVisible === c.coordinador"
+            [id]="'nav-' + c.coordinador + '-tab'"
             data-bs-toggle="tab"
-            [attr.data-bs-target]="'#nav-' + c.coordinador[0].nombre"
+            [attr.data-bs-target]="'#nav-' + c.coordinador"
             type="button"
             role="tab"
-            [attr.aria-controls]="'nav-' + c.coordinador[0].nombre"
-            [attr.aria-selected]="coordinadorVisible === c.coordinador[0].nombre"
-            (click)="mostrarDiv(c.coordinador[0].nombre)"
+            [attr.aria-controls]="'nav-' + c.coordinador"
+            [attr.aria-selected]="coordinadorVisible === c.coordinador"
+            (click)="mostrarDiv(c.coordinador)"
           >
-            <span class="tab-label">{{ c.coordinador[0].nombre }}</span>
+            <span class="tab-label">{{ c.coordinador }}</span>
             <span class="tab-indicator"></span>
           </button>
         </div>

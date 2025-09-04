@@ -43,8 +43,8 @@
                   <select class="form-select" id="ejecutiva" formControlName="ejecutiva" [disabled]="isEditing">
                     <option disabled selected value="">Seleccionar persona</option>
                     <option *ngFor="let persona of personasFiltradas" [ngValue]="persona">
-                      {{ persona.nombre }}
-                    </option>
+                        {{ persona.nombre }}
+                      </option>
                   </select>
                   <div class="invalid-feedback d-block" *ngIf="baucherForm.get('ejecutiva')?.invalid && baucherForm.get('ejecutiva')?.touched">
                     Por favor seleccione una persona

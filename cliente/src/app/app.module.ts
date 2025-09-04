@@ -17,7 +17,7 @@ import { InicioComponent } from './components/inicio/inicio.component';
 import { HeaderComponent } from './components/Shared/layout/header/header.component';
 import { LegalesComponent } from './components/Shared/legales/legales.component';
 import { ToggleButtonModule } from 'primeng/togglebutton';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient, HttpClientModule } from '@angular/common/http';
 import { FooterComponent } from './components/Shared/layout/footer/footer.component';
 import { BaucherPipe } from './pipes/baucher.pipe';
 import { RecorridoAgendaComponent } from './components/Coordinadoras/recorrido-agenda/recorrido-agenda.component';
@@ -40,6 +40,9 @@ import { DirSegProyeccionComponent } from './components/Shared/dir-seg-proyeccio
 import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-agenda/cumplimiento-agenda.component';
 import { SubirAgendaComponent } from './components/Coordinadoras/subir-agenda/subir-agenda.component';
 import { ActividadPipe } from './pipes/actividad.pipe';
+import { MiAgendaComponent } from './components/Coordinadoras/mi-agenda/mi-agenda.component';
+import { TokenInterceptor } from './interceptors/token.interceptor';
+import { RegistrarAgendaComponent } from './components/Coordinadoras/registrar-agenda/registrar-agenda.component';
 
 
 @NgModule({
@@ -65,7 +68,9 @@ import { ActividadPipe } from './pipes/actividad.pipe';
     IniciarSesionComponent,
     CumplimientoAgendaComponent,
     SubirAgendaComponent,
-    ActividadPipe
+    ActividadPipe,
+    MiAgendaComponent,
+    RegistrarAgendaComponent
   ],
   
   imports: [
@@ -87,7 +92,9 @@ import { ActividadPipe } from './pipes/actividad.pipe';
   ],
     providers: [
         provideAnimationsAsync(),
-        providePrimeNG({ /* options */ })
+        providePrimeNG({ /* options */ }),
+        { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }
+
     ], 
   bootstrap: [AppComponent]
 })
