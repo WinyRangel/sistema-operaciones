@@ -4,6 +4,10 @@ import { CoordinacionService } from '../../../services/coordinacion.service';
 import { FormBuilder } from '@angular/forms';
 import { Agenda } from '../../../models/agenda';
 import Swal from 'sweetalert2';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
+
 
 const SEMANAS_ANIO = 52;
 @Component({
@@ -267,6 +271,83 @@ getClaseCoordinador(i: number): any {
     { value: 'Sin Codigo', texto: 'Sin Codigo' },
     { value: '', texto: '' }
   ];
+
+descargarAgendaPDF(): void {
+  const doc = new jsPDF();
+
+  // === Encabezado dinámico ===
+  const titulo = "Agenda de Actividades";
+  const coordinador = this.coordinadorVisible || this.usuarioLogueado || "Todos";
+  const semana = this.semanaSeleccionada || "Todas";
+  const fechaGeneracion = new Date().toLocaleDateString('es-MX');
+
+  doc.setFontSize(18);
+  doc.text(titulo, 14, 20);
+
+  doc.setFontSize(11);
+  doc.text(`Coordinador: ${coordinador}`, 14, 30);
+  doc.text(`Semana: ${semana}`, 14, 36);
+  doc.text(`Fecha de generación: ${fechaGeneracion}`, 14, 42);
+
+  // === Definir columnas (cabeceras de la tabla) ===
+  const columnas = [
+    { header: 'Fecha', dataKey: 'fecha' },
+    { header: 'Domicilio', dataKey: 'domicilio' },
+    { header: 'Actividad', dataKey: 'actividad' },
+    { header: 'Código', dataKey: 'codigo' },
+  ];
+
+  // === Mapear datos filtrados ===
+const filas: Record<string, any>[] = this.agendasFiltradasPorCoordinador.map(agenda => ({
+  fecha: new Date(agenda.fecha).toLocaleDateString('es-MX'),
+  domicilio: agenda.domicilio,
+  actividad: agenda.actividad,
+  codigo: agenda.codigo
+}));
+
+  // === Generar tabla con estilo ===
+  autoTable(doc, {
+    startY: 50,
+    head: [columnas.map(col => col.header)], // Encabezados visibles
+    body: filas.map(fila => columnas.map(col => fila[col.dataKey])),
+    theme: 'grid', // 'striped', 'grid', 'plain'
+    headStyles: {
+      fillColor: [200, 0, 0], // rojo PDF
+      textColor: 255,
+      fontStyle: 'bold',
+      halign: 'center'
+    },
+    bodyStyles: {
+      fontSize: 10,
+      cellPadding: 3
+    },
+    alternateRowStyles: {
+      fillColor: [240, 240, 240] // gris claro
+    },
+    styles: {
+      halign: 'left',
+      valign: 'middle'
+    },
+    margin: { top: 50 }
+  });
+
+  // === Pie de página ===
+  const pageCount = (doc as any).internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(9);
+    doc.text(
+      `Página ${i} de ${pageCount}`,
+      doc.internal.pageSize.getWidth() - 40,
+      doc.internal.pageSize.getHeight() - 10
+    );
+  }
+
+  // === Descargar con nombre dinámico ===
+  doc.save(`agenda_${coordinador}_semana_${semana}.pdf`);
+}
+
+
   
   // Helper para notificaciones
   private showToast(icon: 'success' | 'error', title: string): void {

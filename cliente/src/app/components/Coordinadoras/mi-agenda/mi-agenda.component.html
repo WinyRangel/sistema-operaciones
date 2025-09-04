@@ -86,6 +86,11 @@
                       </select>
                     </div>
                   </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-2 mb-2">
+                    <button class="btn btn-danger" type="button" (click)="descargarAgendaPDF()">
+                      Descargar Agenda <i class="fa-solid fa-file-pdf"></i>
+                    </button>
+                    </div>
                 </div>
 
                 <!-- Tabla de actividades - MEJORADO -->
@@ -95,6 +100,7 @@
                       <tr>
                         <th class="text-center ps-4" style="width: 100px;">Fecha</th>
                         <th class="text-center" style="width: 80px;">Hora</th>
+                        <th class="text-center" style="width: 80px;">Domicilio</th>
                         <th style="min-width: 100px;">Actividad</th>
                         <th class="text-center" style="min-width: 30px;">Código</th>
                         <th class="text-center" style="min-width: 100px;">Resultado</th>
@@ -116,6 +122,13 @@
                         <td class="text-center">
                           <span class="badge bg-light text-dark py-2 px-3 rounded">{{ agenda.hora }}</span>
                         </td>
+
+                        <!-- Domicilio -->
+                        <td>
+                          <div class="activity-text" style="text-align: center;" [title]="agenda.domicilio">
+                            {{ agenda.domicilio }}
+                          </div>
+                        </td>                        
                         
                         <!-- Actividad -->
                         <td>
@@ -128,7 +141,6 @@
                         <td class="text-center">
                           <span class="badge text-bg-warning py-2 px-3">{{ agenda.codigo }}</span>
                         </td>
-                        <!-- Resultado -->
                         <!-- Resultado -->
                         <td class="text-center">
                           <textarea class="form-control form-control-sm border-primary" 
