@@ -15,7 +15,9 @@ conectarDB();
 
 // Middleware
 app.use(cors({
-  origin: 'https://supervisor-operacion.web.app/', // url frontend
+   // url frontend
+  // origin: 'https://supervisor-operacion.web.app/',
+  origin: 'http://localhost:4200',
   credentials: true
 }));
 app.use(express.json());
