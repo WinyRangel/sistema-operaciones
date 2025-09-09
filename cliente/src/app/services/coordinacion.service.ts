@@ -9,10 +9,10 @@ import { Agenda, Domicilio } from '../models/agenda';
 })
 export class CoordinacionService {
 
-  url = 'https://servidor-operaciones.onrender.com/coordinacion'
-  url3 = 'https://servidor-operaciones.onrender.com/agendas?page=1&limit=10000'
-  url2 = 'https://servidor-operaciones.onrender.com/agenda'
-  url4 = 'https://servidor-operaciones.onrender.com/obtenerAgenda'
+  url = 'http://localhost:4000/coordinacion'
+  url3 = 'http://localhost:4000/agendas?page=1&limit=10000'
+  url2 = 'http://localhost:4000/agenda'
+  url4 = 'http://localhost:4000/obtenerAgenda'
   constructor(private http: HttpClient) { }
 
   obtenerCoordinacion(): Observable<Coordinacion[]> {
@@ -37,7 +37,7 @@ export class CoordinacionService {
 
 
   getDomicilios(): Observable<Domicilio[]> {
-  return this.http.get<Domicilio[]>('https://servidor-operaciones.onrender.com/domicilios');
+  return this.http.get<Domicilio[]>('http://localhost:4000/domicilios');
   }
 
   obtenerAgenda(coordinador: string): Observable<any> {
@@ -45,11 +45,11 @@ export class CoordinacionService {
   }
 
   actualizarAgenda(id: string, datos: any): Observable<any> {
-    return this.http.put(`https://servidor-operaciones.onrender.com/agenda/${id}`, datos);
+    return this.http.put(`http://localhost:4000/agenda/${id}`, datos);
   }
   
   eliminarAgenda(id: string): Observable<any>{
-    return this.http.delete(`https://servidor-operaciones.onrender.com/agenda/${id}`);
+    return this.http.delete(`http://localhost:4000/agenda/${id}`);
   }
 
 
