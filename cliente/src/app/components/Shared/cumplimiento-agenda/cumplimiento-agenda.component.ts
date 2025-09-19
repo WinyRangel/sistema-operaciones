@@ -4,7 +4,7 @@ import { catchError } from 'rxjs/operators';
 import { ObjetivosService } from '../../../services/objetivos.service';
 import { CumpObjetivoService } from '../../../services/cump-objetivo.service';
 import { Agenda } from '../../../models/agenda';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 

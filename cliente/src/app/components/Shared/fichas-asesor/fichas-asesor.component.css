@@ -1,0 +1,44 @@
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #3f51b5, #2196f3);
+}
+
+.custom-accordion .accordion-button {
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+.custom-accordion .accordion-button:not(.collapsed) {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.custom-accordion .accordion-button:focus {
+  box-shadow: none;
+  border-color: rgba(0,0,0,.125);
+}
+
+.filter-group {
+  min-width: 200px;
+}
+
+.info-item {
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #fafafa;
+}
+
+.form-check-input:checked {
+  background-color: #2196f3;
+  border-color: #2196f3;
+}
+
+@media (max-width: 768px) {
+  .filter-group {
+    width: 100%;
+  }
+  
+  .filter-group .form-select,
+  .filter-group .input-group {
+    width: 100% !important;
+  }
+}

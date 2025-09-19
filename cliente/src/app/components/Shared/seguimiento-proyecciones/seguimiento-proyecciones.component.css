@@ -192,22 +192,27 @@
 
 .status-ontime {
     background-color: #e8f5e9;
-    color: #2e7d32;
+    color: #2a702d;
     border: 1px solid #c8e6c9;
 }
 
 .status-delayed {
     background-color: #ffebee;
-    color: #c62828;
+    color: #b92323;
     border: 1px solid #ffcdd2;
 }
 
 .status-pending {
     background-color: #fff8e1;
-    color: #f57f17;
+    color: #eb7611;
     border: 1px solid #ffecb3;
 }
 
+.status-early {
+    background-color: #2195f348;
+    color: #0b5fa3af;
+    border: 1px solid #2195f386; 
+}
 
 .record-count {
     font-weight: 600;

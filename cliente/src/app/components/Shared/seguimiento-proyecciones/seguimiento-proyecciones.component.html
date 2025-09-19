@@ -101,6 +101,7 @@
               <th>Fecha límite entrega legal</th>
               <th>Fecha de legal recibido</th>
               <th>Días de retraso Legal</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -145,7 +146,8 @@
                 <span class="status-badge" [ngClass]="{
           'status-ontime': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) === 0,
           'status-pending': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) > 0 && getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) <= 3,
-          'status-delayed': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) > 3
+          'status-delayed': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) > 3,
+          'status-early': getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) < 0
         }">
                   {{ getDiasRetrasoOpe(item.fechaEntregaAgendadaOpe, item.fechaEnvioOperativo) || 0 }} días
                 </span>
@@ -191,6 +193,11 @@
                   {{ getDiasRetrasoLegal(getFechaLimiteEntrega(item.fechaEntregaAgendada), item.fechaRealReciboExpLegal)
                   || 0 }} días
                 </span>
+              </td>
+              <td class="text-center">
+                <button class="btn btn-danger btn-sm" (click)="eliminarProyeccion(item._id)">
+                  <i class="bi bi-trash"></i> <!-- Icono de basura de Bootstrap Icons -->
+                </button>
               </td>
             </tr>
           </tbody>

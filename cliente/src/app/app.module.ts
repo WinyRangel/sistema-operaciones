@@ -43,8 +43,7 @@ import { ActividadPipe } from './pipes/actividad.pipe';
 import { MiAgendaComponent } from './components/Coordinadoras/mi-agenda/mi-agenda.component';
 import { TokenInterceptor } from './interceptors/token.interceptor';
 import { RegistrarAgendaComponent } from './components/Coordinadoras/registrar-agenda/registrar-agenda.component';
-import { FichasComponent } from './components/Shared/fichas/fichas.component';
-
+import { FichasAsesorComponent } from './components/Shared/fichas-asesor/fichas-asesor.component';
 
 @NgModule({
   declarations: [
@@ -72,7 +71,7 @@ import { FichasComponent } from './components/Shared/fichas/fichas.component';
     ActividadPipe,
     MiAgendaComponent,
     RegistrarAgendaComponent,
-    FichasComponent
+    FichasAsesorComponent
   ],
   
   imports: [
