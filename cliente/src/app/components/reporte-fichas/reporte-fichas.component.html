@@ -30,7 +30,6 @@
   </div>
 
   <div class="row g-4">
-    <!-- Columna Izquierda - Tablas Excel -->
     <div class="col-md-8">
       <h4 class="mb-4 text-primary">Datos de Archivos Excel</h4>
       <div *ngFor="let sheet of objectKeys(excelDataBySheet)" class="mb-4">
@@ -58,8 +57,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Columna Derecha - Vista Previa -->
     <div class="col-md-4">
       <div class="sticky-top" style="top: 20px;">
         <h4 class="mb-4 text-primary">Vista Previa del Reporte</h4>
@@ -71,12 +68,9 @@
             </div>
             <div class="card-body">
               <div class="row g-2">
-                <!-- Gráfica -->
                 <div class="col-12">
                   <canvas [id]="'chart-' + item.sheet" class="mb-3"></canvas>
                 </div>
-                
-                <!-- Tabla Resumen -->
                 <div class="col-12">
                   <table class="table table-bordered table-sm">
                     <tbody>

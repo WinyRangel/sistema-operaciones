@@ -5,6 +5,7 @@ import { ActividadPipe } from '../../../pipes/actividad.pipe';
 import { CoordinacionService } from '../../../services/coordinacion.service';
 import { Coordinacion } from '../../../models/coordinacion';
 import Swal from 'sweetalert2';
+import { saveAs } from 'file-saver';
 
 const SEMANAS_ANIO = 31;
 
@@ -195,7 +196,44 @@ export class SubirAgendaComponent {
           });
     }
 
+ exportarExcel() {
+    // Filtrar solo los campos que quieres
+    const datosFiltrados = this.agendas.map(a => ({
+      fecha: this.formatearFecha(a.fecha), // ✅ formatear aquí
+      hora: a.hora,
+      domicilio: a.domicilio,
+      actividad: a.actividad,
+      codigo: a.codigo,
+      traslado: a.traslado,
+      kmRecorrido: a.kmRecorrido,
+      acordeObjetivo: a.acordeObjetivo ? 'SI' : 'NO' // lo pasamos como texto
+    }));
 
+    // Crear hoja con los datos filtrados
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(datosFiltrados, {skipHeader: true});
+
+    XLSX.utils.sheet_add_aoa(ws, [[
+      "Fecha", "Hora", "Domicilio", "Actividad", "Codigo",
+    "Traslado", "Km Recorrido", "Acorde Objetivo"
+    ]], {origin: "A1"})
+
+    // Crear libro y añadir hoja
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Agendas');
+
+    // Generar archivo Excel
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+
+    // Descargar archivo
+    saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'agendas.xlsx');
+  }
+ private formatearFecha(fecha: any): string {
+    const d = new Date(fecha);
+    const dia = String(d.getDate()).padStart(2, '0');
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const anio = d.getFullYear();
+    return `${dia}/${mes}/${anio}`;
+  }
   //Metodo para eliminar una fila
   eliminarAgenda(index: number) {
   if (confirm('¿Estás segura/o de eliminar esta fila de la agenda?')) {

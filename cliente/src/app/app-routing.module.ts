@@ -18,6 +18,7 @@ import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-ag
 import { SubirAgendaComponent } from './components/Coordinadoras/subir-agenda/subir-agenda.component';
 import { MiAgendaComponent } from './components/Coordinadoras/mi-agenda/mi-agenda.component';
 import { RegistrarAgendaComponent } from './components/Coordinadoras/registrar-agenda/registrar-agenda.component';
+import { FichasComponent } from './components/Shared/fichas/fichas.component';
 
 const routes: Routes = [
   { path: 'baucher', component: BauchersComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
@@ -38,6 +39,7 @@ const routes: Routes = [
   { path: 'proyecciones', component: ProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'seg-proyecciones', component: SeguimientoProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']}  },
   { path: 'dir-seg-proyeccion', component: DirSegProyeccionComponent, canActivate: [AuthGuard], data: { roles: ['admin']}},
+  { path: 'fichas', component: FichasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'coordinador']} },
   { path: '**', redirectTo: 'inicio' }
 ];
 

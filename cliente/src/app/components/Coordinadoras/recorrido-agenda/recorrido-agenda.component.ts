@@ -280,7 +280,6 @@ export class RecorridoAgendaComponent implements OnInit {
     });
   }
 
-  // Metrics calculations
 // Métricas de reporte
   get totalKmRecorridos(): number {
     return +this.agendasFiltradasPorCoordinador
@@ -354,8 +353,6 @@ get horasAgendadas(): number {
   return claves.size;
 }
 
-
-
   get horasReportadas(): number {
     const claves = new Set<string>();
     for (const a of this.agendasFiltradasPorCoordinador) {
@@ -375,7 +372,6 @@ get horasAgendadas(): number {
     }
     return claves.size;
   }
-
 
 
   /////////////////////////////////////////////////////////////////////////////////////
@@ -567,11 +563,7 @@ get horasAgendadas(): number {
 			: 0;
 	}
 
-  /////////////////////////////////////////////////////////////////////////////////////
-
-
-    
-
+//REPORTE MENSUAL
   opcionesCodigo = [
     { value: 'AG', texto: 'AG | Aseo General' },
     { value: 'GA', texto: 'GA | Gestión Administrativa' },
@@ -644,7 +636,7 @@ get horasAgendadas(): number {
     },
     plugins: [ChartDataLabels]
   });
-}
+  }
 
 
   generarGraficaEntregas(): void {
@@ -810,7 +802,6 @@ get horasAgendadas(): number {
     });
   }
 
-
   dibujarGraficaReporteadasVsNoReportadas(): void {
     if (!this.mostrarContenedorGraficas || !this.graficaHoras) return;
 
@@ -862,7 +853,6 @@ get horasAgendadas(): number {
       plugins: [ChartDataLabels]
     });
   }
-
 
   // PDF Generation
   generarPDFConGrafica(): void {

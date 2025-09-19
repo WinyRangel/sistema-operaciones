@@ -202,10 +202,12 @@
                       <tr>
                         <th class="text-center" style="width: 100px;">Fecha</th>
                         <th class="text-center" style="width: 80px;">Hora</th>
+                        <th class="text-center" style="width: 70px;">Traslado</th>
+                        <th class="text-center" style="width: 70px;">Domicilio</th>
                         <th style="min-width: 180px;">Actividad</th>
-                        <th class="text-center" style="min-width: 40px;">Código</th>
+                        <th class="text-center" style="min-width: 30px;">Código</th>
                         <th style="min-width: 180px;">Actividad Reportada</th>
-                        <th class="text-center" style="min-width: 40px;">Código Reportado</th>
+                        <th class="text-center" style="min-width: 30px;">Código Reportado</th>
                         <th class="text-center" style="width: 100px;">Estado</th>
                         <th class="text-center" style="width: 100px;">Inicio</th>
                         <th class="text-center" style="width: 100px;">Cierre</th>
@@ -228,7 +230,22 @@
                         <td class="text-center">
                           <span class="badge bg-light text-dark">{{ agenda.hora }}</span>
                         </td>
-                        
+                        <!--Traslado-->
+                          <td class="text-center" [title]="agenda.traslado"
+                              [ngClass]="{
+                                'text-success': agenda.traslado === 'SI',
+                                'text-danger': agenda.traslado === 'NO'
+                              }">
+                            <strong>
+                               {{ agenda.traslado }}
+                            </strong>
+                          </td>
+                        <!-- Domicilio -->
+                        <td>
+                          <div class="text-primary-emphasis" style="max-width: 180px;" [title]="agenda.domicilio">
+                            {{ agenda.domicilio }}
+                          </div>
+                        </td>                          
                         <!-- Actividad -->
                         <td>
                           <div class="text-truncate" style="max-width: 180px;" [title]="agenda.actividad">
@@ -630,11 +647,12 @@
     <!--FIN CONTENIDO-->
     </div>
   </div>
+  </div>
+  </div>
 </div>
-
 <!-- Modal Edit Activity - Enhanced Design -->
 <div class="modal fade" id="editarActividad" tabindex="-1" aria-labelledby="editarActividadLabel" aria-hidden="true" #modalEditar>
-  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content border-0 shadow-lg">
 
       <!-- Modal Header -->
@@ -646,124 +664,116 @@
       </div>
 
       <!-- Modal Body -->
+      <div class="modal-body p-4" *ngIf="actividadSeleccionada">
+        <form>
+          <!-- Primera fila: Hora y Estado -->
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold text-primary">Hora Programada</label>
+              <input type="time" 
+                     class="form-control border-primary" 
+                     [(ngModel)]="actividadSeleccionada.hora"
+                     name="hora"
+                     title="Hora programada">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold text-primary">Estado</label>
+              <select class="form-select" 
+                      [(ngModel)]="actividadSeleccionada.reportado"
+                      name="reportado"
+                      [ngClass]="{
+                        'border-success text-success': actividadSeleccionada.reportado,
+                        'border-danger text-danger': !actividadSeleccionada.reportado
+                      }">
+                <option [value]="true">✓ Reportado</option>
+                <option [value]="false">✗ No reportado</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold text-primary">Hora Inicio Real</label>
+              <input type="time" 
+                     class="form-control border-primary" 
+                     [(ngModel)]="actividadSeleccionada.horaReporte"
+                     name="horaReporte"
+                     title="Hora de inicio real">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold text-primary">Hora Finalización</label>
+              <input type="time" 
+                     class="form-control border-primary" 
+                     [(ngModel)]="actividadSeleccionada.horaCierre"
+                     name="horaCierre"
+                     title="Hora de finalización">
+            </div>
+          </div>
 
-      <div class="modal-body p-4">
-        <div class="table-responsive rounded-3 border">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th class="text-center bg-light-blue text-primary">Hora</th>
-                <th class="bg-light-blue text-primary">Domicilio</th>
-                <th class="bg-light-blue text-primary">Actividad</th>
-                <th class="bg-light-blue text-primary">Actividad Reportada</th>
-                <th class="bg-light-blue text-primary">Código Reportado</th>
-                <th class="text-center bg-light-blue text-primary">Estado</th>
-                <th class="text-center bg-light-blue text-primary">Hora Inicio</th>
-                <th class="text-center bg-light-blue text-primary">Hora Cierre</th>
-                <th class="text-center bg-light-blue text-primary">Actividad Acorde a Objetivo</th>
-                <th class="text-center bg-light-blue text-primary">KM</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngIf="actividadSeleccionada">
-                <!-- Hora -->
-                <td class="text-center">
-                  <input type="time" 
-                         class="form-control form-control-sm border-primary" 
-                         [(ngModel)]="actividadSeleccionada.hora"
-                         title="Hora programada">
-                </td>
-                
-                <!-- Domicilio -->
-                <td>
-                  <input type="text" 
-                         class="form-control form-control-sm border-primary" 
-                         [(ngModel)]="actividadSeleccionada.domicilio"
-                         placeholder="Nombre domicilio">
-                </td>
-                
-                <!-- Actividad -->
-                <td>
-                  <textarea class="form-control form-control-sm border-primary" 
-                            rows="2" 
-                            [(ngModel)]="actividadSeleccionada.actividad"
-                            placeholder="Descripción actividad"></textarea>
-                </td>
-                
-                <!-- Actividad Reportada -->
-                <td>
-                  <textarea class="form-control form-control-sm border-primary" 
-                            rows="2" 
-                            [(ngModel)]="actividadSeleccionada.actividadReportada"
-                            placeholder="Actividad realizada"></textarea>
-                </td>
+          <!-- Domicilio -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-primary">Domicilio</label>
+            <input type="text" 
+                   class="form-control border-primary" 
+                   [(ngModel)]="actividadSeleccionada.domicilio"
+                   name="domicilio"
+                   placeholder="Ingrese el domicilio">
+          </div>
 
-                                <!-- Codigo Reportado -->
-                <td>
-                  <input class="form-control form-control-sm border-primary" 
-                            rows="2" 
-                            [(ngModel)]="actividadSeleccionada.codigoReportado"
-                            placeholder="Actividad realizada">
-                </td>
-                
-                <!-- Estado Reportado -->
-                <td class="text-center">
-                  <select class="form-select form-select-sm" 
-                          [(ngModel)]="actividadSeleccionada.reportado"
-                          [ngClass]="{
-                            'border-success': actividadSeleccionada.reportado,
-                            'border-danger': !actividadSeleccionada.reportado
-                          }">
-                    <option [value]="true" class="text-success">✓ Reportado</option>
-                    <option [value]="false" class="text-danger">✗ No reportado</option>
-                  </select>
-                </td>
-                
-                <!-- Hora Reporte -->
-                <td class="text-center">
-                  <input type="time" 
-                         class="form-control form-control-sm border-primary" 
-                         [(ngModel)]="actividadSeleccionada.horaReporte"
-                         title="Hora de inicio real">
-                </td>
-                
-                <!-- Hora Cierre -->
-                <td class="text-center">
-                  <input type="time" 
-                         class="form-control form-control-sm border-primary" 
-                         [(ngModel)]="actividadSeleccionada.horaCierre"
-                         title="Hora de finalización">
-                </td>
+          <!-- Actividades -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-primary">Actividad Planificada</label>
+              <textarea class="form-control border-primary" 
+                        rows="3" 
+                        [(ngModel)]="actividadSeleccionada.actividad"
+                        name="actividad"
+                        placeholder="Descripción de la actividad planificada"></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-primary">Actividad Realizada</label>
+              <textarea class="form-control border-primary" 
+                        rows="3" 
+                        [(ngModel)]="actividadSeleccionada.actividadReportada"
+                        name="actividadReportada"
+                        placeholder="Descripción de la actividad realizada"></textarea>
+            </div>
+          </div>
 
-               <!-- checkbox -->
-                <td class="text-center">
-                  <input type="checkbox" 
-                         class="form-check-input" 
-                         [(ngModel)]="actividadSeleccionada.acordeObjetivo">
-                </td>
-
-                <!-- KM Recorridos -->
-                <td class="text-center">
-                  <div class="input-group input-group-sm">
-                    <input type="number" 
-                           class="form-control border-primary" 
-                           [(ngModel)]="actividadSeleccionada.kmRecorrido"
-                           min="0"
-                           step="0.1">
-                    <span class="input-group-text bg-light">km</span>
-                  </div>
-                </td>          
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <!-- Sección de Notas -->
-        <!-- <div class="mt-3">
-          <label class="form-label text-muted small">Notas adicionales:</label>
-          <textarea class="form-control" rows="2" placeholder="Agregue cualquier observación importante"></textarea>
-        </div>
-      </div> -->
+          <!-- Código y KM -->
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold text-primary">Código Reportado</label>
+              <input class="form-control border-primary" 
+                     [(ngModel)]="actividadSeleccionada.codigoReportado"
+                     name="codigoReportado"
+                     placeholder="Código">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold text-primary">Kilómetros Recorridos</label>
+              <div class="input-group">
+                <input type="number" 
+                       class="form-control border-primary" 
+                       [(ngModel)]="actividadSeleccionada.kmRecorrido"
+                       name="kmRecorrido"
+                       min="0"
+                       step="0.1">
+                <span class="input-group-text bg-light">km</span>
+              </div>
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+              <div class="form-check form-switch">
+                <input class="form-check-input" 
+                       type="checkbox" 
+                       role="switch" 
+                       id="acordeObjetivo"
+                       [(ngModel)]="actividadSeleccionada.acordeObjetivo"
+                       name="acordeObjetivo">
+                <label class="form-check-label small fw-semibold text-primary" for="acordeObjetivo">
+                  Actividad acorde al objetivo
+                </label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
 
       <!-- Modal Footer -->
       <div class="modal-footer bg-light">
@@ -771,13 +781,11 @@
           <i class="fas fa-times me-1"></i>Cancelar
         </button>
         <button type="button" class="btn btn-primary" 
-                (click)="guardarCambios(actividadSeleccionada)"
-                >
+                (click)="guardarCambios(actividadSeleccionada)">
           <i class="fas fa-save me-1"></i>Guardar Cambios
         </button>
       </div>
 
     </div>
   </div>
-</div>
 </div>
