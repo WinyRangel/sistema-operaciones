@@ -97,7 +97,7 @@ export class SeguimientoProyeccionesComponent implements OnInit {
     };
   }
 
-  
+
 
   /** Crea un nuevo registro */
   createNew(): void {
@@ -128,76 +128,50 @@ export class SeguimientoProyeccionesComponent implements OnInit {
   }
 
   /** Construye el payload ISO para el back */
-  // private buildPayload(item: Proyeccion): ProyeccionPayload {
-  //   return {
-  //     coordinacion: item.coordinacion?.trim(),
-  //     asesor: item.asesor?.trim(),
-  //     cliente: item.cliente?.trim(),
-  //     fechaEntregaAgendadaOpe: item.fechaEntregaAgendadaOpe
-  //       ? new Date(item.fechaEntregaAgendadaOpe).toISOString()
-  //       : undefined,
-  //     fechaEntregaAgendada: item.fechaEntregaAgendada
-  //       ? new Date(item.fechaEntregaAgendada).toISOString()
-  //       : undefined,
-  //     mes: item.mes,
-  //     fechaEnvioOperativo: item.fechaEnvioOperativo
-  //       ? new Date(item.fechaEnvioOperativo).toISOString()
-  //       : undefined,
-  //     hora: item.hora,
-  //     incidenciasOperativo: item.incidenciasOperativo,
-  //     fechaRealReciboExpLegal: item.fechaRealReciboExpLegal
-  //       ? new Date(item.fechaRealReciboExpLegal).toISOString()
-  //       : undefined,
-  //     renovado: item.renovado,
-  //     refil: item.refil
-  //       ? new Date(item.refil).toISOString()
-  //       : undefined
-  //   };
-  // }
   private buildPayload(item: Proyeccion): ProyeccionPayload {
-  const parseDate = (d: any) => {
-    if (!d) return undefined;
-    const parsed = new Date(d);
-    return isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
-  };
+    const parseDate = (d: any) => {
+      if (!d) return undefined;
+      const parsed = new Date(d);
+      return isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
+    };
 
-  return {
-    coordinacion: item.coordinacion?.trim() || '',
-    asesor: item.asesor?.trim() || '',
-    cliente: item.cliente?.trim() || '',
-    fechaEntregaAgendadaOpe: parseDate(item.fechaEntregaAgendadaOpe),
-    fechaEntregaAgendada: parseDate(item.fechaEntregaAgendada),
-    fechaEnvioOperativo: parseDate(item.fechaEnvioOperativo),
-    fechaRealReciboExpLegal: parseDate(item.fechaRealReciboExpLegal),
-    hora: item.hora || '',
-    incidenciasOperativo: item.incidenciasOperativo || '',
-    renovado: item.renovado === true,
-    mes: item.mes || '',
-    refil: item.refil || '',
-  };
-}
+    return {
+      coordinacion: item.coordinacion?.trim() || '',
+      asesor: item.asesor?.trim() || '',
+      cliente: item.cliente?.trim() || '',
+      fechaEntregaAgendadaOpe: parseDate(item.fechaEntregaAgendadaOpe),
+      fechaEntregaAgendada: parseDate(item.fechaEntregaAgendada),
+      fechaEnvioOperativo: parseDate(item.fechaEnvioOperativo),
+      fechaRealReciboExpLegal: parseDate(item.fechaRealReciboExpLegal),
+      hora: item.hora || '',
+      incidenciasOperativo: item.incidenciasOperativo || '',
+      renovado: item.renovado === true,
+      mes: item.mes || '',
+      refil: item.refil || '',
+    };
+  }
 
 
   guardarCambios(): void {
-  const actualizables = this.proyecciones.filter(p => p._id); // Solo con _id definido
+    const actualizables = this.proyecciones.filter(p => p._id); // Solo con _id definido
 
-  actualizables.forEach(item => {
-    const payload = this.buildPayload(item);
-    if (!payload) return; // Saltar si el payload falló
+    actualizables.forEach(item => {
+      const payload = this.buildPayload(item);
+      if (!payload) return; // Saltar si el payload falló
 
-    this.proyeccionesSvc.updateOne(item._id!, payload).subscribe({
-      next: () => console.log(`Actualizado: ${item._id}`),
-      error: (err) => console.error(`Error al actualizar ${item._id}:`, err)
+      this.proyeccionesSvc.updateOne(item._id!, payload).subscribe({
+        next: () => console.log(`Actualizado: ${item._id}`),
+        error: (err) => console.error(`Error al actualizar ${item._id}:`, err)
+      });
     });
-  });
 
-  Swal.fire({
-    icon: 'success',
-    title: 'Cambios guardados',
-    showConfirmButton: false,
-    timer: 1500
-  });
-}
+    Swal.fire({
+      icon: 'success',
+      title: 'Cambios guardados',
+      showConfirmButton: false,
+      timer: 1500
+    });
+  }
 
 
   /** Resto de getters y métodos auxiliares (filtros, PDF, Excel, etc.) */
@@ -240,23 +214,46 @@ export class SeguimientoProyeccionesComponent implements OnInit {
 
   getDiasRetrasoLegal(fechaLimite: string | undefined, fechaRecibido: string | undefined): number {
     if (!fechaLimite || !fechaRecibido) return 0;
+
     const limite = new Date(fechaLimite);
     const recibido = new Date(fechaRecibido);
+
     if (isNaN(limite.getTime()) || isNaN(recibido.getTime())) return 0;
-    const diffMs = recibido.getTime() - limite.getTime();
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    const limiteUTC = Date.UTC(limite.getFullYear(), limite.getMonth(), limite.getDate());
+    const recibidoUTC = Date.UTC(recibido.getFullYear(), recibido.getMonth(), recibido.getDate());
+
+    const diffDays = Math.floor((recibidoUTC - limiteUTC) / (1000 * 60 * 60 * 24));
     return diffDays > 0 ? diffDays : 0;
   }
 
+
+  // getDiasRetrasoLegal(fechaLimite: string | undefined, fechaRecibido: string | undefined): number {
+  //   if (!fechaLimite || !fechaRecibido) return 0;
+  //   const limite = new Date(fechaLimite);
+  //   const recibido = new Date(fechaRecibido);
+  //   if (isNaN(limite.getTime()) || isNaN(recibido.getTime())) return 0;
+  //   const diffMs = recibido.getTime() - limite.getTime();
+  //   const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  //   return diffDays > 0 ? diffDays : 0;
+  // }
+
   getDiasRetrasoOpe(fechaLimite: string | undefined, fechaEnvio: string | undefined): number {
     if (!fechaLimite || !fechaEnvio) return 0;
+
     const limite = new Date(fechaLimite);
     const envio = new Date(fechaEnvio);
+
     if (isNaN(limite.getTime()) || isNaN(envio.getTime())) return 0;
-    const diffMs = envio.getTime() - limite.getTime();
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
+
+    const limiteUTC = Date.UTC(limite.getFullYear(), limite.getMonth(), limite.getDate());
+    const envioUTC = Date.UTC(envio.getFullYear(), envio.getMonth(), envio.getDate());
+
+    const diffDays = Math.floor((envioUTC - limiteUTC) / (1000 * 60 * 60 * 24));
+
+    return diffDays; // positivo = retraso, negativo = anticipación
   }
+
 
   get clientesNoRenovados(): Proyeccion[] {
     return this.proyeccionesFiltradasPorCoordinacion.filter(p => p.renovado === false);
@@ -268,14 +265,15 @@ export class SeguimientoProyeccionesComponent implements OnInit {
     return this.clientesNoRenovados.filter(p => !!p.diasRetrasoExpOp && !!p.fechaRealReciboExpLegal && !!p.incidenciasOperativo && !!p.fechaEntregaAgendada);
   }
 
-  //Excel con las fechas proyectadas de Refil.
+
   exportarExcelConFechasExtra(): void {
     const workbook = XLSX.utils.book_new();
 
     const coordinacionesUnicas = [...new Set(this.proyecciones
-      .filter(p => p.mes === this.mesSeleccionado) // Solo del mes seleccionado
+      .filter(p => p.mes === this.mesSeleccionado)
       .map(p => p.coordinacion || 'Sin asignar'))];
 
+    // --- Hojas por coordinación ---
     coordinacionesUnicas.forEach(coordinacion => {
       const datos = this.proyecciones.filter(p =>
         p.mes === this.mesSeleccionado &&
@@ -283,24 +281,7 @@ export class SeguimientoProyeccionesComponent implements OnInit {
       );
 
       const datosSheet = datos.map(p => {
-        let renovacionCredito = '';
-        let renovacionRefil = '';
-
-        if (p.fechaEntregaAgendada) {
-          const fechaBase = new Date(p.fechaEntregaAgendada);
-          if (!isNaN(fechaBase.getTime())) {
-            if (p.refil?.toUpperCase() === 'NO') {
-              const fechaRenov = new Date(fechaBase);
-              fechaRenov.setMonth(fechaRenov.getMonth() + 4);
-              renovacionCredito = fechaRenov.toISOString().substring(0, 10);
-            } else if (p.refil?.toUpperCase() === 'SI') {
-              const fechaRef = new Date(fechaBase);
-              fechaRef.setMonth(fechaRef.getMonth() + 2);
-              renovacionRefil = fechaRef.toISOString().substring(0, 10);
-            }
-          }
-        }
-
+        const diasRetrasoEnvioOpe = this.getDiasRetrasoOpe(p.fechaEntregaAgendadaOpe, p.fechaEnvioOperativo);
         return {
           ASESOR: p.asesor,
           Cliente: p.cliente,
@@ -308,24 +289,43 @@ export class SeguimientoProyeccionesComponent implements OnInit {
           'Fecha de envío operativo APK': p.fechaEnvioOperativo,
           Hora: p.hora,
           'Incidencias operativo': p.incidenciasOperativo,
+          'Días de retraso envio operativo': diasRetrasoEnvioOpe,
           'Fecha agendada entrega crédito': p.fechaEntregaAgendada,
           Renovado: p.renovado ? 'Sí' : 'No',
           'Fecha límite entrega legal': p.fechaLimiteEntrega,
           'Fecha de legal recibido': p.fechaRealReciboExpLegal,
-          'Días de retraso Op.': p.diasRetrasoExpOp,
-          'Renovacion de Credito': renovacionCredito,
-          'Renovacion Refil': renovacionRefil
+          'Días de retraso Op.': this.getDiasRetrasoLegal(p.fechaLimiteEntrega, p.fechaRealReciboExpLegal)
         };
       });
 
       const sheet = XLSX.utils.json_to_sheet(datosSheet);
-      XLSX.utils.book_append_sheet(workbook, sheet, coordinacion.substring(0, 31)); // nombres de hoja max 31 caracteres
+      XLSX.utils.book_append_sheet(workbook, sheet, coordinacion.substring(0, 31));
     });
+
+    // --- Hoja TOTALES filtrada por mes ---
+    const totales = coordinacionesUnicas.map(coordinacion => {
+      const filtrados = this.proyecciones.filter(p =>
+        (p.coordinacion || 'Sin asignar') === coordinacion &&
+        p.mes === this.mesSeleccionado // <-- filtramos por mes
+      );
+      const renovados = filtrados.filter(p => p.renovado).length;
+      const noRenovados = filtrados.filter(p => !p.renovado).length;
+      return {
+        Coordinacion: coordinacion,
+        Renovado: renovados,
+        'No Renovado': noRenovados
+      };
+    });
+
+    const sheetTotales = XLSX.utils.json_to_sheet(totales);
+    XLSX.utils.book_append_sheet(workbook, sheetTotales, 'TOTALES');
 
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
     FileSaver.saveAs(blob, `Proyecciones_${this.mesSeleccionado || 'Todos'}_por_coordinacion.xlsx`);
   }
+
+
 
 
   generarReportePDF(): void {
@@ -454,5 +454,30 @@ export class SeguimientoProyeccionesComponent implements OnInit {
       this.toast.fire({ icon: 'info', title: 'Primero genera la vista previa del PDF.' });
     }
   }
+
+
+  eliminarProyeccion(id: string | undefined): void {
+    if (!id) return;
+
+    Swal.fire({
+      icon: 'warning',
+      title: '¿Eliminar proyección?',
+      text: 'Esta acción no se puede deshacer.',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.proyeccionesSvc.deleteOne(id).subscribe({
+          next: () => {
+            this.toast.fire({ icon: 'success', title: 'Proyección eliminada' });
+            this.loadData(); // recarga la tabla
+          },
+          error: () => this.toast.fire({ icon: 'error', title: 'Error al eliminar' })
+        });
+      }
+    });
+  }
+
 
 }

@@ -44,7 +44,8 @@ export interface ProyeccionPayload {
 })
 
 export class ProyeccionesService {
-  private baseUrl = 'https://servidor-operaciones.onrender.com/api/proyecciones';
+  // private baseUrl = 'https://servidor-operaciones.onrender.com/api/proyecciones';
+  private baseUrl = 'http://localhost:4000/api/proyecciones';
 
   constructor(private http: HttpClient) {}
 

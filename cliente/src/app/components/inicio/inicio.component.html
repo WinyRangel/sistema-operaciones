@@ -18,7 +18,7 @@
 <div class="container-fluid mt-4 mb-4">
   <div class="row g-4">
     <!---TARJETA COP-->
-    <div class="col-md-6" *ngIf="rolUsuario === 'coordinador'" >
+    <div class="col-md-6" *ngIf="rolUsuario === 'coordinador'">
       <div class="card h-100 shadow-sm border hover-effect">
         <div class="card-body text-center p-4 position-relative">
           <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
@@ -34,11 +34,11 @@
       </div>
     </div>
     <!---TARJETA COP-->
-    <div class="col-md-6" *ngIf="rolUsuario === 'coordinador'" >
+    <div class="col-md-6" *ngIf="rolUsuario === 'coordinador'">
       <div class="card h-100 shadow-sm border hover-effect">
         <div class="card-body text-center p-4 position-relative">
           <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
-`           <i class="fa-solid fa-calendar-days fs-1 text-info"></i>
+            ` <i class="fa-solid fa-calendar-days fs-1 text-info"></i>
           </div>
           <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Diaria</span>
           <h5 class="card-title fw-bold mb-3">Ver Agenda</h5>
@@ -50,7 +50,7 @@
       </div>
     </div>
     <!-- Tarjeta 1 -->
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'" >
+    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
       <div class="card h-100 shadow-sm border hover-effect">
         <div class="card-body text-center p-4 position-relative">
           <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
@@ -130,28 +130,28 @@
         </div>
       </div>
     </div>
-     <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-          <div class="card h-100 shadow-sm border hover-effect">
-            <div class="card-body text-center p-4 position-relative">
-              <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
-                <i class="bi bi-file-earmark-bar-graph fs-1 text-info"></i>
-              </div>
-              <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Mensual</span>
-              <h5 class="card-title fw-bold mb-3">Reporte de fichas cerradas al día</h5>
-              <p class="card-text text-muted mb-4">Generar reporte de fichas mensual</p>
-              <a routerLink="/reportefichas" class="btn btn-gradient px-4 rounded-pill text-white">
-                Acceder <i class="bi bi-arrow-right ms-2"></i>
-              </a>
-            </div>
+    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+      <div class="card h-100 shadow-sm border hover-effect">
+        <div class="card-body text-center p-4 position-relative">
+          <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
+            <i class="bi bi-file-earmark-bar-graph fs-1 text-info"></i>
           </div>
+          <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Mensual</span>
+          <h5 class="card-title fw-bold mb-3">Reporte de fichas cerradas al día</h5>
+          <p class="card-text text-muted mb-4">Generar reporte de fichas mensual</p>
+          <a routerLink="/reportefichas" class="btn btn-gradient px-4 rounded-pill text-white">
+            Acceder <i class="bi bi-arrow-right ms-2"></i>
+          </a>
         </div>
+      </div>
+    </div>
 
     <!-- Tarjeta  6-->
     <div class="container my-5" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
       <div class="row justify-content-center">
-       
+
         <!-- Tarjeta 7 -->
-        <div class="col-md-4"  *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+        <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
           <div class="card h-100 shadow-sm border hover-effect">
             <div class="card-body text-center p-4 position-relative">
               <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
@@ -168,7 +168,7 @@
         </div>
 
         <!-- Tarjeta 8-->
-        <div class="col-md-4"  *ngIf="rolUsuario === 'admin'">
+        <div class="col-md-4" *ngIf="rolUsuario === 'admin'">
           <div class="card h-100 shadow-sm border hover-effect">
             <div class="card-body text-center p-4 position-relative">
               <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
@@ -183,8 +183,29 @@
             </div>
           </div>
         </div>
+
       </div>
 
     </div>
+
+    <div class="container-fluid mt-4 mb-4" *ngIf="rolUsuario === 'asesor'">
+      <div class="row g-4">
+        <!-- Tarjeta: Registrar Ficha por Asesor -->
+        <div class="col-md-6">
+          <div class="card h-100 shadow-sm border hover-effect">
+            <div class="card-body text-center p-4 position-relative">
+              <div class="icon-container mb-3 bg-success bg-opacity-10 rounded-3">
+                <i class="bi bi-journal-check fs-1 text-success"></i>
+              </div>
+              <span class="badge bg-success text-white position-absolute top-0 end-0 m-2">Actividad Diaria</span>
+              <h5 class="card-title fw-bold mb-3">Registrar Ficha</h5>
+              <p class="card-text text-muted mb-4">Captura de actividades del día</p>
+              <a routerLink="/fichas-asesor" class="btn btn-gradient px-4 rounded-pill text-white">
+                Acceder <i class="bi bi-arrow-right ms-2"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>

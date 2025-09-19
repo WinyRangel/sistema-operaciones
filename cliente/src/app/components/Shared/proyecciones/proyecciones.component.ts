@@ -173,15 +173,6 @@ export class ProyeccionesComponent {
     });
   }
 
-  exportExcel() {
-    if (!this.originalWorkbook) return;
-    this.sheetNames.forEach(name => {
-      this.originalWorkbook!.Sheets[name] =
-        XLSX.utils.aoa_to_sheet(this.sheetsData[name]);
-    });
-    XLSX.writeFile(this.originalWorkbook, 'proyecciones_editado.xlsx');
-  }
-
   refreshSheet() {
     if (!this.originalWorkbook) return;
     const wb = this.originalWorkbook;
@@ -198,5 +189,15 @@ export class ProyeccionesComponent {
         .filter(i => i >= 0);
     });
     this.currentSheet = this.sheetNames[0] || '';
+  }
+
+  
+  exportExcel() {
+    if (!this.originalWorkbook) return;
+    this.sheetNames.forEach(name => {
+      this.originalWorkbook!.Sheets[name] =
+        XLSX.utils.aoa_to_sheet(this.sheetsData[name]);
+    });
+    XLSX.writeFile(this.originalWorkbook, 'proyecciones_editado.xlsx');
   }
 }

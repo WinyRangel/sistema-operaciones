@@ -1,96 +1,132 @@
 <div class="container-fluid px-0">
-  <div class="card text-center shadow">
-    <div class="card-header bg-primary text-white">
-      <h4 class="card-title mb-0">Generar Reporte Mensual de Fichas</h4>
-    </div>
-    <div class="card-body">
-      <img src="https://cdn-icons-png.flaticon.com/512/732/732220.png" alt="Ícono Excel" width="64" height="64"
-        class="mb-3" />
-
-      <p class="card-text">Elige los archivos para generar el reporte de fichas mensual</p>
-      <div class="mb-3">
-        <input type="file" class="form-control-file mx-auto d-block" id="inputGroupFile04" multiple
-          (change)="onFileChange($event)" />
-      </div>
+  <div class="header bg-primary text-white py-4 mb-4">
+    <div class="container">
+      <h2 class="text-center fw-bold mb-0"><i class="fas fa-file-alt me-2"></i>Gestión de Fichas</h2>
     </div>
   </div>
-</div>
 
-<div class="container" *ngIf="objectKeys(excelDataBySheet).length > 0">
-  <br>
-  <div class="d-flex justify-content-end mb-4 gap-2">
-    <button class="btn btn-secondary" (click)="limpiarTodo()">
-      <i class="fa-solid fa-broom me-2"></i>
-      Limpiar
-    </button>
-    <button type="button" class="btn btn-primary" style="background-color: rgb(140, 0, 255);" title="Generar reporte PDF" (click)="generarReporte()">
-      <i class="fas fa-file-pdf me-2"></i>
-      Generar Reporte
-    </button>
-  </div>
+  <div class="container-fluid">
+    <!-- Sección de carga de archivos -->
+    <div class="accordion custom-accordion mb-4" id="accordionFormBaucher">
+      <div class="accordion-item border-0 shadow-sm rounded">
+        <h2 class="accordion-header">
+          <button class="accordion-button fw-bold rounded-top bg-primary text-white" type="button"
+            data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+            <i class="fas fa-file-upload me-2"></i>
+            Cargar Fichas
+          </button>
+        </h2>
 
-  <div class="row g-4">
-    <!-- Columna Izquierda - Tablas Excel -->
-    <div class="col-md-8">
-      <h4 class="mb-4 text-primary">Datos de Archivos Excel</h4>
-      <div *ngFor="let sheet of objectKeys(excelDataBySheet)" class="mb-4">
-        <div class="card shadow-sm">
-          <div class="card-header bg-dark text-white py-2">
-            <h6 class="mb-0">{{ sheet }}</h6>
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-bordered table-hover mb-0">
-                <thead class="table-info">
-                  <tr>
-                    <th scope="col">NOMBRE DEL GRUPO O INDIVIDUAL</th>
-                    <th scope="col">CERRADA</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let row of excelDataBySheet[sheet]">
-                    <td *ngFor="let cell of row">{{ cell }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionFormBaucher">
+          <div class="accordion-body bg-light">
+            <div class="upload-section">
+              <h3 class="fw-bold mb-3 text-primary">Cargar archivo Excel</h3>
 
-    <!-- Columna Derecha - Vista Previa -->
-    <div class="col-md-4">
-      <div class="sticky-top" style="top: 20px;">
-        <h4 class="mb-4 text-primary">Vista Previa del Reporte</h4>
-        
-        <div *ngIf="resumenData.length > 0">
-          <div *ngFor="let item of resumenData" class="card mb-4 shadow">
-            <div class="card-header bg-dark text-white py-2">
-              <h5 class="card-title mb-0">{{ item.sheet }}</h5>
-            </div>
-            <div class="card-body">
-              <div class="row g-2">
-                <!-- Gráfica -->
-                <div class="col-12">
-                  <canvas [id]="'chart-' + item.sheet" class="mb-3"></canvas>
+              <!-- Fila de filtros principales -->
+              <div class="row g-3 align-items-end mb-3">
+                <!-- Fecha inicio -->
+                <div class="col-md-2">
+                  <label for="fecha-inicio" class="form-label fw-semibold">Fecha inicio</label>
+                  <input type="date" id="fecha-inicio" required [(ngModel)]="fechaInicio"
+                    (ngModelChange)="onFechaInicioChange($event)" name="fechaInicio" class="form-control" />
                 </div>
-                
-                <!-- Tabla Resumen -->
-                <div class="col-12">
-                  <table class="table table-bordered table-sm">
+
+                <!-- Fecha fin -->
+                <div class="col-md-2">
+                  <label for="fecha-fin" class="form-label fw-semibold">Fecha fin</label>
+                  <input type="date" id="fecha-fin" required [(ngModel)]="fechaFin"
+                    (ngModelChange)="onFechaFinChange($event)" name="fechaFin" class="form-control" />
+                </div>
+
+                <!-- Semanas -->
+                <div class="col-md-2">
+                  <label for="semanas" class="form-label fw-semibold">Semanas</label>
+                  <select id="semanas" class="form-select" multiple [(ngModel)]="semanasSeleccionadas"
+                    (ngModelChange)="onSemanasChange($event)" name="semanas">
+                    <option *ngFor="let s of semanas" [value]="s">Semana {{ s }}</option>
+                  </select>
+                </div>
+
+                <!-- Coordinación -->
+                <div class="col-md-2">
+                  <label for="upload-coordination" class="form-label fw-semibold">Coordinación</label>
+                  <select id="upload-coordination" class="form-select" [(ngModel)]="coordinacionSeleccionada"
+                    (ngModelChange)="onCoordinacionChange($event)" name="coordinacion">
+                    <option value="">Seleccionar coordinación</option>
+                    <option *ngFor="let c of coordinacionesOptions" [value]="c.value">{{ c.label }}</option>
+                  </select>
+                </div>
+
+                <!-- Archivo Excel -->
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold d-block">Archivo Excel</label>
+                  <div class="input-group">
+                    <input type="file" id="excel-upload" class="form-control" accept=".xlsx, .xls"
+                      (change)="onFileChange($event)" aria-label="Upload">
+                  </div>
+                  <div class="mt-1 d-flex align-items-center">
+                    <small *ngIf="fileName" class="text-muted">Archivo: {{ fileName }}</small>
+                    <button class="btn btn-sm btn-outline-danger ms-2" *ngIf="fileLoaded" (click)="clearFile()">
+                      Limpiar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selector de pestañas -->
+              <div class="row mb-3" *ngIf="fileLoaded">
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">Seleccionar pestaña:</label>
+                  <select class="form-select" [(ngModel)]="selectedSheet" (ngModelChange)="onSheetSelect($event)"
+                    name="selectedSheet">
+                    <option *ngFor="let s of sheetNames" [value]="s">{{ s }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Botones de guardar -->
+              <div class="d-flex gap-2 align-items-center mb-3">
+                <button class="btn btn-primary" (click)="saveCurrentSheet()"
+                  [disabled]="saving || previewData.length === 0">
+                  <i class="fas fa-save me-1"></i>
+                  Guardar pestaña actual
+                </button>
+
+                <!-- Spinner/estado de guardado -->
+                <div *ngIf="saving" class="ms-3">
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <small class="ms-2">Guardando...</small>
+                </div>
+              </div>
+
+              <!-- Previsualización de datos -->
+              <div class="tabla-previa mt-3">
+                <h5 class="fw-bold mb-2 text-primary">
+                  Previsualización de datos
+                  <span class="badge bg-secondary ms-2">{{ registrosCount }} registros</span>
+                </h5>
+
+                <div class="table-container" style="max-height: 300px; overflow-y: auto;">
+                  <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>Asesor</th>
+                        <th>Cliente</th>
+                        <th>Día de Atención</th>
+                      </tr>
+                    </thead>
                     <tbody>
-                      <tr class="table-light">
-                        <th>Agendadas</th>
-                        <td class="fw-bold">{{ item.agendadas }}</td>
+                      <tr *ngFor="let r of previewData; let i = index">
+                        <td>{{ r.asesor }}</td>
+                        <td>{{ r.cliente }}</td>
+                        <td>{{ r.diaAtencion }}</td>
                       </tr>
-                      <tr class="table-success">
-                        <th>Fichas Cerradas</th>
-                        <td class="fw-bold">{{ item.reportadas }}</td>
-                      </tr>
-                      <tr class="table-danger">
-                        <th>No Reportadas</th>
-                        <td class="fw-bold">{{ item.noReportadas }}</td>
+
+                      <tr *ngIf="previewData.length === 0">
+                        <td class="text-muted text-center py-4" colspan="3">
+                          <i class="fas fa-info-circle me-2"></i>
+                          No hay datos para mostrar. Selecciona un archivo Excel.
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -99,6 +135,247 @@
             </div>
           </div>
         </div>
+
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header">
+        <h5 class="card-title fw-bold mb-0">
+          <i class="bi bi-funnel"></i> Filtros
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- Semana -->
+          <div class="col-md-3 filter-col">
+            <div class="filter-group">
+              <label class="filter-label">Semana</label>
+              <select class="form-select" [(ngModel)]="semanaSeleccionada">
+                <option value="">Todas</option>
+                <option *ngFor="let s of semanas" [value]="s">Semana {{ s }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Fecha -->
+          <div class="col-md-3 filter-col">
+            <div class="filter-group">
+              <label class="filter-label">Fecha</label>
+              <input type="date" class="form-control" [(ngModel)]="fechaFiltro">
+            </div>
+          </div>
+
+          <!-- Día de atención -->
+          <div class="col-md-3 filter-col">
+            <div class="filter-group">
+              <label class="filter-label">Día de atención</label>
+              <select class="form-select" [(ngModel)]="diaAtencionSeleccionado">
+                <option value="todos">Todos</option>
+                <option *ngFor="let d of ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado']" [value]="d">{{ d }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Cliente -->
+          <div class="col-md-3 filter-col">
+            <div class="filter-group">
+              <label class="filter-label">Cliente</label>
+              <input type="text" class="form-control" placeholder="Escribe cliente..." [(ngModel)]="clienteSeleccionado"
+                (input)="filtrarClientes()" list="clientesList" />
+              <datalist id="clientesList">
+                <option *ngFor="let c of clientesFiltrados" [value]="c"></option>
+              </datalist>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- LIMPIAR FILTROS -->
+        <div class="row mt-3">
+          <div class="col-12 text-end mb-3">
+            <button class="btn btn-outline-secondary me-2" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle"></i> Limpiar filtros
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestañas de coordinaciones -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header">
+        <h5 class="card-title fw-bold mb-0">Coordinaciones</h5>
+      </div>
+      <div class="card-body p-0">
+        <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item" *ngFor="let c of coordinaciones">
+            <a class="nav-link" [class.active]="coordinacionSeleccionada === c._id"
+              (click)="onCoordinacionChange(c._id!)" role="button">
+              {{ c.nombre }}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Tabla de fichas -->
+    <div class="card shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title fw-bold mb-0">Listado de Fichas</h5>
+        <button class="btn btn-success" [disabled]="saving" (click)="guardarCambios()">
+          <i class="fas fa-save me-2"></i>{{ saving ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalReporte">
+          <i class="fas fa-chart-bar me-1"></i> Generar Reporte
+        </button>
+      </div>
+
+      <div class="card-body">
+        <div *ngIf="fichas && fichas.length > 0; else noData">
+          <div class="table-responsive">
+            <table class="table table-striped table-bordered text-center align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Semana</th>
+                  <th>Coordinación</th>
+                  <th>Asesor</th>
+                  <th>Cliente</th>
+                  <th>Día Atención</th>
+                  <th>Estado</th>
+                  <th>Fecha/Hora</th>
+                  <th>Tipo Pago</th>
+                  <th>Reportada</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let ficha of fichasFiltradas()">
+                  <td>{{ ficha.semana }}</td>
+                  <td>{{ getNombreCoordinacion(ficha.coordinacion || '') }}</td>
+                  <td>{{ ficha.asesor }}</td>
+                  <td>{{ ficha.cliente }}</td>
+                  <td>{{ ficha.diaAtencion }}</td>
+
+                  <td>
+                    <div class="form-check form-switch d-flex justify-content-center">
+                      <input class="form-check-input" type="checkbox" [checked]="ficha.estado"
+                        (change)="toggleEstado(ficha)">
+                    </div>
+                  </td>
+
+                  <!-- Fecha/Hora: muestra o input datetime-local si está en edición -->
+                  <td>
+                    <div *ngIf="editingId !== ficha._id">
+                      {{ ficha.fechahora ? (ficha.fechahora | date:'yyyy-MM-dd HH:mm') : '-' }}
+                    </div>
+
+                    <div *ngIf="editingId === ficha._id">
+                      <input class="form-control form-control-sm" type="datetime-local"
+                        [(ngModel)]="editingFicha!.fechahora" />
+                    </div>
+                  </td>
+
+                  <td class="text-start">
+                    <div class="checks-left">
+                      <div class="form-check" *ngFor="let metodo of ['Efectivo','Deposito','Transferencia']">
+                        <input class="form-check-input" type="checkbox" [checked]="ficha.tipopago?.includes(metodo)"
+                          (change)="togglePago(ficha, metodo, $event)">
+                        <label class="form-check-label ms-2 small">{{ metodo }}</label>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="form-check form-switch d-flex justify-content-center">
+                      <input class="form-check-input" type="checkbox" [checked]="ficha.reportada"
+                        (change)="toggleReportada(ficha)">
+                    </div>
+                  </td>
+
+                  <!-- Acciones: Editar / Guardar / Cancelar -->
+                  <td>
+                    <div *ngIf="editingId !== ficha._id">
+                      <button class="btn btn-sm btn-primary" (click)="startEdit(ficha)" [disabled]="saving">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                    </div>
+
+                    <div *ngIf="editingId === ficha._id">
+                      <button class="btn btn-sm btn-success me-1" (click)="saveEdit()" [disabled]="saving">
+                        <i class="fas fa-save"></i> Guardar
+                      </button>
+                      <button class="btn btn-sm btn-secondary" (click)="cancelEdit()" [disabled]="saving">
+                        <i class="fas fa-times"></i> Cancelar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+
+            </table>
+          </div>
+        </div>
+
+        <ng-template #noData>
+          <div class="alert alert-warning text-center py-4">
+            <i class="fas fa-exclamation-triangle me-2"></i>No hay fichas registradas
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Modal Reporte -->
+<div class="modal fade" id="modalReporte" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title"><i class="fas fa-chart-bar me-2"></i> Generar Reporte</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body d-flex align-items-start">
+        <!-- Select a la izquierda -->
+        <div class="me-4" style="flex: 1; min-width: 150px;">
+          <!-- <label class="mb-2 fw-bold">Selecciona semanas:</label> -->
+          <h5 class="fw-bold">Selecciona la semana(s):</h5>
+          <select class="form-select" multiple (change)="seleccionarSemanas($event)">
+            <option *ngFor="let s of semanas" [value]="s">Semana {{ s }}</option>
+          </select>
+          <div class="mt-4">
+            <h5 class="fw-bold">Estadísticas:</h5>
+            <ul class="list-group">
+              <li class="list-group-item">
+                Reportadas (Cerradas): {{ estadisticas.cerradas }}
+              </li>
+              <li class="list-group-item">
+                No Reportadas (No Cerradas): {{ estadisticas.noCerradas }}
+              </li>
+              <li class="list-group-item">
+                Total Esperadas: {{ estadisticas.total }}
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- Gráfica a la derecha -->
+        <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
+          <div style="width: 300px; height: 300px;">
+            <canvas id="graficaGeneral"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-success" (click)="generarReporteExcel()">
+          <i class="fas fa-file-excel me-1"></i> Descargar Excel
+        </button>
       </div>
     </div>
   </div>

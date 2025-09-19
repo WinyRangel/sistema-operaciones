@@ -240,6 +240,17 @@
         <button type="button" class="btn btn-danger" (click)="generarPDF()" [disabled]="!mesSeleccionado">
           <i class="fas fa-file-pdf"></i> Descargar Reporte
         </button>
+        <!-- Necesita Bootstrap y (opcional) FontAwesome -->
+        <button
+          class="btn btn-success me-2"
+          type="button"
+          (click)="generarExcel()"
+          [disabled]="!mesSeleccionado"
+          title="Descargar reporte en Excel">
+          <i class="fas fa-file-excel" aria-hidden="true"></i>
+          Descargar Excel
+        </button>
+
       </div>
     </div>
   </div>

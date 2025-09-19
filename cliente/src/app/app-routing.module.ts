@@ -18,6 +18,7 @@ import { CumplimientoAgendaComponent } from './components/Shared/cumplimiento-ag
 import { SubirAgendaComponent } from './components/Coordinadoras/subir-agenda/subir-agenda.component';
 import { MiAgendaComponent } from './components/Coordinadoras/mi-agenda/mi-agenda.component';
 import { RegistrarAgendaComponent } from './components/Coordinadoras/registrar-agenda/registrar-agenda.component';
+import { FichasAsesorComponent } from './components/Shared/fichas-asesor/fichas-asesor.component';
 
 const routes: Routes = [
   { path: 'baucher', component: BauchersComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
@@ -33,8 +34,9 @@ const routes: Routes = [
   { path: 'iniciar-sesion', component: IniciarSesionComponent},
   { path: 'ejecutivas', component: EjecutivasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'depositos', component: DepositosComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
-  { path: 'inicio', component: InicioComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'coordinador']} },
+  { path: 'inicio', component: InicioComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'coordinador', 'asesor']} },
   { path: 'reportefichas', component: ReporteFichasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
+  { path: 'fichas-asesor', component: FichasAsesorComponent, canActivate: [AuthGuard], data: {roles: ['admin', 'sup', 'asesor']}},
   { path: 'proyecciones', component: ProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'seg-proyecciones', component: SeguimientoProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']}  },
   { path: 'dir-seg-proyeccion', component: DirSegProyeccionComponent, canActivate: [AuthGuard], data: { roles: ['admin']}},

@@ -49,14 +49,13 @@ export class DepositosComponent implements OnInit {
   ngOnInit(): void { }
   mesSeleccionado: string = '';
 
-  // Getter para filtrar por mes (en cualquier año)
   get filteredDepositos(): any[] {
     if (!this.mesSeleccionado) {
       return this.depositos;
     }
 
     return this.depositos.filter(d => {
-      const mes = d.fechaReporte.substring(5, 7); // formato ISO: YYYY-MM-DD
+      const mes = d.fechaReporte.substring(5, 7); 
       return mes === this.mesSeleccionado;
     });
   }
