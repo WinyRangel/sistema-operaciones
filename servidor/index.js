@@ -14,13 +14,13 @@ const app = express();
 conectarDB();
 
 // para localhost y producción
-const allowedOrigins = [
-  //'http://localhost:4200',
-  'https://supervisor-operacion.web.app'
-];
+// const allowedOrigins = [
+//   'http://localhost:4200',
+//   'https://supervisor-operacion.web.app'
+// ];
 
 app.use(cors({
-  origin: 'http://localhost:4200', // tu frontend
+  origin: 'https://supervisor-operacion.web.app', // tu frontend
   credentials: true
 }));
 //https://supervisor-operacion.web.app

@@ -6,8 +6,8 @@ import { Observable } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class FichasService {
   // usar la ruta recomendada
-  private baseUrl = 'http://localhost:4000/fichas';
-  // private baseUrl = 'https://servidor-operaciones.onrender.com/fichas'
+  // private baseUrl = 'http://localhost:4000/fichas';
+  private baseUrl = 'https://servidor-operaciones.onrender.com/fichas'
 
   constructor(private http: HttpClient) {}
 
@@ -18,7 +18,7 @@ export class FichasService {
 
   // compatibilidad (si algo llama a POST /fichas)
   saveBulkLegacy(payload: any[]): Observable<any> {
-    return this.http.post(`http://localhost:4000/fichas`, payload);
+    return this.http.post(this.baseUrl, payload);
   }
 
   // otros métodos

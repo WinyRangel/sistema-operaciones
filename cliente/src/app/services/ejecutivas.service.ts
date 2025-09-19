@@ -10,8 +10,8 @@ export class EjecutivasService {
   getRegistros() {
     throw new Error('Method not implemented.');
   }
-  private apiUrl = 'http://localhost:4000/ejecutivas';
-  // private apiUrl = 'https://servidor-operaciones.onrender.com/ejecutivas'
+  // private apiUrl = 'http://localhost:4000/ejecutivas';
+  private apiUrl = 'https://servidor-operaciones.onrender.com/ejecutivas'
 
   constructor(private http: HttpClient) { }
 

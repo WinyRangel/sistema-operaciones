@@ -41,7 +41,6 @@ const routes: Routes = [
   { path: 'proyecciones', component: ProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']} },
   { path: 'seg-proyecciones', component: SeguimientoProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup']}  },
   { path: 'dir-seg-proyeccion', component: DirSegProyeccionComponent, canActivate: [AuthGuard], data: { roles: ['admin']}},
-  { path: 'fichas', component: FichasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'coordinador']} },
   { path: '**', redirectTo: 'inicio' }
 ];
 
