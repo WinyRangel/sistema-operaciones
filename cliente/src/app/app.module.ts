@@ -45,7 +45,6 @@ import { TokenInterceptor } from './interceptors/token.interceptor';
 import { RegistrarAgendaComponent } from './components/Coordinadoras/registrar-agenda/registrar-agenda.component';
 import { FichasAsesorComponent } from './components/Shared/fichas-asesor/fichas-asesor.component';
 
-
 @NgModule({
   declarations: [
     AppComponent,

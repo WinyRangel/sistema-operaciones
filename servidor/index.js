@@ -15,22 +15,16 @@ conectarDB();
 
 // para localhost y producción
 const allowedOrigins = [
-  'http://localhost:4200',
+  //'http://localhost:4200',
   'https://supervisor-operacion.web.app'
 ];
 
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true); 
-    if (allowedOrigins.indexOf(origin) === -1) {
-      return callback(new Error('CORS policy no permite este origen'), false);
-    }
-    return callback(null, true);
-  },
+  origin: 'http://localhost:4200', // tu frontend
   credentials: true
 }));
+//https://supervisor-operacion.web.app
 
-// Middleware para parsear JSON y URL encoded
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

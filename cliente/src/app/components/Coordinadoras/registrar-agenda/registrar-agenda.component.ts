@@ -223,27 +223,24 @@ export class RegistrarAgendaComponent {
 
 
     opcionesCodigo = [
-      { value: 'AG', texto: 'AG | Aseo General', color: '#ffcccc' },
-      { value: 'GA', texto: 'GA | Gestión Administrativa', color: '#ffe6cc' },
-      { value: 'C', texto: 'C | Cobranza', color: '#d9ead3' },
-      { value: 'D', texto: 'D | Domiciliar', color: '#cfe2f3' },
-      { value: 'Dep', texto: 'Dep | Depósitar', color: '#d9d2e9' },
-      { value: 'E', texto: 'E | Entregas', color: '#fce5cd' },
-      { value: 'GN', texto: 'GN | Grupo Nuevo', color: '#f4cccc' },
-      { value: 'INT', texto: 'INT | Integración', color: '#d0e0e3' },
-      { value: 'R', texto: 'R | Pago', color: '#ead1dc' },
-      { value: 'R/A', texto: 'R/A | Realizando Agendas', color: '#c9daf8' },
-      { value: 'RM', texto: 'RM | Reunión Mensual', color: '#ffcccb' },
-      { value: 'RS', texto: 'RS | Reunión Semanal', color: '#b6d7a8' },
-      { value: 'VTA', texto: 'VTA | Promoción', color: '#a2c4c9' },
-      { value: 'Sup', texto: 'Sup | Supervisión', color: '#d5a6bd' },
-      { value: 'S/Renov', texto: 'S/Renov | Sup.Renovación', color: '#b4a7d6' },
-      { value: 'Sin Codigo', texto: 'Sin código', color: '#eeeeee' },
-      { value: '', texto: 'Actividades sin código', color: '#eeeeee' }
+      { value: 'AG', texto: 'AG | Aseo General', color: '#fdff9dff' },
+      { value: 'GA', texto: 'GA | Gestión Administrativa', color: '#d7ff60ff' },
+      { value: 'C', texto: 'C | Cobranza', color: '#00ff9dff' },
+      { value: 'D', texto: 'D | Domiciliar', color: '#bcfff5ff' },
+      { value: 'Dep', texto: 'Dep | Depósitar', color: '#b300ffff' },
+      { value: 'E', texto: 'E | Entregas', color: '#00ffe5ff' },
+      { value: 'GN', texto: 'GN | Grupo Nuevo', color: '#79afffff' },
+      { value: 'INT', texto: 'INT | Integración', color: '#00d9ffff' },
+      { value: 'R', texto: 'R | Pago', color: '#ff006fff' },
+      { value: 'R/A', texto: 'R/A | Realizando Agendas', color: '#75a8ffff' },
+      { value: 'RM', texto: 'RM | Reunión Mensual', color: '#ff0400ff' },
+      { value: 'RS', texto: 'RS | Reunión Semanal', color: '#4dff00ff' },
+      { value: 'VTA', texto: 'VTA | Promoción', color: '#00ddffff' },
+      { value: 'Sup', texto: 'Sup | Supervisión', color: '#00c8ffff' },
+      { value: 'S/Renov', texto: 'S/Renov | Sup.Renovación', color: '#2d00a0ff' },
+      { value: 'Sin Codigo', texto: 'Sin código', color: '#ff93d9ff' },
+      { value: '', texto: 'Actividades sin código', color: '#ffacccff' }
     ];
-
-
-
 
 
   // Helper para notificaciones
