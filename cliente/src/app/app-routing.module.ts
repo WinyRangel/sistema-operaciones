@@ -19,6 +19,7 @@ import { SubirAgendaComponent } from './components/Coordinadoras/subir-agenda/su
 import { MiAgendaComponent } from './components/Coordinadoras/mi-agenda/mi-agenda.component';
 import { RegistrarAgendaComponent } from './components/Coordinadoras/registrar-agenda/registrar-agenda.component';
 import { FichasAsesorComponent } from './components/Shared/fichas-asesor/fichas-asesor.component';
+import { FichasComponent } from './components/Shared/fichas/fichas.component';
 
 
 const routes: Routes = [
