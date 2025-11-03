@@ -11,7 +11,7 @@ export class CoordinacionService {
 
    url = 'https://servidor-operaciones.onrender.com/coordinacion'
   // url = 'http://localhost:4000/coordinacion'
-   url3 = 'https://servidor-operaciones.onrender.com/agendas?page=1&limit=10000'
+   url3 = 'https://servidor-operaciones.onrender.com/agendas?page=1&limit=11000'
  // url3 = 'http://localhost:4000/agendas'
   url2 = 'https://servidor-operaciones.onrender.com/agenda'
   // url2 = 'http://localhost:4000/agenda/'
