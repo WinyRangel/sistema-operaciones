@@ -381,6 +381,11 @@ get horasAgendadas(): number {
 	  ).length;
   }
 
+  get horasEntregasNoAgendadas(): number {
+	return this.agendasFiltradasPorCoordinador.filter(
+	  a => a.horaReporte && a.reportado === true && a.codigoReportado === 'E' && a.codigo != 'E'
+	).length;
+  }
   get horasEntregasReportadas(): number {
 	return this.agendasFiltradasPorCoordinador.filter(
 	  a => a.horaReporte && a.reportado === true && a.codigo === 'E'

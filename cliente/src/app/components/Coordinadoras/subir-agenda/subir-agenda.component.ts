@@ -70,6 +70,18 @@ export class SubirAgendaComponent {
     });
   }
 
+      // Función para normalizar nombres de columnas
+    normalizeKey(key: string): string {
+      return key
+        .toString()
+        .trim()                 // quita espacios al inicio y final
+        .toLowerCase()          // todo a minúsculas
+        .normalize("NFD")       // elimina acentos
+        .replace(/[\u0300-\u036f]/g, "") // remueve tildes
+        .replace(/\s+/g, " ");  // reemplaza múltiples espacios por uno
+    }
+
+
 
   onFileChange(evt: any): void {
     const target: DataTransfer = <DataTransfer>(evt.target);
@@ -87,35 +99,42 @@ export class SubirAgendaComponent {
 
       const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
 
-      // Mapeo de las columnas del archivo a la interfaz Agenda
-      this.agendas = (data as any[]).map((row: any): Agenda => {
-        const rawFecha = row['Fecha'];
-        const rawHora = row['Hora'];
+      this.agendas = data.map((row: any) => {
+        // 1. Crear una copia del row con claves normalizadas
+        const normalizedRow: any = {};
+        Object.keys(row).forEach(key => {
+          normalizedRow[this.normalizeKey(key)] = row[key];
+        });
+
+        // 2. Extraer datos ahora con nombres "seguros"
+        const rawFecha = normalizedRow['fecha'];
+        const rawHora = normalizedRow['hora'];
 
         const fecha = !isNaN(rawFecha) ? this.excelSerialDateToJSDate(Number(rawFecha)) : rawFecha;
         const hora = !isNaN(rawHora) ? this.excelSerialTimeToJSTime(Number(rawHora)) : rawHora;
 
-          return {
-            semana: row['Semana'] || '',
-            coordinador: row['Coordinador'] || '',
-            fecha,
-            objetivo: row['Objetivo'] || '',
-            meta: row['Meta'] || '',
-            hora,
-            domicilio: row['Domicilio'] || '',
-            actividad: row['Actividad'] || '',
-            codigo: row['Código'] || '',
-            codigoReportado: row['Código Reportado'] || '',
-            actividadReportada: row['Actividad Reportada'] || '',
-            reportado: row['Reportado']?.toString().toLowerCase() === 'true',
-            horaReporte: row['Hora Reporte'] || '',
-            horaCierre: row['Hora Cierre'] || '',
-            traslado: row['Traslado'] || 'NO',
-            kmRecorrido: parseFloat(row['Km Recorrido']) || 0,
-            cumplimientoAgenda: row['Cumplimiento Agenda']?.toString().toLowerCase() === 'true',
-            acordeObjetivo: row['Acorde Objetivo']?.toString().toLowerCase() === 'true'
-          };
-        });
+        return {
+          semana: normalizedRow['semana'] || '',
+          coordinador: normalizedRow['coordinador'] || '',
+          fecha,
+          objetivo: normalizedRow['objetivo'] || '',
+          meta: normalizedRow['meta'] || '',
+          hora,
+          domicilio: normalizedRow['domicilio'] || '',
+          actividad: normalizedRow['actividad'] || '',
+          codigo: normalizedRow['codigo'] || '',
+          codigoReportado: normalizedRow['codigo reportado'] || '',
+          actividadReportada: normalizedRow['actividad reportada'] || '',
+          reportado: normalizedRow['reportado']?.toString().toLowerCase() === 'true',
+          horaReporte: normalizedRow['hora reporte'] || '',
+          horaCierre: normalizedRow['hora cierre'] || '',
+          traslado: normalizedRow['traslado'] || 'NO',
+          kmRecorrido: parseFloat(normalizedRow['km recorrido']) || 0,
+          cumplimientoAgenda: normalizedRow['cumplimiento agenda']?.toString().toLowerCase() === 'true',
+          acordeObjetivo: normalizedRow['acorde objetivo']?.toString().toLowerCase() === 'true'
+        };
+      });
+
 
     };
 
