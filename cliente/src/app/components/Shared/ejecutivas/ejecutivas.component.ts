@@ -313,12 +313,26 @@ export class EjecutivasComponent implements OnInit {
     y += 10;
 
     // 5) Tabla de totales
+    // autoTable(doc, {
+    //   head: [['Tipo', 'Cantidad']],
+    //   body: [
+    //     ['Reportadas (R)', tot.totalR],
+    //     ['No Reportadas (NR)', tot.totalNR, ],
+    //     ['Total Esperadas', tot.esperadas, ]
+    //   ],
+    //   startY: y,
+    //   margin: { left: 10, right: 10 },
+    //   headStyles: { fillColor: [36, 84, 139] },
+    //   theme: 'grid'
+    // });
+    // y = (doc as any).lastAutoTable.finalY + 6;
     autoTable(doc, {
       head: [['Tipo', 'Cantidad']],
       body: [
         ['Reportadas (R)', tot.totalR],
-        ['No Reportadas (NR)', tot.totalNR, ],
-        ['Total Esperadas', tot.esperadas, ]
+        ['No Reportadas (NR)', tot.totalNR],
+        ['No Registradas', tot.esperadas - (tot.totalR + tot.totalNR)],
+        ['Total Esperadas', tot.esperadas]
       ],
       startY: y,
       margin: { left: 10, right: 10 },
@@ -327,17 +341,7 @@ export class EjecutivasComponent implements OnInit {
     });
     y = (doc as any).lastAutoTable.finalY + 6;
 
-    // // 6) Tabla de detalle
-    // autoTable(doc, {
-    //   head: [['Coordinación','Ejecutiva','R','NR','Esperadas']],
-    //   body: detalles,
-    //   startY: y,
-    //   margin: { left: 10, right: 10 },
-    //   styles: { fontSize: 8 },
-    //   headStyles: { fillColor: [36, 84, 139] },
-    //   theme: 'grid'
-    // });
-    // y = (doc as any).lastAutoTable.finalY + 6;
+
     // 6) Tablas por coordinación y actividad
     const detallesPorCoord = this.calcularActividadesPorCoordinacion(regsMes);
 
