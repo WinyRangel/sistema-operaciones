@@ -44,6 +44,8 @@ import { MiAgendaComponent } from './components/Coordinadoras/mi-agenda/mi-agend
 import { TokenInterceptor } from './interceptors/token.interceptor';
 import { RegistrarAgendaComponent } from './components/Coordinadoras/registrar-agenda/registrar-agenda.component';
 import { FichasAsesorComponent } from './components/Shared/fichas-asesor/fichas-asesor.component';
+import { TestComponent } from './components/test/test.component';
+import { TestAgendaComponent } from './components/test-agenda/test-agenda.component';
 
 @NgModule({
   declarations: [
@@ -71,7 +73,9 @@ import { FichasAsesorComponent } from './components/Shared/fichas-asesor/fichas-
     ActividadPipe,
     MiAgendaComponent,
     RegistrarAgendaComponent,
-    FichasAsesorComponent
+    FichasAsesorComponent,
+    TestComponent,
+    TestAgendaComponent
   ],
   
   imports: [

@@ -53,3 +53,8 @@ a { font-family: "Century Gothic";
     font-weight: 100; 
     line-height: 18.7px;
  }
+
+html, body { height: 100%; 
+ font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; }
+body { margin: 0;  font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;  }
+
