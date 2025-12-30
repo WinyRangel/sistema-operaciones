@@ -42,7 +42,7 @@ export class AuthGuard implements CanActivate {
         icon: "error",
         title: "Acceso restringido. No tiene autorización para ingresar a esta liga."
       });
-      this.router.navigate(['/inicio']); // o a otra ruta
+      this.router.navigate(['/inicio']); 
       return false;
     }
 

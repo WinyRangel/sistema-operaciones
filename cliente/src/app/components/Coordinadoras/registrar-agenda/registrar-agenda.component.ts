@@ -9,7 +9,7 @@ import { AuthService } from '../../../services/auth.service';
 
 // Constantes para evitar "magic numbers/strings"
 const RENDIMIENTO_POR_DEFECTO = 13;
-const SEMANAS_ANIO = 52;
+const SEMANAS_ANIO = 53;
 @Component({
   selector: 'app-registrar-agenda',
   standalone: false,
@@ -17,8 +17,7 @@ const SEMANAS_ANIO = 52;
   styleUrl: './registrar-agenda.component.css'
 })
 export class RegistrarAgendaComponent {
-// En tu componente RecorridoAgendaComponent
-  coordinacion: string[] = []; // Debes poblarlo en loadCoordinaciones
+  coordinacion: string[] = []; 
 
 
   //Variables para agenda
@@ -298,7 +297,6 @@ export class RegistrarAgendaComponent {
             this.selectedObjetivos = this.selectedObjetivos.filter(o => o !== objetivo);
           }
 
-          // ✅ Si quieres guardar en el form como string separado por comas
           this.registrarAgenda.get('objetivo')?.setValue(this.selectedObjetivos.join(','));
         }
 

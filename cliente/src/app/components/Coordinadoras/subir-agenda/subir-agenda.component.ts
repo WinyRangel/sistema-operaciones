@@ -7,7 +7,7 @@ import { Coordinacion } from '../../../models/coordinacion';
 import Swal from 'sweetalert2';
 import { saveAs } from 'file-saver';
 
-const SEMANAS_ANIO = 31;
+const SEMANAS_ANIO = 32;
 
 @Component({
   selector: 'app-subir-agenda',

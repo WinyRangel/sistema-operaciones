@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 
 // Constantes para evitar "magic numbers/strings"
 const RENDIMIENTO_POR_DEFECTO = 13;
-const SEMANAS_ANIO = 52;
+const SEMANAS_ANIO = 53;
 
 
 @Component({
@@ -18,8 +18,7 @@ const SEMANAS_ANIO = 52;
   styleUrl: './agendas.component.css'
 })
 export class AgendasComponent {
-// En tu componente RecorridoAgendaComponent
-  coordinacion: string[] = []; // Debes poblarlo en loadCoordinaciones
+  coordinacion: string[] = []; 
 
 
   //Variables para agenda
@@ -300,7 +299,6 @@ export class AgendasComponent {
             this.selectedObjetivos = this.selectedObjetivos.filter(o => o !== objetivo);
           }
 
-          // ✅ Si quieres guardar en el form como string separado por comas
           this.registrarAgenda.get('objetivo')?.setValue(this.selectedObjetivos.join(','));
         }
 
