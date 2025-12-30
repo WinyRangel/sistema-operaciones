@@ -9,7 +9,7 @@ import { AuthService } from '../../../services/auth.service';
 
 // Constantes para evitar "magic numbers/strings"
 const RENDIMIENTO_POR_DEFECTO = 13;
-const SEMANAS_ANIO = 52;
+const SEMANAS_ANIO = 53;
 @Component({
   selector: 'app-registrar-agenda',
   standalone: false,

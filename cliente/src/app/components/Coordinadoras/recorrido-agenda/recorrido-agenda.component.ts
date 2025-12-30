@@ -15,7 +15,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 // Constantes para evitar "magic numbers/strings"
 const RENDIMIENTO_POR_DEFECTO = 13;
 const DELAY_PDF_GENERATION = 500;
-const SEMANAS_ANIO = 52;
+const SEMANAS_ANIO = 53;
 
 @Component({
   selector: 'app-recorrido-agenda',
