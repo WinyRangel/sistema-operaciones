@@ -24,7 +24,7 @@ export class ReporteFichasComponent implements OnInit {
   fechaInicio: string = '';
   fechaFin: string = '';
   semanaSeleccionada: string = '';
-  semanas: number[] = Array.from({ length: 52 }, (_, i) => i + 1);
+  semanas: number[] = Array.from({ length: 53 }, (_, i) => i + 1);
   fileName: string = '';
   sheetNames: string[] = [];
   selectedSheet: string = '';

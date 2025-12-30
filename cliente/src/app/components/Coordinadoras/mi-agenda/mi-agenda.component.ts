@@ -9,7 +9,7 @@ import autoTable from 'jspdf-autotable';
 
 
 
-const SEMANAS_ANIO = 52;
+const SEMANAS_ANIO = 53;
 @Component({
   selector: 'app-mi-agenda',
   standalone: false,
