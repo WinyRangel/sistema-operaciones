@@ -1,3 +1,9 @@
+import { LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es-MX'; // 🇲🇽 español México
+
+registerLocaleData(localeEs);
+
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
@@ -100,7 +106,15 @@ import { TruncatePipe } from './pipes/truncate.pipe';
   providers: [
     provideAnimationsAsync(),
     providePrimeNG({ /* options */ }),
-    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }
+    {
+      provide: LOCALE_ID,
+      useValue: 'es-MX'
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenInterceptor,
+      multi: true
+    }
 
   ],
   bootstrap: [AppComponent]

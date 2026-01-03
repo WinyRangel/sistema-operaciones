@@ -29,16 +29,18 @@ export interface ActividadPayload {
 })
 export class CoordinacionService {
 
-  // url = 'https://servidor-operaciones.onrender.com/coordinacion'
-  url = 'http://localhost:4000/coordinacion'
-  url3 = 'http://localhost:4000/agendas?page=1&limit=11000'
+  url = 'https://servidor-operaciones.onrender.com/coordinacion'
+  // url = 'http://localhost:4000/coordinacion'
+  url3 = 'https://servidor-operaciones.onrender.com/agendas?page=1&limit=11000'
   // url3 = 'http://localhost:4000/agendas'
-  // url2 = 'https://servidor-operaciones.onrender.com/agenda'
-  url2 = 'http://localhost:4000/agenda/'
-  //  url4 = 'https://servidor-operaciones.onrender.com/obtenerAgenda'
-  url4 = 'http://localhost:4000/obtenerAgenda'
+  url2 = 'https://servidor-operaciones.onrender.com/agenda'
+  //url2 = 'http://localhost:4000/agenda/'
+  url4 = 'https://servidor-operaciones.onrender.com/obtenerAgenda'
+  //url4 = 'http://localhost:4000/obtenerAgenda'
 
-  urlAsesor = 'http://localhost:4000/agenda-asesor/'
+  //urlAsesor = 'http://localhost:4000/agenda-asesor/'
+  urlAsesor = 'https://servidor-operaciones.onrender.com/agenda-asesor/'
+
   constructor(private http: HttpClient) { }
 
   obtenerCoordinacion(): Observable<Coordinacion[]> {
@@ -98,8 +100,8 @@ export class CoordinacionService {
   // Obtener lista de asesores para coordinadores
   obtenerAsesoresPorCoordinacion() {
     const token = localStorage.getItem('token');
-    // Necesitas crear este endpoint en el backend
-    return this.http.get<any>('http://localhost:4000/urlAsesor/asesores', {
+
+    return this.http.get<any>(`${this.urlAsesor}asesores`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -123,5 +125,9 @@ export class CoordinacionService {
 
   eliminarAgendaAsesor(id: string): Observable<any> {
     return this.http.delete(this.urlAsesor + id);
+  }
+
+  validarAgendaAsesor(id: string): Observable<any> {
+    return this.http.put(this.urlAsesor + id + '/validar', {});
   }
 }

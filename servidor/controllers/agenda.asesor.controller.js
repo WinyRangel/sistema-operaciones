@@ -1,4 +1,5 @@
 const AgendaAsesor = require('../models/AgendaAsesor');
+const Usuario = require('../models/Usuario');
 
 // -------------------------------------------------------------
 // Crear agenda 
@@ -205,6 +206,41 @@ const actualizarAgenda = async (req, res) => {
   }
 };
 
+const validarAgenda = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
+
+    const agenda = await AgendaAsesor.findById(id);
+    if (!agenda) {
+      return res.status(404).json({ ok: false, msg: "Agenda no encontrada" });
+    }
+
+    // REGLAS
+    if (user.rol === "coordinador") {
+      if (agenda.coordinacion !== user.coordinacion) {
+        return res.status(403).json({ ok: false, msg: "No puedes validar agendas de otra coordinación" });
+      }
+    }
+
+    const updateData = {
+      validada: true,
+      validadaPor: user.usuario
+    };
+
+    const updated = await AgendaAsesor.findByIdAndUpdate(id, updateData, { new: true });
+
+    return res.json({
+      ok: true,
+      msg: 'Agenda validada correctamente',
+      agenda: updated
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, msg: 'Error al validar agenda' });
+  }
+};
 
 // -------------------------------------------------------------
 // Eliminar agenda
@@ -250,30 +286,37 @@ const obtenerAsesoresPorCoordinacion = async (req, res) => {
     if (user.rol !== 'coordinador') {
       return res.status(403).json({
         ok: false,
-        msg: 'Solo los coordinadores pueden ver la lista de asesores'
+        msg: 'No autorizado'
       });
     }
 
     const asesores = await Usuario.find({
       rol: 'asesor',
       coordinacion: user.coordinacion
-    }).select('usuario -_id'); // Solo devuelve el nombre de usuario
+    }).select('usuario coordinacion');
 
     res.json({
       ok: true,
-      asesores: asesores.map(a => a.usuario)
+      asesores
     });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ ok: false, msg: 'Error al obtener asesores' });
+    res.status(500).json({
+      ok: false,
+      msg: 'Error al obtener asesores'
+    });
   }
 };
+
+
+
 module.exports = {
   crearAgenda,
   obtenerAgendas,
   obtenerAgendasCoordinador,
   actualizarAgenda,
   eliminarAgenda,
-  obtenerAsesoresPorCoordinacion
+  obtenerAsesoresPorCoordinacion,
+  validarAgenda
 };

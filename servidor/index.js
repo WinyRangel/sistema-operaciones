@@ -3,14 +3,7 @@ const path = require('path');
 const express = require('express');
 const conectarDB = require('./config/db');
 const cors = require("cors");
-
-// Importar el modelo Domicilio
-const Domicilio = require('./models/Domicilio');
-
-// Creamos el servidor
 const app = express();
-
-// Conectamos a la BD
 conectarDB();
 
 // para localhost y producción
@@ -20,7 +13,7 @@ conectarDB();
 // ];
 
 app.use(cors({
-  origin: 'http://localhost:4200', // tu frontend
+  origin: 'https://supervisor-operacion.web.app', // tu frontend
   credentials: true
 }));
 //https://supervisor-operacion.web.app
@@ -50,23 +43,7 @@ app.use(
 );
 
 
-// Inicializar domicilio por defecto
-const inicializarDomicilioPorDefecto = async () => {
-  try {
-    const existente = await Domicilio.findOne({ nombre: 'SIN AGENDAR' });
-    if (!existente) {
-      await Domicilio.create({ nombre: 'SIN AGENDAR' });
-      console.log('Domicilio por defecto creado: SIN AGENDAR');
-    } else {
-      console.log('Domicilio por defecto ya existe');
-    }
-  } catch (error) {
-    console.error('Error al crear domicilio por defecto:', error);
-  }
-};
-
 // Iniciar servidor
 app.listen(4000, async () => {
   console.log('El servidor está corriendo perfectamente en el puerto 4000!');
-  await inicializarDomicilioPorDefecto();
 });

@@ -39,25 +39,26 @@
         <h6 class="text-muted mb-0">
           <i class="bi bi-people me-1"></i> Gestión de Asesores
         </h6>
-        <small class="text-muted">{{ asesores?.length || 0 }} asesores</small>
+        <small class="text-muted">{{ asesores.length || 0 }} asesores</small>
       </div>
 
       <!-- Selector de Asesor Mejorado -->
       <div class="asesor-selector-container">
         <div class="nav nav-pills asesor-nav" role="tablist">
           <button class="nav-link asesor-tab" [class.active]="!asesorSeleccionado"
-            (click)="asesorSeleccionado = null; filtrarPorAsesor()">
+            (click)="asesorSeleccionado = ''; filtrarPorAsesor()">
             <i class="bi bi-people-fill me-2"></i>
             <span>Todos</span>
             <span class="badge bg-primary rounded-pill ms-2">{{ agendas.length }}</span>
           </button>
 
           <button *ngFor="let asesor of asesores" class="nav-link asesor-tab"
-            [class.active]="asesorSeleccionado === asesor" (click)="asesorSeleccionado = asesor; filtrarPorAsesor()">
+            [class.active]="asesorSeleccionado === asesor.usuario"
+            (click)="asesorSeleccionado = asesor.usuario; filtrarPorAsesor()">
             <i class="bi bi-person me-2"></i>
-            <span>{{ asesor }}</span>
+            <span>{{ asesor.usuario }}</span>
             <span class="badge bg-secondary rounded-pill ms-2">
-              {{ contarAgendasPorAsesor(asesor) }}
+              {{ contarAgendasPorAsesor(asesor.usuario) }}
             </span>
           </button>
         </div>
@@ -86,7 +87,7 @@
                 </div>
 
                 <!-- Con Evidencia -->
-                <div class="col-md-3">
+                <!-- <div class="col-md-3">
                   <div class="d-flex align-items-center">
                     <div class="stats-icon bg-success bg-gradient rounded-circle p-3 me-3">
                       <i class="bi bi-check-circle text-white fs-4"></i>
@@ -101,10 +102,10 @@
                       </h3>
                     </div>
                   </div>
-                </div>
+                </div> -->
 
                 <!-- Validadas -->
-                <div class="col-md-3">
+                <!-- <div class="col-md-3">
                   <div class="d-flex align-items-center">
                     <div class="stats-icon bg-warning bg-gradient rounded-circle p-3 me-3">
                       <i class="bi bi-shield-check text-white fs-4"></i>
@@ -114,10 +115,10 @@
                       <h3 class="mb-0 fw-bold text-dark">{{ estadisticas?.actividadesValidadas || 0 }}</h3>
                     </div>
                   </div>
-                </div>
+                </div> -->
 
                 <!-- Acciones Rápidas -->
-                <div class="col-md-3">
+                <!-- <div class="col-md-3">
                   <div class="d-flex align-items-center justify-content-end h-100">
                     <button class="btn btn-outline-primary btn-sm me-2" (click)="generarReporte()">
                       <i class="bi bi-graph-up me-1"></i> Reporte
@@ -126,7 +127,7 @@
                       <i class="bi bi-file-pdf me-1"></i> PDF
                     </button>
                   </div>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
@@ -134,7 +135,7 @@
       </div>
 
       <!-- SECCIÓN DE REPORTES -->
-      <div class="row mb-4">
+      <div class="row mb-4" *ngIf="rolUsuario === 'coordinador'">
         <div class="col-12">
           <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-bottom py-3">
@@ -305,8 +306,8 @@
                   </label>
                   <select class="form-select" [(ngModel)]="asesorSeleccionado" (change)="filtrarPorAsesor()">
                     <option value="">Todos los asesores</option>
-                    <option *ngFor="let asesor of asesores" [value]="asesor">
-                      {{ asesor }}
+                    <option *ngFor="let asesor of asesores" [value]="asesor.usuario">
+                      {{ asesor.usuario }}
                     </option>
                   </select>
                 </div>
@@ -333,15 +334,15 @@
                     <th style="min-width: 200px;">
                       <i class="bi bi-list-task"></i> Actividad
                     </th>
-                    <th class="text-center" style="width: 80px;">
+                    <th class="text-center" style="width: 60px;">
                       <i class="bi bi-tag"></i> Código
                     </th>
                     <th class="text-center" style="min-width: 150px;">
                       <i class="bi bi-check-circle"></i> Resultado
                     </th>
-                    <th class="text-center" style="min-width: 150px;">
+                    <!-- <th class="text-center" style="min-width: 150px;">
                       <i class="bi bi-paperclip"></i> Evidencia
-                    </th>
+                    </th> -->
                     <th class="text-center" style="width: 140px;">
                       <i class="bi bi-gear"></i> Acciones
                     </th>
@@ -362,8 +363,8 @@
                     <!-- Fecha -->
                     <td class="text-center">
                       <div class="date-badge">
-                        <div class="date-day fw-bold text-primary">{{ agenda.fecha | date:'dd' }}</div>
-                        <div class="date-month small text-muted">{{ agenda.fecha | date:'MMM' }}</div>
+                        <div class="date-day fw-bold text-primary">{{ agenda.fecha | date:'dd':'UTC' }}</div>
+                        <div class="date-month small text-muted">{{ agenda.fecha | date:'MMM':'UTC' }}</div>
                       </div>
                     </td>
 
@@ -405,7 +406,7 @@
                     </td>
 
                     <!-- Evidencia -->
-                    <td class="text-center">
+                    <!-- <td class="text-center">
                       <div class="d-flex flex-column align-items-center">
                         <div *ngIf="agenda.evidencia" class="mb-2">
                           <a [href]="getUrlEvidencia(agenda.evidencia)" target="_blank"
@@ -413,41 +414,49 @@
                             <i class="bi bi-eye me-1"></i> Ver
                           </a>
                         </div>
-                        <div class="file-upload">
+                         <div class="file-upload" *ngIf="rolUsuario === 'asesor'">
                           <input type="file" class="form-control form-control-sm"
                             (change)="onFileSelected($event, agenda)" accept="image/*,.pdf">
                           <small class="text-muted d-block mt-1">
                             JPG, PNG, PDF (Max 5MB)
                           </small>
-                        </div>
+                        </div> 
                       </div>
-                    </td>
+                    </td> -->
 
                     <!-- Acciones -->
                     <td class="text-center">
                       <div class="btn-group-vertical btn-group-sm" role="group">
-                        <button type="button" class="btn btn-primary mb-1" (click)="guardarCambios(agenda)"
-                          [disabled]="!agenda.resultado && !agenda.evidencia">
+                        <button *ngIf="rolUsuario === 'asesor'" type="button" class="btn btn-primary mb-1"
+                          (click)="guardarCambios(agenda)" [disabled]="!agenda.resultado && !agenda.evidencia">
                           <i class="bi bi-save"></i>
                           <span class="d-none d-md-inline"> Guardar</span>
                         </button>
 
-                        <button type="button" class="btn btn-info mb-1" data-bs-toggle="modal"
-                          data-bs-target="#editarActividad" (click)="seleccionarActividad(agenda)">
+                        <button *ngIf="rolUsuario === 'coordinador' || 'asesor'" type="button" class="btn btn-info mb-1"
+                          data-bs-toggle="modal" data-bs-target="#editarActividad"
+                          (click)="seleccionarActividad(agenda)">
                           <i class="bi bi-eye"></i>
                           <span class="d-none d-md-inline"> Detalles</span>
                         </button>
 
-                        <button type="button" class="btn btn-danger" (click)="eliminarAgenda(agenda._id)">
+                        <button *ngIf="rolUsuario === 'asesor'" type="button" class="btn btn-danger"
+                          (click)="eliminarAgenda(agenda._id)">
                           <i class="bi bi-trash"></i>
                           <span class="d-none d-md-inline"> Eliminar</span>
+                        </button>
+
+                        <button *ngIf="rolUsuario === 'coordinador'" type="button" class="btn btn-success"
+                          (click)="validarAgenda(agenda._id)">
+                          <i class="bi bi-check"></i>
+                          <span class="d-none d-md-inline"> Validar agenda</span>
                         </button>
                       </div>
                     </td>
                   </tr>
 
                   <!-- Sin datos -->
-                  <tr *ngIf="!agendasFiltradas?.length">
+                  <tr *ngIf="!agendasFiltradas.length">
                     <td [attr.colspan]="esCoordinador ? 9 : 8" class="text-center py-5">
                       <div class="empty-state">
                         <i class="bi bi-calendar-x display-4 text-muted mb-3"></i>
@@ -519,7 +528,7 @@
               <div class="info-item mb-3">
                 <label class="text-muted small">Fecha y Hora</label>
                 <div class="fw-bold">
-                  {{ actividadSeleccionada.fecha | date:'fullDate' }}
+                  {{ actividadSeleccionada.fecha | date:'fullDate':'UTC' }}
                   a las {{ actividadSeleccionada.hora }}
                 </div>
               </div>
@@ -566,7 +575,7 @@
           </div>
 
           <!-- Evidencia -->
-          <div class="col-12 mt-4">
+          <!-- <div class="col-12 mt-4">
             <div class="info-card">
               <h6 class="text-primary mb-3">
                 <i class="bi bi-paperclip me-2"></i>
@@ -584,12 +593,12 @@
                   </a>
                 </div>
               </div>
-              <div *ngIf="!actividadSeleccionada.evidencia" class="text-center py-4 text-muted">
+               <div *ngIf="!actividadSeleccionada.evidencia" class="text-center py-4 text-muted">
                 <i class="bi bi-file-earmark-excel display-4"></i>
                 <p class="mt-2">No hay evidencia registrada</p>
               </div>
-            </div>
-          </div>
+        </div>
+      </div> -->
         </div>
       </div>
 

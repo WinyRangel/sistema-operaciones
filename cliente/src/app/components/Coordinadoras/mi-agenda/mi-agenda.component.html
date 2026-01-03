@@ -4,41 +4,36 @@
       <!-- Pestañas de coordinadores - MEJORADO -->
       <nav class="px-3 pt-3">
         <div class="nav nav-tabs coordinador-tabs" id="nav-tab" role="tablist">
-          <button 
-            *ngFor="let c of coordinacionesVisibles; let i = index"
+          <button *ngFor="let c of coordinacionesVisibles; let i = index"
             class="nav-link position-relative coordinador-tab d-flex align-items-center"
-            [ngClass]="getClaseCoordinador(i)"
-            [class.active]="coordinadorVisible === c.coordinador"
-            [id]="'nav-' + c.coordinador + '-tab'"
-            data-bs-toggle="tab"
-            [attr.data-bs-target]="'#nav-' + c.coordinador"
-            type="button"
-            role="tab"
-            [attr.aria-controls]="'nav-' + c.coordinador"
-            [attr.aria-selected]="coordinadorVisible === c.coordinador"
-            (click)="mostrarDiv(c.coordinador)">
+            [ngClass]="getClaseCoordinador(i)" [class.active]="coordinadorVisible === c.coordinador"
+            [id]="'nav-' + c.coordinador + '-tab'" data-bs-toggle="tab" [attr.data-bs-target]="'#nav-' + c.coordinador"
+            type="button" role="tab" [attr.aria-controls]="'nav-' + c.coordinador"
+            [attr.aria-selected]="coordinadorVisible === c.coordinador" (click)="mostrarDiv(c.coordinador)">
             <span class="tab-label">{{ c.coordinador }}</span>
             <span class="tab-indicator"></span>
           </button>
         </div>
       </nav>
-      
+
       <!-- CONTENIDO PRINCIPAL - MEJORADO -->
       <div class="container-fluid p-4">
         <div class="row g-4">
           <!-- TABLA DE SEGUIMIENTO - MEJORADO -->
           <div class="col-12">
             <div class="card shadow-sm h-100 border-0">
-              <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-top">
+              <div
+                class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-top">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-table me-2 fs-5"></i>
                   <h4 class="mb-0">Seguimiento de Agenda</h4>
                 </div>
-                <button type="button" class="btn btn-sm btn-light rounded-circle" (click)="refrescarAgendas()" title="Actualizar">
+                <button type="button" class="btn btn-sm btn-light rounded-circle" (click)="refrescarAgendas()"
+                  title="Actualizar">
                   <i class="bi bi-arrow-clockwise"></i>
                 </button>
               </div>
-              
+
               <div class="card-body p-0">
                 <!-- Filtros - MEJORADO -->
                 <div class="p-4 bg-light border-bottom">
@@ -51,49 +46,55 @@
                       <i class="bi bi-x-circle me-1"></i> Limpiar filtros
                     </button>
                   </div>
-                  
+
                   <div class="row g-3">
                     <!-- Mes -->
                     <div class="col-md-3">
                       <label for="mesSelect" class="form-label fw-semibold small text-uppercase text-muted">Mes</label>
-                      <select class="form-select form-select-sm" id="mesSelect" [(ngModel)]="mesSeleccionado" (change)="aplicarFiltros()">
+                      <select class="form-select form-select-sm" id="mesSelect" [(ngModel)]="mesSeleccionado"
+                        (change)="aplicarFiltros()">
                         <option value="" selected>Todos los meses</option>
                         <option *ngFor="let mes of meses" [value]="mes">{{ mes }}</option>
                       </select>
                     </div>
-                    
+
                     <!-- Semana -->
                     <div class="col-md-3">
-                      <label for="semanaSelect" class="form-label fw-semibold small text-uppercase text-muted">Semana</label>
-                      <select class="form-select form-select-sm" id="semanaSelect" [(ngModel)]="semanaSeleccionada" (change)="aplicarFiltros()">
+                      <label for="semanaSelect"
+                        class="form-label fw-semibold small text-uppercase text-muted">Semana</label>
+                      <select class="form-select form-select-sm" id="semanaSelect" [(ngModel)]="semanaSeleccionada"
+                        (change)="aplicarFiltros()">
                         <option value="" selected>Todas las semanas</option>
                         <option *ngFor="let semana of semanas" [value]="semana">{{ semana }}</option>
                       </select>
                     </div>
-                    
+
                     <!-- Día -->
                     <div class="col-md-3">
                       <label for="diaSelect" class="form-label fw-semibold small text-uppercase text-muted">Día</label>
-                      <select class="form-select form-select-sm" id="diaSelect" [(ngModel)]="diaSeleccionado" (change)="aplicarFiltros()">
+                      <select class="form-select form-select-sm" id="diaSelect" [(ngModel)]="diaSeleccionado"
+                        (change)="aplicarFiltros()">
                         <option value="" selected>Todos los días</option>
                         <option *ngFor="let dia of diasSemana" [value]="dia">{{ dia }}</option>
                       </select>
                     </div>
-                    
+
                     <!-- Código -->
                     <div class="col-md-3">
-                      <label for="codigoSelect" class="form-label fw-semibold small text-uppercase text-muted">Código</label>
-                      <select class="form-select form-select-sm" id="codigoSelect" [(ngModel)]="codigoSeleccionado" (change)="aplicarFiltros()">
+                      <label for="codigoSelect"
+                        class="form-label fw-semibold small text-uppercase text-muted">Código</label>
+                      <select class="form-select form-select-sm" id="codigoSelect" [(ngModel)]="codigoSeleccionado"
+                        (change)="aplicarFiltros()">
                         <option value="" selected>Todos los códigos</option>
                         <option *ngFor="let opcion of opcionesCodigo" [value]="opcion.value">{{ opcion.texto }}</option>
                       </select>
                     </div>
                   </div>
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-2 mb-2">
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-2 mb-2">
                     <button class="btn btn-danger" type="button" (click)="descargarAgendaPDF()">
                       Descargar Agenda <i class="fa-solid fa-file-pdf"></i>
                     </button>
-                    </div>
+                  </div>
                 </div>
 
                 <!-- Tabla de actividades - MEJORADO -->
@@ -110,7 +111,7 @@
                         <th class="text-center pe-4" style="width: 100px;">Acciones</th>
                       </tr>
                     </thead>
-                    
+
                     <tbody>
                       <tr *ngFor="let agenda of agendasFiltradasPorCoordinador" class="border-bottom">
                         <!-- Fecha -->
@@ -120,7 +121,7 @@
                             <span class="small text-muted">{{ agenda.fecha | date:'MMM yy' }}</span>
                           </div>
                         </td>
-                        
+
                         <!-- Hora -->
                         <td class="text-center">
                           <span class="badge bg-light text-dark py-2 px-3 rounded">{{ agenda.hora }}</span>
@@ -131,37 +132,34 @@
                           <div class="activity-text" style="text-align: center;" [title]="agenda.domicilio">
                             {{ agenda.domicilio }}
                           </div>
-                        </td>                        
-                        
+                        </td>
+
                         <!-- Actividad -->
                         <td>
                           <div class="activity-text" [title]="agenda.actividad">
                             {{ agenda.actividad }}
                           </div>
                         </td>
-                        
+
                         <!-- Código -->
                         <td class="text-center">
                           <span class="badge text-bg-warning py-2 px-3">{{ agenda.codigo }}</span>
                         </td>
                         <!-- Resultado -->
                         <td class="text-center">
-                          <textarea class="form-control form-control-sm border-primary" 
-                                    rows="2" 
-                                    [(ngModel)]="agenda.resultado"
-                                    placeholder="Resultados Obtenidos"></textarea>
-                        </td>                     
+                          <textarea class="form-control form-control-sm border-primary" rows="2"
+                            [(ngModel)]="agenda.resultado" placeholder="Resultados Obtenidos"></textarea>
+                        </td>
                         <!-- Acciones -->
-                          <td class="text-center pe-4">
-                              <button type="button" class="btn btn-primary" 
-                                      (click)="guardarCambios(agenda)">
-                                <i class="fas fa-save me-1"></i>
-                              </button>
-                            </td>
+                        <td class="text-center pe-4">
+                          <button type="button" class="btn btn-primary" (click)="guardarCambios(agenda)">
+                            <i class="fas fa-save me-1"></i>
+                          </button>
+                        </td>
                       </tr>
-                      
+
                       <!-- Mensaje cuando no hay datos -->
-                      <tr *ngIf="!agendasFiltradasPorCoordinador?.length">
+                      <tr *ngIf="!agendasFiltradasPorCoordinador.length">
                         <td colspan="7" class="text-center py-5 text-muted">
                           <div class="d-flex flex-column align-items-center">
                             <i class="bi bi-calendar-x fs-1 mb-2"></i>
@@ -183,7 +181,8 @@
 </div>
 
 <!-- Modal Edit Activity - Enhanced Design -->
-<div class="modal fade" id="editarActividad" tabindex="-1" aria-labelledby="editarActividadLabel" aria-hidden="true" #modalEditar>
+<div class="modal fade" id="editarActividad" tabindex="-1" aria-labelledby="editarActividadLabel" aria-hidden="true"
+  #modalEditar>
   <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content border-0 shadow-lg">
 
@@ -210,26 +209,22 @@
               <tr *ngIf="actividadSeleccionada">
                 <!-- Hora -->
                 <td class="text-center">
-                  <input type="time" 
-                         class="form-control form-control-sm border-primary" 
-                         [(ngModel)]="actividadSeleccionada.hora"
-                         title="Hora programada" disabled>
+                  <input type="time" class="form-control form-control-sm border-primary"
+                    [(ngModel)]="actividadSeleccionada.hora" title="Hora programada" disabled>
                 </td>
-                                
+
                 <!-- Actividad -->
                 <td>
-                  <textarea class="form-control form-control-sm border-primary" 
-                            rows="2" 
-                            [(ngModel)]="actividadSeleccionada.actividad"
-                            placeholder="Descripción actividad"
-                            disabled></textarea>
+                  <textarea class="form-control form-control-sm border-primary" rows="2"
+                    [(ngModel)]="actividadSeleccionada.actividad" placeholder="Descripción actividad"
+                    disabled></textarea>
                 </td>
-         
+
               </tr>
             </tbody>
           </table>
         </div>
-        
+
         <!-- Sección de Notas -->
         <!-- <div class="mt-3">
           <label class="form-label text-muted small">Notas adicionales:</label>
@@ -237,14 +232,14 @@
         </div>
       </div> -->
 
-      <!-- Modal Footer -->
-      <div class="modal-footer bg-light">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-          <i class="fas fa-times me-1"></i>Cancelar
-        </button>
-      </div>
+        <!-- Modal Footer -->
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i>Cancelar
+          </button>
+        </div>
 
+      </div>
     </div>
   </div>
-</div>
 </div>

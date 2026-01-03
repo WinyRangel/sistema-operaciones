@@ -32,6 +32,11 @@ interface EstadisticasReporte {
   actividadesPorMes: { [key: string]: number };
   actividadesPorSemana: { [key: string]: number };
 }
+
+interface Asesor {
+  usuario: string;
+  coordinacion: string;
+}
 @Component({
   selector: 'app-test-agenda',
   standalone: false,
@@ -80,8 +85,8 @@ export class TestAgendaComponent {
   diaSeleccionado: string = '';
   codigoSeleccionado: string = '';
   usuarioActual: any;
-  asesores: any;
-  asesorSeleccionado: any;
+  asesores: Asesor[] = [];
+  asesorSeleccionado: string = '';
   actividadSeleccionada: Agenda | null = null;
 
 
@@ -334,6 +339,60 @@ export class TestAgendaComponent {
               }
 
               this.mostrarAlerta('Error al eliminar', mensajeError, 'error');
+            }
+          });
+        }
+      });
+  }
+
+  validarAgenda(id: string) {
+    this.mostrarConfirmacion('¿Validar actividad?', 'Esta acción marcará la actividad como validada.')
+      .then((result) => {
+        if (result.isConfirmed) {
+          // Mostrar loading mientras se procesa
+          Swal.fire({
+            title: 'Validando...',
+            text: 'Por favor espere',
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
+            }
+          });
+
+          this.coordinacionService.validarAgendaAsesor(id).subscribe({
+            next: () => {
+              // Actualizar estado local de la agenda
+              const agenda = this.agendas.find(a => a._id === id);
+              if (agenda) {
+                agenda.validada = true;
+              }
+              this.aplicarFiltros();
+
+              Swal.fire({
+                icon: 'success',
+                title: '¡Validado!',
+                text: 'La actividad ha sido validada correctamente.',
+                timer: 2000,
+                showConfirmButton: false,
+                timerProgressBar: true
+              });
+            },
+            error: (err) => {
+              console.error('Error al validar agenda', err);
+
+              let mensajeError = 'No se pudo validar la actividad. ';
+
+              if (err.status === 404) {
+                mensajeError = 'La actividad no fue encontrada.';
+              } else if (err.status === 403) {
+                mensajeError = 'No tiene permisos para validar esta actividad.';
+              } else if (err.status >= 500) {
+                mensajeError += 'Error del servidor. Por favor, intente más tarde.';
+              } else {
+                mensajeError += 'Por favor, intente nuevamente.';
+              }
+
+              this.mostrarAlerta('Error al validar', mensajeError, 'error');
             }
           });
         }
@@ -677,7 +736,7 @@ export class TestAgendaComponent {
     ];
 
     const filas = this.agendasFiltradas.map(a => ([
-      new Date(a.fecha).toLocaleDateString(),
+      this.formatDateUTC(a.fecha),
       a.hora || '-',
       a.asesor || 'Sin asignar',
       a.actividad?.substring(0, 30) + (a.actividad?.length > 30 ? '...' : '') || '-',
@@ -837,12 +896,12 @@ export class TestAgendaComponent {
       const fechaRegistro = a.updatedAt ? new Date(a.updatedAt) : fecha;
 
       return [
-        fecha.toLocaleDateString(),
+        this.formatDateUTC(fecha),
         a.asesor || 'Sin asignar',
         a.actividad?.substring(0, 40) + (a.actividad?.length > 40 ? '...' : '') || '-',
         this.obtenerDescripcionCodigo(a.codigo),
         a.resultado?.substring(0, 35) + (a.resultado?.length > 35 ? '...' : '') || 'Sin resultado',
-        fechaRegistro.toLocaleDateString(),
+        this.formatDateUTC(fechaRegistro),
         '✅ Registrada'
       ];
     });
@@ -985,7 +1044,7 @@ export class TestAgendaComponent {
       const diasPendiente = Math.floor((hoy.getTime() - fechaActividad.getTime()) / (1000 * 3600 * 24));
 
       return [
-        fechaActividad.toLocaleDateString(),
+        this.formatDateUTC(fechaActividad),
         a.asesor || 'Sin asignar',
         a.actividad?.substring(0, 40) + (a.actividad?.length > 40 ? '...' : '') || '-',
         this.obtenerDescripcionCodigo(a.codigo),
@@ -1229,17 +1288,17 @@ export class TestAgendaComponent {
         'Actividad',
         'Código',
         'Resultado',
-        'Validada'
+        // 'Validada'
       ];
 
       const filas = this.agendasFiltradas.map(a => ([
-        new Date(a.fecha).toLocaleDateString(),
+        this.formatDateUTC(a.fecha),
         a.hora || '',
         a.asesor || '',
         a.actividad || '',
         a.codigo || '',
         a.resultado || '',
-        a.validada ? 'Sí' : 'No'
+        // a.validada ? 'Sí' : 'No'
       ]));
 
       autoTable(doc, {
@@ -1317,5 +1376,21 @@ export class TestAgendaComponent {
     return imageExtensions.some(ext =>
       filename.toLowerCase().endsWith(ext)
     );
+  }
+
+  /**
+   * Formatea una fecha en UTC para evitar problemas de zona horaria
+   * @param fecha La fecha a formatear
+   * @returns String con la fecha formateada en formato local
+   */
+  private formatDateUTC(fecha: Date | string): string {
+    const date = new Date(fecha);
+    // Obtener la fecha en UTC sin conversión de zona horaria
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+
+    // Retornar en formato local (dd/mm/yyyy)
+    return `${day}/${month}/${year}`;
   }
 }
