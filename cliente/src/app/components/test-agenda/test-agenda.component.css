@@ -1,70 +1,218 @@
-  /* Estilos para las pestañas de asesores */
-  .asesor-tabs {
-    border-bottom: 1px solid #dee2e6;
+/* Estilos personalizados para el dashboard */
+
+/* Card principal */
+.card {
+  border: none;
+  overflow: hidden;
+}
+
+.card-header.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Avatar de usuario */
+.user-avatar {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Iconos de estadísticas */
+.stats-icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Navegación de asesores */
+.asesor-nav {
+  display: flex;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.asesor-nav .nav-link {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 0.75rem 1.25rem;
+  margin-right: 0.5rem;
+  border-radius: 50px;
+  border: 1px solid #dee2e6;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.asesor-nav .nav-link.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.asesor-nav .nav-link:hover:not(.active) {
+  background-color: #f8f9fa;
+  border-color: #667eea;
+}
+
+/* Badges de fecha */
+.date-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  padding: 8px;
+  border-radius: 10px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+
+.date-day {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.date-month {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+/* Badge de hora */
+.time-badge {
+  display: inline-block;
+  padding: 8px 12px;
+  background: #e3f2fd;
+  color: #1565c0;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Texto truncado */
+.truncate-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Filas de la tabla */
+.hover-row:hover {
+  background-color: #f8f9fa !important;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Estado vacío */
+.empty-state {
+  padding: 3rem;
+  text-align: center;
+}
+
+/* Círculo de progreso */
+.progress-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.progress-circle::before {
+  content: '';
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: white;
+  border-radius: 50%;
+}
+
+.progress-value {
+  position: relative;
+  z-index: 1;
+  font-size: 1.5rem;
+}
+
+/* Tarjetas de información */
+.info-card {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+}
+
+.info-item label {
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Scroll personalizado */
+.table-responsive::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Botones de acción */
+.btn-group-vertical .btn {
+  border-radius: 6px !important;
+  margin-bottom: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats-icon {
+    width: 48px;
+    height: 48px;
+    padding: 0.75rem;
   }
-  
-  .asesor-tab {
-    border: none;
-    border-bottom: 3px solid transparent;
-    padding: 0.75rem 1.25rem;
-    font-weight: 500;
-    color: #6c757d;
-    transition: all 0.2s ease;
+
+  .asesor-nav .nav-link span:last-child {
+    display: none;
   }
-  
-  .asesor-tab:hover {
-    color: #0d6efd;
-    background-color: rgba(13, 110, 253, 0.05);
-    border-bottom-color: rgba(13, 110, 253, 0.3);
+
+  .btn-group-vertical .btn span {
+    display: none;
   }
-  
-  .asesor-tab.active {
-    color: #0d6efd;
-    background-color: transparent;
-    border-bottom-color: #0d6efd;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-  
-  /* Mejora visual para la tabla */
-  .table-container {
-    border-radius: 0 0 0.375rem 0.375rem;
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .table thead th {
-    border-bottom: 2px solid #dee2e6;
-    font-weight: 600;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #6c757d;
-    vertical-align: middle;
-  }
-  
-  .table tbody tr {
-    transition: background-color 0.15s ease;
-  }
-  
-  .table tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.03);
-  }
-  
-  .activity-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 200px;
-  }
-  
-  /* Estilos para los badges */
-  .badge {
-    font-size: 0.75rem;
-    font-weight: 500;
-  }
-  
-  /* Estilos para los botones de acción */
-  .btn-icon {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  } 
+}
+
+.card {
+  animation: fadeIn 0.5s ease-out;
+}

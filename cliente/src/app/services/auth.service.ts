@@ -6,12 +6,15 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://servidor-operaciones.onrender.com/login';
-  // private apiUrl = 'http://localhost:4000/login';
+  setUsuarioActual(usuario: any) {
+    throw new Error('Method not implemented.');
+  }
+  // private apiUrl = 'https://servidor-operaciones.onrender.com/login';
+  private apiUrl = 'http://localhost:4000/login';
   private autenticadoSubject = new BehaviorSubject<boolean>(this.tieneToken());
   autenticado$ = this.autenticadoSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private tieneToken(): boolean {
     return !!localStorage.getItem('token');
@@ -28,6 +31,7 @@ export class AuthService {
           localStorage.setItem('token', res.token);
           localStorage.setItem('usuario', res.usuario);
           localStorage.setItem('rol', res.rol);
+          localStorage.setItem('coordinacion', res.coordinacion)
           this.autenticadoSubject.next(true); // 🔄 notifica login
         }
       })
@@ -35,9 +39,9 @@ export class AuthService {
   }
 
 
-    getUsuario(): string | null {
-      return localStorage.getItem('usuario');
-    }
+  getUsuario(): string | null {
+    return localStorage.getItem('usuario');
+  }
 
 
   logout(): void {
@@ -70,5 +74,8 @@ export class AuthService {
     return localStorage.getItem('rol');
   }
 
-  
+  obtenerCoordinacion(): string | null {
+    return localStorage.getItem('coordinacion');
+  }
+
 }

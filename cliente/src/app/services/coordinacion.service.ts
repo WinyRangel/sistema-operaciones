@@ -1,8 +1,28 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Coordinacion } from '../models/coordinacion';
 import { Agenda, Domicilio } from '../models/agenda';
+import { AgendaAsesor } from '../models/agenda-asesor';
+
+
+export interface ActividadPayload {
+  asesor: string;
+  coordinacion: string;
+  semana: string;
+  fecha: string;
+  objetivo: string;
+  firma: string;
+  hora: string;
+  domicilio: string;
+  actividad: string;
+  codigo: string;
+  acordeObjetivo: boolean;
+  traslado: string;
+  kmRecorrido: number;
+  coordinadorNombre?: string;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +37,8 @@ export class CoordinacionService {
   url2 = 'http://localhost:4000/agenda/'
   //  url4 = 'https://servidor-operaciones.onrender.com/obtenerAgenda'
   url4 = 'http://localhost:4000/obtenerAgenda'
+
+  urlAsesor = 'http://localhost:4000/agenda-asesor/'
   constructor(private http: HttpClient) { }
 
   obtenerCoordinacion(): Observable<Coordinacion[]> {
@@ -68,4 +90,38 @@ export class CoordinacionService {
     return this.http.get(this.url3, { params });
   }
 
+  // Módulo Asesor
+  guardarAgendaAsesor(actividad: ActividadPayload): Observable<any> {
+    return this.http.post(this.urlAsesor, actividad);
+  }
+
+  // Obtener lista de asesores para coordinadores
+  obtenerAsesoresPorCoordinacion() {
+    const token = localStorage.getItem('token');
+    // Necesitas crear este endpoint en el backend
+    return this.http.get<any>('http://localhost:4000/urlAsesor/asesores', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
+
+  // Obtener agendas según el rol del usuario
+  obtenerAgendasAsesor() {
+    const token = localStorage.getItem('token');
+    return this.http.get<any>(this.urlAsesor, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
+
+  actualizarAgendaAsesor(id: string, datos: any): Observable<any> {
+    return this.http.put(this.urlAsesor + id, datos);
+  }
+
+
+  eliminarAgendaAsesor(id: string): Observable<any> {
+    return this.http.delete(this.urlAsesor + id);
+  }
 }

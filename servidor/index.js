@@ -1,5 +1,5 @@
 require('dotenv').config({ path: 'variables.env' });
-
+const path = require('path');
 const express = require('express');
 const conectarDB = require('./config/db');
 const cors = require("cors");
@@ -41,6 +41,14 @@ app.use('/fichas', require('./routes/fichas.routes'));
 app.use('/', require('./routes/auth.routes'));
 app.use('/api', require('./routes/seguimiento.routes'));
 app.use('/agenda-asesor', require('./routes/agenda.asesor.routes'));
+
+
+
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, 'uploads'))
+);
+
 
 // Inicializar domicilio por defecto
 const inicializarDomicilioPorDefecto = async () => {

@@ -38,7 +38,7 @@
       <div class="card h-100 shadow-sm border hover-effect">
         <div class="card-body text-center p-4 position-relative">
           <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
-           <i class="fa-solid fa-calendar-days fs-1 text-primary-emphasis"></i>
+            <i class="fa-solid fa-calendar-days fs-1 text-primary-emphasis"></i>
           </div>
           <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Semanal</span>
           <h5 class="card-title fw-bold mb-3">Ver Agenda</h5>
@@ -65,7 +65,6 @@
         </div>
       </div>
     </div>
-
     <!-- Tarjeta 2 -->
     <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
       <div class="card h-100 shadow-sm border hover-effect">
@@ -145,7 +144,6 @@
         </div>
       </div>
     </div>
-
     <!-- Tarjeta  6-->
     <div class="container my-5" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
       <div class="row justify-content-center">
@@ -183,29 +181,57 @@
             </div>
           </div>
         </div>
-
       </div>
-
     </div>
 
-    <div class="container-fluid mt-4 mb-4" *ngIf="rolUsuario === 'asesor'">
-      <div class="row g-4">
-        <!-- Tarjeta: Registrar Ficha por Asesor -->
-        <div class="col-md-6">
-          <div class="card h-100 shadow-sm border hover-effect">
+    <div class="container text-center my-2">
+      <div class="row align-items-center">
+        <div class="col">
+          <div class="card h-100 shadow-sm border hover-effect mb-2">
             <div class="card-body text-center p-4 position-relative">
               <div class="icon-container mb-3 bg-success bg-opacity-10 rounded-3">
-                <i class="bi bi-journal-check fs-1 text-success"></i>
+                <i class="bi bi-calendar-check fs-1 text-success"></i>
+              </div>
+              <span class="badge bg-success text-white position-absolute top-0 end-0 m-2">Actividad Semanal</span>
+              <h5 class="card-title fw-bold mb-3">Registrar Agenda</h5>
+              <p class="card-text text-muted mb-4">Captura de actividades diarias</p>
+              <a routerLink="/registrar-agenda-asesor" class="btn btn-success px-4 rounded-pill text-white">
+                Acceder <i class="bi bi-arrow-right ms-2"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card h-100 shadow-sm border hover-effect mb-2">
+            <div class="card-body text-center p-4 position-relative">
+              <div class="icon-container mb-3 bg-success bg-opacity-10 rounded-3">
+                <i class="bi bi-list-check fs-1 text-success"></i>
               </div>
               <span class="badge bg-success text-white position-absolute top-0 end-0 m-2">Actividad Diaria</span>
-              <h5 class="card-title fw-bold mb-3">Registrar Ficha</h5>
-              <p class="card-text text-muted mb-4">Captura de actividades del día</p>
-              <a routerLink="/fichas-asesor" class="btn btn-gradient px-4 rounded-pill text-white">
+              <h5 class="card-title fw-bold mb-3">Seguimiento Agenda</h5>
+              <p class="card-text text-muted mb-4">Captura de actividades diarias</p>
+              <a routerLink="/seguimiento-agenda-asesor" class="btn btn-success px-4 rounded-pill text-white">
                 Acceder <i class="bi bi-arrow-right ms-2"></i>
               </a>
             </div>
           </div>
         </div>
       </div>
+      <div class="col">
+        <div class="card h-100 shadow-sm border hover-effect">
+          <div class="card-body text-center p-4 position-relative">
+            <div class="icon-container mb-3 bg-success bg-opacity-10 rounded-3">
+              <i class="bi bi-journal-check fs-1 text-success"></i>
+            </div>
+            <span class="badge bg-success text-white position-absolute top-0 end-0 m-2">Actividad Diaria</span>
+            <h5 class="card-title fw-bold mb-3">Registrar Ficha</h5>
+            <p class="card-text text-muted mb-4">Captura de actividades del día</p>
+            <a routerLink="/fichas-asesor" class="btn btn-success px-4 rounded-pill text-white">
+              Acceder <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+</div>

@@ -31,7 +31,7 @@ import { TagModule } from 'primeng/tag';
 import { FechaFormatPipe } from './pipes/fecha-format.pipe';
 import { AgendasComponent } from './components/Coordinadoras/agendas/agendas.component';
 import { ReporteAgendasComponent } from './components/Coordinadoras/reporte-agendas/reporte-agendas.component';
- 
+
 import { IniciarSesionComponent } from './components/Shared/iniciar-sesion/iniciar-sesion.component';
 
 import { ProyeccionesComponent } from './components/Shared/proyecciones/proyecciones.component';
@@ -44,8 +44,9 @@ import { MiAgendaComponent } from './components/Coordinadoras/mi-agenda/mi-agend
 import { TokenInterceptor } from './interceptors/token.interceptor';
 import { RegistrarAgendaComponent } from './components/Coordinadoras/registrar-agenda/registrar-agenda.component';
 import { FichasAsesorComponent } from './components/Shared/fichas-asesor/fichas-asesor.component';
-import { TestComponent } from './components/test/test.component';
+import { TestComponent } from './components/registrar-agenda-asesor/test.component';
 import { TestAgendaComponent } from './components/test-agenda/test-agenda.component';
+import { TruncatePipe } from './pipes/truncate.pipe';
 
 @NgModule({
   declarations: [
@@ -75,9 +76,10 @@ import { TestAgendaComponent } from './components/test-agenda/test-agenda.compon
     RegistrarAgendaComponent,
     FichasAsesorComponent,
     TestComponent,
-    TestAgendaComponent
+    TestAgendaComponent,
+    TruncatePipe
   ],
-  
+
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -95,12 +97,12 @@ import { TestAgendaComponent } from './components/test-agenda/test-agenda.compon
     CommonModule
 
   ],
-    providers: [
-        provideAnimationsAsync(),
-        providePrimeNG({ /* options */ }),
-        { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }
+  providers: [
+    provideAnimationsAsync(),
+    providePrimeNG({ /* options */ }),
+    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }
 
-    ], 
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
