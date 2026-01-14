@@ -29,18 +29,17 @@ export interface ActividadPayload {
 })
 export class CoordinacionService {
 
-  // url = 'https://servidor-operaciones.onrender.com/coordinacion'
-  // url3 = 'https://servidor-operaciones.onrender.com/agendas?page=1&limit=13000'
-  // url2 = 'https://servidor-operaciones.onrender.com/agenda'
-  // url4 = 'https://servidor-operaciones.onrender.com/obtenerAgenda'
-
-  url = 'http://localhost:4000/coordinacion'
-  url3 = 'http://localhost:4000/agendas'
-  url2 = 'http://localhost:4000/agenda/'
-  url4 = 'http://localhost:4000/obtenerAgenda'
-
-  //urlAsesor = 'http://localhost:4000/agenda-asesor/'
+  url = 'https://servidor-operaciones.onrender.com/coordinacion'
+  url3 = 'https://servidor-operaciones.onrender.com/agendas?page=1&limit=13000'
+  url2 = 'https://servidor-operaciones.onrender.com/agenda'
+  url4 = 'https://servidor-operaciones.onrender.com/obtenerAgenda'
   urlAsesor = 'https://servidor-operaciones.onrender.com/agenda-asesor/'
+
+  // url = 'http://localhost:4000/coordinacion'
+  // url3 = 'http://localhost:4000/agendas'
+  // url2 = 'http://localhost:4000/agenda/'
+  // url4 = 'http://localhost:4000/obtenerAgenda'
+  //urlAsesor = 'http://localhost:4000/agenda-asesor/'
 
   constructor(private http: HttpClient) { }
 
