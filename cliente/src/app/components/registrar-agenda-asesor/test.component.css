@@ -1,55 +1,232 @@
-/* Transiciones suaves */
-.hover-shadow {
+/* Estilos para la agenda */
+.timeline-container {
+  position: relative;
+}
+
+.time-marker {
+  position: relative;
+  z-index: 2;
+}
+
+.time-circle {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
-.hover-shadow:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+.time-circle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Scroll personalizado */
-.card-body::-webkit-scrollbar {
-  width: 8px;
+.timeline-line {
+  opacity: 0.3;
 }
 
-.card-body::-webkit-scrollbar-track {
+.activity-item {
+  position: relative;
+}
+
+.activity-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 30px;
+  top: 75px;
+  bottom: -20px;
+  width: 2px;
+  background: linear-gradient(to bottom, #0d6efd, transparent);
+  z-index: 1;
+}
+
+.empty-state {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  border: 2px dashed #dee2e6;
+}
+
+/* Mejoras de diseño */
+.form-control.border-2,
+.form-select.border-2 {
+  border-width: 2px !important;
+  transition: all 0.3s ease;
+}
+
+.form-control.border-2:focus,
+.form-select.border-2:focus {
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  border-color: #0d6efd;
+}
+
+.activities-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.activities-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.activities-list::-webkit-scrollbar-track {
   background: #f1f1f1;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
-.card-body::-webkit-scrollbar-thumb {
+.activities-list::-webkit-scrollbar-thumb {
   background: #c1c1c1;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
-.card-body::-webkit-scrollbar-thumb:hover {
+.activities-list::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
 
-/* Estilos para inputs readonly */
-.form-control:read-only {
-  background-color: #f8f9fa;
-  cursor: default;
+/* Utilidades responsive */
+.min-width-0 {
+  min-width: 0;
 }
 
-/* Efecto de focus mejorado */
-.form-control:focus,
-.form-select:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+.fs-7 {
+  font-size: 0.875rem;
 }
 
-/* Gradientes */
-.bg-gradient-primary {
-  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+/* Breakpoints Responsive */
+
+/* Dispositivos extra pequeños (teléfonos, menos de 576px) */
+@media (max-width: 575.98px) {
+  .activity-item:not(:last-child)::after {
+    left: 30px;
+  }
+
+  .time-circle {
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .time-circle .fs-7 {
+    font-size: 0.75rem !important;
+  }
+
+  .empty-state {
+    padding: 1.5rem;
+  }
+
+  .card-body {
+    padding: 1rem !important;
+  }
 }
 
-/* Sticky footer mejorado */
-.sticky-bottom {
-  position: sticky;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  z-index: 10;
+/* Dispositivos pequeños (teléfonos en horizontal, 576px y superior) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .activity-item:not(:last-child)::after {
+    left: 35px;
+  }
+
+  .time-circle {
+    width: 55px !important;
+    height: 55px !important;
+  }
+}
+
+/* Dispositivos medianos (tablets, 768px y superior) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .activity-item:not(:last-child)::after {
+    left: 40px;
+  }
+
+  .time-circle {
+    width: 60px !important;
+    height: 60px !important;
+  }
+}
+
+/* Dispositivos grandes (desktops, 992px y superior) */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .activity-item:not(:last-child)::after {
+    left: 35px;
+  }
+
+  .time-circle {
+    width: 65px !important;
+    height: 65px !important;
+  }
+}
+
+/* Dispositivos extra grandes (desktops grandes, 1200px y superior) */
+@media (min-width: 1200px) {
+  .activity-item:not(:last-child)::after {
+    left: 35px;
+  }
+}
+
+/* Ajustes para pantallas muy pequeñas */
+@media (max-width: 400px) {
+  .card-header h4 {
+    font-size: 1rem !important;
+  }
+
+  .time-circle {
+    width: 45px !important;
+    height: 45px !important;
+  }
+
+  .activity-item:not(:last-child)::after {
+    left: 22px;
+    top: 65px;
+  }
+
+  .btn {
+    font-size: 0.875rem !important;
+    padding: 0.375rem 0.75rem !important;
+  }
+}
+
+/* Mejoras para inputs en móviles */
+@media (max-width: 768px) {
+
+  input[type="date"],
+  input[type="time"],
+  select {
+    font-size: 16px !important;
+    /* Evita zoom en iOS */
+  }
+
+  .form-floating>label {
+    font-size: 14px !important;
+  }
+}
+
+/* Ajuste de altura máxima en móviles */
+@media (max-width: 768px) {
+  .card-body[style*="max-height"] {
+    max-height: 75vh !important;
+  }
+}
+
+/* Mejoras de toques en móviles */
+@media (hover: none) and (pointer: coarse) {
+
+  .btn,
+  .time-circle,
+  input,
+  select,
+  textarea {
+    min-height: 44px !important;
+    /* Tamaño mínimo para toques */
+  }
+
+  .btn-sm {
+    min-height: 36px !important;
+  }
+}
+
+/* Orientación landscape en móviles */
+@media (max-height: 600px) and (orientation: landscape) {
+  .card-body[style*="max-height"] {
+    max-height: 65vh !important;
+  }
+
+  .activities-list {
+    max-height: 250px;
+  }
 }

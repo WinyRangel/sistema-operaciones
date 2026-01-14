@@ -1,495 +1,487 @@
-<div class="container-fluid mt-4 mb-4">
-  <!-- Tarjeta Principal -->
-  <div class="card shadow-lg border-0 rounded-3 overflow-hidden">
+<div class="tabs-container">
+  <!-- Tabs para desktop -->
+  <ul class="nav nav-underline cursor-pointer mb-3 d-none d-md-flex">
+    <li class="nav-item">
+      <a class="nav-link position-relative" [class.active]="pestanaActiva === 'calendario'"
+        (click)="cambiarPestana('calendario')">
+        <i class="bi bi-calendar-week me-2"></i>
+        Calendario
+        <span class="active-indicator" *ngIf="pestanaActiva === 'calendario'"></span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link position-relative" [class.active]="pestanaActiva === 'lista'"
+        (click)="cambiarPestana('lista')">
+        <i class="bi bi-list-task me-2"></i>
+        Lista
+        <span class="active-indicator" *ngIf="pestanaActiva === 'lista'"></span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link position-relative" [class.active]="pestanaActiva === 'rechazadas'"
+        (click)="cambiarPestana('rechazadas')">
+        <i class="fa-solid fa-calendar-xmark me-2"></i>
+        Actividades Rechazadas
+        <span class="badge text-bg-danger" [class.blinking]="agendasRechazadas.length > 0">{{ agendasRechazadas.length
+          }}</span>
+        <span class="active-indicator" *ngIf="pestanaActiva === 'rechazadas'"></span>
+      </a>
+    </li>
+  </ul>
 
-    <!-- Encabezado de Usuario -->
-    <div class="card-header bg-gradient-primary text-white py-3">
-      <div class="d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-          <div class="user-avatar me-3">
-            <i class="bi bi-person-circle fs-1"></i>
-          </div>
-          <div>
-            <h3 class="mb-1 fw-bold">
-              {{ esCoordinador ? 'Coordinador' : 'Asesor' }} Dashboard
-            </h3>
-            <p class="mb-0 opacity-75">
-              <i class="bi bi-person me-1"></i>
-              {{ usuarioActual }}
-              <span class="mx-2">•</span>
-              <i class="bi bi-calendar-check me-1"></i>
-              {{ agendasFiltradas.length }} actividades
-            </p>
-          </div>
-        </div>
-        <div class="d-flex align-items-center">
-          <div class="badge bg-white text-primary fw-semibold py-2 px-3 rounded-pill me-3">
-            {{ rolUsuario | titlecase }}
-          </div>
-          <button class="btn btn-light btn-sm rounded-pill" (click)="refrescarAgendas()" title="Actualizar datos">
-            <i class="bi bi-arrow-clockwise"></i>
-          </button>
-        </div>
-      </div>
+  <!-- Select para mobile -->
+  <div class="d-md-none mb-3">
+    <div class="form-floating">
+      <select #vistaSelect class="form-select" (change)="cambiarPestana(vistaSelect.value)" [value]="pestanaActiva">
+        <option value="calendario">Calendario</option>
+        <option value="lista">Lista</option>
+        <option value="rechazadas">Rechazadas</option>
+      </select>
+      <label>Vista</label>
     </div>
+  </div>
 
-    <!-- Pestañas de Asesores (solo para coordinadores) -->
-    <div *ngIf="esCoordinador" class="px-4 pt-3">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="text-muted mb-0">
-          <i class="bi bi-people me-1"></i> Gestión de Asesores
-        </h6>
-        <small class="text-muted">{{ asesores.length || 0 }} asesores</small>
-      </div>
+</div>
 
-      <!-- Selector de Asesor Mejorado -->
-      <div class="asesor-selector-container">
-        <div class="nav nav-pills asesor-nav" role="tablist">
-          <button class="nav-link asesor-tab" [class.active]="!asesorSeleccionado"
-            (click)="asesorSeleccionado = ''; filtrarPorAsesor()">
-            <i class="bi bi-people-fill me-2"></i>
-            <span>Todos</span>
-            <span class="badge bg-primary rounded-pill ms-2">{{ agendas.length }}</span>
-          </button>
 
-          <button *ngFor="let asesor of asesores" class="nav-link asesor-tab"
-            [class.active]="asesorSeleccionado === asesor.usuario"
-            (click)="asesorSeleccionado = asesor.usuario; filtrarPorAsesor()">
-            <i class="bi bi-person me-2"></i>
-            <span>{{ asesor.usuario }}</span>
-            <span class="badge bg-secondary rounded-pill ms-2">
-              {{ contarAgendasPorAsesor(asesor.usuario) }}
-            </span>
-          </button>
-        </div>
-      </div>
-    </div>
+<div class="tab-content">
+  <!--FORMATO DE CALENDARIO -->
+  <div id="calendario" class="tab-pane fade" [class.show]="pestanaActiva === 'calendario'"
+    [class.active]="pestanaActiva === 'calendario'">
+    <div class="container-fluid mt-3 mb-3 px-0 px-sm-3">
+      <!-- Tarjeta Principal -->
+      <div class="card shadow-lg border-0 rounded-3 overflow-hidden">
 
-    <!-- Contenido Principal -->
-    <div class="card-body p-4">
-      <!-- SECCIÓN DE ESTADÍSTICAS RÁPIDAS -->
-      <div class="row mb-4">
-        <div class="col-12">
-          <div class="card bg-light border-0 rounded-3 shadow-sm">
-            <div class="card-body p-3">
-              <div class="row g-3">
-                <!-- Total Actividades -->
-                <div class="col-md-3">
-                  <div class="d-flex align-items-center">
-                    <div class="stats-icon bg-primary bg-gradient rounded-circle p-3 me-3">
-                      <i class="bi bi-calendar-check text-white fs-4"></i>
-                    </div>
-                    <div>
-                      <h6 class="mb-0 text-muted">Total Actividades</h6>
-                      <h3 class="mb-0 fw-bold text-dark">{{ agendasFiltradas.length }}</h3>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Con Evidencia -->
-                <!-- <div class="col-md-3">
-                  <div class="d-flex align-items-center">
-                    <div class="stats-icon bg-success bg-gradient rounded-circle p-3 me-3">
-                      <i class="bi bi-check-circle text-white fs-4"></i>
-                    </div>
-                    <div>
-                      <h6 class="mb-0 text-muted">Con Evidencia</h6>
-                      <h3 class="mb-0 fw-bold text-dark">
-                        {{ (estadisticas?.actividadesConEvidencia || 0) }}
-                        <small class="text-success fs-6">
-                          ({{ estadisticas?.porcentajeCompletitud || 0 }}%)
-                        </small>
-                      </h3>
-                    </div>
-                  </div>
-                </div> -->
-
-                <!-- Validadas -->
-                <!-- <div class="col-md-3">
-                  <div class="d-flex align-items-center">
-                    <div class="stats-icon bg-warning bg-gradient rounded-circle p-3 me-3">
-                      <i class="bi bi-shield-check text-white fs-4"></i>
-                    </div>
-                    <div>
-                      <h6 class="mb-0 text-muted">Validadas</h6>
-                      <h3 class="mb-0 fw-bold text-dark">{{ estadisticas?.actividadesValidadas || 0 }}</h3>
-                    </div>
-                  </div>
-                </div> -->
-
-                <!-- Acciones Rápidas -->
-                <!-- <div class="col-md-3">
-                  <div class="d-flex align-items-center justify-content-end h-100">
-                    <button class="btn btn-outline-primary btn-sm me-2" (click)="generarReporte()">
-                      <i class="bi bi-graph-up me-1"></i> Reporte
-                    </button>
-                    <button class="btn btn-outline-success btn-sm" (click)="descargarAgendaPDF()">
-                      <i class="bi bi-file-pdf me-1"></i> PDF
-                    </button>
-                  </div>
-                </div> -->
+        <!-- Encabezado de Usuario -->
+        <div class="card-header text-white py-3 px-2 px-sm-4" style="background-color: #4e62b4;">
+          <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+            <div class="d-flex align-items-center mb-2 mb-sm-0 w-100">
+              <div class="user-avatar me-2 me-sm-3">
+                <i class="bi bi-calendar4-week fs-1"></i>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SECCIÓN DE REPORTES -->
-      <div class="row mb-4" *ngIf="rolUsuario === 'coordinador'">
-        <div class="col-12">
-          <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-bottom py-3">
-              <h5 class="mb-0">
-                <i class="bi bi-graph-up me-2 text-primary"></i>
-                Generar Reportes
-              </h5>
-            </div>
-            <div class="card-body">
-              <div class="row g-3">
-                <!-- Tipo de Reporte -->
-                <div class="col-md-8">
-                  <label class="form-label fw-semibold">
-                    <i class="bi bi-funnel me-1"></i>
-                    Seleccionar Tipo de Reporte
-                  </label>
-                  <div class="btn-group w-100" role="group">
-                    <button *ngFor="let tipo of tiposReporte" type="button" class="btn btn-outline-primary"
-                      [class.active]="tipoReporteSeleccionado === tipo.id" (click)="tipoReporteSeleccionado = tipo.id">
-                      <i class="bi me-2" [class]="getIconForReport(tipo.id)"></i>
-                      {{ tipo.nombre }}
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Botón Generar -->
-                <div class="col-md-4 d-flex align-items-end">
-                  <button class="btn btn-primary btn-lg w-100 py-3" (click)="generarReporte()">
-                    <i class="bi bi-file-earmark-pdf-fill me-2"></i>
-                    Generar Reporte
-                  </button>
-                </div>
-              </div>
-
-              <!-- Vista Previa de Estadísticas -->
-              <div *ngIf="estadisticas" class="mt-4">
-                <h6 class="text-muted mb-3">
-                  <i class="bi bi-bar-chart me-1"></i>
-                  Vista Previa de Estadísticas
-                </h6>
-                <div class="row g-3">
-                  <!-- Distribución por Códigos -->
-                  <div class="col-md-6">
-                    <div class="card border-0 bg-gradient-light h-100">
-                      <div class="card-body">
-                        <h6 class="card-title text-primary">
-                          <i class="bi bi-tag me-1"></i>
-                          Distribución por Códigos
-                        </h6>
-                        <div class="mt-3">
-                          <div *ngFor="let item of getTopCodigos(estadisticas.actividadesPorCodigo, 5)" class="mb-2">
-                            <div class="d-flex justify-content-between align-items-center">
-                              <span class="text-muted">{{ item[0] }}</span>
-                              <span class="fw-bold">{{ item[1] }}</span>
-                            </div>
-                            <div class="progress" style="height: 6px;">
-                              <div class="progress-bar bg-primary"
-                                [style.width]="(item[1] / estadisticas.totalActividades * 100) + '%'"
-                                role="progressbar">
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Completitud General -->
-                  <div class="col-md-6">
-                    <div class="card border-0 bg-gradient-light h-100">
-                      <div class="card-body">
-                        <h6 class="card-title text-primary">
-                          <i class="bi bi-speedometer2 me-1"></i>
-                          Completitud General
-                        </h6>
-                        <div class="text-center py-4">
-                          <div class="progress-circle mx-auto"
-                            [style.background]="'conic-gradient(#4CAF50 ' + estadisticas.porcentajeCompletitud + '%, #e0e0e0 0)'">
-                            <span class="progress-value fw-bold">{{ estadisticas.porcentajeCompletitud }}%</span>
-                          </div>
-                          <p class="text-muted mt-3 mb-0">
-                            {{ estadisticas.actividadesConEvidencia }} de {{ estadisticas.totalActividades }}
-                            actividades con evidencia
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SECCIÓN DE FILTROS Y TABLA -->
-      <div class="row">
-        <div class="col-12">
-          <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-bottom py-3">
-              <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                  <i class="bi bi-table me-2 text-primary"></i>
-                  {{ esCoordinador ? 'Seguimiento de Actividades' : 'Mis Actividades' }}
-                </h5>
-                <div class="d-flex align-items-center">
-                  <span class="badge bg-primary rounded-pill me-3">
-                    {{ agendasFiltradas.length }} registros
-                  </span>
-                  <div class="btn-group btn-group-sm" role="group">
-                    <button class="btn btn-outline-primary" (click)="aplicarFiltros()">
-                      <i class="bi bi-funnel me-1"></i> Aplicar
-                    </button>
-                    <button class="btn btn-outline-secondary" (click)="limpiarFiltros()">
-                      <i class="bi bi-x-circle me-1"></i> Limpiar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Filtros Avanzados -->
-            <div class="card-body border-bottom">
-              <div class="row g-3">
-                <!-- Mes -->
-                <div class="col-md-3">
-                  <label class="form-label fw-semibold small text-uppercase text-muted">
-                    <i class="bi bi-calendar-month me-1"></i>
-                    Mes
-                  </label>
-                  <select class="form-select" [(ngModel)]="mesSeleccionado">
-                    <option value="">Todos los meses</option>
-                    <option *ngFor="let mes of meses" [value]="mes">{{ mes }}</option>
-                  </select>
-                </div>
-
-                <!-- Semana -->
-                <div class="col-md-3">
-                  <label class="form-label fw-semibold small text-uppercase text-muted">
-                    <i class="bi bi-calendar-week me-1"></i>
-                    Semana
-                  </label>
-                  <select class="form-select" [(ngModel)]="semanaSeleccionada">
-                    <option value="">Todas las semanas</option>
-                    <option *ngFor="let semana of semanas" [value]="semana">{{ semana }}</option>
-                  </select>
-                </div>
-
-                <!-- Código -->
-                <div class="col-md-3">
-                  <label class="form-label fw-semibold small text-uppercase text-muted">
-                    <i class="bi bi-tag me-1"></i>
-                    Código
-                  </label>
-                  <select class="form-select" [(ngModel)]="codigoSeleccionado">
-                    <option value="">Todos los códigos</option>
-                    <option *ngFor="let opcion of opcionesCodigo" [value]="opcion.value">
-                      {{ opcion.texto }} - {{ opcion.descripcion }}
-                    </option>
-                  </select>
-                </div>
-
-                <!-- Asesor (solo coordinadores) -->
-                <div *ngIf="esCoordinador" class="col-md-3">
-                  <label class="form-label fw-semibold small text-uppercase text-muted">
+              <div class="flex-grow-1">
+                <h3 class="mb-1 fw-bold fs-5 fs-sm-4">
+                  {{ esCoordinador ? 'Seguimiento de Calendario' : 'Mi Calendario' }}
+                </h3>
+                <div class="d-flex flex-wrap align-items-center">
+                  <p class="mb-0 opacity-75 small me-2">
                     <i class="bi bi-person me-1"></i>
-                    Asesor
-                  </label>
-                  <select class="form-select" [(ngModel)]="asesorSeleccionado" (change)="filtrarPorAsesor()">
-                    <option value="">Todos los asesores</option>
-                    <option *ngFor="let asesor of asesores" [value]="asesor.usuario">
-                      {{ asesor.usuario }}
-                    </option>
-                  </select>
+                    {{ usuarioActual }}
+                  </p>
+                  <span class="mx-1 d-none d-sm-inline">•</span>
+                  <p class="mb-0 opacity-75 small">
+                    <i class="bi bi-calendar-check me-1"></i>
+                    {{ agendaCalendario.length }} actividades
+                  </p>
                 </div>
               </div>
             </div>
-
-            <!-- Tabla de Actividades -->
-            <div class="table-responsive" style="max-height: 500px;">
-              <table class="table table-hover align-middle">
-                <thead class="table-light sticky-top">
-                  <tr>
-                    <th *ngIf="esCoordinador" class="text-center" style="width: 120px;">
-                      <i class="bi bi-person"></i> Asesor
-                    </th>
-                    <th class="text-center" style="width: 100px;">
-                      <i class="bi bi-calendar"></i> Fecha
-                    </th>
-                    <th class="text-center" style="width: 80px;">
-                      <i class="bi bi-clock"></i> Hora
-                    </th>
-                    <th class="text-center" style="width: 150px;">
-                      <i class="bi bi-geo-alt"></i> Domicilio
-                    </th>
-                    <th style="min-width: 200px;">
-                      <i class="bi bi-list-task"></i> Actividad
-                    </th>
-                    <th class="text-center" style="width: 60px;">
-                      <i class="bi bi-tag"></i> Código
-                    </th>
-                    <th class="text-center" style="min-width: 150px;">
-                      <i class="bi bi-check-circle"></i> Resultado
-                    </th>
-                    <!-- <th class="text-center" style="min-width: 150px;">
-                      <i class="bi bi-paperclip"></i> Evidencia
-                    </th> -->
-                    <th class="text-center" style="width: 140px;">
-                      <i class="bi bi-gear"></i> Acciones
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr *ngFor="let agenda of agendasFiltradas" class="border-bottom hover-row"
-                    [class.table-success]="agenda.evidencia" [class.table-warning]="agenda.validada">
-
-                    <!-- Asesor -->
-                    <td *ngIf="esCoordinador" class="text-center">
-                      <span class="badge bg-info bg-gradient rounded-pill py-2 px-3">
-                        {{ agenda.asesor || agenda.coordinador }}
-                      </span>
-                    </td>
-
-                    <!-- Fecha -->
-                    <td class="text-center">
-                      <div class="date-badge">
-                        <div class="date-day fw-bold text-primary">{{ agenda.fecha | date:'dd':'UTC' }}</div>
-                        <div class="date-month small text-muted">{{ agenda.fecha | date:'MMM':'UTC' }}</div>
-                      </div>
-                    </td>
-
-                    <!-- Hora -->
-                    <td class="text-center">
-                      <span class="time-badge">{{ agenda.hora }}</span>
-                    </td>
-
-                    <!-- Domicilio -->
-                    <td class="text-center">
-                      <div class="truncate-text" [title]="agenda.domicilio">
-                        {{ agenda.domicilio | truncate:25 }}
-                      </div>
-                    </td>
-
-                    <!-- Actividad -->
-                    <td>
-                      <div class="truncate-text" [title]="agenda.actividad">
-                        {{ agenda.actividad | truncate:60 }}
-                      </div>
-                    </td>
-
-                    <!-- Código -->
-                    <td class="text-center">
-                      <span class="badge bg-warning text-dark py-2 px-3">
-                        {{ agenda.codigo }}
-                      </span>
-                    </td>
-
-                    <!-- Resultado -->
-                    <td class="text-center">
-                      <textarea class="form-control form-control-sm border-primary" rows="2"
-                        [(ngModel)]="agenda.resultado" placeholder="Ingrese resultados..."
-                        (focus)="agenda.editing = true" (blur)="agenda.editing = false">
-                      </textarea>
-                      <small class="text-muted" *ngIf="!agenda.resultado">
-                        Pendiente de registrar
-                      </small>
-                    </td>
-
-                    <!-- Evidencia -->
-                    <!-- <td class="text-center">
-                      <div class="d-flex flex-column align-items-center">
-                        <div *ngIf="agenda.evidencia" class="mb-2">
-                          <a [href]="getUrlEvidencia(agenda.evidencia)" target="_blank"
-                            class="btn btn-sm btn-outline-success">
-                            <i class="bi bi-eye me-1"></i> Ver
-                          </a>
-                        </div>
-                         <div class="file-upload" *ngIf="rolUsuario === 'asesor'">
-                          <input type="file" class="form-control form-control-sm"
-                            (change)="onFileSelected($event, agenda)" accept="image/*,.pdf">
-                          <small class="text-muted d-block mt-1">
-                            JPG, PNG, PDF (Max 5MB)
-                          </small>
-                        </div> 
-                      </div>
-                    </td> -->
-
-                    <!-- Acciones -->
-                    <td class="text-center">
-                      <div class="btn-group-vertical btn-group-sm" role="group">
-                        <button *ngIf="rolUsuario === 'asesor'" type="button" class="btn btn-primary mb-1"
-                          (click)="guardarCambios(agenda)" [disabled]="!agenda.resultado && !agenda.evidencia">
-                          <i class="bi bi-save"></i>
-                          <span class="d-none d-md-inline"> Guardar</span>
-                        </button>
-
-                        <button *ngIf="rolUsuario === 'coordinador' || 'asesor'" type="button" class="btn btn-info mb-1"
-                          data-bs-toggle="modal" data-bs-target="#editarActividad"
-                          (click)="seleccionarActividad(agenda)">
-                          <i class="bi bi-eye"></i>
-                          <span class="d-none d-md-inline"> Detalles</span>
-                        </button>
-
-                        <button *ngIf="rolUsuario === 'asesor'" type="button" class="btn btn-danger"
-                          (click)="eliminarAgenda(agenda._id)">
-                          <i class="bi bi-trash"></i>
-                          <span class="d-none d-md-inline"> Eliminar</span>
-                        </button>
-
-                        <button *ngIf="rolUsuario === 'coordinador'" type="button" class="btn btn-success"
-                          (click)="validarAgenda(agenda._id)">
-                          <i class="bi bi-check"></i>
-                          <span class="d-none d-md-inline"> Validar agenda</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  <!-- Sin datos -->
-                  <tr *ngIf="!agendasFiltradas.length">
-                    <td [attr.colspan]="esCoordinador ? 9 : 8" class="text-center py-5">
-                      <div class="empty-state">
-                        <i class="bi bi-calendar-x display-4 text-muted mb-3"></i>
-                        <h5 class="text-muted">No se encontraron actividades</h5>
-                        <p class="text-muted mb-0">
-                          {{ esCoordinador ?
-                          'Intenta seleccionar otro asesor o ajustar los filtros' :
-                          'No tienes actividades registradas en este período' }}
-                        </p>
-                        <button class="btn btn-outline-primary mt-3" (click)="limpiarFiltros()">
-                          <i class="bi bi-arrow-clockwise me-1"></i>
-                          Limpiar filtros
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="d-flex align-items-center w-100 justify-content-end">
+              <div
+                class="badge bg-white text-primary-emphasis fw-semibold py-1 py-sm-2 px-2 px-sm-3 rounded-pill me-2 me-sm-3">
+                {{ rolUsuario | titlecase }}
+              </div>
+              <button class="btn btn-light btn-sm rounded-pill" (click)="refrescarAgendas()" title="Actualizar datos">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
             </div>
+          </div>
+        </div>
 
-            <!-- Pie de tabla -->
-            <div class="card-footer bg-white border-top py-3">
-              <div class="d-flex justify-content-between align-items-center">
-                <small class="text-muted">
-                  Mostrando {{ agendasFiltradas.length }} de {{ agendas.length }} actividades
-                </small>
-                <div>
-                  <button class="btn btn-sm btn-outline-primary me-2" (click)="descargarAgendaPDF()">
-                    <i class="bi bi-download me-1"></i> Exportar PDF
-                  </button>
-                  <button class="btn btn-sm btn-outline-success" (click)="generarReporte()">
-                    <i class="bi bi-graph-up me-1"></i> Generar Reporte
-                  </button>
+        <!-- Pestañas de Asesores (solo para coordinadores) -->
+        <div *ngIf="esCoordinador" class="px-2 px-sm-4 pt-3">
+          <div
+            class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-2">
+            <h6 class="text-muted mb-1 mb-sm-0 fs-6">
+              <i class="bi bi-people me-1"></i> Gestión de Asesores
+            </h6>
+            <small class="text-muted">{{ asesores.length || 0 }} asesores</small>
+          </div>
+
+          <!-- Selector de Asesor Mejorado -->
+          <div class="asesor-selector-container">
+            <div class="nav nav-pills asesor-nav flex-nowrap" role="tablist">
+              <button class="nav-link asesor-tab" [class.active]="!asesorSeleccionado"
+                (click)="asesorSeleccionado = ''; filtrarPorAsesor()">
+                <i class="bi bi-people-fill me-1 me-sm-2"></i>
+                <span class="d-none d-sm-inline">Todos</span>
+                <span class="badge rounded-pill ms-1 ms-sm-2" style="background-color: #4e62b4;">{{
+                  agendaCalendario.length }}</span>
+              </button>
+
+              <button *ngFor="let asesor of asesores" class="nav-link asesor-tab"
+                [class.active]="asesorSeleccionado === asesor.usuario"
+                (click)="asesorSeleccionado = asesor.usuario; filtrarPorAsesor()">
+                <i class="bi bi-person me-1 me-sm-2"></i>
+                <span class="d-none d-md-inline">{{ asesor.usuario }}</span>
+                <span class="d-md-none">{{ asesor.usuario | slice:0:3 }}..</span>
+                <span class="badge bg-secondary rounded-pill ms-1 ms-sm-2">
+                  {{ contarAgendasPorAsesor(asesor.usuario) }}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenido Principal - VISTA CALENDARIO -->
+        <div class="card-body p-2 p-sm-4">
+          <!-- CONTROLES DEL CALENDARIO -->
+          <div class="row mb-3 mb-sm-4 g-2 g-sm-3">
+            <div class="col-12">
+              <div class="card bg-light border-0 rounded-3 shadow-sm">
+                <div class="card-body p-2 p-sm-3">
+                  <div class="row align-items-center">
+                    <!-- Navegación de Mes -->
+                    <div class="col-12 col-md-4 mb-2 mb-md-0">
+                      <div class="d-flex align-items-center justify-content-center justify-content-md-start">
+                        <button class="btn btn-outline-secondary btn-sm rounded-circle me-2" (click)="mesAnterior()"
+                          style="border-color: #4e62b4; border-width: 2px;">
+                          <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <h4 class="mb-0 text-center text-md-start fw-bold text-primary-emphasis fs-4 fs-sm-3">
+                          {{ mesActual }} {{ anioActual }}
+                        </h4>
+                        <button class="btn btn-outline-secondary btn-sm rounded-circle ms-2" (click)="mesSiguiente()"
+                          style="border-color: #4e62b4; border-width: 2px; ">
+                          <i class="bi bi-chevron-right"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Selector de Vista -->
+                    <div class="col-12 col-md-4 mb-2 mb-md-0">
+                      <div class="d-flex justify-content-center">
+                        <div class="btn-group btn-group-sm" role="group">
+                          <button class="btn btn-outline-light text-primary-emphasis"
+                            [class.active]="vistaActual === 'mes'" (click)="cambiarVista('mes')"
+                            style="border-color: #4e62b4; border-width: 2px;">
+                            <i class="bi bi-calendar-month"></i>
+                            <span class="d-none d-sm-inline ms-1">Mes</span>
+                          </button>
+                          <button class="btn btn-outline-light text-primary-emphasis"
+                            [class.active]="vistaActual === 'semana'" (click)="cambiarVista('semana')"
+                            style="border-color: #4e62b4; border-width: 2px;">
+                            <i class="bi bi-calendar-week"></i>
+                            <span class="d-none d-sm-inline ms-1">Semana</span>
+                          </button>
+                          <button class="btn btn-outline-light text-primary-emphasis"
+                            [class.active]="vistaActual === 'dia'" (click)="cambiarVista('dia')"
+                            style="border-color: #4e62b4; border-width: 2px;">
+                            <i class="bi bi-calendar-day"></i>
+                            <span class="d-none d-sm-inline ms-1">Día</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Estadísticas Rápidas -->
+                    <div class="col-12 col-md-4">
+                      <div class="d-flex justify-content-center justify-content-md-end">
+                        <div class="text-center me-3">
+                          <div class="fw-bold text-primary-emphasis fs-5">{{ agendaCalendario.length }}</div>
+                          <small class="text-muted">Actividades</small>
+                        </div>
+                        <div class="text-center">
+                          <div class="fw-bold text-success fs-5">{{ actividadesCompletadas }}</div>
+                          <small class="text-muted">Completadas</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FILTROS RÁPIDOS -->
+          <div class="row mb-3 mb-sm-4 g-2 g-sm-3">
+            <div class="col-12">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body p-2 p-sm-3">
+                  <div class="row g-2 g-sm-3">
+                    <!-- Filtro por Código -->
+                    <div class="col-12 col-sm-4 col-md-3">
+                      <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-tag me-1"></i>
+                        Tipo de Actividad
+                      </label>
+                      <select class="form-select form-select-sm" [(ngModel)]="codigoSeleccionado"
+                        (change)="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <option *ngFor="let opcion of opcionesCodigo" [value]="opcion.value">
+                          {{ opcion.texto }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <!-- Filtro por Semana -->
+                    <div class="col-12 col-sm-4 col-md-3">
+                      <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-calendar-week me-1"></i>
+                        Semana
+                      </label>
+                      <select class="form-select form-select-sm" [(ngModel)]="semanaSeleccionada"
+                        (change)="aplicarFiltros()">
+                        <option value="">Todas</option>
+                        <option *ngFor="let semana of semanas" [value]="semana">{{ semana }}</option>
+                      </select>
+                    </div>
+
+                    <!-- Filtro por Estado -->
+                    <div class="col-12 col-sm-4 col-md-3">
+                      <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Estado
+                      </label>
+                      <select class="form-select form-select-sm" [(ngModel)]="estadoSeleccionado"
+                        (change)="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <option value="completada">Completadas</option>
+                        <option value="pendiente">Pendientes</option>
+                        <option value="en-progreso">En Progreso</option>
+                      </select>
+                    </div>
+
+                    <!-- Buscar -->
+                    <div class="col-12 col-md-3">
+                      <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-search me-1"></i>
+                        Buscar
+                      </label>
+                      <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" placeholder="Buscar actividad..." [(ngModel)]="busqueda"
+                          (input)="aplicarFiltros()">
+                        <button class="btn btn-outline-secondary" type="button" (click)="limpiarFiltros()">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- VISTA DE CALENDARIO -->
+          <div class="row">
+            <div class="col-12">
+              <div class="calendar-container">
+                <!-- VISTA MES -->
+                <div *ngIf="vistaActual === 'mes'" class="calendar-view">
+                  <!-- Encabezado de Días -->
+                  <div class="calendar-header">
+                    <div class="calendar-day-header" *ngFor="let dia of diasSemana">
+                      {{ dia }}
+                    </div>
+                  </div>
+
+                  <!-- Cuerpo del Calendario -->
+                  <div class="calendar-body">
+                    <div *ngFor="let semana of semanasDelMes" class="calendar-week">
+                      <div *ngFor="let dia of semana" class="calendar-day" [class.current-month]="dia.mesActual"
+                        [class.today]="dia.hoy" [class.has-activities]="(dia.actividades?.length || 0) > 0"
+                        (click)="seleccionarDia(dia)">
+
+                        <!-- Número del Día -->
+                        <div class="day-number" [class.text-muted]="!dia.mesActual">
+                          {{ dia.numero }}
+                        </div>
+
+                        <!-- Indicador de Actividades -->
+                        <div *ngIf="(dia.actividades?.length || 0) > 0" class="day-activities">
+                          <div class="activity-indicators">
+                            <span *ngFor="let actividad of (dia.actividades || []) | slice:0:3"
+                              class="activity-indicator" [style.background-color]="getColorForCodigo(actividad.codigo)"
+                              [title]="actividad.actividad">
+                            </span>
+                            <span *ngIf="(dia.actividades?.length || 0) > 3" class="activity-count">
+                              +{{ (dia.actividades?.length || 0) - 3 }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- VISTA SEMANA -->
+                <div *ngIf="vistaActual === 'semana'" class="week-view">
+                  <div class="week-header">
+                    <div class="week-day-header" *ngFor="let dia of diasDeLaSemana">
+                      <div class="week-day-name">{{ dia.nombre }}</div>
+                      <div class="week-day-date">{{ dia.fecha | date:'dd' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="week-body">
+                    <div class="time-slots">
+                      <div class="time-slot" *ngFor="let hora of horasDelDia">
+                        <div class="time-label">{{ hora }}</div>
+                        <div class="time-line"></div>
+                      </div>
+                    </div>
+
+                    <div class="week-days">
+                      <div *ngFor="let dia of diasDeLaSemana; let i = index" class="week-day-column">
+                        <div *ngFor="let actividad of getActividadesPorDia(dia.fecha)" class="week-activity"
+                          [style.top]="getPositionTop(actividad.hora)" [style.height]="getHeight(actividad.duracion)"
+                          [style.background-color]="getColorForCodigo(actividad.codigo)"
+                          (click)="seleccionarActividad(actividad)" data-bs-toggle="modal"
+                          data-bs-target="#modalDetallesActividad">
+                          <div class="week-activity-content">
+                            <div class="activity-time small">{{ actividad.hora }}</div>
+                            <div class="activity-title truncate">{{ actividad.actividad | truncate:30 }}</div>
+                            <div class="activity-asesor small" *ngIf="esCoordinador">
+                              {{ actividad.asesor | slice:0:10 }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- VISTA DÍA -->
+                <div *ngIf="vistaActual === 'dia'" class="day-view">
+                  <div class="day-header">
+                    <div class="day-title">
+                      <h5 class="fw-bold">{{ diaSeleccionado?.fecha | date:'fullDate' }}</h5>
+                      <small class="text-muted">{{ diaSeleccionado?.actividades?.length || 0 }} actividades</small>
+                    </div>
+                  </div>
+
+                  <div class="day-timeline">
+                    <div *ngFor="let hora of horasDelDia" class="day-hour">
+                      <div class="hour-label">{{ hora }}</div>
+                      <div class="hour-line"></div>
+                      <div class="hour-activities">
+                        <div *ngFor="let actividad of getActividadesPorHora(diaSeleccionado?.fecha, hora)"
+                          class="day-activity" [style.background-color]="getColorForCodigo(actividad.codigo)"
+                          (click)="seleccionarActividad(actividad)" data-bs-toggle="modal"
+                          data-bs-target="#modalDetallesActividad">
+                          <div class="activity-time">{{ actividad.hora }}</div>
+                          <div class="activity-content">
+                            <div class="activity-title">{{ actividad.actividad | truncate:40 }}</div>
+                            <div class="activity-codigo">{{ actividad.codigo }}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- PANEL LATERAL DE DETALLES -->
+                <div *ngIf="diaSeleccionado" class="calendar-sidebar">
+                  <div class="sidebar-header">
+                    <h6 class="fw-bold mb-0">
+                      <i class="bi bi-calendar3 me-2"></i>
+                      {{ diaSeleccionado.fecha | date:'fullDate' }}
+                    </h6>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="diaSeleccionado = null">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+
+                  <div class="sidebar-content">
+                    <div class="activities-list">
+                      <div *ngFor="let actividad of diaSeleccionado.actividades" class="activity-card"
+                        [class.completed]="actividad.evidencia">
+
+                        <div class="activity-header">
+                          <div class="activity-time">{{ actividad.hora }}</div>
+                          <div class="activity-codigo-badge"
+                            [style.background-color]="getColorForCodigo(actividad.codigo)">
+                            {{ actividad.codigo }}
+                          </div>
+                        </div>
+
+                        <div class="activity-body">
+                          <div class="activity-title">{{ actividad.actividad }}</div>
+                          <div class="activity-domicilio text-muted small">
+                            <i class="bi bi-geo-alt me-1"></i>{{ actividad.domicilio }}
+                          </div>
+
+                          <div *ngIf="actividad.resultado" class="activity-resultado mt-2">
+                            <label class="text-muted small">Resultado:</label>
+                            <div class="resultado-text">{{ actividad.resultado }}</div>
+                          </div>
+                        </div>
+
+                        <div class="activity-footer">
+                          <div class="btn-group btn-group-sm w-100">
+                            <button class="btn btn-outline btn-sm" (click)="seleccionarActividad(actividad)"
+                              data-bs-toggle="modal" data-bs-target="#modalDetallesActividad"
+                              style="border-color: #4e62b4; border-width: 1px">
+                              <i class="bi bi-eye"></i>
+                            </button>
+
+                            <button *ngIf="rolUsuario === 'asesor'" class="btn btn-outline-success btn-sm"
+                              (click)="editarAgenda(actividad)" data-bs-toggle="modal"
+                              data-bs-target="#modalEditarActividad">
+                              <i class="bi bi-pencil"></i>
+                            </button>
+
+                            <button *ngIf="rolUsuario === 'asesor'" type="button" class="btn btn-danger"
+                              (click)="eliminarAgenda(actividad._id)">
+                              <i class="bi bi-trash"></i>
+                            </button>
+
+                            <button *ngIf="rolUsuario === 'coordinador'" type="button" class="btn btn-success"
+                              (click)="validarAgenda(actividad._id)" [disabled]="actividad.validada === 'VALIDADA'">
+                              <i class="bi bi-check"></i>
+                            </button>
+
+                            <!--Boton para rechazar actividad-->
+                            <button *ngIf="rolUsuario === 'coordinador'" type="button" class="btn btn-danger"
+                              (click)="rechazarAgenda(actividad._id)">
+                              <i class="bi bi-x"></i>
+                            </button>
+
+                            <!-- <button *ngIf="rolUsuario === 'asesor'" class="btn btn-outline-info btn-sm"
+                              (click)="agregarEvidencia(actividad)">
+                              <i class="bi bi-camera"></i>
+                            </button> -->
+                          </div>
+                        </div>
+                      </div>
+
+                      <div *ngIf="!diaSeleccionado.actividades?.length" class="empty-day">
+                        <i class="bi bi-calendar-x text-muted fs-1"></i>
+                        <p class="text-muted mt-2 mb-0">No hay actividades para este día</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACCIONES RÁPIDAS -->
+          <div class="row mt-3 mt-sm-4">
+            <div class="col-12">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body p-2 p-sm-3">
+                  <div class="d-flex flex-wrap justify-content-center justify-content-md-between gap-2">
+                    <!-- <button class="btn btn-outline-danger" (click)=" exportarCalendario()">
+                      <i class="bi bi-calendar-plus me-1"></i>
+                      Exportar Calendario
+                    </button> -->
+
+                    <button class="btn btn-outline-success" (click)="descargarAgendaPDF()">
+                      <i class="bi bi-file-earmark-pdf me-1"></i>
+                      Generar PDF
+                    </button>
+
+                    <!-- <button class="btn btn-outline-info" (click)="imprimirCalendario()">
+                      <i class="bi bi-printer me-1"></i>
+                      Imprimir
+                    </button> -->
+
+                    <button class="btn btn-outline-secondary" (click)="hoy()">
+                      <i class="bi bi-calendar-check me-1"></i>
+                      Ir a Hoy
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -498,115 +490,824 @@
       </div>
     </div>
   </div>
+  <!--FORMATO DE LISTA-->
+  <div id="lista" class="tab-pane fade" [class.show]="pestanaActiva === 'lista'"
+    [class.active]="pestanaActiva === 'lista'">
+    <div class="container-fluid mt-3 mb-3 px-0 px-sm-3">
+      <!-- Tarjeta Principal -->
+      <div class="card shadow-lg border-0 rounded-3 overflow-hidden">
+
+        <!-- Encabezado de Usuario -->
+        <div class="card-header text-white py-3 px-2 px-sm-4" style="background-color: #4e62b4;">
+          <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+            <div class="d-flex align-items-center mb-2 mb-sm-0 w-100">
+              <div class="user-avatar me-2 me-sm-3">
+                <i class="bi bi-person-circle fs-1"></i>
+              </div>
+              <div class="flex-grow-1">
+                <h3 class="mb-1 fw-bold fs-5 fs-sm-4">
+                  {{ esCoordinador ? 'Coordinador' : 'Asesor' }} Dashboard
+                </h3>
+                <div class="d-flex flex-wrap align-items-center">
+                  <p class="mb-0 opacity-75 small me-2">
+                    <i class="bi bi-person me-1"></i>
+                    {{ usuarioActual }}
+                  </p>
+                  <span class="mx-1 d-none d-sm-inline">•</span>
+                  <p class="mb-0 opacity-75 small">
+                    <i class="bi bi-calendar-check me-1"></i>
+                    {{ agendasFiltradas.length }} actividades
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center w-100 justify-content-end">
+              <div
+                class="badge bg-white text-primary-emphasis fw-semibold py-1 py-sm-2 px-2 px-sm-3 rounded-pill me-2 me-sm-3">
+                {{ rolUsuario | titlecase }}
+              </div>
+              <button class="btn btn-light btn-sm rounded-pill" (click)="refrescarAgendas()" title="Actualizar datos">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pestañas de Asesores (solo para coordinadores) -->
+        <div *ngIf="esCoordinador" class="px-2 px-sm-4 pt-3">
+          <div
+            class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-2">
+            <h6 class="text-muted mb-1 mb-sm-0 fs-6">
+              <i class="bi bi-people me-1"></i> Gestión de Asesores
+            </h6>
+            <small class="text-muted">{{ asesores.length || 0 }} asesores</small>
+          </div>
+
+          <!-- Selector de Asesor Mejorado -->
+          <div class="asesor-selector-container">
+            <div class="nav nav-pills asesor-nav flex-nowrap" role="tablist">
+              <button class="nav-link asesor-tab" [class.active]="!asesorSeleccionado"
+                (click)="asesorSeleccionado = ''; filtrarPorAsesor()">
+                <i class="bi bi-people-fill me-1 me-sm-2"></i>
+                <span class="d-none d-sm-inline">Todos</span>
+                <span class="badge rounded-pill ms-1 ms-sm-2" style="background-color: #4e62b4;">{{ agendas.length
+                  }}</span>
+              </button>
+
+              <button *ngFor="let asesor of asesores" class="nav-link asesor-tab"
+                [class.active]="asesorSeleccionado === asesor.usuario"
+                (click)="asesorSeleccionado = asesor.usuario; filtrarPorAsesor()">
+                <i class="bi bi-person me-1 me-sm-2"></i>
+                <span class="d-none d-md-inline">{{ asesor.usuario }}</span>
+                <span class="d-md-none">{{ asesor.usuario | slice:0:3 }}..</span>
+                <span class="badge bg-secondary rounded-pill ms-1 ms-sm-2">
+                  {{ contarAgendasPorAsesor(asesor.usuario) }}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="card-body p-2 p-sm-4">
+          <!-- SECCIÓN DE ESTADÍSTICAS RÁPIDAS -->
+          <div class="row mb-3 mb-sm-4 g-2 g-sm-3">
+            <div class="col-12">
+              <div class="card bg-light border-0 rounded-3 shadow-sm">
+                <div class="card-body p-2 p-sm-3">
+                  <div class="row g-2 g-sm-3">
+                    <!-- Total Actividades -->
+                    <div class="col-12 col-sm-6 col-md-3 mb-2 mb-md-0">
+                      <div class="d-flex align-items-center">
+                        <div class="stats-icon bg-gradient rounded-circle p-2 p-sm-3 me-2 me-sm-3"
+                          style="background-color: #4e62b4;">
+                          <i class="bi bi-calendar-check text-white fs-5 fs-sm-4"></i>
+                        </div>
+                        <div>
+                          <h6 class="mb-0 text-muted small">Total Actividades</h6>
+                          <h3 class="mb-0 fw-bold text-dark fs-4 fs-sm-3">{{ agendasFiltradas.length }}</h3>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN DE REPORTES -->
+          <div class="row mb-3 mb-sm-4" *ngIf="rolUsuario === 'coordinador'">
+            <div class="col-12">
+              <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-2 py-sm-3">
+                  <h5 class="mb-0 fs-6 fs-sm-5">
+                    <i class="bi bi-graph-up me-2 text-primary"></i>
+                    Generar Reportes
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <div class="row g-2 g-sm-3">
+                    <!-- Tipo de Reporte -->
+                    <div class="col-12 col-md-8">
+                      <label class="form-label fw-semibold small">
+                        <i class="bi bi-funnel me-1"></i>
+                        Tipo de Reporte
+                      </label>
+                      <div class="btn-group-outline-primary w-100 flex-wrap" role="group">
+                        <button *ngFor="let tipo of tiposReporte" type="button" class="btn btn-outline mb-1 me-1"
+                          [class.active]="tipoReporteSeleccionado === tipo.id"
+                          (click)="tipoReporteSeleccionado = tipo.id">
+                          <i class="bi me-1 me-sm-2" [class]="getIconForReport(tipo.id)"></i>
+                          <span class="d-none d-sm-inline">{{ tipo.nombre }}</span>
+                          <span class="d-sm-none">{{ tipo.nombre | slice:0:3 }}..</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Botón Generar -->
+                    <div class="col-12 col-md-4 d-flex align-items-end">
+                      <button class="btn btn w-100 py-2 py-sm-3 text-white" (click)="generarReporte()"
+                        style="background-color: #1a3c60;">
+                        <i class="bi bi-file-earmark-pdf-fill me-1 me-sm-2"></i>
+                        <span class="d-none d-sm-inline">Generar Reporte</span>
+                        <span class="d-sm-none">Reporte</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Vista Previa de Estadísticas -->
+                  <div *ngIf="estadisticas" class="mt-3 mt-sm-4">
+                    <h6 class="text-muted mb-2 mb-sm-3 small">
+                      <i class="bi bi-bar-chart me-1"></i>
+                      Vista Previa
+                    </h6>
+                    <div class="row g-2 g-sm-3">
+                      <!-- Distribución por Códigos -->
+                      <div class="col-12 col-md-6 mb-3 mb-md-0">
+                        <div class="card border-0 bg-gradient-light h-100">
+                          <div class="card-body">
+                            <h6 class="card-title text-primary-emphasis small">
+                              <i class="bi bi-tag me-1"></i>
+                              Por Códigos
+                            </h6>
+                            <div class="mt-2 mt-sm-3">
+                              <div *ngFor="let item of getTopCodigos(estadisticas.actividadesPorCodigo, 5)"
+                                class="mb-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                  <span class="text-muted small">{{ item[0] }}</span>
+                                  <span class="fw-bold">{{ item[1] }}</span>
+                                </div>
+                                <div class="progress" style="height: 4px;">
+                                  <div class="progress-bar bg-primary"
+                                    [style.width]="(item[1] / estadisticas.totalActividades * 100) + '%'"
+                                    role="progressbar">
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Completitud General -->
+                      <div class="col-12 col-md-6">
+                        <div class="card border-0 bg-gradient-light h-100">
+                          <div class="card-body">
+                            <h6 class="card-title text-primary small">
+                              <i class="bi bi-speedometer2 me-1"></i>
+                              Completitud
+                            </h6>
+                            <div class="text-center py-3 py-sm-4">
+                              <div class="progress-circle mx-auto"
+                                [style.background]="'conic-gradient(#4CAF50 ' + estadisticas.porcentajeCompletitud + '%, #e0e0e0 0)'">
+                                <span class="progress-value fw-bold">{{ estadisticas.porcentajeCompletitud }}%</span>
+                              </div>
+                              <p class="text-muted mt-2 mt-sm-3 mb-0 small">
+                                {{ estadisticas.actividadesConEvidencia }} de {{ estadisticas.totalActividades }}
+                                actividades
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN DE FILTROS Y TABLA -->
+          <div class="row">
+            <div class="col-12">
+              <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-2 py-sm-3">
+                  <div
+                    class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                    <h5 class="mb-1 mb-sm-0 fs-6 fs-sm-5">
+                      <i class="bi bi-table me-2 text-primary"></i>
+                      {{ esCoordinador ? 'Seguimiento' : 'Mis Actividades' }}
+                    </h5>
+                    <div class="d-flex align-items-center w-100 justify-content-sm-end">
+                      <span class="badge bg-primary rounded-pill me-2 me-sm-3 small">
+                        {{ agendasFiltradas.length }}
+                      </span>
+                      <div class="btn-group btn-group-sm" role="group">
+                        <button class="btn btn-outline-primary" (click)="aplicarFiltros()">
+                          <i class="bi bi-funnel"></i>
+                          <span class="d-none d-sm-inline ms-1">Aplicar</span>
+                        </button>
+                        <button class="btn btn-outline-secondary" (click)="limpiarFiltros()">
+                          <i class="bi bi-x-circle"></i>
+                          <span class="d-none d-sm-inline ms-1">Limpiar</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Filtros Avanzados -->
+                <div class="card-body border-bottom">
+                  <div class="row g-2 g-sm-3">
+                    <!-- Mes -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                      <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-calendar-month me-1"></i>
+                        Mes
+                      </label>
+                      <select class="form-select form-select-sm" [(ngModel)]="mesSeleccionado">
+                        <option value="">Todos</option>
+                        <option *ngFor="let mes of meses" [value]="mes">{{ mes }}</option>
+                      </select>
+                    </div>
+
+                    <!-- Semana -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                      <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-calendar-week me-1"></i>
+                        Semana
+                      </label>
+                      <select class="form-select form-select-sm" [(ngModel)]="semanaSeleccionada">
+                        <option value="">Todas</option>
+                        <option *ngFor="let semana of semanas" [value]="semana">{{ semana }}</option>
+                      </select>
+                    </div>
+
+                    <!-- Código -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                      <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-tag me-1"></i>
+                        Código
+                      </label>
+                      <select class="form-select form-select-sm" [(ngModel)]="codigoSeleccionado">
+                        <option value="">Todos</option>
+                        <option *ngFor="let opcion of opcionesCodigo" [value]="opcion.value">
+                          {{ opcion.texto }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <!-- Fecha Inicio -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                      <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-calendar-range me-1"></i>
+                        Fecha Inicio
+                      </label>
+                      <input type="date" class="form-control form-control-sm" [(ngModel)]="filtroFechaInicio"
+                        (change)="aplicarFiltros()">
+                    </div>
+
+                    <!-- Fecha Fin -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                      <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-calendar-range-fill me-1"></i>
+                        Fecha Fin
+                      </label>
+                      <input type="date" class="form-control form-control-sm" [(ngModel)]="filtroFechaFin"
+                        (change)="aplicarFiltros()">
+                    </div>
+
+                    <!-- Buscar -->
+                    <div class="col-12 col-sm-6">
+                      <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-search me-1"></i>
+                        Buscar
+                      </label>
+                      <input type="text" class="form-control form-control-sm" placeholder="Buscar actividad..."
+                        [(ngModel)]="busqueda" (input)="aplicarFiltros()">
+                    </div>
+
+                    <!-- Asesor (solo coordinadores) -->
+                    <div *ngIf="esCoordinador" class="col-12 col-sm-6">
+                      <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-person me-1"></i>
+                        Asesor
+                      </label>
+                      <select class="form-select form-select-sm" [(ngModel)]="asesorSeleccionado"
+                        (change)="filtrarPorAsesor()">
+                        <option value="">Todos</option>
+                        <option *ngFor="let asesor of asesores" [value]="asesor.usuario">
+                          {{ asesor.usuario }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tabla de Actividades -->
+                <div class="table-responsive" style="max-height: 400px;">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table table-dark sticky-top">
+                      <tr>
+                        <th *ngIf="esCoordinador" class="text-center d-none d-sm-table-cell">
+                          <i class="bi bi-person"></i>
+                          <span class="d-none d-md-inline"> Asesor</span>
+                        </th>
+                        <th class="text-center">
+                          <i class="bi bi-calendar"></i>
+                        </th>
+                        <th class="text-center d-none d-sm-table-cell">
+                          <i class="bi bi-clock"></i>
+                        </th>
+                        <th class="text-center d-none d-md-table-cell">
+                          <i class="bi bi-geo-alt"></i>
+                        </th>
+                        <th>
+                          <i class="bi bi-list-task"></i>
+                          <span class="d-none d-sm-inline"> Actividad</span>
+                        </th>
+                        <th class="text-center">
+                          <i class="bi bi-tag"></i>
+                        </th>
+                        <th class="text-center d-none d-lg-table-cell">
+                          <i class="bi bi-check-circle"></i>
+                        </th>
+                        <th class="text-center" style="width: 100px;">
+                          <i class="bi bi-gear"></i>
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <tr *ngFor="let agenda of agendasFiltradas" class="border-bottom hover-row"
+                        [class.table-light]="agenda.validada === 'PENDIENTE'"
+                        [class.table-success]="agenda.validada === 'VALIDADA'"
+                        [class.table-danger]="agenda.validada === 'RECHAZADA'">
+
+                        <!-- Asesor (solo en desktop) -->
+                        <td *ngIf="esCoordinador" class="text-center d-none d-sm-table-cell">
+                          <span class="badge bg-info bg-gradient rounded-pill py-1 px-2 small">
+                            {{ agenda.asesor || agenda.coordinador | slice:0:10 }}
+                          </span>
+                        </td>
+
+                        <!-- Fecha -->
+                        <td class="text-center">
+                          <div class="date-badge small">
+                            <div class="date-day fw-bold text-primary">{{ agenda.fecha | date:'dd':'UTC' }}</div>
+                            <div class="date-month">{{ agenda.fecha | date:'MMM':'UTC' }}</div>
+                          </div>
+                        </td>
+
+                        <!-- Hora (solo en desktop) -->
+                        <td class="text-center d-none d-sm-table-cell">
+                          <span class="time-badge small">{{ agenda.hora }}</span>
+                        </td>
+
+                        <!-- Domicilio (solo en desktop) -->
+                        <td class="text-center d-none d-md-table-cell">
+                          <div class="truncate-text" [title]="agenda.domicilio">
+                            {{ agenda.domicilio | truncate:20 }}
+                          </div>
+                        </td>
+
+                        <!-- Actividad -->
+                        <td>
+                          <div class="truncate-text" [title]="agenda.actividad">
+                            {{ agenda.actividad | truncate:30 }}
+                          </div>
+                          <div class="d-block d-sm-none small text-muted mt-1">
+                            <i class="bi bi-clock me-1"></i>{{ agenda.hora }}
+                            <span class="mx-2">•</span>
+                            <i class="bi bi-geo-alt me-1"></i>{{ agenda.domicilio | truncate:15 }}
+                          </div>
+                        </td>
+
+                        <!-- Código -->
+                        <td class="text-center">
+                          <span class="badge bg-warning text-dark py-1 px-2 small">
+                            {{ agenda.codigo }}
+                          </span>
+                        </td>
+
+                        <!-- Resultado (solo en desktop) -->
+                        <td class="text-center d-none d-lg-table-cell">
+                          <textarea class="form-control form-control-sm border-primary" rows="1"
+                            [(ngModel)]="agenda.resultado" placeholder="Resultados..." (focus)="agenda.editing = true"
+                            (blur)="agenda.editing = false">
+                      </textarea>
+                        </td>
+
+                        <!-- Acciones -->
+                        <td class="text-center">
+                          <div class="btn-group btn-group-sm" role="group">
+
+                            <button *ngIf="rolUsuario === 'asesor'" type="button" class="btn btn-primary"
+                              (click)="guardarCambios(agenda)" [disabled]="!agenda.resultado && !agenda.evidencia"
+                              title="Guardar">
+                              <i class="bi bi-save"></i>
+                            </button>
+
+                            <button *ngIf="rolUsuario === 'asesor'" type="button" class="btn btn-success"
+                              (click)="editarAgenda(agenda)" data-bs-toggle="modal"
+                              data-bs-target="#modalEditarActividad" title="Editar">
+                              <i class="bi bi-pencil"></i>
+                            </button>
+
+
+
+                            <button *ngIf="rolUsuario === 'coordinador'" type="button" class="btn btn-success"
+                              (click)="validarAgenda(agenda._id)" [disabled]="agenda.validada === 'VALIDADA'">
+                              <i class="bi bi-check"></i>
+                            </button>
+
+                            <!--Boton para rechazar actividad-->
+                            <button *ngIf="rolUsuario === 'coordinador'" type="button" class="btn btn-danger"
+                              (click)="rechazarAgenda(agenda._id)" [disabled]="agenda.validada === 'RECHAZADA'">
+                              <i class="bi bi-x"></i>
+                            </button>
+                            <button type="button" class="btn btn-info" data-bs-toggle="modal"
+                              data-bs-target="#modalDetallesActividad" (click)="seleccionarActividad(agenda)"
+                              title="Ver">
+                              <i class="bi bi-eye"></i>
+                            </button>
+                            <button *ngIf="rolUsuario === 'asesor'" type="button" class="btn btn-danger"
+                              (click)="eliminarAgenda(agenda._id)">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <!-- Sin datos -->
+                      <tr *ngIf="!agendasFiltradas.length">
+                        <td [attr.colspan]="esCoordinador ? 7 : 6" class="text-center py-4">
+                          <div class="empty-state">
+                            <i class="bi bi-calendar-x fs-1 text-muted mb-2"></i>
+                            <h6 class="text-muted">No se encontraron actividades</h6>
+                            <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
+                              <i class="bi bi-arrow-clockwise me-1"></i>
+                              Limpiar filtros
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Pie de tabla -->
+                <div class="card-footer bg-white border-top py-2 py-sm-3">
+                  <div
+                    class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                    <small class="text-muted mb-1 mb-sm-0 small">
+                      {{ agendasFiltradas.length }} de {{ agendas.length }} actividades
+                    </small>
+                    <div>
+                      <button class="btn btn-sm btn-outline-primary me-1 me-sm-2" (click)="descargarAgendaPDF()">
+                        <i class="bi bi-download me-1"></i>
+                        <span class="d-none d-sm-inline">Descargar Agenda en PDF</span>
+                      </button>
+                      <!-- <button class="btn btn-sm btn-outline-success" (click)="generarReporte()">
+                    <i class="bi bi-graph-up me-1"></i>
+                    <span class="d-none d-sm-inline">Reporte</span>
+                  </button> -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--Listar actividades rechazadas por coordinador-->
+  <div id="rechazadas" class="tab-pane fade" [class.show]="pestanaActiva === 'rechazadas'"
+    [class.active]="pestanaActiva === 'rechazadas'">
+    <div class="card border-left-danger shadow-sm">
+      <div class="card-header bg-danger bg-opacity-10 border-danger">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title mb-0">
+              <i class="bi bi-x-circle-fill text-danger me-2"></i>
+              Actividades Rechazadas
+            </h5>
+            <p class="card-text text-muted mb-0">
+              Listado de actividades rechazadas por el coordinador.
+            </p>
+          </div>
+          <span class="badge bg-danger" [class.blinking]="agendasRechazadas.length > 0">
+            {{ agendasRechazadas.length }} {{ agendasRechazadas.length === 1 ? 'rechazada' : 'rechazadas' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4">Fecha</th>
+                <th>Asesor</th>
+                <th>Actividad</th>
+                <th>Motivo de Rechazo</th>
+                <th>Rechazado por</th>
+                <th class="text-center pe-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let agenda of agendasRechazadas" class="border-start border-4 border-danger align-middle">
+                <td class="ps-4">
+                  <div class="fw-semibold">{{ agenda.fecha | date:'dd/MM/yyyy' }}</div>
+                  <small class="text-muted">{{ agenda.fecha | date:'EEEE' }}</small>
+                </td>
+
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="avatar-sm me-2">
+                      <div class="avatar-title bg-primary bg-opacity-10 text-primary rounded-circle">
+                        {{ agenda.asesor?.charAt(0) || 'A' }}
+                      </div>
+                    </div>
+                    <span>{{ agenda.asesor }}</span>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="fw-medium">{{ agenda.actividad }}</div>
+                  <small class="text-muted" *ngIf="agenda.detalle">
+                    {{ agenda.detalle | truncate:30 }}
+                  </small>
+                </td>
+
+                <td>
+                  <div class="card bg-danger bg-opacity-5 border-danger border-opacity-25">
+                    <div class="card-body py-2 px-3">
+                      <div class="d-flex align-items-start">
+                        <i class="bi bi-exclamation-triangle-fill text-warning  mt-1 me-2"></i>
+                        <div>
+                          <div class="fw-medium text-dark">{{ agenda.motivoRechazo }}</div>
+                          <small class="text-muted" *ngIf="agenda.fechaRechazo">
+                            {{ agenda.fechaRechazo | date:'dd/MM/yyyy HH:mm' }}
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="d-flex align-items-center">
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                      <i class="bi bi-person-fill me-1"></i>
+                      {{ agenda.validadaPor }}
+                    </span>
+                  </div>
+                </td>
+
+                <td class="text-center pe-4">
+                  <div class="btn-group btn-group-sm" role="group">
+                    <!-- Ver detalles -->
+                    <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                      data-bs-target="#modalDetallesActividad" (click)="seleccionarActividad(agenda)"
+                      title="Ver detalles">
+                      <i class="bi bi-eye"></i>
+                    </button>
+
+                    <!-- Acciones para asesor -->
+                    <ng-container *ngIf="rolUsuario === 'asesor'">
+                      <button type="button" class="btn btn-outline-success" (click)="editarAgenda(agenda)"
+                        data-bs-toggle="modal" data-bs-target="#modalEditarActividad" title="Editar actividad">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+
+                      <button type="button" class="btn btn-outline-danger" (click)="eliminarAgenda(agenda._id)"
+                        title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </ng-container>
+
+                    <!-- Acciones para coordinador -->
+                    <ng-container *ngIf="rolUsuario === 'coordinador'">
+                      <button type="button" class="btn btn-outline-success" (click)="validarAgenda(agenda._id)"
+                        [disabled]="agenda.validada === 'VALIDADA'" title="Validar actividad">
+                        <i class="bi bi-check-lg"></i>
+                      </button>
+
+                      <button type="button" class="btn btn-outline-danger" (click)="rechazarAgenda(agenda._id)"
+                        title="Rechazar">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </ng-container>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Estado vacío -->
+              <tr *ngIf="!agendasRechazadas.length">
+                <td [attr.colspan]="6" class="text-center py-5">
+                  <div class="empty-state">
+                    <div class="empty-state-icon mb-3">
+                      <i class="bi bi-check-circle-fill fs-1 text-success opacity-25"></i>
+                    </div>
+                    <h5 class="text-muted">¡Excelente! No hay actividades rechazadas</h5>
+                    <p class="text-muted mb-3">
+                      Todas las actividades han sido validadas o están pendientes de revisión.
+                    </p>
+                    <button class="btn btn-outline-primary" (click)="limpiarFiltros()">
+                      <i class="bi bi-arrow-clockwise me-1"></i>
+                      Actualizar lista
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pie de tabla con información -->
+      <div class="card-footer bg-light text-muted py-2" *ngIf="agendasRechazadas.length">
+        <div class="d-flex justify-content-between align-items-center">
+          <small>
+            <i class="bi bi-info-circle me-1"></i>
+            Las actividades rechazadas pueden ser editadas por el asesor para su reenvío.
+          </small>
+          <small>
+            Mostrando {{ agendasRechazadas.length }} actividad{{ agendasRechazadas.length !== 1 ? 'es' : '' }}
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- Modal de Detalles -->
-<div class="modal fade" id="editarActividad" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+
+<!-- Modal de Detalles (actualizado) -->
+<div class="modal fade" id="modalDetallesActividad" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content border-0 shadow-lg">
-      <div class="modal-header bg-gradient-primary text-white">
-        <h5 class="modal-title">
-          <i class="bi bi-info-circle me-2"></i>
+      <div class="modal-header bg-gradient-primary text-primary-emphasis">
+        <h5 class=" modal-title fs-6 fs-sm-5">
+          <i class="bi bi-calendar-event me-2"></i>
           Detalles de Actividad
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
 
       <div class="modal-body" *ngIf="actividadSeleccionada">
-        <div class="row">
+        <div class="row g-3">
           <!-- Información Principal -->
-          <div class="col-md-6">
-            <div class="info-card mb-4">
-              <h6 class="text-primary mb-3">
-                <i class="bi bi-info-circle me-2"></i>
-                Información General
-              </h6>
-              <div class="info-item mb-3">
-                <label class="text-muted small">Asesor</label>
-                <div class="fw-bold">{{ actividadSeleccionada.asesor }}</div>
-              </div>
-              <div class="info-item mb-3">
-                <label class="text-muted small">Fecha y Hora</label>
-                <div class="fw-bold">
-                  {{ actividadSeleccionada.fecha | date:'fullDate':'UTC' }}
-                  a las {{ actividadSeleccionada.hora }}
+          <div class="col-12 col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+              <div class="card-body">
+                <h6 class="card-title text-primary mb-3">
+                  <i class="bi bi-info-circle me-2"></i>
+                  Información General
+                </h6>
+
+                <div class="info-grid">
+                  <div class="info-item">
+                    <label class="text-muted small">Asesor</label>
+                    <div class="fw-bold">{{ actividadSeleccionada.asesor }}</div>
+                  </div>
+
+                  <div class="info-item">
+                    <label class="text-muted small">Fecha</label>
+                    <div class="fw-bold">{{ actividadSeleccionada.fecha | date:'fullDate' }}</div>
+                  </div>
+
+                  <div class="info-item">
+                    <label class="text-muted small">Hora</label>
+                    <div class="fw-bold">{{ actividadSeleccionada.hora }}</div>
+                  </div>
+
+                  <div class="info-item">
+                    <label class="text-muted small">Código</label>
+                    <div class="badge" [style.background-color]="getColorForCodigo(actividadSeleccionada.codigo)">
+                      {{ actividadSeleccionada.codigo }}
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="info-item mb-3">
-                <label class="text-muted small">Código</label>
+            </div>
+          </div>
+
+          <!-- Detalles de la Actividad -->
+          <div class="col-12 col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+              <div class="card-body">
+                <h6 class="card-title text-primary mb-3">
+                  <i class="bi bi-card-checklist me-2"></i>
+                  Detalles
+                </h6>
+
+                <div class="mb-3">
+                  <label class="text-muted small">Actividad</label>
+                  <div class="fw-bold">{{ actividadSeleccionada.actividad }}</div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-muted small">Dirección</label>
+                  <div class="fw-bold">
+                    <i class="bi bi-geo-alt me-1"></i>
+                    {{ actividadSeleccionada.domicilio }}
+                  </div>
+                </div>
+
                 <div>
-                  <span class="badge bg-warning py-2 px-3">
-                    {{ actividadSeleccionada.codigo }}
-                  </span>
+                  <label class="text-muted small">Resultados</label>
+                  <div class="p-3 bg-light rounded">
+                    {{ actividadSeleccionada.resultado || 'Sin resultados registrados' }}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-
-          <!-- Detalles Adicionales -->
-          <div class="col-md-6">
-            <div class="info-card mb-4">
-              <h6 class="text-primary mb-3">
-                <i class="bi bi-geo-alt me-2"></i>
-                Ubicación
-              </h6>
-              <div class="info-item">
-                <label class="text-muted small">Domicilio</label>
-                <div class="fw-bold">{{ actividadSeleccionada.domicilio }}</div>
-              </div>
-            </div>
-
-            <div class="info-card">
-              <h6 class="text-primary mb-3">
-                <i class="bi bi-card-checklist me-2"></i>
-                Resultados
-              </h6>
-              <div class="info-item">
-                <label class="text-muted small">Actividad Realizada</label>
-                <div class="fw-bold">{{ actividadSeleccionada.actividad }}</div>
-              </div>
-              <div class="info-item mt-3">
-                <label class="text-muted small">Resultados Obtenidos</label>
-                <div class="resultado-text p-3 bg-light rounded">
-                  {{ actividadSeleccionada.resultado || 'Sin resultado registrado' }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Evidencia -->
-          <!-- <div class="col-12 mt-4">
-            <div class="info-card">
-              <h6 class="text-primary mb-3">
-                <i class="bi bi-paperclip me-2"></i>
-                Evidencia
-              </h6>
-              <div *ngIf="actividadSeleccionada.evidencia" class="text-center">
-                <img *ngIf="esImagen(actividadSeleccionada.evidencia)"
-                  [src]="getUrlEvidencia(actividadSeleccionada.evidencia)" class="img-fluid rounded border shadow-sm"
-                  style="max-height: 300px;">
-                <div *ngIf="!esImagen(actividadSeleccionada.evidencia)" class="p-4 bg-light rounded">
-                  <i class="bi bi-file-earmark-pdf display-4 text-danger"></i>
-                  <p class="mt-3">Documento PDF adjunto</p>
-                  <a [href]="getUrlEvidencia(actividadSeleccionada.evidencia)" target="_blank" class="btn btn-danger">
-                    <i class="bi bi-download me-1"></i> Descargar
-                  </a>
-                </div>
-              </div>
-               <div *ngIf="!actividadSeleccionada.evidencia" class="text-center py-4 text-muted">
-                <i class="bi bi-file-earmark-excel display-4"></i>
-                <p class="mt-2">No hay evidencia registrada</p>
-              </div>
-        </div>
-      </div> -->
         </div>
       </div>
 
       <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+        <button *ngIf="rolUsuario === 'asesor' && actividadSeleccionada" type="button" class="btn btn-primary"
+          data-bs-dismiss="modal" (click)="editarAgenda(actividadSeleccionada)" data-bs-toggle="modal"
+          data-bs-target="#modalEditarActividad">
+          <i class="bi bi-pencil me-1"></i>
+          Editar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para editar actividad -->
+<div class="modal fade" id="modalEditarActividad" tabindex="-1" aria-labelledby="modalEditarActividadLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalEditarActividadLabel">Editar Actividad</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" *ngIf="actividadSeleccionada">
+        <div class="row">
+          <div class="col-12">
+            <div class="info-card">
+              <h6 class="text-primary mb-3">
+                <i class="bi bi-info-circle me-2"></i>
+                Información de la actividad
+              </h6>
+              <div class="row">
+                <div class="col-12">
+                  <div class="form-group mb-3">
+                    <label for="fecha">Fecha</label>
+                    <input type="date" class="form-control" id="fecha" [(ngModel)]="actividadSeleccionada.fecha">
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="hora">Hora</label>
+                    <input type="time" class="form-control" id="hora" [(ngModel)]="actividadSeleccionada.hora">
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="actividad">Actividad</label>
+                    <input type="text" class="form-control" id="actividad"
+                      [(ngModel)]="actividadSeleccionada.actividad">
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="codigo">Código</label>
+                    <select class="form-control" id="codigo" [(ngModel)]="actividadSeleccionada.codigo">
+                      <option *ngFor="let opcion of opcionesCodigo" [value]="opcion.value">{{ opcion.texto }}</option>
+                    </select>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="resultado">Resultado</label>
+                    <input type="text" class="form-control" id="resultado"
+                      [(ngModel)]="actividadSeleccionada.resultado">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
           Cerrar
         </button>
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
+          (click)="guardarCambios(actividadSeleccionada)">
           <i class="bi bi-check-circle me-1"></i>
           Aceptar
         </button>

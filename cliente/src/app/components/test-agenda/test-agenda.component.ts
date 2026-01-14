@@ -20,6 +20,12 @@ interface Agenda {
   asesor: string;
   coordinador?: string;
   evidencia: string;
+  duracion?: number;
+  validada?: string;
+  motivoRechazo?: string;
+  validadaPor?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 interface EstadisticasReporte {
@@ -37,6 +43,14 @@ interface Asesor {
   usuario: string;
   coordinacion: string;
 }
+
+interface CalendarDay {
+  numero: number | string;
+  fecha?: Date;
+  mesActual: boolean;
+  hoy?: boolean;
+  actividades?: Agenda[];
+}
 @Component({
   selector: 'app-test-agenda',
   standalone: false,
@@ -46,10 +60,16 @@ interface Asesor {
 export class TestAgendaComponent {
   agendas: any[] = [];
   agendasFiltradas: any[] = [];
+
+  get agendasRechazadas() {
+    return this.agendasFiltradas.filter(a => a.validada === 'RECHAZADA');
+  }
+
   estaLogueado: boolean = true;
   private authSubscription!: Subscription;
   rolUsuario = '';
   esCoordinador = false;
+  pestanaActiva: string = 'calendario';
   estadisticas: EstadisticasReporte | null = null;
 
 
@@ -57,7 +77,7 @@ export class TestAgendaComponent {
   tiposReporte = [
     { id: 'completo', nombre: 'Reporte Completo' },
     { id: 'estadisticas', nombre: 'Estadísticas Generales' },
-    { id: 'evidencias', nombre: 'Actividades con Evidencias' },
+    //{ id: 'evidencias', nombre: 'Actividades con Evidencias' },
     { id: 'codigos', nombre: 'Análisis por Códigos' },
     { id: 'asesores', nombre: 'Reporte por Asesores' },
     { id: 'pendientes', nombre: 'Actividades Pendientes' }
@@ -70,51 +90,83 @@ export class TestAgendaComponent {
   semanas: string[] = [];
   diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   opcionesCodigo = [
-    { value: 'R', texto: 'R', descripcion: 'Pago' },
-    { value: 'RP', texto: 'R/P', descripcion: 'Pago / Levantamiento de papeleria' },
-    { value: 'C', texto: 'C', descripcion: 'Cobranza' },
-    { value: 'VTA', texto: 'VTA', descripcion: 'Promoción' },
-    { value: 'REC', texto: 'R/EC', descripcion: 'Pago / Entrega / Cambio ciclo' },
-    { value: 'RER', texto: 'R/ER', descripcion: 'Pago / Entrega / Refill' },
-    { value: 'GN', texto: 'GN', descripcion: 'Grupo nuevo' },
-
+    { value: 'R', texto: 'R | Recuperación', descripcion: 'Recuperación' },
+    { value: 'RP', texto: 'R/P | Recuperación / levantamiento de papelería', descripcion: 'Recuperación / levantamiento de papelería' },
+    { value: 'LPI', texto: 'Levantamiento papelería individuales', descripcion: 'Levantamiento papelería individuales' },
+    { value: 'RPI', texto: 'Recuperación de levantaiento de papelería', descripcion: 'Recuperación de levantaiento de papelería' },
+    { value: 'C', texto: 'C | Cobranza', descripcion: 'Cobranza' },
+    { value: 'VTA', texto: 'VTA | Promoción', descripcion: 'Promoción' },
+    { value: 'REC', texto: 'R/EC | Recuperación / Entrega / Cambio ciclo', descripcion: 'Recuperación / Entrega / Cambio ciclo' },
+    { value: 'RER', texto: 'R/ER | Recuperación / Entrega / Refil', descripcion: 'Recuperación / Entrega / Refil' },
+    { value: 'GN', texto: 'GN | Grupos nuevos', descripcion: 'Grupos nuevos' },
+    { value: 'COMIDA', texto: 'COMIDA', descripcion: 'COMIDA' },
+    { value: 'ASEO', texto: 'ASEO', descripcion: 'ASEO' },
+    { value: 'RS', texto: 'RS | Reunión Semanal', descripcion: 'Reunión Semanal' },
+    { value: 'INT', texto: 'INT | Integración', descripcion: 'Integración' },
+    { value: 'CM', texto: 'CM | Capacitación Manual', descripcion: 'Capacitación Manual' },
+    { value: 'ED', texto: 'ED | Entrega Depósitos', descripcion: 'Entrega Depósitos' },
+    { value: 'EOP', texto: 'EOP | Entrega Operativos', descripcion: 'Entrega Operativos' },
+    { value: 'R/A', texto: 'RA | Realizar Agenda y Concentrado', descripcion: 'Realizar Agenda y Concentrado' },
+    //{ value: 'CC', texto: 'RA | Realizar Agenda y Concentrado' },
+    { value: 'OTRO', texto: 'OTRO | Otro', descripcion: 'Otro' }
   ];
 
   mesSeleccionado: string = '';
   semanaSeleccionada: string = '';
-  diaSeleccionado: string = '';
+  diaSeleccionado: any = null;
   codigoSeleccionado: string = '';
+  estadoSeleccionado: string = '';
   usuarioActual: any;
   asesores: Asesor[] = [];
   asesorSeleccionado: string = '';
   actividadSeleccionada: Agenda | null = null;
+  busqueda: string = '';
+  fechaSeleccionada: string = '';
+  filtroFechaInicio: string = '';
+  filtroFechaFin: string = '';
 
+  // ===== PROPIEDADES DEL CALENDARIO =====
+  agendaCalendario: Agenda[] = [];
+  vistaActual: 'mes' | 'semana' | 'dia' = 'mes';
+  fechaActual: Date = new Date();
+  mesActual: string = '';
+  anioActual: number = new Date().getFullYear();
+  semanasDelMes: CalendarDay[][] = [];
+  diasDeLaSemana: any[] = [];
+  horasDelDia: string[] = Array.from({ length: 13 }, (_, i) => `${i + 8}:00`); // 8:00 a 20:00
+  actividadesCompletadas: number = 0;
 
-  private generateWeeks(): void {
-    this.semanas = Array.from({ length: SEMANAS_ANIO },
-      (_, i) => `SEMANA ${i + 1}`);
+  private actualizarSemanasDisponibles(): void {
+    if (!this.agendas || this.agendas.length === 0) {
+      this.semanas = [];
+      return;
+    }
+
+    const semanasSet = new Set<number>();
+    this.agendas.forEach(agenda => {
+      if (agenda.fecha) {
+        semanasSet.add(this.getSemanaDelAnio(agenda.fecha));
+      }
+    });
+
+    this.semanas = Array.from(semanasSet)
+      .sort((a, b) => a - b)
+      .map(s => `SEMANA ${s}`);
   }
   constructor(private authService: AuthService, private coordinacionService: CoordinacionService) {
     this.aplicarFiltros();
-    this.generateWeeks();
   }
 
-  getSemanaDelAnio(fecha: Date): number {
+  getSemanaDelAnio(fecha: Date | string): number {
     const date = new Date(fecha);
-    date.setHours(0, 0, 0, 0);
-
-    // Jueves en la semana actual decide el año
-    date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
-
-    const week1 = new Date(date.getFullYear(), 0, 4);
-
-    return (
-      1 +
-      Math.round(
-        ((date.getTime() - week1.getTime()) / 86400000
-          - 3 + ((week1.getDay() + 6) % 7)) / 7
-      )
-    );
+    const dayNum = (date.getUTCDay() + 6) % 7;
+    date.setUTCDate(date.getUTCDate() - dayNum + 3);
+    const firstThursday = date.getTime();
+    date.setUTCMonth(0, 1);
+    if (date.getUTCDay() !== 4) {
+      date.setUTCMonth(0, 1 + ((4 - date.getUTCDay()) + 7) % 7);
+    }
+    return 1 + Math.ceil((firstThursday - date.getTime()) / 604800000);
   }
 
   ngOnInit(): void {
@@ -214,6 +266,7 @@ export class TestAgendaComponent {
     this.coordinacionService.obtenerAgendasAsesor().subscribe({
       next: (resp) => {
         this.agendas = resp.agendas;
+        this.actualizarSemanasDisponibles();
         this.aplicarFiltros();
 
         // Mostrar mensaje si no hay agendas
@@ -266,7 +319,7 @@ export class TestAgendaComponent {
         parseInt(this.semanaSeleccionada.replace('SEMANA ', ''), 10);
 
       filtradas = filtradas.filter(a => {
-        const semana = this.getSemanaDelAnio(new Date(a.fecha));
+        const semana = this.getSemanaDelAnio(a.fecha);
         return semana === semanaIndex;
       });
     }
@@ -277,8 +330,52 @@ export class TestAgendaComponent {
       const mesIndex = this.meses.indexOf(this.mesSeleccionado) + 1;
       filtradas = filtradas.filter(a => {
         const fecha = new Date(a.fecha);
-        return fecha.getMonth() + 1 === mesIndex;
+        return fecha.getUTCMonth() + 1 === mesIndex;
       });
+    }
+
+    // filtros por fecha
+    if (this.fechaSeleccionada) {
+      const [y, m, d] = this.fechaSeleccionada.split('-').map(Number);
+      const fechaMinima = new Date(Date.UTC(y, m - 1, 1));
+      const fechaMaxima = new Date(Date.UTC(y, m, 0, 23, 59, 59, 999));
+
+      filtradas = filtradas.filter(a => {
+        const fecha = new Date(a.fecha);
+        return fecha >= fechaMinima && fecha <= fechaMaxima;
+      });
+    }
+
+    // Filtro por rango de fechas (Inicio - Fin)
+    if (this.filtroFechaInicio && this.filtroFechaFin) {
+      const inicio = new Date(this.filtroFechaInicio);
+      const fin = new Date(this.filtroFechaFin);
+      fin.setHours(23, 59, 59, 999);
+
+      filtradas = filtradas.filter(a => {
+        const fecha = new Date(a.fecha);
+        return fecha >= inicio && fecha <= fin;
+      });
+    }
+
+    // Filtro por búsqueda de texto
+    if (this.busqueda) {
+      const busquedaLower = this.busqueda.toLowerCase();
+      filtradas = filtradas.filter(a =>
+        (a.actividad && a.actividad.toLowerCase().includes(busquedaLower)) ||
+        (a.domicilio && a.domicilio.toLowerCase().includes(busquedaLower)) ||
+        (a.resultado && a.resultado.toLowerCase().includes(busquedaLower)) ||
+        (a.asesor && a.asesor.toLowerCase().includes(busquedaLower))
+      );
+    }
+
+    // Filtro por estado
+    if (this.estadoSeleccionado) {
+      if (this.estadoSeleccionado === 'completada') {
+        filtradas = filtradas.filter(a => a.evidencia && a.evidencia.trim() !== '');
+      } else if (this.estadoSeleccionado === 'pendiente') {
+        filtradas = filtradas.filter(a => !a.evidencia || a.evidencia.trim() === '');
+      }
     }
 
     this.agendasFiltradas = filtradas;
@@ -293,6 +390,10 @@ export class TestAgendaComponent {
         );
       }, 300);
     }
+
+    // Actualizar datos del calendario
+    this.agendaCalendario = [...this.agendasFiltradas];
+    this.actualizarInformacionCalendario();
   }
 
   eliminarAgenda(id: string) {
@@ -346,67 +447,151 @@ export class TestAgendaComponent {
   }
 
   validarAgenda(id: string) {
-    this.mostrarConfirmacion('¿Validar actividad?', 'Esta acción marcará la actividad como validada.')
-      .then((result) => {
-        if (result.isConfirmed) {
-          // Mostrar loading mientras se procesa
-          Swal.fire({
-            title: 'Validando...',
-            text: 'Por favor espere',
-            allowOutsideClick: false,
-            didOpen: () => {
-              Swal.showLoading();
+    this.mostrarConfirmacion(
+      '¿Validar actividad?',
+      'Esta acción marcará la actividad como validada.'
+    ).then((result) => {
+
+      if (result.isConfirmed) {
+
+        Swal.fire({
+          title: 'Validando...',
+          text: 'Por favor espere',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        this.coordinacionService.validarAgendaAsesor(id).subscribe({
+          next: () => {
+
+            // ✅ Actualizar estado local correctamente
+            const agenda = this.agendas.find(a => a._id === id);
+            if (agenda) {
+              agenda.validada = 'VALIDADA';
             }
-          });
 
-          this.coordinacionService.validarAgendaAsesor(id).subscribe({
-            next: () => {
-              // Actualizar estado local de la agenda
-              const agenda = this.agendas.find(a => a._id === id);
-              if (agenda) {
-                agenda.validada = true;
-              }
-              this.aplicarFiltros();
+            this.aplicarFiltros();
 
-              Swal.fire({
-                icon: 'success',
-                title: '¡Validado!',
-                text: 'La actividad ha sido validada correctamente.',
-                timer: 2000,
-                showConfirmButton: false,
-                timerProgressBar: true
-              });
-            },
-            error: (err) => {
-              console.error('Error al validar agenda', err);
+            Swal.fire({
+              icon: 'success',
+              title: '¡Validado!',
+              text: 'La actividad ha sido validada correctamente.',
+              timer: 2000,
+              showConfirmButton: false,
+              timerProgressBar: true
+            });
+          },
+          error: (err) => {
+            console.error('Error al validar agenda', err);
 
-              let mensajeError = 'No se pudo validar la actividad. ';
+            let mensajeError = 'No se pudo validar la actividad. ';
 
-              if (err.status === 404) {
-                mensajeError = 'La actividad no fue encontrada.';
-              } else if (err.status === 403) {
-                mensajeError = 'No tiene permisos para validar esta actividad.';
-              } else if (err.status >= 500) {
-                mensajeError += 'Error del servidor. Por favor, intente más tarde.';
-              } else {
-                mensajeError += 'Por favor, intente nuevamente.';
-              }
-
-              this.mostrarAlerta('Error al validar', mensajeError, 'error');
+            if (err.status === 404) {
+              mensajeError = 'La actividad no fue encontrada.';
+            } else if (err.status === 403) {
+              mensajeError = 'No tiene permisos para validar esta actividad.';
+            } else if (err.status >= 500) {
+              mensajeError += 'Error del servidor. Por favor, intente más tarde.';
+            } else {
+              mensajeError += 'Por favor, intente nuevamente.';
             }
-          });
-        }
-      });
+
+            this.mostrarAlerta('Error al validar', mensajeError, 'error');
+          }
+        });
+      }
+    });
   }
 
-  guardarCambios(agenda: Agenda) {
+
+  rechazarAgenda(id: string) {
+    Swal.fire({
+      title: '¿Rechazar actividad?',
+      text: 'Por favor, indique el motivo del rechazo:',
+      icon: 'warning',
+      input: 'textarea',
+      inputPlaceholder: 'Escriba aquí el motivo...',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Rechazar',
+      cancelButtonText: 'Cancelar',
+      inputValidator: (value) => {
+        if (!value) {
+          return '¡Es obligatorio indicar un motivo!';
+        }
+        return null;
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const motivoRechazo = result.value;
+
+        Swal.fire({
+          title: 'Rechazando...',
+          text: 'Por favor espere',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        this.coordinacionService.rechazarAgendaAsesor(id, motivoRechazo).subscribe({
+          next: (resp) => {
+            // ✅ Actualizar estado local
+            const agenda = this.agendas.find(a => a._id === id);
+            if (agenda) {
+              agenda.motivoRechazo = motivoRechazo;
+              agenda.validada = 'RECHAZADA';
+            }
+
+            this.aplicarFiltros();
+            Swal.fire({
+              icon: 'success',
+              title: '¡Rechazada!',
+              text: 'La actividad ha sido rechazada correctamente.',
+              timer: 2000,
+              showConfirmButton: false,
+              timerProgressBar: true
+            });
+          },
+          error: (err) => {
+            console.error('Error al rechazar agenda', err);
+            this.mostrarAlerta(
+              'Error al rechazar',
+              'No se pudo rechazar la actividad.',
+              'error'
+            );
+          }
+        });
+      }
+    });
+  }
+
+
+  editarAgenda(agenda: Agenda) {
+    this.actividadSeleccionada = { ...agenda };
+
+    // Formatear la fecha para el input type="date" (yyyy-MM-dd)
+    if (this.actividadSeleccionada.fecha) {
+      const d = new Date(this.actividadSeleccionada.fecha);
+      const year = d.getUTCFullYear();
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      this.actividadSeleccionada.fecha = `${year}-${month}-${day}` as any;
+    }
+  }
+
+
+
+  guardarCambios(agenda: Agenda | null) {
     if (!agenda || !agenda._id) {
       this.mostrarAlerta('Datos inválidos', 'La agenda seleccionada no es válida.', 'warning');
       return;
     }
-
     // Validar que haya al menos un cambio
-    if (!agenda.resultado && !(agenda as any).archivoEvidencia) {
+    if (!agenda.resultado && !agenda.fecha && !agenda.hora && !agenda.actividad && !(agenda as any).archivoEvidencia) {
       this.mostrarAlerta(
         'Sin cambios',
         'No se detectaron cambios para guardar.',
@@ -418,6 +603,15 @@ export class TestAgendaComponent {
     const formData = new FormData();
 
     // Campos permitidos para el asesor
+    if (agenda.fecha) {
+      formData.append('fecha', agenda.fecha as any);
+    }
+    if (agenda.hora) {
+      formData.append('hora', agenda.hora);
+    }
+    if (agenda.actividad) {
+      formData.append('actividad', agenda.actividad);
+    }
     if (agenda.resultado) {
       formData.append('resultado', agenda.resultado);
     }
@@ -466,6 +660,13 @@ export class TestAgendaComponent {
         next: (resp) => {
           console.log('Agenda actualizada:', resp);
 
+          // ✅ Actualizar estado local con la respuesta del servidor
+          const index = this.agendas.findIndex(a => a._id === agenda._id);
+          if (index !== -1 && resp.agenda) {
+            this.agendas[index] = { ...resp.agenda };
+            this.aplicarFiltros();
+          }
+
           Swal.fire({
             icon: 'success',
             title: '¡Guardado!',
@@ -502,6 +703,22 @@ export class TestAgendaComponent {
   }
 
   // ===== FUNCIONES AUXILIARES =====
+
+  cambiarPestana(pestana: string) {
+    this.pestanaActiva = pestana;
+  }
+
+  getIndicatorStyle() {
+    // Asumiendo que hay 2 pestañas (50% cada una)
+    // Si se agregan más pestañas, esto debería actualizarse a 100/N %
+    const width = '50%';
+    const left = this.pestanaActiva === 'calendario' ? '0' : '50%';
+
+    return {
+      'left': left,
+      'width': width
+    };
+  }
 
   filtrarPorAsesor() {
     this.aplicarFiltros();
@@ -551,6 +768,11 @@ export class TestAgendaComponent {
     this.semanaSeleccionada = '';
     this.diaSeleccionado = '';
     this.codigoSeleccionado = '';
+    this.estadoSeleccionado = '';
+    this.busqueda = '';
+    this.fechaSeleccionada = '';
+    this.filtroFechaInicio = '';
+    this.filtroFechaFin = '';
     this.aplicarFiltros();
 
     this.mostrarAlerta(
@@ -642,26 +864,29 @@ export class TestAgendaComponent {
 
     this.calcularEstadisticas();
 
+    const tipoReporte = this.tiposReporte.find(t => t.id === this.tipoReporteSeleccionado);
+
     Swal.fire({
       title: 'Generando Reporte',
       html: `
-        <div style="text-align: left;">
-          <p><strong>Tipo de Reporte:</strong> ${this.tiposReporte.find(t => t.id === this.tipoReporteSeleccionado)?.nombre}</p>
-          <p><strong>Actividades a incluir:</strong> ${this.agendasFiltradas.length}</p>
-          <p><strong>Filtros aplicados:</strong> ${this.obtenerFiltrosAplicados()}</p>
-        </div>
-      `,
+      <div style="text-align: left;">
+        <p><strong>Tipo de Reporte:</strong> ${tipoReporte?.nombre || 'No especificado'}</p>
+        <p><strong>Actividades a incluir:</strong> ${this.agendasFiltradas.length}</p>
+        <p><strong>Filtros aplicados:</strong> ${this.obtenerFiltrosAplicados() || 'Ninguno'}</p>
+      </div>
+    `,
       showCancelButton: true,
       confirmButtonText: 'Generar PDF',
       cancelButtonText: 'Cancelar',
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      didOpen: () => {
-        Swal.showLoading();
+      showLoaderOnConfirm: true,
+      preConfirm: () => {
+        return this.generarPDF();
       }
     }).then((result) => {
       if (result.isConfirmed) {
-        this.generarPDF();
+        // Opcional: Aquí podrías agregar lógica post-generación
       }
     });
   }
@@ -1003,7 +1228,7 @@ export class TestAgendaComponent {
    */
   private generarReportePendientes(): void {
     const actividadesPendientes = this.agendasFiltradas.filter(a =>
-      !a.evidencia || a.evidencia.trim() === ''
+      !a.resultado || a.resultado.trim() === ''
     );
 
     if (actividadesPendientes.length === 0) {
@@ -1020,7 +1245,7 @@ export class TestAgendaComponent {
     // Título
     doc.setFontSize(18);
     doc.setTextColor(231, 76, 60);
-    doc.text('ACTIVIDADES PENDIENTES DE EVIDENCIA', 140, 15, { align: 'center' });
+    doc.text('ACTIVIDADES PENDIENTES SIN RESULTADO REGISTRADO', 140, 15, { align: 'center' });
 
     doc.setFontSize(10);
     doc.setTextColor(0, 0, 0);
@@ -1033,15 +1258,15 @@ export class TestAgendaComponent {
       'Asesor',
       'Actividad',
       'Código',
-      'Resultado Esperado',
-      'Días Pendiente',
-      'Prioridad'
+      //'Resultado Esperado',
+      //'Días Pendiente',
+      //'Prioridad'
     ];
 
     const hoy = new Date();
     const filas = actividadesPendientes.map(a => {
       const fechaActividad = new Date(a.fecha);
-      const diasPendiente = Math.floor((hoy.getTime() - fechaActividad.getTime()) / (1000 * 3600 * 24));
+      //const diasPendiente = Math.floor((hoy.getTime() - fechaActividad.getTime()) / (1000 * 3600 * 24));
 
       return [
         this.formatDateUTC(fechaActividad),
@@ -1049,8 +1274,8 @@ export class TestAgendaComponent {
         a.actividad?.substring(0, 40) + (a.actividad?.length > 40 ? '...' : '') || '-',
         this.obtenerDescripcionCodigo(a.codigo),
         a.resultado || 'Por definir',
-        diasPendiente > 0 ? `${diasPendiente} días` : 'Hoy',
-        this.obtenerPrioridad(diasPendiente)
+        //diasPendiente > 0 ? `${diasPendiente} días` : 'Hoy',
+        //this.obtenerPrioridad(diasPendiente)
       ];
     });
 
@@ -1087,7 +1312,7 @@ export class TestAgendaComponent {
     this.guardarPDF(doc, 'actividades_pendientes');
   }
 
-  /**
+  /** 
    * Reporte por asesores
    */
   private generarReportePorAsesores(): void {
@@ -1161,7 +1386,7 @@ export class TestAgendaComponent {
   /**
    * Función auxiliar para dibujar barra de progreso
    */
-  private dibujarBarraProgreso(doc: jsPDF, porcentaje: number, x: number, y: number): void {
+  private dibujarBarraProgreso(doc: any, porcentaje: number, x: number, y: number): void {
     const anchoBarra = 50;
     const altoBarra = 8;
 
@@ -1230,20 +1455,36 @@ export class TestAgendaComponent {
   /**
    * Guarda el PDF generado
    */
-  private guardarPDF(doc: jsPDF, nombreBase: string): void {
+  private guardarPDF(doc: any, nombreBase: string): void {
     const fecha = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const nombreArchivo = `${nombreBase}_${fecha}.pdf`;
 
-    doc.save(nombreArchivo);
+    console.log('Generando PDF:', nombreArchivo);
 
-    Swal.fire({
-      icon: 'success',
-      title: '¡Reporte generado!',
-      text: `El archivo "${nombreArchivo}" se ha descargado correctamente`,
-      timer: 3000,
-      showConfirmButton: false,
-      timerProgressBar: true
-    });
+    try {
+      doc.save(nombreArchivo);
+
+      Swal.fire({
+        icon: 'success',
+        title: '¡Reporte generado!',
+        text: `El archivo "${nombreArchivo}" se ha descargado correctamente`,
+        timer: 3000,
+        showConfirmButton: false,
+        timerProgressBar: true
+      });
+    } catch (error) {
+      console.error('Error al guardar el PDF:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al generar PDF',
+        text: 'Hubo un problema técnico al intentar descargar el archivo.'
+      });
+    }
+  }
+
+  getNombreDia(fecha: Date | string) {
+    const dias = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
+    return dias[new Date(fecha).getDay()];
   }
 
   descargarAgendaPDF() {
@@ -1257,73 +1498,423 @@ export class TestAgendaComponent {
     }
 
     Swal.fire({
-      title: 'Generando PDF',
-      text: 'Preparando el archivo...',
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
+      title: 'Opciones del PDF',
+      html: `
+    <div style="text-align: left;">
+      <label style="display: block; margin: 10px 0;">
+        <input type="checkbox" id="incluirLogo" checked> Incluir logo
+      </label>
+      <label style="display: block; margin: 10px 0;">
+        <input type="checkbox" id="mostrarSoloDiasHabiles" checked> Mostrar solo Lunes a Sábado
+      </label>
+      <label style="display: block; margin: 10px 0;">
+        <input type="checkbox" id="comprimirParaDosPaginas" checked> Comprimir en máximo 2 páginas
+      </label>
+    </div>
+  `,
+      showCancelButton: true,
+      confirmButtonText: 'Generar PDF',
+      cancelButtonText: 'Cancelar',
+      preConfirm: () => {
+        return {
+          incluirLogo: (document.getElementById('incluirLogo') as HTMLInputElement).checked,
+          mostrarSoloDiasHabiles: (document.getElementById('mostrarSoloDiasHabiles') as HTMLInputElement).checked,
+          comprimirParaDosPaginas: (document.getElementById('comprimirParaDosPaginas') as HTMLInputElement).checked
+        };
       }
-    });
+    }).then((result) => {
+      if (!result.isConfirmed) return;
 
-    setTimeout(() => {
-      const doc = new jsPDF('landscape');
-
-      // ===== TÍTULO =====
-      doc.setFontSize(16);
-      doc.text('Reporte de Agenda de Asesor', 14, 15);
-
-      // ===== SUBTÍTULO =====
-      doc.setFontSize(10);
-      doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 14, 22);
-
-      if (this.asesorSeleccionado) {
-        doc.text(`Asesor: ${this.asesorSeleccionado}`, 14, 28);
-      }
-
-      // ===== TABLA =====
-      const columnas = [
-        'Fecha',
-        'Hora',
-        'Asesor',
-        'Actividad',
-        'Código',
-        'Resultado',
-        // 'Validada'
-      ];
-
-      const filas = this.agendasFiltradas.map(a => ([
-        this.formatDateUTC(a.fecha),
-        a.hora || '',
-        a.asesor || '',
-        a.actividad || '',
-        a.codigo || '',
-        a.resultado || '',
-        // a.validada ? 'Sí' : 'No'
-      ]));
-
-      autoTable(doc, {
-        head: [columnas],
-        body: filas,
-        startY: 35,
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [41, 128, 185] },
-        alternateRowStyles: { fillColor: [245, 245, 245] }
-      });
-
-      // ===== GUARDAR =====
-      doc.save(`agenda_${new Date().toISOString().slice(0, 10)}.pdf`);
+      const opciones = result.value;
 
       Swal.fire({
-        icon: 'success',
-        title: '¡PDF descargado!',
-        text: 'El archivo se descargó correctamente',
-        timer: 2000,
-        showConfirmButton: false
+        title: 'Generando PDF',
+        text: 'Preparando el archivo...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
       });
 
-    }, 800);
+      setTimeout(() => {
+        const doc = new jsPDF('landscape');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        // ===== CONFIGURACIÓN DE COMPRESIÓN =====
+        const comprimir = opciones.comprimirParaDosPaginas;
+
+        // Ajustes según si necesitamos comprimir
+        const fontSizeNormal = comprimir ? 8 : 9;
+        const fontSizeSmall = comprimir ? 7 : 7.5;
+        const fontSizeHeader = comprimir ? 10 : 11;
+        const headerHeight = comprimir ? 7 : 8;
+        const lineHeightActivity = comprimir ? 4 : 4.5;
+        const lineHeightAsesor = comprimir ? 3.5 : 4;
+        const cellPadding = comprimir ? 2 : 3;
+        const minRowHeight = comprimir ? 25 : 30;
+        const marginBottomPage = comprimir ? 15 : 20;
+
+        // ===== ENCABEZADO =====
+        let startY = comprimir ? 12 : 15;
+
+        if (opciones.incluirLogo) {
+          doc.addImage('https://static.wixstatic.com/media/0bf950_155f8cd81f6d4fe5ac3419b8e0397b40~mv2.png', 'PNG', 14, 7, 30, 12);
+          doc.setTextColor(0, 0, 0);
+          doc.setFontSize(comprimir ? 14 : 16);
+          doc.text('Agenda Semanal de Actividades', pageWidth / 2, comprimir ? 15 : 20, { align: 'center' });
+          startY = comprimir ? 22 : 30;
+        } else {
+          doc.setFontSize(comprimir ? 14 : 16);
+          doc.text('Agenda Semanal de Actividades', pageWidth / 2, comprimir ? 20 : 25, { align: 'center' });
+          startY = comprimir ? 22 : 25;
+        }
+
+        // ===== INFORMACIÓN DEL REPORTE =====
+        doc.setFontSize(fontSizeSmall);
+        doc.setTextColor(100, 100, 100);
+
+        const ahora = new Date();
+        const fechaStr = `${ahora.toLocaleDateString()} ${ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        doc.text(`Generado: ${fechaStr}`, 14, startY);
+
+        startY += comprimir ? 6 : 7;
+
+        let asesorAMostrar = this.asesorSeleccionado || (!this.esCoordinador ? this.usuarioActual : '');
+        if (asesorAMostrar) {
+          doc.text(`Asesor: ${asesorAMostrar}`, 14, startY);
+          startY += comprimir ? 6 : 7;
+        }
+
+        if (this.filtroFechaInicio && this.filtroFechaFin) {
+          doc.text(`Periodo: ${this.formatDateUTC(this.filtroFechaInicio)} - ${this.formatDateUTC(this.filtroFechaFin)}`, 14, startY);
+          startY += comprimir ? 6 : 7;
+        }
+
+        doc.text(`Total actividades: ${this.agendasFiltradas.length}`, 14, startY);
+        startY += comprimir ? 8 : 10;
+
+        doc.setTextColor(0, 0, 0);
+
+        // ===== PREPARAR DATOS POR DÍA =====
+        const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+        const diasHabiles = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const diasAMostrar = opciones.mostrarSoloDiasHabiles ? diasHabiles : diasSemana;
+
+        // Crear estructura para organizar actividades por día y hora
+        const actividadesPorDia: { [key: string]: any[] } = {};
+        diasAMostrar.forEach(dia => {
+          actividadesPorDia[dia] = [];
+        });
+
+        // Agrupar actividades por día de la semana
+        this.agendasFiltradas.forEach(actividad => {
+          const fecha = new Date(actividad.fecha);
+          const diaSemanaNum = fecha.getUTCDay();
+          const diaSemana = diasSemana[diaSemanaNum === 0 ? 6 : diaSemanaNum - 1];
+
+          if (diasAMostrar.includes(diaSemana)) {
+            // Acortar textos si estamos comprimiendo
+            const actividadTexto = comprimir ?
+              (actividad.actividad || '').substring(0, 60) +
+              ((actividad.actividad || '').length > 60 ? '...' : '') :
+              actividad.actividad || '';
+
+            const domicilioTexto = comprimir ?
+              (actividad.domicilio || 'Sin domicilio').substring(0, 40) :
+              actividad.domicilio || 'Sin domicilio';
+
+            actividadesPorDia[diaSemana].push({
+              hora: actividad.hora || 'Sin hora',
+              asesor: actividad.asesor || 'Sin asignar',
+              actividad: actividadTexto,
+              domicilio: domicilioTexto,
+              codigo: actividad.codigo || 'N/A',
+              resultado: actividad.resultado || 'Pendiente',
+              fechaCompleta: this.formatDateUTC(actividad.fecha)
+            });
+          }
+        });
+
+        // Ordenar actividades por hora dentro de cada día
+        diasAMostrar.forEach(dia => {
+          actividadesPorDia[dia].sort((a, b) => {
+            const horaA = a.hora === 'Sin hora' ? '23:59' : a.hora;
+            const horaB = b.hora === 'Sin hora' ? '23:59' : b.hora;
+            return horaA.localeCompare(horaB);
+          });
+        });
+
+        // ===== DISEÑO DE AGENDA SEMANAL =====
+        const marginLeft = 14;
+        const marginRight = 14;
+        const contentWidth = pageWidth - marginLeft - marginRight;
+        const numDias = diasAMostrar.length;
+        const colWidth = contentWidth / numDias;
+
+        // Dibujar encabezados de los días
+        doc.setFontSize(fontSizeHeader);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255);
+
+        diasAMostrar.forEach((dia, index) => {
+          const x = marginLeft + (index * colWidth);
+
+          // Fondo color para encabezado de día
+          doc.setFillColor(41, 128, 185);
+          doc.rect(x, startY, colWidth, headerHeight, 'F');
+
+          // Texto del día centrado
+          const textWidth = doc.getTextWidth(dia);
+          const textX = x + (colWidth - textWidth) / 2;
+          doc.text(dia, textX, startY + (comprimir ? 4.5 : 5));
+        });
+
+        startY += headerHeight;
+
+        // Líneas verticales entre días
+        doc.setDrawColor(200, 200, 200);
+        for (let i = 0; i <= numDias; i++) {
+          const x = marginLeft + (i * colWidth);
+          doc.line(x, startY, x, pageHeight - marginBottomPage);
+        }
+
+        // Línea horizontal superior
+        doc.line(marginLeft, startY, marginLeft + contentWidth, startY);
+
+        let currentY = startY;
+        let pageNumber = 1;
+
+        // Encontrar el día con más actividades
+        let maxActividades = 0;
+        diasAMostrar.forEach(dia => {
+          if (actividadesPorDia[dia].length > maxActividades) {
+            maxActividades = actividadesPorDia[dia].length;
+          }
+        });
+
+        // Si no hay actividades, mostrar mensaje
+        if (maxActividades === 0) {
+          diasAMostrar.forEach((dia, index) => {
+            const x = marginLeft + (index * colWidth) + 3;
+            doc.text('Sin actividades', x, currentY + 10);
+          });
+        } else {
+          // Calcular si necesitamos dividir en páginas
+          const actividadesPorPagina = Math.ceil(maxActividades / 2);
+
+          // Dividir actividades en dos páginas si es necesario
+          for (let pagina = 0; pagina < 2; pagina++) {
+            if (pagina > 0) {
+              // Crear nueva página si no es la primera
+              doc.addPage('landscape');
+              pageNumber++;
+              currentY = 20;
+              startY = currentY;
+
+              // Redibujar encabezados en nueva página
+              doc.setFontSize(fontSizeHeader);
+              doc.setFont('helvetica', 'bold');
+              doc.setTextColor(255, 255, 255);
+
+              diasAMostrar.forEach((dia, index) => {
+                const x = marginLeft + (index * colWidth);
+                doc.setFillColor(41, 128, 185);
+                doc.rect(x, currentY, colWidth, headerHeight, 'F');
+                const textWidth = doc.getTextWidth(dia);
+                const textX = x + (colWidth - textWidth) / 2;
+                doc.text(dia, textX, currentY + (comprimir ? 4.5 : 5));
+              });
+
+              currentY += headerHeight;
+              startY = currentY;
+
+              doc.setDrawColor(200, 200, 200);
+              doc.line(marginLeft, currentY, marginLeft + contentWidth, currentY);
+            }
+
+            // Calcular rango de filas para esta página
+            const startRow = pagina * actividadesPorPagina;
+            const endRow = Math.min((pagina + 1) * actividadesPorPagina, maxActividades);
+
+            // Generar contenido para cada fila en esta página
+            for (let row = startRow; row < endRow; row++) {
+              // Calcular altura necesaria para esta fila
+              let rowHeight = minRowHeight;
+              diasAMostrar.forEach(dia => {
+                const actividades = actividadesPorDia[dia];
+                if (row < actividades.length) {
+                  const act = actividades[row];
+                  const linesActividad = doc.splitTextToSize(act.actividad, colWidth - 6).length;
+                  const linesAsesor = doc.splitTextToSize(`Asesor: ${act.asesor}`, colWidth - 6).length;
+
+                  const neededHeight = cellPadding +
+                    (linesActividad * lineHeightActivity) +
+                    2 +
+                    (linesAsesor * lineHeightAsesor) +
+                    cellPadding;
+
+                  if (neededHeight > rowHeight) rowHeight = neededHeight;
+                }
+              });
+
+              // Verificar si necesitamos saltar de página dentro de la misma "mitad"
+              if (comprimir && currentY + rowHeight > pageHeight - marginBottomPage) {
+                // Si estamos comprimiendo y no cabe, reducir fuentes aún más
+                doc.setFontSize(7);
+              }
+
+              // Dibujar el contenido de cada celda en la fila
+              diasAMostrar.forEach((dia, colIndex) => {
+                const x = marginLeft + (colIndex * colWidth) + cellPadding;
+                const actividades = actividadesPorDia[dia];
+
+                if (row < actividades.length) {
+                  const actividad = actividades[row];
+
+                  // Fondo alternado suave
+                  if (row % 2 === 0) {
+                    doc.setFillColor(248, 248, 248);
+                    doc.rect(marginLeft + (colIndex * colWidth), currentY, colWidth, rowHeight, 'F');
+                  }
+
+                  let textPosY = currentY + cellPadding + 2;
+
+                  // Hora
+                  doc.setFont('helvetica', 'bold');
+                  doc.setTextColor(41, 128, 185);
+                  doc.setFontSize(fontSizeNormal);
+                  doc.text(actividad.hora, x, textPosY);
+                  textPosY += (comprimir ? 4 : 5);
+
+                  // Actividad
+                  doc.setFont('helvetica', 'normal');
+                  doc.setTextColor(0, 0, 0);
+                  const actividadTexto = doc.splitTextToSize(actividad.actividad, colWidth - 8);
+                  doc.text(actividadTexto, x, textPosY);
+
+                  // Ajustar posición para el asesor
+                  textPosY += (actividadTexto.length * (comprimir ? 3.8 : 4.5)) + 1;
+
+                  // Asesor
+                  doc.setFontSize(fontSizeSmall);
+                  doc.setTextColor(100, 100, 100);
+                  const asesorTexto = doc.splitTextToSize(`Asesor: ${actividad.asesor}`, colWidth - 8);
+                  doc.text(asesorTexto, x, textPosY);
+
+                  // Restaurar fuente
+                  doc.setFontSize(fontSizeNormal);
+                  doc.setTextColor(0, 0, 0);
+                }
+              });
+
+              // Dibujar línea horizontal de la fila
+              doc.setDrawColor(230, 230, 230);
+              doc.line(marginLeft, currentY + rowHeight, marginLeft + contentWidth, currentY + rowHeight);
+
+              currentY += rowHeight;
+            }
+
+            // Dibujar líneas verticales finales para esta página
+            doc.setDrawColor(200, 200, 200);
+            for (let i = 0; i <= numDias; i++) {
+              const xFinalLine = marginLeft + (i * colWidth);
+              doc.line(xFinalLine, startY, xFinalLine, currentY);
+            }
+
+            // Línea horizontal final de la página
+            doc.line(marginLeft, currentY, marginLeft + contentWidth, currentY);
+          }
+        }
+
+        // ===== PIE DE PÁGINA =====
+        const totalPages = (doc as any).getNumberOfPages();
+
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.setFontSize(fontSizeSmall);
+          doc.setTextColor(150, 150, 150);
+
+          // Número de página
+          doc.text(
+            `Página ${i} de ${totalPages}`,
+            pageWidth / 2,
+            pageHeight - (comprimir ? 8 : 10),
+            { align: 'center' }
+          );
+
+          // Fecha de generación
+          doc.text(
+            `Generado: ${fechaStr}`,
+            marginLeft,
+            pageHeight - (comprimir ? 8 : 10),
+            { align: 'left' }
+          );
+
+          // Texto confidencial
+          doc.text(
+            'Confidencial - Uso interno',
+            pageWidth - marginRight,
+            pageHeight - (comprimir ? 8 : 10),
+            { align: 'right' }
+          );
+        }
+
+        // ===== GUARDAR ARCHIVO =====
+        const fechaISO = new Date().toISOString().slice(0, 10);
+        let nombreArchivo = `agenda_semanal_${fechaISO}`;
+
+        if (asesorAMostrar) {
+          const asesorNormalizado = asesorAMostrar
+            .toLowerCase()
+            .replace(/\s+/g, '_')
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          nombreArchivo += `_${asesorNormalizado}`;
+        }
+
+        nombreArchivo += '.pdf';
+
+        doc.save(nombreArchivo);
+
+        Swal.fire({
+          icon: 'success',
+          title: '¡PDF generado!',
+          html: `
+        <div style="text-align: center;">
+          <p>Agenda semanal descargada correctamente</p>
+          <p style="font-size: 12px; color: #666;">${nombreArchivo}</p>
+          <p style="font-size: 12px; color: #666;">${this.agendasFiltradas.length} actividades</p>
+          <p style="font-size: 12px; color: #666;">${totalPages} página${totalPages > 1 ? 's' : ''}</p>
+        </div>
+      `,
+          timer: 3000,
+          showConfirmButton: false
+        });
+
+      }, 1000);
+    });
   }
 
+
+  // Método auxiliar para generar resumen
+  generarResumenActividades() {
+    const conteo: { [key: string]: number } = {};
+
+    this.agendasFiltradas.forEach(item => {
+      const actividad = item.actividad || 'Sin actividad';
+      conteo[actividad] = (conteo[actividad] || 0) + 1;
+    });
+
+    const total = this.agendasFiltradas.length;
+
+    return Object.entries(conteo)
+      .map(([actividad, cantidad]) => ({
+        actividad,
+        cantidad,
+        porcentaje: ((cantidad / total) * 100).toFixed(1)
+      }))
+      .sort((a, b) => b.cantidad - a.cantidad);
+  }
 
   onFileSelected(event: any, agenda: Agenda) {
     const file = event.target.files[0];
@@ -1393,4 +1984,203 @@ export class TestAgendaComponent {
     // Retornar en formato local (dd/mm/yyyy)
     return `${day}/${month}/${year}`;
   }
+
+  // ===== MÉTODOS DEL CALENDARIO =====
+
+  mesAnterior() {
+    const nuevaFecha = new Date(this.fechaActual);
+    if (this.vistaActual === 'mes') {
+      nuevaFecha.setMonth(nuevaFecha.getMonth() - 1);
+    } else if (this.vistaActual === 'semana') {
+      nuevaFecha.setDate(nuevaFecha.getDate() - 7);
+    } else {
+      nuevaFecha.setDate(nuevaFecha.getDate() - 1);
+    }
+    this.fechaActual = nuevaFecha;
+    this.actualizarInformacionCalendario();
+  }
+
+  mesSiguiente() {
+    const nuevaFecha = new Date(this.fechaActual);
+    if (this.vistaActual === 'mes') {
+      nuevaFecha.setMonth(nuevaFecha.getMonth() + 1);
+    } else if (this.vistaActual === 'semana') {
+      nuevaFecha.setDate(nuevaFecha.getDate() + 7);
+    } else {
+      nuevaFecha.setDate(nuevaFecha.getDate() + 1);
+    }
+    this.fechaActual = nuevaFecha;
+    this.actualizarInformacionCalendario();
+  }
+
+  hoy() {
+    this.fechaActual = new Date();
+    this.actualizarInformacionCalendario();
+  }
+
+  cambiarVista(vista: 'mes' | 'semana' | 'dia') {
+    this.vistaActual = vista;
+    this.actualizarInformacionCalendario();
+  }
+
+  actualizarInformacionCalendario() {
+    this.mesActual = this.meses[this.fechaActual.getMonth()];
+    this.anioActual = this.fechaActual.getFullYear();
+
+    // Generar datos según la vista
+    if (this.vistaActual === 'mes') {
+      this.generarMatrizMes();
+    } else if (this.vistaActual === 'semana') {
+      this.generarDatosSemana();
+    }
+
+    // Calcular estadísticas para la vista actual
+    this.calcularEstadisticasVista();
+  }
+
+  generarMatrizMes() {
+    const año = this.fechaActual.getFullYear();
+    const mes = this.fechaActual.getMonth();
+
+    const primerDia = new Date(año, mes, 1);
+    const ultimoDia = new Date(año, mes + 1, 0);
+
+    const diasEnMes = ultimoDia.getDate();
+    const diaInicioSemana = primerDia.getDay() || 7; // 1 (Lunes) a 7 (Domingo) - Ajustar según preferencia, aquí asumimos Dom=0 en JS
+
+    // Nota: JS getDay() devuelve 0 para Domingo. Si queremos Lunes primero, ajustamos.
+    // Asumiremos Domingo como primer día para simplificar visualización estándar, o ajustar lógica
+
+    let semanas: CalendarDay[][] = [];
+    let semana: CalendarDay[] = [];
+
+    // Días del mes anterior para completar la primera semana
+    const primerDiaSemana = primerDia.getDay() === 0 ? 6 : primerDia.getDay() - 1; // Lunes=0
+
+    for (let i = 0; i < primerDiaSemana; i++) {
+      semana.push({ numero: '', mesActual: false });
+    }
+
+    for (let dia = 1; dia <= diasEnMes; dia++) {
+      const fechaDia = new Date(año, mes, dia);
+      const actividadesDia = this.agendaCalendario.filter(a => {
+        const f = new Date(a.fecha);
+        return f.getUTCDate() === dia && f.getUTCMonth() === mes && f.getUTCFullYear() === año;
+      });
+
+      semana.push({
+        numero: dia,
+        fecha: fechaDia,
+        mesActual: true,
+        hoy: this.esHoy(fechaDia),
+        actividades: actividadesDia
+      });
+
+      if (semana.length === 7) {
+        semanas.push(semana);
+        semana = [];
+      }
+    }
+
+    // Completar última semana
+    if (semana.length > 0) {
+      while (semana.length < 7) {
+        semana.push({ numero: '', mesActual: false });
+      }
+      semanas.push(semana);
+    }
+
+    this.semanasDelMes = semanas;
+  }
+
+  generarDatosSemana() {
+    // Implementar lógica para obtener los días de la semana actual
+    // Esto es un placeholder básico
+    this.diasDeLaSemana = [];
+    const curr = new Date(this.fechaActual);
+    const first = curr.getDate() - curr.getDay() + 1; // Lunes
+
+    for (let i = 0; i < 7; i++) {
+      const next = new Date(curr);
+      next.setDate(first + i);
+      this.diasDeLaSemana.push({
+        nombre: this.diasSemana[i] || 'Domingo',
+        fecha: next
+      });
+    }
+  }
+
+  esHoy(fecha: Date): boolean {
+    const hoy = new Date();
+    return fecha.getDate() === hoy.getDate() &&
+      fecha.getMonth() === hoy.getMonth() &&
+      fecha.getFullYear() === hoy.getFullYear();
+  }
+
+  seleccionarDia(dia: any) {
+    if (dia.mesActual) {
+      this.diaSeleccionado = dia;
+    }
+  }
+
+  getColorForCodigo(codigo: string): string {
+    // Mapeo básico de colores, se puede expandir
+    const colores: { [key: string]: string } = {
+      'R': '#3498db',   // Azul
+      'RP': '#9b59b6',  // Púrpura
+      'C': '#e74c3c',   // Rojo
+      'VTA': '#2ecc71', // Verde
+      'REC': '#f1c40f', // Amarillo
+      'RER': '#e67e22', // Naranja
+      'GN': '#1abc9c'   // Turquesa
+    };
+    return colores[codigo] || '#95a5a6'; // Gris por defecto
+  }
+
+  calcularEstadisticasVista() {
+    // Recalcular completadas basado en la vista actual o total
+    this.actividadesCompletadas = this.agendaCalendario.filter(a => a.evidencia).length;
+  }
+
+  getActividadesPorDia(fecha: Date): Agenda[] {
+    return this.agendaCalendario.filter(a => {
+      const f = new Date(a.fecha);
+      const d = new Date(fecha);
+      return f.getUTCDate() === d.getDate() &&
+        f.getUTCMonth() === d.getMonth() &&
+        f.getUTCFullYear() === d.getFullYear();
+    });
+  }
+
+  getActividadesPorHora(fecha: any, hora: string): Agenda[] {
+    // Simplificado: asume que la hora coincide string a string o empieza con
+    // Debería parsear horas reales
+    const acts = this.getActividadesPorDia(new Date(fecha));
+    return acts.filter(a => a.hora && a.hora.startsWith(hora.split(':')[0]));
+  }
+
+  getPositionTop(hora: string): string {
+    // Calcular posición top basada en la hora
+    return '0px';
+  }
+
+  getHeight(duracion: number | undefined): string {
+    // Calcular altura
+    return '50px';
+  }
+
+  exportarCalendario() {
+    this.descargarAgendaPDF();
+  }
+
+  imprimirCalendario() {
+    window.print();
+  }
+
+  agregarEvidencia(actividad: Agenda) {
+    // Lógica para abrir modal de evidencia o input file
+    // Podrías necesitar un ElementRef al input hidden si existe
+    this.mostrarAlerta('Funcionalidad', 'Utilice el botón de cámara en la lista detallada', 'info');
+  }
+
 }

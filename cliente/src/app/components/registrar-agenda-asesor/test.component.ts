@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { CoordinacionService } from '../../services/coordinacion.service';
+import Swal from 'sweetalert2';
 
 const SEMANAS_ANIO = 53;
 
@@ -24,12 +25,46 @@ export interface Actividad {
 export class TestComponent implements OnInit {
   usuario = '';
   coordinacion = '';
+  fechaActual = new Date();
+
+  get asesorNombre(): string {
+    return this.usuario;
+  }
+
   rol = '';
   semanas: string[] = [];
   selectedObjetivos: string[] = [];
 
   // Formulario
   formulario!: FormGroup;
+
+  // Configuración de SweetAlert
+  private swalConfig = {
+    success: {
+      title: '¡Éxito!',
+      icon: 'success' as const,
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Aceptar'
+    },
+    error: {
+      title: 'Error',
+      icon: 'error' as const,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Entendido'
+    },
+    warning: {
+      title: 'Advertencia',
+      icon: 'warning' as const,
+      confirmButtonColor: '#f59e0b',
+      confirmButtonText: 'Entendido'
+    },
+    info: {
+      title: 'Información',
+      icon: 'info' as const,
+      confirmButtonColor: '#3b82f6',
+      confirmButtonText: 'Aceptar'
+    }
+  };
 
   constructor(
     private fb: FormBuilder,
@@ -43,6 +78,40 @@ export class TestComponent implements OnInit {
     this.semanas = Array.from({ length: SEMANAS_ANIO }, (_, i) => `SEMANA ${i + 1}`);
   }
 
+  private updateSemana(fechaStr: string): void {
+    const fecha = new Date(fechaStr);
+    // Ajustar zona horaria sumando los minutos de offset
+    const fechaAjustada = new Date(fecha.getTime() + fecha.getTimezoneOffset() * 60000);
+    const numeroSemana = this.getWeekNumber(fechaAjustada);
+    const semanaStr = `SEMANA ${numeroSemana}`;
+
+    // Verificar si la semana existe en el array, si no, seleccionarla de todos modos o manejarlo
+    if (this.semanas.includes(semanaStr)) {
+      this.formulario.get('semana')?.setValue(semanaStr);
+    }
+  }
+
+  private getWeekNumber(d: Date): number {
+    const year = d.getFullYear();
+    const firstJan = new Date(year, 0, 1);
+    const dayOfWeek = firstJan.getDay(); // 0 (Sun) to 6 (Sat)
+
+    // Calcular días hasta el primer lunes
+    // Si es Lunes (1), 0 dias. Si es Martes (2), 6 dias... Domingo (0), 1 dia.
+    const daysToFirstMonday = dayOfWeek === 1 ? 0 : (8 - dayOfWeek) % 7;
+    const firstMonday = new Date(year, 0, 1 + daysToFirstMonday);
+
+    // Si la fecha es anterior al primer lunes, devolver 0 (o manejar como semana 52/53 año anterior)
+    if (d < firstMonday) {
+      return 0;
+    }
+
+    const diffTime = d.getTime() - firstMonday.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    return Math.floor(diffDays / 7) + 1;
+  }
+
   ngOnInit(): void {
     this.usuario = this.auth.getUsuario() || '';
     this.coordinacion = this.auth.obtenerCoordinacion() || '';
@@ -51,16 +120,26 @@ export class TestComponent implements OnInit {
     this.formulario = this.fb.group({
       asesor: [{ value: this.usuario, disabled: true }],
       coordinacion: [{ value: this.coordinacion, disabled: true }],
-      semana: ['', Validators.required],
+      semana: [{ value: '', disabled: true }, Validators.required],
       fecha: ['', Validators.required],
       objetivo: [''],
       firma: [''],
-      // Mantenemos el FormArray para el formulario, pero cada actividad se guardará como documento independiente
       actividades: this.fb.array([this.crearActividad()])
     });
+
+    // Suscribirse a cambios en la fecha para actualizar la semana
+    this.formulario.get('fecha')?.valueChanges.subscribe(fecha => {
+      if (fecha) {
+        this.updateSemana(fecha);
+      }
+    });
+
+    // Establecer fecha actual por defecto
+    const today = new Date().toISOString().split('T')[0];
+    this.formulario.patchValue({ fecha: today });
   }
 
-  // ====== FORM ARRAY (solo para UI) ======
+  // ====== FORM ARRAY ======
   get actividades(): FormArray {
     return this.formulario.get('actividades') as FormArray;
   }
@@ -84,6 +163,8 @@ export class TestComponent implements OnInit {
   eliminarActividad(index: number): void {
     if (this.actividades.length > 1) {
       this.actividades.removeAt(index);
+    } else {
+      this.showWarning('No se puede eliminar', 'Debe existir al menos una actividad');
     }
   }
 
@@ -105,55 +186,185 @@ export class TestComponent implements OnInit {
     }
   }
 
-  // ====== GUARDAR (Cada actividad como documento) ======
-  guardarAgenda(): void {
+  // ====== MÉTODOS SWEETALERT ======
+  private showError(title: string, message: string): Promise<any> {
+    return Swal.fire({
+      ...this.swalConfig.error,
+      title,
+      text: message
+    });
+  }
+
+  private showSuccess(title: string, message: string): Promise<any> {
+    return Swal.fire({
+      ...this.swalConfig.success,
+      title,
+      text: message
+    });
+  }
+
+  private showWarning(title: string, message: string): Promise<any> {
+    return Swal.fire({
+      ...this.swalConfig.warning,
+      title,
+      text: message
+    });
+  }
+
+  private showInfo(title: string, message: string): Promise<any> {
+    return Swal.fire({
+      ...this.swalConfig.info,
+      title,
+      text: message
+    });
+  }
+
+  private showConfirm(title: string, text: string): Promise<any> {
+    return Swal.fire({
+      title,
+      text,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, continuar',
+      cancelButtonText: 'Cancelar'
+    });
+  }
+
+  // ====== VALIDACIÓN DE FORMULARIO ======
+  private validarFormulario(): boolean {
     if (this.formulario.invalid) {
       this.formulario.markAllAsTouched();
-      alert('Por favor completa todos los campos requeridos');
+
+      // Obtener campos inválidos
+      const invalidFields = this.getInvalidFields();
+
+      if (invalidFields.length > 0) {
+        const message = `Por favor completa los siguientes campos requeridos:\n\n${invalidFields.join('\n')}`;
+        this.showError('Campos incompletos', message);
+      } else {
+        this.showError('Formulario incompleto', 'Por favor completa todos los campos requeridos');
+      }
+
+      return false;
+    }
+    // Validar que todas las actividades tengan hora
+    const actividadesInvalidas = this.actividades.controls
+      .filter((act, index) => !act.get('hora')?.valid)
+      .map((_, index) => `Actividad ${index + 1}`);
+
+    if (actividadesInvalidas.length > 0) {
+      const message = `Las siguientes actividades no tienen hora especificada:\n\n${actividadesInvalidas.join('\n')}`;
+      this.showError('Horas incompletas', message);
+      return false;
+    }
+
+    return true;
+  }
+
+  private getInvalidFields(): string[] {
+    const invalidFields: string[] = [];
+
+    // Validar campos principales
+    const mainFields = [
+      { name: 'semana', label: 'Semana' },
+      { name: 'fecha', label: 'Fecha' }
+    ];
+
+    mainFields.forEach(field => {
+      if (this.formulario.get(field.name)?.invalid) {
+        invalidFields.push(`• ${field.label}`);
+      }
+    });
+
+    return invalidFields;
+  }
+
+  // ====== GUARDAR AGENDA ======
+  async guardarAgenda(): Promise<void> {
+    if (!this.validarFormulario()) {
+      return;
+    }
+
+    const confirm = await this.showConfirm(
+      'Confirmar guardado',
+      `¿Estás seguro de guardar ${this.actividades.length} actividad(es)?`
+    );
+
+    if (!confirm.isConfirmed) {
       return;
     }
 
     const raw = this.formulario.getRawValue();
-    const objetivo = this.selectedObjetivos.join(',');
+    const objetivo = this.selectedObjetivos.join(', ');
 
-    // Crear un array de promesas para guardar cada actividad
-    const requests = this.actividades.controls.map((actividadControl, index) => {
-      const actividad = actividadControl.value;
-
-      // Crear payload para cada actividad/documento
-      const payload = {
-        asesor: raw.asesor,
-        coordinacion: raw.coordinacion,
-        semana: raw.semana,
-        fecha: raw.fecha,
-        objetivo: objetivo,
-        firma: raw.firma,
-        // Campos de actividad individual
-        hora: actividad.hora,
-        domicilio: actividad.domicilio,
-        actividad: actividad.actividad,
-        codigo: actividad.codigo,
-        acordeObjetivo: actividad.acordeObjetivo,
-        traslado: actividad.traslado,
-        kmRecorrido: actividad.kmRecorrido,
-        // Campo opcional para coordinador
-        coordinadorNombre: this.rol === 'coordinador' ? this.usuario : undefined
-      };
-
-      console.log(`Enviando actividad ${index + 1}:`, payload);
-      return this.coordinacionService.guardarAgendaAsesor(payload).toPromise();
-    });
-
-    // Ejecutar todas las peticiones
-    Promise.all(requests)
-      .then(() => {
-        alert(`¡Éxito! ${requests.length} actividad(es) guardada(s)`);
-        this.resetForm();
-      })
-      .catch((error) => {
-        console.error('Error al guardar actividades:', error);
-        alert('Error al guardar una o más actividades');
+    try {
+      // Mostrar loader
+      Swal.fire({
+        title: 'Guardando...',
+        text: 'Por favor espera mientras se guardan las actividades',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
       });
+
+      // Crear array de promesas
+      const requests = this.actividades.controls.map((actividadControl, index) => {
+        const actividad = actividadControl.value;
+
+        const payload = {
+          asesor: raw.asesor,
+          coordinacion: raw.coordinacion,
+          semana: raw.semana,
+          fecha: raw.fecha,
+          objetivo: objetivo,
+          firma: raw.firma,
+          hora: actividad.hora,
+          domicilio: actividad.domicilio,
+          actividad: actividad.actividad,
+          codigo: actividad.codigo,
+          acordeObjetivo: actividad.acordeObjetivo,
+          traslado: actividad.traslado,
+          kmRecorrido: actividad.kmRecorrido,
+          coordinadorNombre: this.rol === 'coordinador' ? this.usuario : undefined
+        };
+
+        return this.coordinacionService.guardarAgendaAsesor(payload).toPromise();
+      });
+
+      // Ejecutar todas las peticiones
+      const results = await Promise.all(requests);
+
+      // Cerrar loader
+      Swal.close();
+
+      await this.showSuccess(
+        '¡Guardado exitoso!',
+        `Se guardaron ${results.length} actividad(es) correctamente`
+      );
+
+      this.resetForm();
+
+    } catch (error: any) {
+      Swal.close();
+
+      console.error('Error al guardar actividades:', error);
+
+      let errorMessage = 'Ocurrió un error al guardar las actividades';
+
+      if (error.error?.message) {
+        errorMessage = error.error.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      await this.showError(
+        'Error al guardar',
+        errorMessage
+      );
+    }
   }
 
   resetForm(): void {
@@ -166,18 +377,64 @@ export class TestComponent implements OnInit {
     this.selectedObjetivos = [];
   }
 
-  // Opciones para código (igual que antes)
+  async cancelar(): Promise<void> {
+    const confirm = await this.showConfirm(
+      'Confirmar cancelación',
+      '¿Estás seguro de cancelar? Se perderán todos los datos no guardados.'
+    );
+
+    if (confirm.isConfirmed) {
+      this.resetForm();
+      await this.showInfo('Formulario cancelado', 'El formulario ha sido restablecido');
+    }
+  }
+
+  // Opciones para código
   opcionesCodigo = [
-    { value: 'R', texto: 'R | Pago' },
-    { value: 'RP', texto: 'R/P | Pago / levantamiento de papelería' },
+    { value: 'R', texto: 'R | Recuperación' },
+    { value: 'RP', texto: 'R/P | Recuperación / levantamiento de papelería' },
+    { value: 'LPI', texto: 'Levantamiento papelería individuales' },
+    { value: 'RPI', texto: 'Recuperación de levantaiento de papelería' },
     { value: 'C', texto: 'C | Cobranza' },
     { value: 'VTA', texto: 'VTA | Promoción' },
-    { value: 'REC', texto: 'R/EC | Pago / Entrega / Cambio ciclo' },
-    { value: 'RER', texto: 'R/ER | Pago / Entrega / Refil' },
-    { value: 'GN', texto: 'GN | Grupos nuevos' }
+    { value: 'REC', texto: 'R/EC | Recuperación / Entrega / Cambio ciclo' },
+    { value: 'RER', texto: 'R/ER | Recuperación / Entrega / Refil' },
+    { value: 'GN', texto: 'GN | Grupos nuevos' },
+    { value: 'COMIDA', texto: 'COMIDA' },
+    { value: 'ASEO', texto: 'ASEO' },
+    { value: 'RS', texto: 'RS | Reunión Semanal' },
+    { value: 'INT', texto: 'INT | Integración' },
+    { value: 'CM', texto: 'CM | Capacitación Manual' },
+    { value: 'ED', texto: 'ED | Entrega Depósitos' },
+    { value: 'EOP', texto: 'EOP | Entrega Operativos' },
+    { value: 'R/A', texto: 'RA | Realizar Agenda y Concentrado' },
+    //{ value: 'CC', texto: 'RA | Realizar Agenda y Concentrado' },
+    { value: 'OTRO', texto: 'OTRO | Otro' }
   ];
 
-  cancelar(): void {
-    this.resetForm();
+  // Para formatear la hora
+  getHoraFormateada(hora: string): string {
+    if (!hora) return '--:--';
+    return hora.substring(0, 5);
+  }
+
+  // Para obtener el nombre del código
+  getNombreCodigo(codigo: string): string {
+    const opcion = this.opcionesCodigo.find(o => o.value === codigo);
+    return opcion ? opcion.texto : 'Sin código';
+  }
+
+  // Para calcular horas totales (ejemplo básico)
+  calcularTotalHoras(): number {
+    // Implementa tu lógica para calcular horas entre actividades
+    return this.actividades.length * 1; // Ejemplo: 1 hora por actividad
+  }
+
+  // Para limpiar el formulario
+  limpiarFormulario(): void {
+    while (this.actividades.length !== 0) {
+      this.actividades.removeAt(0);
+    }
+    this.formulario.reset();
   }
 }

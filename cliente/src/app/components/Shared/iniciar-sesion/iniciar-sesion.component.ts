@@ -14,14 +14,20 @@ export class IniciarSesionComponent {
   error = '';
   mostrarContrasenia: boolean = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  loading: boolean = false;
+
+  constructor(private authService: AuthService, private router: Router) { }
 
   login(): void {
+    this.loading = true;
+    this.error = '';
     this.authService.login(this.usuario, this.contrasenia).subscribe({
       next: res => {
+        this.loading = false;
         this.router.navigate(['/inicio']); // redirige a donde tú decidas
       },
       error: err => {
+        this.loading = false;
         this.error = err.error.mensaje || 'Error de autenticación';
       }
     });

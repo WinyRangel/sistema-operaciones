@@ -29,14 +29,15 @@ export interface ActividadPayload {
 })
 export class CoordinacionService {
 
-  url = 'https://servidor-operaciones.onrender.com/coordinacion'
-  // url = 'http://localhost:4000/coordinacion'
-  url3 = 'https://servidor-operaciones.onrender.com/agendas?page=1&limit=11000'
-  // url3 = 'http://localhost:4000/agendas'
-  url2 = 'https://servidor-operaciones.onrender.com/agenda'
-  //url2 = 'http://localhost:4000/agenda/'
-  url4 = 'https://servidor-operaciones.onrender.com/obtenerAgenda'
-  //url4 = 'http://localhost:4000/obtenerAgenda'
+  // url = 'https://servidor-operaciones.onrender.com/coordinacion'
+  // url3 = 'https://servidor-operaciones.onrender.com/agendas?page=1&limit=13000'
+  // url2 = 'https://servidor-operaciones.onrender.com/agenda'
+  // url4 = 'https://servidor-operaciones.onrender.com/obtenerAgenda'
+
+  url = 'http://localhost:4000/coordinacion'
+  url3 = 'http://localhost:4000/agendas'
+  url2 = 'http://localhost:4000/agenda/'
+  url4 = 'http://localhost:4000/obtenerAgenda'
 
   //urlAsesor = 'http://localhost:4000/agenda-asesor/'
   urlAsesor = 'https://servidor-operaciones.onrender.com/agenda-asesor/'
@@ -129,5 +130,8 @@ export class CoordinacionService {
 
   validarAgendaAsesor(id: string): Observable<any> {
     return this.http.put(this.urlAsesor + id + '/validar', {});
+  }
+  rechazarAgendaAsesor(id: string, motivoRechazo: string): Observable<any> {
+    return this.http.put(this.urlAsesor + id + '/rechazar', { motivoRechazo })
   }
 }
