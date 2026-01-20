@@ -8,6 +8,9 @@ import jsPDF from 'jspdf';
 
 
 const SEMANAS_ANIO = 53;
+const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+
+
 
 interface Agenda {
   _id: string;
@@ -125,6 +128,7 @@ export class TestAgendaComponent {
   filtroFechaInicio: string = '';
   filtroFechaFin: string = '';
 
+  
   // ===== PROPIEDADES DEL CALENDARIO =====
   agendaCalendario: Agenda[] = [];
   vistaActual: 'mes' | 'semana' | 'dia' = 'mes';
@@ -1414,7 +1418,7 @@ export class TestAgendaComponent {
    */
   private obtenerDescripcionCodigo(codigo: string): string {
     const encontrado = this.opcionesCodigo.find(c => c.value === codigo);
-    return encontrado ? `${encontrado.texto} - ${encontrado.descripcion}` : codigo;
+    return encontrado ? `${encontrado.texto}` : codigo;
   }
 
   /**
@@ -1482,418 +1486,14 @@ export class TestAgendaComponent {
     }
   }
 
-  getNombreDia(fecha: Date | string) {
-    const dias = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
-    return dias[new Date(fecha).getDay()];
-  }
 
-  descargarAgendaPDF() {
-    if (!this.agendasFiltradas || this.agendasFiltradas.length === 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Sin datos',
-        text: 'No hay actividades para exportar'
-      });
-      return;
-    }
+  getNombreDia(fecha: Date | string): string {
+  const dias = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
+  const fechaObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
+  // Asegurar que estamos usando la hora local correctamente
+  return dias[fechaObj.getDay()];
+}
 
-    Swal.fire({
-      title: 'Opciones del PDF',
-      html: `
-    <div style="text-align: left;">
-      <label style="display: block; margin: 10px 0;">
-        <input type="checkbox" id="incluirLogo" checked> Incluir logo
-      </label>
-      <label style="display: block; margin: 10px 0;">
-        <input type="checkbox" id="mostrarSoloDiasHabiles" checked> Mostrar solo Lunes a Sábado
-      </label>
-      <label style="display: block; margin: 10px 0;">
-        <input type="checkbox" id="comprimirParaDosPaginas" checked> Comprimir en máximo 2 páginas
-      </label>
-    </div>
-  `,
-      showCancelButton: true,
-      confirmButtonText: 'Generar PDF',
-      cancelButtonText: 'Cancelar',
-      preConfirm: () => {
-        return {
-          incluirLogo: (document.getElementById('incluirLogo') as HTMLInputElement).checked,
-          mostrarSoloDiasHabiles: (document.getElementById('mostrarSoloDiasHabiles') as HTMLInputElement).checked,
-          comprimirParaDosPaginas: (document.getElementById('comprimirParaDosPaginas') as HTMLInputElement).checked
-        };
-      }
-    }).then((result) => {
-      if (!result.isConfirmed) return;
-
-      const opciones = result.value;
-
-      Swal.fire({
-        title: 'Generando PDF',
-        text: 'Preparando el archivo...',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
-
-      setTimeout(() => {
-        const doc = new jsPDF('landscape');
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-
-        // ===== CONFIGURACIÓN DE COMPRESIÓN =====
-        const comprimir = opciones.comprimirParaDosPaginas;
-
-        // Ajustes según si necesitamos comprimir
-        const fontSizeNormal = comprimir ? 8 : 9;
-        const fontSizeSmall = comprimir ? 7 : 7.5;
-        const fontSizeHeader = comprimir ? 10 : 11;
-        const headerHeight = comprimir ? 7 : 8;
-        const lineHeightActivity = comprimir ? 4 : 4.5;
-        const lineHeightAsesor = comprimir ? 3.5 : 4;
-        const cellPadding = comprimir ? 2 : 3;
-        const minRowHeight = comprimir ? 25 : 30;
-        const marginBottomPage = comprimir ? 15 : 20;
-
-        // ===== ENCABEZADO =====
-        let startY = comprimir ? 12 : 15;
-
-        if (opciones.incluirLogo) {
-          doc.addImage('https://static.wixstatic.com/media/0bf950_155f8cd81f6d4fe5ac3419b8e0397b40~mv2.png', 'PNG', 14, 7, 30, 12);
-          doc.setTextColor(0, 0, 0);
-          doc.setFontSize(comprimir ? 14 : 16);
-          doc.text('Agenda Semanal de Actividades', pageWidth / 2, comprimir ? 15 : 20, { align: 'center' });
-          startY = comprimir ? 22 : 30;
-        } else {
-          doc.setFontSize(comprimir ? 14 : 16);
-          doc.text('Agenda Semanal de Actividades', pageWidth / 2, comprimir ? 20 : 25, { align: 'center' });
-          startY = comprimir ? 22 : 25;
-        }
-
-        // ===== INFORMACIÓN DEL REPORTE =====
-        doc.setFontSize(fontSizeSmall);
-        doc.setTextColor(100, 100, 100);
-
-        const ahora = new Date();
-        const fechaStr = `${ahora.toLocaleDateString()} ${ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-        doc.text(`Generado: ${fechaStr}`, 14, startY);
-
-        startY += comprimir ? 6 : 7;
-
-        let asesorAMostrar = this.asesorSeleccionado || (!this.esCoordinador ? this.usuarioActual : '');
-        if (asesorAMostrar) {
-          doc.text(`Asesor: ${asesorAMostrar}`, 14, startY);
-          startY += comprimir ? 6 : 7;
-        }
-
-        if (this.filtroFechaInicio && this.filtroFechaFin) {
-          doc.text(`Periodo: ${this.formatDateUTC(this.filtroFechaInicio)} - ${this.formatDateUTC(this.filtroFechaFin)}`, 14, startY);
-          startY += comprimir ? 6 : 7;
-        }
-
-        doc.text(`Total actividades: ${this.agendasFiltradas.length}`, 14, startY);
-        startY += comprimir ? 8 : 10;
-
-        doc.setTextColor(0, 0, 0);
-
-        // ===== PREPARAR DATOS POR DÍA =====
-        const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-        const diasHabiles = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        const diasAMostrar = opciones.mostrarSoloDiasHabiles ? diasHabiles : diasSemana;
-
-        // Crear estructura para organizar actividades por día y hora
-        const actividadesPorDia: { [key: string]: any[] } = {};
-        diasAMostrar.forEach(dia => {
-          actividadesPorDia[dia] = [];
-        });
-
-        // Agrupar actividades por día de la semana
-        this.agendasFiltradas.forEach(actividad => {
-          const fecha = new Date(actividad.fecha);
-          const diaSemanaNum = fecha.getUTCDay();
-          const diaSemana = diasSemana[diaSemanaNum === 0 ? 6 : diaSemanaNum - 1];
-
-          if (diasAMostrar.includes(diaSemana)) {
-            // Acortar textos si estamos comprimiendo
-            const actividadTexto = comprimir ?
-              (actividad.actividad || '').substring(0, 60) +
-              ((actividad.actividad || '').length > 60 ? '...' : '') :
-              actividad.actividad || '';
-
-            const domicilioTexto = comprimir ?
-              (actividad.domicilio || 'Sin domicilio').substring(0, 40) :
-              actividad.domicilio || 'Sin domicilio';
-
-            actividadesPorDia[diaSemana].push({
-              hora: actividad.hora || 'Sin hora',
-              asesor: actividad.asesor || 'Sin asignar',
-              actividad: actividadTexto,
-              domicilio: domicilioTexto,
-              codigo: actividad.codigo || 'N/A',
-              resultado: actividad.resultado || 'Pendiente',
-              fechaCompleta: this.formatDateUTC(actividad.fecha)
-            });
-          }
-        });
-
-        // Ordenar actividades por hora dentro de cada día
-        diasAMostrar.forEach(dia => {
-          actividadesPorDia[dia].sort((a, b) => {
-            const horaA = a.hora === 'Sin hora' ? '23:59' : a.hora;
-            const horaB = b.hora === 'Sin hora' ? '23:59' : b.hora;
-            return horaA.localeCompare(horaB);
-          });
-        });
-
-        // ===== DISEÑO DE AGENDA SEMANAL =====
-        const marginLeft = 14;
-        const marginRight = 14;
-        const contentWidth = pageWidth - marginLeft - marginRight;
-        const numDias = diasAMostrar.length;
-        const colWidth = contentWidth / numDias;
-
-        // Dibujar encabezados de los días
-        doc.setFontSize(fontSizeHeader);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(255, 255, 255);
-
-        diasAMostrar.forEach((dia, index) => {
-          const x = marginLeft + (index * colWidth);
-
-          // Fondo color para encabezado de día
-          doc.setFillColor(41, 128, 185);
-          doc.rect(x, startY, colWidth, headerHeight, 'F');
-
-          // Texto del día centrado
-          const textWidth = doc.getTextWidth(dia);
-          const textX = x + (colWidth - textWidth) / 2;
-          doc.text(dia, textX, startY + (comprimir ? 4.5 : 5));
-        });
-
-        startY += headerHeight;
-
-        // Líneas verticales entre días
-        doc.setDrawColor(200, 200, 200);
-        for (let i = 0; i <= numDias; i++) {
-          const x = marginLeft + (i * colWidth);
-          doc.line(x, startY, x, pageHeight - marginBottomPage);
-        }
-
-        // Línea horizontal superior
-        doc.line(marginLeft, startY, marginLeft + contentWidth, startY);
-
-        let currentY = startY;
-        let pageNumber = 1;
-
-        // Encontrar el día con más actividades
-        let maxActividades = 0;
-        diasAMostrar.forEach(dia => {
-          if (actividadesPorDia[dia].length > maxActividades) {
-            maxActividades = actividadesPorDia[dia].length;
-          }
-        });
-
-        // Si no hay actividades, mostrar mensaje
-        if (maxActividades === 0) {
-          diasAMostrar.forEach((dia, index) => {
-            const x = marginLeft + (index * colWidth) + 3;
-            doc.text('Sin actividades', x, currentY + 10);
-          });
-        } else {
-          // Calcular si necesitamos dividir en páginas
-          const actividadesPorPagina = Math.ceil(maxActividades / 2);
-
-          // Dividir actividades en dos páginas si es necesario
-          for (let pagina = 0; pagina < 2; pagina++) {
-            if (pagina > 0) {
-              // Crear nueva página si no es la primera
-              doc.addPage('landscape');
-              pageNumber++;
-              currentY = 20;
-              startY = currentY;
-
-              // Redibujar encabezados en nueva página
-              doc.setFontSize(fontSizeHeader);
-              doc.setFont('helvetica', 'bold');
-              doc.setTextColor(255, 255, 255);
-
-              diasAMostrar.forEach((dia, index) => {
-                const x = marginLeft + (index * colWidth);
-                doc.setFillColor(41, 128, 185);
-                doc.rect(x, currentY, colWidth, headerHeight, 'F');
-                const textWidth = doc.getTextWidth(dia);
-                const textX = x + (colWidth - textWidth) / 2;
-                doc.text(dia, textX, currentY + (comprimir ? 4.5 : 5));
-              });
-
-              currentY += headerHeight;
-              startY = currentY;
-
-              doc.setDrawColor(200, 200, 200);
-              doc.line(marginLeft, currentY, marginLeft + contentWidth, currentY);
-            }
-
-            // Calcular rango de filas para esta página
-            const startRow = pagina * actividadesPorPagina;
-            const endRow = Math.min((pagina + 1) * actividadesPorPagina, maxActividades);
-
-            // Generar contenido para cada fila en esta página
-            for (let row = startRow; row < endRow; row++) {
-              // Calcular altura necesaria para esta fila
-              let rowHeight = minRowHeight;
-              diasAMostrar.forEach(dia => {
-                const actividades = actividadesPorDia[dia];
-                if (row < actividades.length) {
-                  const act = actividades[row];
-                  const linesActividad = doc.splitTextToSize(act.actividad, colWidth - 6).length;
-                  const linesAsesor = doc.splitTextToSize(`Asesor: ${act.asesor}`, colWidth - 6).length;
-
-                  const neededHeight = cellPadding +
-                    (linesActividad * lineHeightActivity) +
-                    2 +
-                    (linesAsesor * lineHeightAsesor) +
-                    cellPadding;
-
-                  if (neededHeight > rowHeight) rowHeight = neededHeight;
-                }
-              });
-
-              // Verificar si necesitamos saltar de página dentro de la misma "mitad"
-              if (comprimir && currentY + rowHeight > pageHeight - marginBottomPage) {
-                // Si estamos comprimiendo y no cabe, reducir fuentes aún más
-                doc.setFontSize(7);
-              }
-
-              // Dibujar el contenido de cada celda en la fila
-              diasAMostrar.forEach((dia, colIndex) => {
-                const x = marginLeft + (colIndex * colWidth) + cellPadding;
-                const actividades = actividadesPorDia[dia];
-
-                if (row < actividades.length) {
-                  const actividad = actividades[row];
-
-                  // Fondo alternado suave
-                  if (row % 2 === 0) {
-                    doc.setFillColor(248, 248, 248);
-                    doc.rect(marginLeft + (colIndex * colWidth), currentY, colWidth, rowHeight, 'F');
-                  }
-
-                  let textPosY = currentY + cellPadding + 2;
-
-                  // Hora
-                  doc.setFont('helvetica', 'bold');
-                  doc.setTextColor(41, 128, 185);
-                  doc.setFontSize(fontSizeNormal);
-                  doc.text(actividad.hora, x, textPosY);
-                  textPosY += (comprimir ? 4 : 5);
-
-                  // Actividad
-                  doc.setFont('helvetica', 'normal');
-                  doc.setTextColor(0, 0, 0);
-                  const actividadTexto = doc.splitTextToSize(actividad.actividad, colWidth - 8);
-                  doc.text(actividadTexto, x, textPosY);
-
-                  // Ajustar posición para el asesor
-                  textPosY += (actividadTexto.length * (comprimir ? 3.8 : 4.5)) + 1;
-
-                  // Asesor
-                  doc.setFontSize(fontSizeSmall);
-                  doc.setTextColor(100, 100, 100);
-                  const asesorTexto = doc.splitTextToSize(`Asesor: ${actividad.asesor}`, colWidth - 8);
-                  doc.text(asesorTexto, x, textPosY);
-
-                  // Restaurar fuente
-                  doc.setFontSize(fontSizeNormal);
-                  doc.setTextColor(0, 0, 0);
-                }
-              });
-
-              // Dibujar línea horizontal de la fila
-              doc.setDrawColor(230, 230, 230);
-              doc.line(marginLeft, currentY + rowHeight, marginLeft + contentWidth, currentY + rowHeight);
-
-              currentY += rowHeight;
-            }
-
-            // Dibujar líneas verticales finales para esta página
-            doc.setDrawColor(200, 200, 200);
-            for (let i = 0; i <= numDias; i++) {
-              const xFinalLine = marginLeft + (i * colWidth);
-              doc.line(xFinalLine, startY, xFinalLine, currentY);
-            }
-
-            // Línea horizontal final de la página
-            doc.line(marginLeft, currentY, marginLeft + contentWidth, currentY);
-          }
-        }
-
-        // ===== PIE DE PÁGINA =====
-        const totalPages = (doc as any).getNumberOfPages();
-
-        for (let i = 1; i <= totalPages; i++) {
-          doc.setPage(i);
-          doc.setFontSize(fontSizeSmall);
-          doc.setTextColor(150, 150, 150);
-
-          // Número de página
-          doc.text(
-            `Página ${i} de ${totalPages}`,
-            pageWidth / 2,
-            pageHeight - (comprimir ? 8 : 10),
-            { align: 'center' }
-          );
-
-          // Fecha de generación
-          doc.text(
-            `Generado: ${fechaStr}`,
-            marginLeft,
-            pageHeight - (comprimir ? 8 : 10),
-            { align: 'left' }
-          );
-
-          // Texto confidencial
-          doc.text(
-            'Confidencial - Uso interno',
-            pageWidth - marginRight,
-            pageHeight - (comprimir ? 8 : 10),
-            { align: 'right' }
-          );
-        }
-
-        // ===== GUARDAR ARCHIVO =====
-        const fechaISO = new Date().toISOString().slice(0, 10);
-        let nombreArchivo = `agenda_semanal_${fechaISO}`;
-
-        if (asesorAMostrar) {
-          const asesorNormalizado = asesorAMostrar
-            .toLowerCase()
-            .replace(/\s+/g, '_')
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-          nombreArchivo += `_${asesorNormalizado}`;
-        }
-
-        nombreArchivo += '.pdf';
-
-        doc.save(nombreArchivo);
-
-        Swal.fire({
-          icon: 'success',
-          title: '¡PDF generado!',
-          html: `
-        <div style="text-align: center;">
-          <p>Agenda semanal descargada correctamente</p>
-          <p style="font-size: 12px; color: #666;">${nombreArchivo}</p>
-          <p style="font-size: 12px; color: #666;">${this.agendasFiltradas.length} actividades</p>
-          <p style="font-size: 12px; color: #666;">${totalPages} página${totalPages > 1 ? 's' : ''}</p>
-        </div>
-      `,
-          timer: 3000,
-          showConfirmButton: false
-        });
-
-      }, 1000);
-    });
-  }
 
 
   // Método auxiliar para generar resumen
@@ -1984,6 +1584,48 @@ export class TestAgendaComponent {
     // Retornar en formato local (dd/mm/yyyy)
     return `${day}/${month}/${year}`;
   }
+
+  /**
+   * Convierte una fecha a la zona horaria local, evitando desfaces
+   * @param fecha La fecha (Date o string ISO)
+   * @returns Date con la zona horaria local
+   */
+  private convertirFechaLocal(fecha: Date | string): Date {
+    const date = typeof fecha === 'string' ? new Date(fecha) : new Date(fecha);
+    
+    // Si es una cadena ISO, extraer la fecha en la zona local
+    if (typeof fecha === 'string') {
+      // Extraer componentes de la cadena ISO (YYYY-MM-DDTHH:MM:SS.sssZ)
+      const partes = fecha.split('T')[0].split('-');
+      if (partes.length === 3) {
+        const year = parseInt(partes[0], 10);
+        const month = parseInt(partes[1], 10) - 1;
+        const day = parseInt(partes[2], 10);
+        // Crear una fecha en la zona horaria local
+        return new Date(year, month, day);
+      }
+    }
+    
+    return date;
+  }
+
+  private formatearFechaExtendida(fecha: Date | string = new Date()): string {
+    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    
+    // Convertir la fecha a la zona horaria local
+    const fechaLocal = this.convertirFechaLocal(fecha);
+    
+    const diaSemana = dias[fechaLocal.getDay()];
+    const dia = fechaLocal.getDate();
+    const mes = meses[fechaLocal.getMonth()];
+    const anio = fechaLocal.getFullYear();
+    
+    return `${diaSemana} ${dia} de ${mes} ${anio}`;
+  }
+
+  // Remove unused variables: fechaFormateada and horaFormateada
 
   // ===== MÉTODOS DEL CALENDARIO =====
 
@@ -2168,6 +1810,302 @@ export class TestAgendaComponent {
     // Calcular altura
     return '50px';
   }
+
+  /**
+   * Verifica si hay filtros aplicados
+   */
+  private hayFiltrosAplicados(): boolean {
+    return !!(this.mesSeleccionado || 
+              this.semanaSeleccionada || 
+              this.codigoSeleccionado || 
+              this.asesorSeleccionado ||
+              this.busqueda ||
+              this.fechaSeleccionada ||
+              this.filtroFechaInicio ||
+              this.filtroFechaFin ||
+              this.estadoSeleccionado);
+  }
+
+descargarAgendaPDF(): void {
+    const tieneFiltros = this.hayFiltrosAplicados();
+    
+    // Si no hay filtros, mostrar confirmación
+    if (!tieneFiltros) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Sin filtros aplicados',
+        text: '¿Está seguro de descargar todas las actividades registradas? Esto puede generar un archivo muy grande.',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, descargar todo',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.generarPDFAgenda(this.agendas);
+        }
+      });
+      return;
+    }
+    
+    // Si hay filtros, descargar directamente las agendas filtradas
+    this.generarPDFAgenda(this.agendasFiltradas);
+}
+
+private generarPDFAgenda(agendas: any[]): void {
+    const doc = new jsPDF('landscape', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 2;
+    let yPos = margin;
+    
+    // Configuración general
+    doc.setFont('helvetica', 'normal');
+    
+    // Fecha de generación mejorada
+    const fechaGeneracion = new Date();
+    const fechaFormateada = this.formatearFechaExtendida(fechaGeneracion);
+    const horaFormateada = fechaGeneracion.toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    // --- AGREGAR LOGO ---
+    yPos = 5;
+    const logoPath = 'https://static.wixstatic.com/media/0bf950_155f8cd81f6d4fe5ac3419b8e0397b40~mv2.png/v1/crop/x_0,y_260,w_6000,h_2480/fill/w_508,h_210,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/LOGO%20SIN%20FONDO%20OFICIAL.png';
+    
+    try {
+      doc.addImage(logoPath, 'PNG', margin, yPos, 38, 15);
+    } catch (error) {
+      console.warn('No se pudo cargar el logo:', error);
+    }
+    
+    // --- DETERMINAR NOMBRE DEL ASESOR Y TÍTULO ---
+    let nombreAsesor = this.usuarioActual || 'Sin datos';
+    let tituloReporte = '';
+    
+    if (this.esCoordinador) {
+        // Si es coordinador
+        if (this.asesorSeleccionado) {
+            tituloReporte = `AGENDA DE ${this.asesorSeleccionado.toUpperCase()}`;
+        } else {
+            tituloReporte = 'REPORTE DE AGENDAS';
+        }
+    } else {
+        // Si es asesor
+        tituloReporte = `AGENDA DE ${nombreAsesor.toUpperCase()}`;
+    }
+    
+    // --- INFORMACIÓN DEL REPORTE EN TARJETA ---
+    yPos = 12;
+    
+    // Título del reporte
+    doc.setFontSize(14);
+    doc.setTextColor(52, 58, 64);
+    doc.setFont('helvetica', 'bold');
+    doc.text(tituloReporte, pageWidth / 2, yPos, { align: 'center' });
+    
+    yPos += 8;
+    
+    // Información de fecha y hora
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    //doc.text(`Generado: ${fechaFormateada} a las ${horaFormateada}`, margin, yPos);
+    
+    // Mostrar filtros aplicados
+    const filtrosTexto = this.obtenerFiltrosAplicados();
+    doc.setFontSize(8);
+    doc.text(`Filtros: ${filtrosTexto}`, margin, yPos + 5);
+    
+    yPos += 12;
+
+    // --- TABLA DE ACTIVIDADES MEJORADA ---
+    
+    // Definir columnas dinámicamente según el rol
+    let columnas: any[] = [];
+    
+    if (this.esCoordinador) {
+        // Si es coordinador, incluir columna de ASESOR
+        columnas = [
+            { header: 'ASESOR', dataKey: 'asesor', width: 18 },
+            { header: 'FECHA', dataKey: 'fecha', width: 18 },
+            { header: 'HORA', dataKey: 'hora', width: 8 },
+            { header: 'DOMICILIO', dataKey: 'domicilio', width: 18 },
+            { header: 'CÓDIGO', dataKey: 'codigo', width: 6 },
+            { header: 'ACTIVIDAD', dataKey: 'actividad', width: 82 }
+        ];
+    } else {
+        // Si es asesor, no incluir columna de ASESOR
+        columnas = [
+            { header: 'FECHA', dataKey: 'fecha', width: 22 },
+            { header: 'HORA', dataKey: 'hora', width: 10 },
+            { header: 'DOMICILIO', dataKey: 'domicilio', width: 25 },
+            { header: 'CÓDIGO', dataKey: 'codigo', width: 8 },
+            { header: 'ACTIVIDAD', dataKey: 'actividad', width: 105 }
+        ];
+    }
+
+    let filas = agendas.map(a => ({
+        asesor: a.asesor || 'Sin asignar',
+        fecha: this.formatearFechaExtendida(a.fecha),
+        hora: a.hora || '--:--',
+        domicilio: this.truncarTexto(a.domicilio, 30),
+        codigo: this.obtenerDescripcionCodigo(a.codigo),
+        actividad: this.truncarTexto(a.actividad, 40),
+    }));
+
+    // Ordenar filas
+    if (this.esCoordinador) {
+        // Si es coordinador, ordenar por asesor, fecha y hora
+        filas.sort((a, b) => {
+            const asesorCompare = a.asesor.localeCompare(b.asesor);
+            if (asesorCompare !== 0) {
+                return asesorCompare;
+            }
+            // Si el asesor es igual, ordenar por fecha (descendente - más recientes primero)
+            const fechaCompare = b.fecha.localeCompare(a.fecha);
+            if (fechaCompare !== 0) {
+                return fechaCompare;
+            }
+            // Si la fecha es igual, ordenar por hora
+            return a.hora.localeCompare(b.hora);
+        });
+    } else {
+        // Si es asesor, ordenar por fecha y luego por hora
+        filas.sort((a, b) => {
+            const fechaCompare = b.fecha.localeCompare(a.fecha);
+            if (fechaCompare !== 0) {
+                return fechaCompare;
+            }
+            return a.hora.localeCompare(b.hora);
+        });
+    }
+
+    // --- ASIGNAR COLORES POR DÍA ---
+    const coloresPorDia = [
+        [227, 242, 253],   // Azul claro
+        [255, 250, 190],   // Amarillo claro
+        [220, 237, 200],   // Verde claro
+        [248, 187, 208],   // Rosa claro
+        [225, 190, 231]    // Púrpura claro
+    ];
+
+    let lastFecha = '';
+    let colorIndex = 0;
+
+    filas = filas.map((fila) => {
+        if (fila.fecha !== lastFecha) {
+            lastFecha = fila.fecha;
+            colorIndex = (colorIndex + 1) % coloresPorDia.length;
+        }
+        return {
+            ...fila,
+            colorFondo: coloresPorDia[colorIndex]
+        };
+    });
+
+    console.log('Total de filas a generar:', filas.length);
+    console.log('Agendas recibidas:', agendas.length);
+
+    autoTable(doc, {
+        columns: columnas,
+        body: filas,
+        startY: yPos,
+        margin: { left: margin, right: margin, top: margin, bottom: margin },
+        styles: {
+            fontSize: 8,
+            cellPadding: 2,
+            lineColor: [200, 200, 200],
+            lineWidth: 0.1,
+            font: 'helvetica',
+            textColor: [60, 60, 60],
+            halign: 'left',
+            valign: 'middle'
+        },
+        headStyles: {
+            fillColor: [52, 58, 64],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            fontSize: 9,
+            halign: 'center',
+            cellPadding: 4
+        },
+        bodyStyles: {
+            fillColor: [255, 255, 255]
+        },
+        willDrawCell: (data) => {
+            // Aplicar color de fondo según el día
+            if (data.cell.section === 'body' && data.row.raw && (data.row.raw as any).colorFondo) {
+                data.cell.styles.fillColor = (data.row.raw as any).colorFondo;
+            }
+        },
+        columnStyles: {
+            fecha: { halign: 'center' },
+            hora: { halign: 'center' }
+        },
+        theme: 'grid',
+        pageBreak: 'auto',
+        didDrawPage: (data) => {
+            // Log para debugging
+            const pageCount = (doc as any).internal.getNumberOfPages();
+            console.log('Página generada:', pageCount);
+        }
+    });
+
+    // Verificar cuántas filas se incluyeron realmente
+    const tableHeight = (doc as any).lastAutoTable?.finalY || 0;
+    console.log('Última posición Y de la tabla:', tableHeight);
+    console.log('Páginas totales en PDF:', (doc as any).internal.getNumberOfPages());
+
+
+
+    // --- GUARDAR CON NOMBRE MÁS DESCRIPTIVO ---
+    let nombreBase = '';
+    
+    if (this.esCoordinador) {
+        // Si es coordinador y hay asesor seleccionado
+        if (this.asesorSeleccionado) {
+            nombreBase = `agenda_${this.asesorSeleccionado.replace(/\s+/g, '_')}`;
+        } else {
+            nombreBase = 'agendas_coordinador';
+        }
+    } else {
+        // Si es asesor, usa su nombre
+        nombreBase = `agenda_${nombreAsesor.replace(/\s+/g, '_')}`;
+    }
+    
+    this.guardarPDF(doc, nombreBase);
+}
+
+// Métodos auxiliares para mejorar el código
+truncarTexto(texto: string, maxLength: number): string {
+    if (!texto) return '-';
+    return texto.length > maxLength ? texto.substring(0, maxLength - 3) + '...' : texto;
+}
+
+obtenerEstadoResultado(resultado: string): string {
+    if (!resultado) return '⏳ Pendiente';
+    if (resultado.length > 20) return resultado.substring(0, 20) + '...';
+    
+    // Colores según resultado
+    const resultadoLower = resultado.toLowerCase();
+    if (resultadoLower.includes('complet') || resultadoLower.includes('éxito')) {
+        return `🟢 ${resultado}`;
+    } else if (resultadoLower.includes('pendiente') || resultadoLower.includes('espera')) {
+        return `🟡 ${resultado}`;
+    } else if (resultadoLower.includes('cancel') || resultadoLower.includes('fallo')) {
+        return `🔴 ${resultado}`;
+    }
+    return resultado;
+}
+
+obtenerIconoValidacion(validada: boolean): string {
+    if (validada) return '✅';
+    return '⏳';
+}
+
+
 
   exportarCalendario() {
     this.descargarAgendaPDF();
