@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { BaucherPipe } from '../../../pipes/baucher.pipe';
-import { jsPDF } from 'jspdf';
+import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Chart, registerables } from 'chart.js';
 
@@ -622,9 +622,8 @@ generarDatosReporte() {
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pdf.internal.pageSize.getWidth() - 20; // Margen
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
       // Agregar título y fecha
       pdf.setFontSize(18);

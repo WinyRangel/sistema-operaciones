@@ -35,9 +35,10 @@
                 "glob": "**/*",
                 "input": "public"
               },
-                "src/assets"
+              "src/assets"
             ],
             "styles": [
+              "node_modules/primeicons/primeicons.css",
               "src/styles.css"
             ],
             "scripts": []
@@ -95,7 +96,7 @@
                 "input": "public"
               }
             ],
-            "styles": [             
+            "styles": [
               "src/styles.css"
             ],
             "scripts": []

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { CoordinacionService } from '../../services/coordinacion.service';
 import Swal from 'sweetalert2';
@@ -146,7 +146,7 @@ export class TestComponent implements OnInit {
 
   crearActividad(): FormGroup {
     return this.fb.group({
-      hora: ['', Validators.required],
+      hora: ['', [Validators.required, horaLaboralValidator]],
       domicilio: [''],
       actividad: [''],
       acordeObjetivo: [false],
@@ -430,11 +430,44 @@ export class TestComponent implements OnInit {
     return this.actividades.length * 1; // Ejemplo: 1 hora por actividad
   }
 
+
   // Para limpiar el formulario
   limpiarFormulario(): void {
-    while (this.actividades.length !== 0) {
-      this.actividades.removeAt(0);
-    }
-    this.formulario.reset();
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "Se eliminarán todas las actividades registradas y se limpiará el formulario. ¡Esta acción es irreversible!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, limpiar todo",
+      cancelButtonText: "Cancelar"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.resetForm();
+        Swal.fire({
+          title: "¡Limpiado!",
+          text: "El formulario ha sido restablecido correctamente.",
+          icon: "success"
+        });
+      }
+    });
   }
+}
+
+export function horaLaboralValidator(control: AbstractControl): ValidationErrors | null {
+  if (!control.value) return null;
+
+  const horaSeleccionada = control.value; // formato "HH:mm"
+  const [hora, minuto] = horaSeleccionada.split(':').map(Number);
+  const totalMinutos = hora * 60 + minuto;
+
+  const inicio = 8 * 60;    // 8:00 am en minutos
+  const fin = 19 * 60;      // 7:00 pm en minutos
+
+  if (totalMinutos < inicio || totalMinutos > fin) {
+    return { horaInvalida: true };
+  }
+
+  return null;
 }

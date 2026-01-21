@@ -1,23 +1,59 @@
 import { Component } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { CoordinacionService } from '../../../services/coordinacion.service';
 import { Coordinacion } from '../../../models/coordinacion';
 import { Agenda, Domicilio } from '../../../models/agenda';
 import Swal from 'sweetalert2';
 import { horaLaboralValidator } from '../agendas/agendas.component';
 import { AuthService } from '../../../services/auth.service';
-
+import { FormsModule } from '@angular/forms';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { TagModule } from 'primeng/tag';
+import { MessageModule } from 'primeng/message';
+import { ToastModule } from 'primeng/toast';
+import { CheckboxModule } from 'primeng/checkbox';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { FieldsetModule } from 'primeng/fieldset';
+import { ListboxModule } from 'primeng/listbox';
 // Constantes para evitar "magic numbers/strings"
 const RENDIMIENTO_POR_DEFECTO = 13;
 const SEMANAS_ANIO = 53;
 @Component({
   selector: 'app-registrar-agenda',
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    AutoCompleteModule,
+    CardModule,
+    ButtonModule,
+    SelectModule,
+    TagModule,
+    MessageModule,
+    ToastModule,
+    CheckboxModule,
+    DatePickerModule,
+    ToggleSwitchModule,
+    SelectButtonModule,
+    InputTextModule,
+    TextareaModule,
+    FieldsetModule,
+    ListboxModule
+  ],
   templateUrl: './registrar-agenda.component.html',
   styleUrl: './registrar-agenda.component.css'
 })
 export class RegistrarAgendaComponent {
-  coordinacion: string[] = []; 
+  coordinacion: string[] = [];
 
 
   //Variables para agenda
@@ -39,9 +75,15 @@ export class RegistrarAgendaComponent {
   selectedCode: string[] = [];
 
 
-    meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  loading: boolean = false;
+  fechaActual: Date = new Date();
+  trasladoOptions = [
+    { label: 'Sí', value: 'SI' },
+    { label: 'No', value: 'NO' }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -49,8 +91,6 @@ export class RegistrarAgendaComponent {
     private authService: AuthService) {
     this.registrarAgenda = this.initForm();
     this.generateWeeks();
-    codigo: this.fb.array([]) // almacenará un array de valores seleccionados
-
   }
 
   fixUTCDateToLocal(dateStr: string): Date {
@@ -63,9 +103,9 @@ export class RegistrarAgendaComponent {
     this.loadCoordinaciones();
     this.loadDomicilios();
     // this.setupFormListeners();
-     this._coordinacionService.obtenerCoordinacion().subscribe(data => {
-        this.coordinaciones = data;
-      });
+    this._coordinacionService.obtenerCoordinacion().subscribe(data => {
+      this.coordinaciones = data;
+    });
 
   }
 
@@ -171,6 +211,7 @@ export class RegistrarAgendaComponent {
   }
 
   private saveAgenda(): void {
+    this.loading = true;
     const datos = this.registrarAgenda.value;
     const requests = this.actividades.value.map((actividad: any) => {
       const agenda: Agenda = {
@@ -196,6 +237,9 @@ export class RegistrarAgendaComponent {
       .catch(error => {
         console.error('Error al registrar agenda:', error);
         this.showToast('error', 'Error al registrar las actividades');
+      })
+      .finally(() => {
+        this.loading = false;
       });
   }
 
@@ -221,25 +265,25 @@ export class RegistrarAgendaComponent {
   }
 
 
-    opcionesCodigo = [
-      { value: 'AG', texto: 'AG | Aseo General', color: '#fdff9dff' },
-      { value: 'GA', texto: 'GA | Gestión Administrativa', color: '#d7ff60ff' },
-      { value: 'C', texto: 'C | Cobranza', color: '#00ff9dff' },
-      { value: 'D', texto: 'D | Domiciliar', color: '#bcfff5ff' },
-      { value: 'Dep', texto: 'Dep | Depósitar', color: '#b300ffff' },
-      { value: 'E', texto: 'E | Entregas', color: '#00ffe5ff' },
-      { value: 'GN', texto: 'GN | Grupo Nuevo', color: '#79afffff' },
-      { value: 'INT', texto: 'INT | Integración', color: '#00d9ffff' },
-      { value: 'R', texto: 'R | Pago', color: '#ff006fff' },
-      { value: 'R/A', texto: 'R/A | Realizando Agendas', color: '#75a8ffff' },
-      { value: 'RM', texto: 'RM | Reunión Mensual', color: '#ff0400ff' },
-      { value: 'RS', texto: 'RS | Reunión Semanal', color: '#4dff00ff' },
-      { value: 'VTA', texto: 'VTA | Promoción', color: '#00ddffff' },
-      { value: 'Sup', texto: 'Sup | Supervisión', color: '#00c8ffff' },
-      { value: 'S/Renov', texto: 'S/Renov | Sup.Renovación', color: '#2d00a0ff' },
-      { value: 'Sin Codigo', texto: 'Sin código', color: '#ff93d9ff' },
-      { value: '', texto: 'Actividades sin código', color: '#ffacccff' }
-    ];
+  opcionesCodigo = [
+    { value: 'AG', texto: 'AG | Aseo General', color: '#fdff9dff' },
+    { value: 'GA', texto: 'GA | Gestión Administrativa', color: '#d7ff60ff' },
+    { value: 'C', texto: 'C | Cobranza', color: '#00ff9dff' },
+    { value: 'D', texto: 'D | Domiciliar', color: '#bcfff5ff' },
+    { value: 'Dep', texto: 'Dep | Depósitar', color: '#b300ffff' },
+    { value: 'E', texto: 'E | Entregas', color: '#00ffe5ff' },
+    { value: 'GN', texto: 'GN | Grupo Nuevo', color: '#79afffff' },
+    { value: 'INT', texto: 'INT | Integración', color: '#00d9ffff' },
+    { value: 'R', texto: 'R | Pago', color: '#ff006fff' },
+    { value: 'R/A', texto: 'R/A | Realizando Agendas', color: '#75a8ffff' },
+    { value: 'RM', texto: 'RM | Reunión Mensual', color: '#ff0400ff' },
+    { value: 'RS', texto: 'RS | Reunión Semanal', color: '#4dff00ff' },
+    { value: 'VTA', texto: 'VTA | Promoción', color: '#00ddffff' },
+    { value: 'Sup', texto: 'Sup | Supervisión', color: '#00c8ffff' },
+    { value: 'S/Renov', texto: 'S/Renov | Sup.Renovación', color: '#2d00a0ff' },
+    { value: 'Sin Codigo', texto: 'Sin código', color: '#ff93d9ff' },
+    { value: '', texto: 'Actividades sin código', color: '#ffacccff' }
+  ];
 
 
   // Helper para notificaciones
@@ -259,45 +303,53 @@ export class RegistrarAgendaComponent {
     Toast.fire({ icon, title });
   }
 
-    onCodeChange(event: any, index: number) {
-      const codigo = event.target.value;
-      const isChecked = event.target.checked;
-      const actividad = this.actividades.at(index);
+  onCodeChange(event: any, index: number, codigo: string) {
+    const isChecked = event.target.checked;
+    const actividad = this.actividades.at(index);
 
-      let selected = actividad.get('codigo')?.value ? actividad.get('codigo')?.value.split(',') : [];
+    let selected = actividad.get('codigo')?.value ? actividad.get('codigo')?.value.split(',') : [];
 
-      if (isChecked) {
-        if (!selected.includes(codigo)) {
-          selected.push(codigo);
-        }
-      } else {
-        selected = selected.filter((c: string) => c !== codigo);
+    if (isChecked) {
+      if (!selected.includes(codigo)) {
+        selected.push(codigo);
       }
-
-      actividad.get('codigo')?.setValue(selected.join(','));
+    } else {
+      selected = selected.filter((c: string) => c !== codigo);
     }
 
-      objetivosDisponibles: string[] = [
-        'Reducir mora',
-        'Grupos nuevos',
-        'Clientes nuevos',
-        'Cierre de fichas',
-        'Renovación de lo proyectado'
-      ];
+    actividad.get('codigo')?.setValue(selected.join(','));
+  }
 
-        onObjetivoToggle(event: any) {
-          const objetivo = event.target.value;
-          const isChecked = event.target.checked;
+  isCodeSelected(index: number, code: string): boolean {
+    const actividad = this.actividades.at(index);
+    const selected = actividad.get('codigo')?.value ? actividad.get('codigo')?.value.split(',') : [];
+    return selected.includes(code);
+  }
 
-          if (isChecked) {
-            if (!this.selectedObjetivos.includes(objetivo)) {
-              this.selectedObjetivos.push(objetivo);
-            }
-          } else {
-            this.selectedObjetivos = this.selectedObjetivos.filter(o => o !== objetivo);
-          }
+  objetivosDisponibles: string[] = [
+    'Reducir mora',
+    'Grupos nuevos',
+    'Clientes nuevos',
+    'Cierre de fichas',
+    'Renovación de lo proyectado'
+  ];
 
-          this.registrarAgenda.get('objetivo')?.setValue(this.selectedObjetivos.join(','));
-        }
+  onObjetivoToggle(event: any, objetivo: string) {
+    const isChecked = event.target.checked;
 
+    if (isChecked) {
+      if (!this.selectedObjetivos.includes(objetivo)) {
+        this.selectedObjetivos.push(objetivo);
+      }
+    } else {
+      this.selectedObjetivos = this.selectedObjetivos.filter(o => o !== objetivo);
+    }
+
+    this.registrarAgenda.get('objetivo')?.setValue(this.selectedObjetivos.join(','));
+  }
+
+  limpiarFormulario(): void {
+    this.registrarAgenda = this.initForm();
+    this.selectedObjetivos = [];
+  }
 }

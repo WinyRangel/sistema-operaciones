@@ -783,9 +783,8 @@ export class ReporteAgendasComponent {
       html2canvas(element).then(canvas => {
         const pdf = new jsPDF('p', 'mm', 'a4');
         const imgData = canvas.toDataURL('image/png');
-        const imgProps = pdf.getImageProperties(imgData);
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
         pdf.text(`Reporte de ${this.coordinadorVisible}`, 10, 10);
         pdf.addImage(imgData, 'PNG', 0, 20, pdfWidth, pdfHeight - 20);

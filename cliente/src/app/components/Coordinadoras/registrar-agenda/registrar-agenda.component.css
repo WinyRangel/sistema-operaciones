@@ -1,0 +1,80 @@
+/* Efectos hover para botones personalizados */
+.btn-lg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Efecto overlay al hacer hover */
+.btn-lg:hover .hover-opacity-10 {
+    opacity: 0.1;
+}
+
+/* Efecto shine al hacer hover */
+.btn-lg:hover .hover-shine {
+    opacity: 0.3;
+    animation: shine 0.8s ease;
+}
+
+/* Animación shine */
+@keyframes shine {
+    0% {
+        left: -20%;
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+
+    100% {
+        left: 120%;
+        opacity: 0;
+    }
+}
+
+/* Estado disabled */
+.btn-lg:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.btn-lg:disabled:hover {
+    background-color: #00c334 !important;
+    /* Mantiene el color original */
+}
+
+/* Efecto de clic */
+.btn-lg:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.1s ease;
+}
+
+/* Efecto específico para botón "Agregar Actividad" */
+.btn-lg[style*="background-color: #8291ff"]:hover:not(:disabled) {
+    background-color: #8291ff !important;
+}
+
+/* Efecto específico para botón "Guardar Agenda" */
+.btn-lg[style*="background-color: #00c334"]:hover:not(:disabled) {
+    background-color: #00a82d !important;
+}
+
+/* Transición suave para iconos */
+.btn-lg i {
+    transition: transform 0.3s ease;
+}
+
+.btn-lg:hover i {
+    transform: scale(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .btn-lg {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+}

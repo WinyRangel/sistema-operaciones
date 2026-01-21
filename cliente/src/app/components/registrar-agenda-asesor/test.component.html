@@ -121,16 +121,27 @@
                         <div class="time-marker d-flex flex-column align-items-center me-2 me-md-3">
                           <div
                             class="time-circle bg-primary-subtle text-primary-emphasis rounded-circle d-flex align-items-center justify-content-center position-relative"
-                            style="width: 60px; height: 60px; cursor: pointer;">
+                            style="width: 60px; height: 60px; cursor: pointer;"
+                            [class.border]="actividad.get('hora')?.invalid && actividad.get('hora')?.touched"
+                            [class.border-danger]="actividad.get('hora')?.invalid && actividad.get('hora')?.touched">
                             <input type="time" formControlName="hora"
                               class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
-                              style="cursor: pointer; z-index: 2;">
+                              style="cursor: pointer; z-index: 2;" min="08:00" max="19:00">
                             <div class="text-center" style="pointer-events: none; z-index: 1;">
                               <div class="fs-7 fs-md-6 fw-bold">
                                 {{ getHoraFormateada(actividad.get('hora')?.value) }}
                               </div>
                               <div class="small d-none d-md-block">Hora</div>
                             </div>
+                          </div>
+                          <!-- Mensaje de error -->
+                          <div *ngIf="actividad.get('hora')?.touched && actividad.get('hora')?.invalid"
+                            class="position-absolute start-0 w-100 text-center" style="top: 65px; z-index: 10;">
+                            <small class="text-danger fw-bold shadow-sm bg-white rounded px-1"
+                              style="font-size: 0.65rem;">
+                              <span *ngIf="actividad.get('hora')?.hasError('required')">Requerido</span>
+                              <span *ngIf="actividad.get('hora')?.hasError('horaInvalida')">8am-7pm</span>
+                            </small>
                           </div>
                           <div class="timeline-line mt-1 mt-md-2" style="width: 2px; height: 100%;"
                             style="background-color: #4e62b4;"></div>
