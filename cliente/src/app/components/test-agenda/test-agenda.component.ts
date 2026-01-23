@@ -27,6 +27,7 @@ interface Agenda {
   validada?: string;
   motivoRechazo?: string;
   validadaPor?: string;
+  semana?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -128,7 +129,7 @@ export class TestAgendaComponent {
   filtroFechaInicio: string = '';
   filtroFechaFin: string = '';
 
-  
+
   // ===== PROPIEDADES DEL CALENDARIO =====
   agendaCalendario: Agenda[] = [];
   vistaActual: 'mes' | 'semana' | 'dia' = 'mes';
@@ -146,31 +147,58 @@ export class TestAgendaComponent {
       return;
     }
 
-    const semanasSet = new Set<number>();
+    const semanasSet = new Set<string>();
     this.agendas.forEach(agenda => {
-      if (agenda.fecha) {
-        semanasSet.add(this.getSemanaDelAnio(agenda.fecha));
+      if (agenda.semana) {
+        semanasSet.add(agenda.semana);
+      } else if (agenda.fecha) {
+        // Fallback si no tiene el campo semana
+        const num = this.getSemanaDelAnio(agenda.fecha);
+        semanasSet.add(`SEMANA ${num}`);
       }
     });
 
-    this.semanas = Array.from(semanasSet)
-      .sort((a, b) => a - b)
-      .map(s => `SEMANA ${s}`);
+    this.semanas = Array.from(semanasSet).sort((a, b) => {
+      const numA = parseInt(a.replace('SEMANA ', '')) || 0;
+      const numB = parseInt(b.replace('SEMANA ', '')) || 0;
+      return numA - numB;
+    });
   }
   constructor(private authService: AuthService, private coordinacionService: CoordinacionService) {
     this.aplicarFiltros();
   }
 
   getSemanaDelAnio(fecha: Date | string): number {
-    const date = new Date(fecha);
-    const dayNum = (date.getUTCDay() + 6) % 7;
-    date.setUTCDate(date.getUTCDate() - dayNum + 3);
-    const firstThursday = date.getTime();
-    date.setUTCMonth(0, 1);
-    if (date.getUTCDay() !== 4) {
-      date.setUTCMonth(0, 1 + ((4 - date.getUTCDay()) + 7) % 7);
+    const d = new Date(fecha);
+    const year = d.getFullYear();
+    const firstJan = new Date(year, 0, 1);
+    const dayOfWeek = firstJan.getDay(); // 0 (Sun) to 6 (Sat)
+
+    // El primer viernes del año
+    const daysToFirstFriday = (5 - dayOfWeek + 7) % 7;
+    const firstFriday = new Date(year, 0, 1 + daysToFirstFriday);
+    firstFriday.setHours(0, 0, 0, 0);
+
+    const targetDate = new Date(d.getTime());
+    targetDate.setHours(0, 0, 0, 0);
+
+    if (targetDate < firstFriday) {
+      const prevYear = year - 1;
+      const firstJanPrev = new Date(prevYear, 0, 1);
+      const dayOfWeekPrev = firstJanPrev.getDay();
+      const daysToFirstFridayPrev = (5 - dayOfWeekPrev + 7) % 7;
+      const firstFridayPrev = new Date(prevYear, 0, 1 + daysToFirstFridayPrev);
+      firstFridayPrev.setHours(0, 0, 0, 0);
+
+      const diffTime = targetDate.getTime() - firstFridayPrev.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      return Math.floor(diffDays / 7) + 1;
     }
-    return 1 + Math.ceil((firstThursday - date.getTime()) / 604800000);
+
+    const diffTime = targetDate.getTime() - firstFriday.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    return Math.floor(diffDays / 7) + 1;
   }
 
   ngOnInit(): void {
@@ -319,12 +347,13 @@ export class TestAgendaComponent {
     }
 
     if (this.semanaSeleccionada) {
-      const semanaIndex =
-        parseInt(this.semanaSeleccionada.replace('SEMANA ', ''), 10);
-
       filtradas = filtradas.filter(a => {
-        const semana = this.getSemanaDelAnio(a.fecha);
-        return semana === semanaIndex;
+        // Usar campo semana si existe, sino recalcular
+        if (a.semana) {
+          return a.semana === this.semanaSeleccionada;
+        }
+        const num = this.getSemanaDelAnio(a.fecha);
+        return `SEMANA ${num}` === this.semanaSeleccionada;
       });
     }
 
@@ -1488,11 +1517,11 @@ export class TestAgendaComponent {
 
 
   getNombreDia(fecha: Date | string): string {
-  const dias = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
-  const fechaObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
-  // Asegurar que estamos usando la hora local correctamente
-  return dias[fechaObj.getDay()];
-}
+    const dias = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
+    const fechaObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
+    // Asegurar que estamos usando la hora local correctamente
+    return dias[fechaObj.getDay()];
+  }
 
 
 
@@ -1592,7 +1621,7 @@ export class TestAgendaComponent {
    */
   private convertirFechaLocal(fecha: Date | string): Date {
     const date = typeof fecha === 'string' ? new Date(fecha) : new Date(fecha);
-    
+
     // Si es una cadena ISO, extraer la fecha en la zona local
     if (typeof fecha === 'string') {
       // Extraer componentes de la cadena ISO (YYYY-MM-DDTHH:MM:SS.sssZ)
@@ -1605,23 +1634,23 @@ export class TestAgendaComponent {
         return new Date(year, month, day);
       }
     }
-    
+
     return date;
   }
 
   private formatearFechaExtendida(fecha: Date | string = new Date()): string {
-    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
-                   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
     const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-    
+
     // Convertir la fecha a la zona horaria local
     const fechaLocal = this.convertirFechaLocal(fecha);
-    
+
     const diaSemana = dias[fechaLocal.getDay()];
     const dia = fechaLocal.getDate();
     const mes = meses[fechaLocal.getMonth()];
     const anio = fechaLocal.getFullYear();
-    
+
     return `${diaSemana} ${dia} de ${mes} ${anio}`;
   }
 
@@ -1815,20 +1844,20 @@ export class TestAgendaComponent {
    * Verifica si hay filtros aplicados
    */
   private hayFiltrosAplicados(): boolean {
-    return !!(this.mesSeleccionado || 
-              this.semanaSeleccionada || 
-              this.codigoSeleccionado || 
-              this.asesorSeleccionado ||
-              this.busqueda ||
-              this.fechaSeleccionada ||
-              this.filtroFechaInicio ||
-              this.filtroFechaFin ||
-              this.estadoSeleccionado);
+    return !!(this.mesSeleccionado ||
+      this.semanaSeleccionada ||
+      this.codigoSeleccionado ||
+      this.asesorSeleccionado ||
+      this.busqueda ||
+      this.fechaSeleccionada ||
+      this.filtroFechaInicio ||
+      this.filtroFechaFin ||
+      this.estadoSeleccionado);
   }
 
-descargarAgendaPDF(): void {
+  descargarAgendaPDF(): void {
     const tieneFiltros = this.hayFiltrosAplicados();
-    
+
     // Si no hay filtros, mostrar confirmación
     if (!tieneFiltros) {
       Swal.fire({
@@ -1847,210 +1876,210 @@ descargarAgendaPDF(): void {
       });
       return;
     }
-    
+
     // Si hay filtros, descargar directamente las agendas filtradas
     this.generarPDFAgenda(this.agendasFiltradas);
-}
+  }
 
-private generarPDFAgenda(agendas: any[]): void {
+  private generarPDFAgenda(agendas: any[]): void {
     const doc = new jsPDF('landscape', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 2;
     let yPos = margin;
-    
+
     // Configuración general
     doc.setFont('helvetica', 'normal');
-    
+
     // Fecha de generación mejorada
     const fechaGeneracion = new Date();
     const fechaFormateada = this.formatearFechaExtendida(fechaGeneracion);
     const horaFormateada = fechaGeneracion.toLocaleTimeString('es-ES', {
-        hour: '2-digit',
-        minute: '2-digit'
+      hour: '2-digit',
+      minute: '2-digit'
     });
-    
+
     // --- AGREGAR LOGO ---
     yPos = 5;
     const logoPath = 'https://static.wixstatic.com/media/0bf950_155f8cd81f6d4fe5ac3419b8e0397b40~mv2.png/v1/crop/x_0,y_260,w_6000,h_2480/fill/w_508,h_210,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/LOGO%20SIN%20FONDO%20OFICIAL.png';
-    
+
     try {
       doc.addImage(logoPath, 'PNG', margin, yPos, 38, 15);
     } catch (error) {
       console.warn('No se pudo cargar el logo:', error);
     }
-    
+
     // --- DETERMINAR NOMBRE DEL ASESOR Y TÍTULO ---
     let nombreAsesor = this.usuarioActual || 'Sin datos';
     let tituloReporte = '';
-    
+
     if (this.esCoordinador) {
-        // Si es coordinador
-        if (this.asesorSeleccionado) {
-            tituloReporte = `AGENDA DE ${this.asesorSeleccionado.toUpperCase()}`;
-        } else {
-            tituloReporte = 'REPORTE DE AGENDAS';
-        }
+      // Si es coordinador
+      if (this.asesorSeleccionado) {
+        tituloReporte = `AGENDA DE ${this.asesorSeleccionado.toUpperCase()}`;
+      } else {
+        tituloReporte = 'REPORTE DE AGENDAS';
+      }
     } else {
-        // Si es asesor
-        tituloReporte = `AGENDA DE ${nombreAsesor.toUpperCase()}`;
+      // Si es asesor
+      tituloReporte = `AGENDA DE ${nombreAsesor.toUpperCase()}`;
     }
-    
+
     // --- INFORMACIÓN DEL REPORTE EN TARJETA ---
     yPos = 12;
-    
+
     // Título del reporte
     doc.setFontSize(14);
     doc.setTextColor(52, 58, 64);
     doc.setFont('helvetica', 'bold');
     doc.text(tituloReporte, pageWidth / 2, yPos, { align: 'center' });
-    
+
     yPos += 8;
-    
+
     // Información de fecha y hora
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(100, 100, 100);
     //doc.text(`Generado: ${fechaFormateada} a las ${horaFormateada}`, margin, yPos);
-    
+
     // Mostrar filtros aplicados
     const filtrosTexto = this.obtenerFiltrosAplicados();
     doc.setFontSize(8);
     doc.text(`Filtros: ${filtrosTexto}`, margin, yPos + 5);
-    
+
     yPos += 12;
 
     // --- TABLA DE ACTIVIDADES MEJORADA ---
-    
+
     // Definir columnas dinámicamente según el rol
     let columnas: any[] = [];
-    
+
     if (this.esCoordinador) {
-        // Si es coordinador, incluir columna de ASESOR
-        columnas = [
-            { header: 'ASESOR', dataKey: 'asesor', width: 18 },
-            { header: 'FECHA', dataKey: 'fecha', width: 18 },
-            { header: 'HORA', dataKey: 'hora', width: 8 },
-            { header: 'DOMICILIO', dataKey: 'domicilio', width: 18 },
-            { header: 'CÓDIGO', dataKey: 'codigo', width: 6 },
-            { header: 'ACTIVIDAD', dataKey: 'actividad', width: 82 }
-        ];
+      // Si es coordinador, incluir columna de ASESOR
+      columnas = [
+        { header: 'ASESOR', dataKey: 'asesor', width: 18 },
+        { header: 'FECHA', dataKey: 'fecha', width: 18 },
+        { header: 'HORA', dataKey: 'hora', width: 8 },
+        { header: 'DOMICILIO', dataKey: 'domicilio', width: 18 },
+        { header: 'CÓDIGO', dataKey: 'codigo', width: 6 },
+        { header: 'ACTIVIDAD', dataKey: 'actividad', width: 82 }
+      ];
     } else {
-        // Si es asesor, no incluir columna de ASESOR
-        columnas = [
-            { header: 'FECHA', dataKey: 'fecha', width: 22 },
-            { header: 'HORA', dataKey: 'hora', width: 10 },
-            { header: 'DOMICILIO', dataKey: 'domicilio', width: 25 },
-            { header: 'CÓDIGO', dataKey: 'codigo', width: 8 },
-            { header: 'ACTIVIDAD', dataKey: 'actividad', width: 105 }
-        ];
+      // Si es asesor, no incluir columna de ASESOR
+      columnas = [
+        { header: 'FECHA', dataKey: 'fecha', width: 22 },
+        { header: 'HORA', dataKey: 'hora', width: 10 },
+        { header: 'DOMICILIO', dataKey: 'domicilio', width: 25 },
+        { header: 'CÓDIGO', dataKey: 'codigo', width: 8 },
+        { header: 'ACTIVIDAD', dataKey: 'actividad', width: 105 }
+      ];
     }
 
     let filas = agendas.map(a => ({
-        asesor: a.asesor || 'Sin asignar',
-        fecha: this.formatearFechaExtendida(a.fecha),
-        hora: a.hora || '--:--',
-        domicilio: this.truncarTexto(a.domicilio, 30),
-        codigo: this.obtenerDescripcionCodigo(a.codigo),
-        actividad: this.truncarTexto(a.actividad, 40),
+      asesor: a.asesor || 'Sin asignar',
+      fecha: this.formatearFechaExtendida(a.fecha),
+      hora: a.hora || '--:--',
+      domicilio: this.truncarTexto(a.domicilio, 30),
+      codigo: this.obtenerDescripcionCodigo(a.codigo),
+      actividad: this.truncarTexto(a.actividad, 40),
     }));
 
     // Ordenar filas
     if (this.esCoordinador) {
-        // Si es coordinador, ordenar por asesor, fecha y hora
-        filas.sort((a, b) => {
-            const asesorCompare = a.asesor.localeCompare(b.asesor);
-            if (asesorCompare !== 0) {
-                return asesorCompare;
-            }
-            // Si el asesor es igual, ordenar por fecha (descendente - más recientes primero)
-            const fechaCompare = b.fecha.localeCompare(a.fecha);
-            if (fechaCompare !== 0) {
-                return fechaCompare;
-            }
-            // Si la fecha es igual, ordenar por hora
-            return a.hora.localeCompare(b.hora);
-        });
+      // Si es coordinador, ordenar por asesor, fecha y hora
+      filas.sort((a, b) => {
+        const asesorCompare = a.asesor.localeCompare(b.asesor);
+        if (asesorCompare !== 0) {
+          return asesorCompare;
+        }
+        // Si el asesor es igual, ordenar por fecha (descendente - más recientes primero)
+        const fechaCompare = b.fecha.localeCompare(a.fecha);
+        if (fechaCompare !== 0) {
+          return fechaCompare;
+        }
+        // Si la fecha es igual, ordenar por hora
+        return a.hora.localeCompare(b.hora);
+      });
     } else {
-        // Si es asesor, ordenar por fecha y luego por hora
-        filas.sort((a, b) => {
-            const fechaCompare = b.fecha.localeCompare(a.fecha);
-            if (fechaCompare !== 0) {
-                return fechaCompare;
-            }
-            return a.hora.localeCompare(b.hora);
-        });
+      // Si es asesor, ordenar por fecha y luego por hora
+      filas.sort((a, b) => {
+        const fechaCompare = b.fecha.localeCompare(a.fecha);
+        if (fechaCompare !== 0) {
+          return fechaCompare;
+        }
+        return a.hora.localeCompare(b.hora);
+      });
     }
 
     // --- ASIGNAR COLORES POR DÍA ---
     const coloresPorDia = [
-        [227, 242, 253],   // Azul claro
-        [255, 250, 190],   // Amarillo claro
-        [220, 237, 200],   // Verde claro
-        [248, 187, 208],   // Rosa claro
-        [225, 190, 231]    // Púrpura claro
+      [227, 242, 253],   // Azul claro
+      [255, 250, 190],   // Amarillo claro
+      [220, 237, 200],   // Verde claro
+      [248, 187, 208],   // Rosa claro
+      [225, 190, 231]    // Púrpura claro
     ];
 
     let lastFecha = '';
     let colorIndex = 0;
 
     filas = filas.map((fila) => {
-        if (fila.fecha !== lastFecha) {
-            lastFecha = fila.fecha;
-            colorIndex = (colorIndex + 1) % coloresPorDia.length;
-        }
-        return {
-            ...fila,
-            colorFondo: coloresPorDia[colorIndex]
-        };
+      if (fila.fecha !== lastFecha) {
+        lastFecha = fila.fecha;
+        colorIndex = (colorIndex + 1) % coloresPorDia.length;
+      }
+      return {
+        ...fila,
+        colorFondo: coloresPorDia[colorIndex]
+      };
     });
 
     console.log('Total de filas a generar:', filas.length);
     console.log('Agendas recibidas:', agendas.length);
 
     autoTable(doc, {
-        columns: columnas,
-        body: filas,
-        startY: yPos,
-        margin: { left: margin, right: margin, top: margin, bottom: margin },
-        styles: {
-            fontSize: 8,
-            cellPadding: 2,
-            lineColor: [200, 200, 200],
-            lineWidth: 0.1,
-            font: 'helvetica',
-            textColor: [60, 60, 60],
-            halign: 'left',
-            valign: 'middle'
-        },
-        headStyles: {
-            fillColor: [52, 58, 64],
-            textColor: [255, 255, 255],
-            fontStyle: 'bold',
-            fontSize: 9,
-            halign: 'center',
-            cellPadding: 4
-        },
-        bodyStyles: {
-            fillColor: [255, 255, 255]
-        },
-        willDrawCell: (data) => {
-            // Aplicar color de fondo según el día
-            if (data.cell.section === 'body' && data.row.raw && (data.row.raw as any).colorFondo) {
-                data.cell.styles.fillColor = (data.row.raw as any).colorFondo;
-            }
-        },
-        columnStyles: {
-            fecha: { halign: 'center' },
-            hora: { halign: 'center' }
-        },
-        theme: 'grid',
-        pageBreak: 'auto',
-        didDrawPage: (data) => {
-            // Log para debugging
-            const pageCount = (doc as any).internal.getNumberOfPages();
-            console.log('Página generada:', pageCount);
+      columns: columnas,
+      body: filas,
+      startY: yPos,
+      margin: { left: margin, right: margin, top: margin, bottom: margin },
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+        lineColor: [200, 200, 200],
+        lineWidth: 0.1,
+        font: 'helvetica',
+        textColor: [60, 60, 60],
+        halign: 'left',
+        valign: 'middle'
+      },
+      headStyles: {
+        fillColor: [52, 58, 64],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 9,
+        halign: 'center',
+        cellPadding: 4
+      },
+      bodyStyles: {
+        fillColor: [255, 255, 255]
+      },
+      willDrawCell: (data) => {
+        // Aplicar color de fondo según el día
+        if (data.cell.section === 'body' && data.row.raw && (data.row.raw as any).colorFondo) {
+          data.cell.styles.fillColor = (data.row.raw as any).colorFondo;
         }
+      },
+      columnStyles: {
+        fecha: { halign: 'center' },
+        hora: { halign: 'center' }
+      },
+      theme: 'grid',
+      pageBreak: 'auto',
+      didDrawPage: (data) => {
+        // Log para debugging
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        console.log('Página generada:', pageCount);
+      }
     });
 
     // Verificar cuántas filas se incluyeron realmente
@@ -2062,48 +2091,48 @@ private generarPDFAgenda(agendas: any[]): void {
 
     // --- GUARDAR CON NOMBRE MÁS DESCRIPTIVO ---
     let nombreBase = '';
-    
-    if (this.esCoordinador) {
-        // Si es coordinador y hay asesor seleccionado
-        if (this.asesorSeleccionado) {
-            nombreBase = `agenda_${this.asesorSeleccionado.replace(/\s+/g, '_')}`;
-        } else {
-            nombreBase = 'agendas_coordinador';
-        }
-    } else {
-        // Si es asesor, usa su nombre
-        nombreBase = `agenda_${nombreAsesor.replace(/\s+/g, '_')}`;
-    }
-    
-    this.guardarPDF(doc, nombreBase);
-}
 
-// Métodos auxiliares para mejorar el código
-truncarTexto(texto: string, maxLength: number): string {
+    if (this.esCoordinador) {
+      // Si es coordinador y hay asesor seleccionado
+      if (this.asesorSeleccionado) {
+        nombreBase = `agenda_${this.asesorSeleccionado.replace(/\s+/g, '_')}`;
+      } else {
+        nombreBase = 'agendas_coordinador';
+      }
+    } else {
+      // Si es asesor, usa su nombre
+      nombreBase = `agenda_${nombreAsesor.replace(/\s+/g, '_')}`;
+    }
+
+    this.guardarPDF(doc, nombreBase);
+  }
+
+  // Métodos auxiliares para mejorar el código
+  truncarTexto(texto: string, maxLength: number): string {
     if (!texto) return '-';
     return texto.length > maxLength ? texto.substring(0, maxLength - 3) + '...' : texto;
-}
+  }
 
-obtenerEstadoResultado(resultado: string): string {
+  obtenerEstadoResultado(resultado: string): string {
     if (!resultado) return '⏳ Pendiente';
     if (resultado.length > 20) return resultado.substring(0, 20) + '...';
-    
+
     // Colores según resultado
     const resultadoLower = resultado.toLowerCase();
     if (resultadoLower.includes('complet') || resultadoLower.includes('éxito')) {
-        return `🟢 ${resultado}`;
+      return `🟢 ${resultado}`;
     } else if (resultadoLower.includes('pendiente') || resultadoLower.includes('espera')) {
-        return `🟡 ${resultado}`;
+      return `🟡 ${resultado}`;
     } else if (resultadoLower.includes('cancel') || resultadoLower.includes('fallo')) {
-        return `🔴 ${resultado}`;
+      return `🔴 ${resultado}`;
     }
     return resultado;
-}
+  }
 
-obtenerIconoValidacion(validada: boolean): string {
+  obtenerIconoValidacion(validada: boolean): string {
     if (validada) return '✅';
     return '⏳';
-}
+  }
 
 
 

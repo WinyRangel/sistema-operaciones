@@ -96,17 +96,31 @@ export class TestComponent implements OnInit {
     const firstJan = new Date(year, 0, 1);
     const dayOfWeek = firstJan.getDay(); // 0 (Sun) to 6 (Sat)
 
-    // Calcular días hasta el primer lunes
-    // Si es Lunes (1), 0 dias. Si es Martes (2), 6 dias... Domingo (0), 1 dia.
-    const daysToFirstMonday = dayOfWeek === 1 ? 0 : (8 - dayOfWeek) % 7;
-    const firstMonday = new Date(year, 0, 1 + daysToFirstMonday);
+    // El primer viernes del año
+    // Si Jan 1 es Viernes (5), daysToFirstFriday es 0.
+    const daysToFirstFriday = (5 - dayOfWeek + 7) % 7;
+    const firstFriday = new Date(year, 0, 1 + daysToFirstFriday);
+    firstFriday.setHours(0, 0, 0, 0);
 
-    // Si la fecha es anterior al primer lunes, devolver 0 (o manejar como semana 52/53 año anterior)
-    if (d < firstMonday) {
-      return 0;
+    // Copia de la fecha para comparar solo fecha sin hora
+    const targetDate = new Date(d.getTime());
+    targetDate.setHours(0, 0, 0, 0);
+
+    // Si la fecha es anterior al primer viernes del año, pertenece a la última semana del año anterior
+    if (targetDate < firstFriday) {
+      const prevYear = year - 1;
+      const firstJanPrev = new Date(prevYear, 0, 1);
+      const dayOfWeekPrev = firstJanPrev.getDay();
+      const daysToFirstFridayPrev = (5 - dayOfWeekPrev + 7) % 7;
+      const firstFridayPrev = new Date(prevYear, 0, 1 + daysToFirstFridayPrev);
+      firstFridayPrev.setHours(0, 0, 0, 0);
+
+      const diffTime = targetDate.getTime() - firstFridayPrev.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      return Math.floor(diffDays / 7) + 1;
     }
 
-    const diffTime = d.getTime() - firstMonday.getTime();
+    const diffTime = targetDate.getTime() - firstFriday.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     return Math.floor(diffDays / 7) + 1;
