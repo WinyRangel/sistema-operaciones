@@ -26,8 +26,8 @@ import { TestAgendaComponent } from './components/test-agenda/test-agenda.compon
 
 const routes: Routes = [
   { path: 'baucher', component: BauchersComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup'] } },
-  { path: 'seguimiento-agenda-asesor', component: TestAgendaComponent },
-  { path: 'registrar-agenda-asesor', component: TestComponent },
+  { path: 'seguimiento-agenda-asesor', component: TestAgendaComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'coordinador', 'asesor'] } },
+  { path: 'registrar-agenda-asesor', component: TestComponent, canActivate: [AuthGuard], data: { roles: ['asesor'] } },
   { path: 'legales', component: LegalesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup'] } },
   { path: 'recorrido-agenda', component: RecorridoAgendaComponent },
   { path: 'reporte-agendas', component: ReporteAgendasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup'] } },
