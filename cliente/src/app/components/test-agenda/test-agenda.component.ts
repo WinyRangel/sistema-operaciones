@@ -297,7 +297,12 @@ export class TestAgendaComponent {
   cargarAgendas(): void {
     this.coordinacionService.obtenerAgendasAsesor().subscribe({
       next: (resp) => {
-        this.agendas = resp.agendas;
+        this.agendas = resp.agendas.sort((a: any, b: any) => {
+          const fechaA = new Date(a.fecha).getTime();
+          const fechaB = new Date(b.fecha).getTime();
+          if (fechaA !== fechaB) return fechaA - fechaB;
+          return (a.hora || '').localeCompare(b.hora || '');
+        });
         this.actualizarSemanasDisponibles();
         this.aplicarFiltros();
 
@@ -1975,7 +1980,32 @@ export class TestAgendaComponent {
       ];
     }
 
-    let filas = agendas.map(a => ({
+    // Ordenar las agendas de menor a mayor (cronológicamente)
+    // Se realiza antes del mapeo para usar los valores originales de fecha y hora
+    const agendasOrdenadas = [...agendas].sort((a: any, b: any) => {
+      // 1. Si es coordinador, agrupar por asesor primero
+      if (this.esCoordinador) {
+        const asesorA = (a.asesor || 'Sin asignar').toLowerCase();
+        const asesorB = (b.asesor || 'Sin asignar').toLowerCase();
+        if (asesorA !== asesorB) {
+          return asesorA.localeCompare(asesorB);
+        }
+      }
+
+      // 2. Ordenar por fecha cronológicamente (menor a mayor)
+      const fechaA = new Date(a.fecha).getTime();
+      const fechaB = new Date(b.fecha).getTime();
+      if (fechaA !== fechaB) {
+        return fechaA - fechaB;
+      }
+
+      // 3. Ordenar por hora (menor a mayor)
+      const horaA = a.hora || '00:00';
+      const horaB = b.hora || '00:00';
+      return horaA.localeCompare(horaB);
+    });
+
+    let filas = agendasOrdenadas.map((a: any) => ({
       asesor: a.asesor || 'Sin asignar',
       fecha: this.formatearFechaExtendida(a.fecha),
       hora: a.hora || '--:--',
@@ -1983,33 +2013,6 @@ export class TestAgendaComponent {
       codigo: this.obtenerDescripcionCodigo(a.codigo),
       actividad: this.truncarTexto(a.actividad, 40),
     }));
-
-    // Ordenar filas
-    if (this.esCoordinador) {
-      // Si es coordinador, ordenar por asesor, fecha y hora
-      filas.sort((a, b) => {
-        const asesorCompare = a.asesor.localeCompare(b.asesor);
-        if (asesorCompare !== 0) {
-          return asesorCompare;
-        }
-        // Si el asesor es igual, ordenar por fecha (descendente - más recientes primero)
-        const fechaCompare = b.fecha.localeCompare(a.fecha);
-        if (fechaCompare !== 0) {
-          return fechaCompare;
-        }
-        // Si la fecha es igual, ordenar por hora
-        return a.hora.localeCompare(b.hora);
-      });
-    } else {
-      // Si es asesor, ordenar por fecha y luego por hora
-      filas.sort((a, b) => {
-        const fechaCompare = b.fecha.localeCompare(a.fecha);
-        if (fechaCompare !== 0) {
-          return fechaCompare;
-        }
-        return a.hora.localeCompare(b.hora);
-      });
-    }
 
     // --- ASIGNAR COLORES POR DÍA ---
     const coloresPorDia = [
