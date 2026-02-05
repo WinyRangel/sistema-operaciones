@@ -13,7 +13,7 @@ conectarDB();
 // ];
 
 app.use(cors({
-  origin: 'https://supervisor-operacion.web.app', // tu frontend
+  origin: ['https://supervisor-operacion.web.app', 'http://localhost:4200'], // tu  frontend producccion https://supervisor-operacion.web.app
   credentials: true
 }));
 //https://supervisor-operacion.web.app
