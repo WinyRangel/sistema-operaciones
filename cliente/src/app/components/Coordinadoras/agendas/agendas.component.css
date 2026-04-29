@@ -1,0 +1,413 @@
+/* Modern UI/UX Enhancements - Inspired by Tailwind & Soft Neon */
+
+:host {
+    --primary-glow: 0 0 8px rgba(59, 130, 246, 0.3);
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Botones modernos */
+.btn-modern-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border: none;
+    padding: 0.625rem 1.5rem;
+    border-radius: 2rem;
+    color: white;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: var(--transition-smooth);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-modern-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+}
+
+.btn-modern-outline {
+    background: transparent;
+    border: 1.5px solid #e2e8f0;
+    padding: 0.625rem 1.5rem;
+    border-radius: 2rem;
+    color: #475569;
+    font-weight: 500;
+    transition: var(--transition-smooth);
+}
+
+.btn-modern-outline:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #eff6ff;
+    transform: translateY(-1px);
+}
+
+/* Tarjeta principal */
+.card-modern {
+    background: #ffffff;
+    border-radius: 1.5rem;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.card-form-modern {
+    background: #ffffff;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.card-header-modern-gradient {
+    background: linear-gradient(135deg, #97cbff 0%, #c3e9ff 100%);
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.glow-dot {
+    width: 8px;
+    height: 8px;
+    background: #3b82f6;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #3b82f6;
+    animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+/* Estilos de formulario moderno */
+.form-floating-modern {
+    position: relative;
+}
+
+.form-select-modern,
+.form-control-modern {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    transition: var(--transition-smooth);
+    background: #ffffff;
+}
+
+.form-select-modern:focus,
+.form-control-modern:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-label-modern {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* Tarjetas secundarias */
+.card-glass,
+.card-activity-modern {
+    background: #ffffff;
+    border-radius: 1rem;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    transition: var(--transition-smooth);
+}
+
+.card-glass:hover,
+.card-activity-modern:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card-header-glass,
+.card-header-activity {
+    background: #f8fafc;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid #eef2f8;
+    border-radius: 1rem 1rem 0 0;
+}
+
+.badge-modern-soft {
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 0.375rem 0.875rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.badge-activity {
+    background: #3b82f6;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+/* Checkboxes modernos */
+.form-check-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+}
+
+.form-check-input-modern {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.25rem;
+    border: 1.5px solid #cbd5e1;
+    transition: var(--transition-smooth);
+    cursor: pointer;
+}
+
+.form-check-input-modern:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.card-check-group {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    background: #fafcff;
+}
+
+/* Switch moderno */
+.form-switch-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.form-switch-input {
+    width: 2.5rem;
+    height: 1.25rem;
+    background: #cbd5e1;
+    border-radius: 1rem;
+    appearance: none;
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition-smooth);
+}
+
+.form-switch-input:checked {
+    background: #3b82f6;
+}
+
+.form-switch-input::before {
+    content: '';
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    background: white;
+    border-radius: 50%;
+    top: 0.125rem;
+    left: 0.125rem;
+    transition: var(--transition-smooth);
+}
+
+.form-switch-input:checked::before {
+    transform: translateX(1.25rem);
+}
+
+.form-switch-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+}
+
+/* Grupos de botones para radio */
+.btn-group-modern {
+    display: inline-flex;
+    gap: 0.5rem;
+    background: #f8fafc;
+    padding: 0.25rem;
+    border-radius: 0.75rem;
+}
+
+.btn-radio-modern {
+    display: none;
+}
+
+.btn-radio-label {
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.btn-radio-label.success {
+    background: transparent;
+    color: #10b981;
+    border: 1px solid #d1fae5;
+}
+
+.btn-radio-label.secondary {
+    background: transparent;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+
+.btn-radio-modern:checked+.btn-radio-label.success {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btn-radio-modern:checked+.btn-radio-label.secondary {
+    background: #64748b;
+    color: white;
+    border-color: #64748b;
+}
+
+/* Tarjeta de código */
+.card-code-section {
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border-radius: 0.75rem;
+    border-left: 4px solid #3b82f6;
+}
+
+.card-highlight {
+    background: #fefce8;
+    border-radius: 0.75rem;
+    border: 1px solid #fef08a;
+}
+
+/* Input group moderno */
+.input-group-modern {
+    display: flex;
+    gap: 0;
+}
+
+.input-group-modern .form-control-modern {
+    border-radius: 0.75rem 0 0 0.75rem;
+    border-right: none;
+}
+
+.input-group-text-modern {
+    background: #f1f5f9;
+    border: 1.5px solid #e2e8f0;
+    border-left: none;
+    padding: 0 0.75rem;
+    display: flex;
+    align-items: center;
+    border-radius: 0 0.75rem 0.75rem 0;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+/* Botones de acción */
+.btn-modern-secondary {
+    background: #f1f5f9;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 2rem;
+    font-weight: 500;
+    color: #475569;
+    transition: var(--transition-smooth);
+}
+
+.btn-modern-secondary:hover {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+.btn-modern-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    color: white;
+    transition: var(--transition-smooth);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-modern-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.btn-icon-danger {
+    background: transparent;
+    border: none;
+    color: #f43f5e;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-smooth);
+}
+
+.btn-icon-danger:hover {
+    background: #ffe4e6;
+    color: #e11d48;
+    transform: scale(1.05);
+}
+
+/* Mensajes de error */
+.invalid-feedback-modern {
+    color: #ef4444;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.text-danger-modern {
+    color: #ef4444;
+    font-size: 0.7rem;
+}
+
+/* Utilidades */
+.border-top-light {
+    border-top: 1px solid #f1f5f9;
+}
+
+.text-muted-soft {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+/* Animaciones suaves adicionales */
+.card-activity-modern,
+.card-glass {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

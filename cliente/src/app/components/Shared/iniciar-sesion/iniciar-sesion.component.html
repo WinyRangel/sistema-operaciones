@@ -1,60 +1,80 @@
-<div class="login-wrapper">
-  <div class="login-container">
-    <div class="login-card">
-      <!-- Logo y encabezado -->
-      <div class="logo-section text-center mb-6">
-        <div class="logo-circle">
-          <img src="./assets/icono.png" alt="Logo" class="login-logo">
-        </div>
-        <div class="login-header mt-4">
-          <h1 class="login-title">Bienvenido</h1>
-          <p class="login-subtitle">Inicia sesión para continuar</p>
+<div class="login-wrapper" style="background-image: url('../../../../assets/canva.png');">
+  <div class="container">
+    <div class="login-grid">
+      <!-- Columna decorativa lateral (opcional) -->
+      <div class="login-brand" style="background-image: url('../../../../assets/vector.png');">
+        <div class="brand-content">
+          <!-- Aquí podrías agregar texto o branding -->
         </div>
       </div>
 
-      <!-- Formulario -->
-      <form (ngSubmit)="login()" class="login-form">
-        <!-- Campo Usuario -->
-        <div class="form-group mb-5">
-          <label for="username" class="form-label">Usuario</label>
-          <div class="input-wrapper">
-            <i class="input-icon fas fa-user"></i>
-            <input type="text" id="username" name="username" class="form-control" placeholder="Ingresa tu usuario"
-              [(ngModel)]="usuario" required>
+      <!-- Columna del formulario -->
+      <div class="login-form-col">
+        <div class="login-card">
+          <!-- Logo y encabezado -->
+          <div class="logo-section">
+            <div class="logo-circle">
+              <img src="./assets/icono.png" alt="Logo de la empresa" class="login-logo">
+            </div>
+            <div class="login-header">
+              <h1 class="login-title">Bienvenido de nuevo</h1>
+              <p class="login-subtitle">Ingresa tus credenciales para acceder</p>
+            </div>
           </div>
-        </div>
 
-        <!-- Campo Contraseña -->
-        <div class="form-group mb-6">
-          <label for="password" class="form-label">Contraseña</label>
-          <div class="input-wrapper">
-            <i class="input-icon fas fa-lock"></i>
-            <input [type]="mostrarContrasenia ? 'text' : 'password'" id="password" name="password" class="form-control"
-              placeholder="Ingresa tu contraseña" [(ngModel)]="contrasenia" required>
-            <button type="button" class="btn-toggle-password" (click)="mostrarContrasenia = !mostrarContrasenia"
-              tabindex="-1">
-              <i class="fas" [ngClass]="mostrarContrasenia ? 'fa-eye-slash' : 'fa-eye'"></i>
-            </button>
-          </div>
-        </div>
+          <!-- Formulario -->
+          <form (ngSubmit)="login()" class="login-form" #loginForm="ngForm">
+            <!-- Campo usuario -->
+            <div class="form-group">
+              <label for="username" class="form-label">Usuario</label>
+              <div class="input-wrapper">
+                <i class="input-icon fas fa-user"></i>
+                <input type="text" id="username" name="username" class="form-control" placeholder="asesor"
+                  [(ngModel)]="usuario" required>
+              </div>
+            </div>
 
-        <!-- Botón de Ingreso -->
-        <div class="d-grid mb-4">
-          <button type="submit" class="btn-login" [disabled]="loading">
-            <span *ngIf="!loading">
-              <i class="btn-icon fas fa-sign-in-alt"></i> Ingresar
-            </span>
-            <span *ngIf="loading">
-              <i class="btn-icon fas fa-spinner fa-spin"></i>Iniciando sesión...
-            </span>
-          </button>
-        </div>
-      </form>
+            <!-- Campo contraseña -->
+            <div class="form-group">
 
-      <!-- Mensaje de error -->
-      <div *ngIf="error" class="alert-custom">
-        <i class="alert-icon fas fa-exclamation-circle"></i>
-        <span class="alert-text">{{ error }}</span>
+              <div class="input-wrapper">
+                <i class="input-icon fas fa-lock"></i>
+                <input [type]="mostrarContrasenia ? 'text' : 'password'" id="password" name="password"
+                  class="form-control" placeholder="••••••••" [(ngModel)]="contrasenia" required>
+                <button type="button" class="btn-toggle-password" (click)="mostrarContrasenia = !mostrarContrasenia"
+                  [attr.aria-label]="mostrarContrasenia ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                  <i class="fas" [ngClass]="mostrarContrasenia ? 'fa-eye-slash' : 'fa-eye'"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Botón de ingreso -->
+            <div class="form-actions">
+              <button type="submit" class="btn-login" [disabled]="loading">
+                <span *ngIf="!loading">
+                  <i class="btn-icon fas fa-arrow-right-to-bracket"></i> Iniciar sesión
+                </span>
+                <span *ngIf="loading">
+                  <i class="btn-icon fas fa-spinner fa-pulse"></i> Verificando...
+                </span>
+              </button>
+            </div>
+
+            <!-- Mensaje de error -->
+            <div *ngIf="error" class="alert-custom" role="alert">
+              <i class="alert-icon fas fa-circle-exclamation"></i>
+              <span class="alert-text">{{ error }}</span>
+            </div>
+
+            <!-- Pie opcional -->
+            <div class="login-footer">
+              <p>¿No tienes una cuenta? <a href="https://wa.me/524181760210" target="_blank"
+                  class="register-link">Contacta
+                  soporte</a>
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>

@@ -18,7 +18,7 @@ const SEMANAS_ANIO = 53;
   styleUrl: './agendas.component.css'
 })
 export class AgendasComponent {
-  coordinacion: string[] = []; 
+  coordinacion: string[] = [];
 
 
   //Variables para agenda
@@ -40,9 +40,9 @@ export class AgendasComponent {
   selectedCode: string[] = [];
 
 
-    meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
   constructor(
     private fb: FormBuilder,
@@ -63,9 +63,9 @@ export class AgendasComponent {
     this.loadCoordinaciones();
     this.loadDomicilios();
     this.setupFormListeners();
-     this._coordinacionService.obtenerCoordinacion().subscribe(data => {
-        this.coordinaciones = data;
-      });
+    this._coordinacionService.obtenerCoordinacion().subscribe(data => {
+      this.coordinaciones = data;
+    });
 
   }
   private initForm(): FormGroup {
@@ -220,25 +220,25 @@ export class AgendasComponent {
   }
 
 
-    opcionesCodigo = [
-      { value: 'AG', texto: 'AG | Aseo General', color: '#ffcccc' },
-      { value: 'GA', texto: 'GA | Gestión Administrativa', color: '#ffe6cc' },
-      { value: 'C', texto: 'C | Cobranza', color: '#d9ead3' },
-      { value: 'D', texto: 'D | Domiciliar', color: '#cfe2f3' },
-      { value: 'Dep', texto: 'Dep | Depósitar', color: '#d9d2e9' },
-      { value: 'E', texto: 'E | Entregas', color: '#fce5cd' },
-      { value: 'GN', texto: 'GN | Grupo Nuevo', color: '#f4cccc' },
-      { value: 'INT', texto: 'INT | Integración', color: '#d0e0e3' },
-      { value: 'R', texto: 'R | Pago', color: '#ead1dc' },
-      { value: 'R/A', texto: 'R/A | Realizando Agendas', color: '#c9daf8' },
-      { value: 'RM', texto: 'RM | Reunión Mensual', color: '#ffcccb' },
-      { value: 'RS', texto: 'RS | Reunión Semanal', color: '#b6d7a8' },
-      { value: 'VTA', texto: 'VTA | Promoción', color: '#a2c4c9' },
-      { value: 'Sup', texto: 'Sup | Supervisión', color: '#d5a6bd' },
-      { value: 'S/Renov', texto: 'S/Renov | Sup.Renovación', color: '#b4a7d6' },
-      { value: 'Sin Codigo', texto: 'Sin código', color: '#eeeeee' },
-      { value: '', texto: 'Actividades sin código', color: '#eeeeee' }
-    ];
+  opcionesCodigo = [
+    { value: 'AG', texto: 'AG | Aseo General' },
+    { value: 'GA', texto: 'GA | Gestión Administrativa' },
+    { value: 'C', texto: 'C | Cobranza' },
+    { value: 'D', texto: 'D | Domiciliar' },
+    { value: 'Dep', texto: 'Dep | Depósitar' },
+    { value: 'E', texto: 'E | Entregas' },
+    { value: 'GN', texto: 'GN | Grupo Nuevo' },
+    { value: 'INT', texto: 'INT | Integración' },
+    { value: 'R', texto: 'R | Pago' },
+    { value: 'R/A', texto: 'R/A | Realizando Agendas' },
+    { value: 'RM', texto: 'RM | Reunión Mensual' },
+    { value: 'RS', texto: 'RS | Reunión Semanal' },
+    { value: 'VTA', texto: 'VTA | Promoción' },
+    { value: 'Sup', texto: 'Sup | Supervisión' },
+    { value: 'S/Renov', texto: 'S/Renov | Sup.Renovación' },
+    { value: 'Sin Codigo', texto: 'Sin código' },
+    { value: '', texto: 'Actividades sin código' }
+  ];
 
 
 
@@ -261,46 +261,46 @@ export class AgendasComponent {
     Toast.fire({ icon, title });
   }
 
-    onCodeChange(event: any, index: number) {
-      const codigo = event.target.value;
-      const isChecked = event.target.checked;
-      const actividad = this.actividades.at(index);
+  onCodeChange(event: any, index: number) {
+    const codigo = event.target.value;
+    const isChecked = event.target.checked;
+    const actividad = this.actividades.at(index);
 
-      let selected = actividad.get('codigo')?.value ? actividad.get('codigo')?.value.split(',') : [];
+    let selected = actividad.get('codigo')?.value ? actividad.get('codigo')?.value.split(',') : [];
 
-      if (isChecked) {
-        if (!selected.includes(codigo)) {
-          selected.push(codigo);
-        }
-      } else {
-        selected = selected.filter((c: string) => c !== codigo);
+    if (isChecked) {
+      if (!selected.includes(codigo)) {
+        selected.push(codigo);
       }
-
-      actividad.get('codigo')?.setValue(selected.join(','));
+    } else {
+      selected = selected.filter((c: string) => c !== codigo);
     }
 
-      objetivosDisponibles: string[] = [
-        'Reducir mora',
-        'Grupos nuevos',
-        'Clientes nuevos',
-        'Cierre de fichas',
-        'Renovación de lo proyectado'
-      ];
+    actividad.get('codigo')?.setValue(selected.join(','));
+  }
 
-        onObjetivoToggle(event: any) {
-          const objetivo = event.target.value;
-          const isChecked = event.target.checked;
+  objetivosDisponibles: string[] = [
+    'Reducir mora',
+    'Grupos nuevos',
+    'Clientes nuevos',
+    'Cierre de fichas',
+    'Renovación de lo proyectado'
+  ];
 
-          if (isChecked) {
-            if (!this.selectedObjetivos.includes(objetivo)) {
-              this.selectedObjetivos.push(objetivo);
-            }
-          } else {
-            this.selectedObjetivos = this.selectedObjetivos.filter(o => o !== objetivo);
-          }
+  onObjetivoToggle(event: any) {
+    const objetivo = event.target.value;
+    const isChecked = event.target.checked;
 
-          this.registrarAgenda.get('objetivo')?.setValue(this.selectedObjetivos.join(','));
-        }
+    if (isChecked) {
+      if (!this.selectedObjetivos.includes(objetivo)) {
+        this.selectedObjetivos.push(objetivo);
+      }
+    } else {
+      this.selectedObjetivos = this.selectedObjetivos.filter(o => o !== objetivo);
+    }
+
+    this.registrarAgenda.get('objetivo')?.setValue(this.selectedObjetivos.join(','));
+  }
 
 
 

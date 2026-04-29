@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Agenda } from '../../../models/agenda';
 import * as XLSX from 'xlsx';
 import { ActividadPipe } from '../../../pipes/actividad.pipe';
@@ -6,6 +6,8 @@ import { CoordinacionService } from '../../../services/coordinacion.service';
 import { Coordinacion } from '../../../models/coordinacion';
 import Swal from 'sweetalert2';
 import { saveAs } from 'file-saver';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 const SEMANAS_ANIO = 53;
 
@@ -14,10 +16,12 @@ const SEMANAS_ANIO = 53;
   standalone: false,
   templateUrl: './subir-agenda.component.html',
   styleUrl: './subir-agenda.component.css',
-  providers: [ActividadPipe]
+  providers: [ActividadPipe, MessageService]
 
 })
 export class SubirAgendaComponent {
+  private messageService = inject(MessageService);
+
   agendas: Agenda[] = [];
   selectedCoordinador: string = '';
   selectedObjetivos: string[] = [];
@@ -265,7 +269,7 @@ export class SubirAgendaComponent {
   limpiarAgendas() {
     this.agendas = [];
     localStorage.removeItem('agendas');
-    alert('Se ha limpiado la agenda cargada.');
+    this.messageService.add({ severity: 'success', summary: 'Limpiado', detail: 'La agenda se ha limpiado correctamente.' });
   }
 
 

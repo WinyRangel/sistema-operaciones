@@ -1,55 +1,93 @@
-.custom-checkbox {
-  display: block;
-  position: relative;
-  padding-left: 30px;
-  margin-bottom: 15px;
-  cursor: pointer;
-  font-size: 16px;
-  user-select: none;
+.transition-all {
+  transition: all 0.2s ease-in-out;
 }
 
-.custom-checkbox input {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
+.file-upload-area {
+  transition: all 0.2s ease;
+  border-color: #dee2e6;
 }
 
-.checkmark {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 20px;
-  width: 20px;
-  background-color: #eee;
-  border-radius: 4px;
+.file-upload-area:hover {
+  border-color: #86b7fe;
+  background-color: #f8f9fa;
 }
 
-.custom-checkbox:hover input ~ .checkmark {
-  background-color: #ccc;
+.border-dashed {
+  border-style: dashed !important;
 }
 
-.custom-checkbox input:checked ~ .checkmark {
-  background-color: #4CAF50;
+.rounded-4 {
+  border-radius: 1rem !important;
 }
 
-.checkmark:after {
-  content: "";
-  position: absolute;
-  display: none;
+.tracking-wide {
+  letter-spacing: 0.5px;
 }
 
-.custom-checkbox input:checked ~ .checkmark:after {
-  display: block;
+.bg-opacity-10 {
+  --bs-bg-opacity: 0.1;
 }
 
-.custom-checkbox .checkmark:after {
-  left: 7px;
-  top: 3px;
-  width: 5px;
-  height: 10px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+.btn-outline-secondary:hover i,
+.btn-outline-primary:hover i,
+.btn-outline-danger:hover i {
+  transform: translateX(2px);
+  transition: transform 0.2s ease;
+}
+
+.btn i {
+  transition: transform 0.2s ease;
+}
+
+.form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(13, 110, 253, 0.02);
+  transition: background-color 0.2s ease;
+}
+
+.badge.bg-primary.bg-opacity-10 {
+  background-color: rgba(13, 110, 253, 0.1) !important;
+}
+
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.form-select:focus,
+.form-control:focus {
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+code {
+  font-size: 0.875em;
+  color: #6c757d;
+  background-color: #f8f9fa;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.85rem;
+  }
+
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .rounded-pill.px-4 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
 }

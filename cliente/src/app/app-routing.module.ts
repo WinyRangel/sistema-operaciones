@@ -22,6 +22,7 @@ import { FichasAsesorComponent } from './components/Shared/fichas-asesor/fichas-
 import { FichasComponent } from './components/Shared/fichas/fichas.component';
 import { TestComponent } from './components/registrar-agenda-asesor/test.component';
 import { TestAgendaComponent } from './components/test-agenda/test-agenda.component';
+import { Error404Component } from './components/Shared/error404/error404.component';
 
 
 const routes: Routes = [
@@ -47,7 +48,8 @@ const routes: Routes = [
   { path: 'seg-proyecciones', component: SeguimientoProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup'] } },
   { path: 'dir-seg-proyeccion', component: DirSegProyeccionComponent, canActivate: [AuthGuard], data: { roles: ['admin'] } },
 
-  { path: '**', redirectTo: 'inicio' }
+  { path: 'error404', component: Error404Component },
+  { path: '**', redirectTo: 'error404' }
 ];
 
 

@@ -27,6 +27,8 @@ import { TagModule } from 'primeng/tag';
 import { TableModule } from 'primeng/table';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { DividerModule } from 'primeng/divider';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -56,6 +58,8 @@ import { FichasAsesorComponent } from './components/Shared/fichas-asesor/fichas-
 import { TestComponent } from './components/registrar-agenda-asesor/test.component';
 import { TestAgendaComponent } from './components/test-agenda/test-agenda.component';
 import { TruncatePipe } from './pipes/truncate.pipe';
+import { SidebarComponent } from './components/Shared/layout/sidebar/sidebar.component';
+import { Error404Component } from './components/Shared/error404/error404.component';
 
 registerLocaleData(localeEs);
 
@@ -103,7 +107,9 @@ const MyPreset = definePreset(Aura, {
     FichasAsesorComponent,
     TestComponent,
     TestAgendaComponent,
-    TruncatePipe
+    TruncatePipe,
+    SidebarComponent,
+    Error404Component
   ],
   imports: [
     BrowserModule,
@@ -128,7 +134,8 @@ const MyPreset = definePreset(Aura, {
     ToggleSwitchModule,
     SelectButtonModule,
     MessageModule,
-    DividerModule
+    DividerModule,
+    ToastModule,
   ],
   providers: [
     provideAnimationsAsync(),

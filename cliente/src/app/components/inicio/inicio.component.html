@@ -1,235 +1,226 @@
-<div id="mainCarousel" class="carousel slide carousel-fade shadow" data-bs-ride="carousel">
-  <div class="carousel-inner rounded-3">
+<div id="mainCarousel" class="carousel slide carousel-fade shadow-lg" data-bs-ride="carousel">
+  <div class="carousel-inner rounded-4 overflow-hidden">
     <div class="carousel-item active">
-      <div class="carousel-image-container">
-        <img src="assets/home.png" class="d-block w-100" alt="Imagen principal">
-        <div class="image-overlay"></div>
+      <div class="carousel-image-container position-relative">
+        <img src="assets/home.png" class="d-block w-100" alt="Imagen principal"
+          style="object-fit: cover; height: 500px;">
+        <div class="image-overlay position-absolute top-0 start-0 w-100 h-100"
+          style="background: linear-gradient(135deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 100%);"></div>
       </div>
-      <!-- Caption mejorado -->
-      <div class="carousel-caption d-none d-md-block text-start">
-        <h2 class="display-5 fw-bold mb-3">Bienvenido</h2>
-        <p class="lead mb-4">Sistema de Supervisión Área Operativa</p>
+      <div class="carousel-caption d-none d-md-block text-start pb-5">
+        <h2 class="display-4 fw-bold mb-3 animate-fade-in">Bienvenido</h2>
+        <p class="lead fs-3 mb-4 animate-slide-up">Sistema de Supervisión Área Operativa</p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Tarjetas de opciones mejoradas -->
-<div class="container-fluid mt-4 mb-4">
+<div class="container-fluid px-4 mt-5 mb-5">
   <div class="row g-4">
-    <!---TARJETA COP-->
     <div class="col-md-6" *ngIf="rolUsuario === 'coordinador'">
-      <div class="card h-100 shadow-sm border hover-effect">
-        <div class="card-body text-center p-4 position-relative">
-          <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
-            <i class="bi bi-calendar-check fs-1  text-primary-emphasis"></i>
+      <div class="card border-0 hover-card h-100">
+        <div class="card-body text-center p-4">
+          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-info">
+            <i class="bi bi-calendar-check fs-1 text-white"></i>
           </div>
-          <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Diaria</span>
-          <h5 class="card-title fw-bold mb-3">Agendas</h5>
-          <p class="card-text text-muted mb-4">Registrar Agenda</p>
-          <a routerLink="/registrar-agenda" class="btn btn-outline-primary px-4 rounded-pill text-primary-emphasis">
+          <span class="badge bg-soft-info rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
+          <h5 class="card-title fw-semibold mb-3">Agendas</h5>
+          <p class="card-text text-secondary mb-4">Registrar Agenda</p>
+          <a routerLink="/registrar-agenda" class="btn btn-outline-primary rounded-pill px-4">
             Acceder <i class="bi bi-arrow-right ms-2"></i>
           </a>
         </div>
       </div>
     </div>
-    <!---TARJETA COP-->
+
     <div class="col-md-6" *ngIf="rolUsuario === 'coordinador'">
-      <div class="card h-100 shadow-sm border hover-effect">
-        <div class="card-body text-center p-4 position-relative">
-          <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
-            <i class="fa-solid fa-calendar-days fs-1 text-primary-emphasis"></i>
+      <div class="card border-0 hover-card h-100">
+        <div class="card-body text-center p-4">
+          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-info">
+            <i class="fa-solid fa-calendar-days fs-1 text-white"></i>
           </div>
-          <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Semanal</span>
-          <h5 class="card-title fw-bold mb-3">Ver Agenda</h5>
-          <p class="card-text text-muted mb-4">Descargar mi agenda</p>
-          <a routerLink="/mi-agenda" class="btn btn-outline-primary px-4 rounded-pill text-primary-emphasis">
+          <span class="badge bg-soft-info rounded-pill px-3 py-2 mb-3">Actividad Semanal</span>
+          <h5 class="card-title fw-semibold mb-3">Ver Agenda</h5>
+          <p class="card-text text-secondary mb-4">Descargar mi agenda</p>
+          <a routerLink="/mi-agenda" class="btn btn-outline-primary rounded-pill px-4">
             Acceder <i class="bi bi-arrow-right ms-2"></i>
           </a>
-        </div>
-      </div>
-    </div>
-    <!-- Tarjeta 1 -->
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="card h-100 shadow-sm border hover-effect">
-        <div class="card-body text-center p-4 position-relative">
-          <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
-            <i class="bi bi-calendar-check fs-1 text-info"></i>
-          </div>
-          <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Diaria</span>
-          <h5 class="card-title fw-bold mb-3">Agendas</h5>
-          <p class="card-text text-muted mb-4">Gestión de agendas</p>
-          <a routerLink="/recorrido-agenda" class="btn btn-gradient px-4 rounded-pill text-white">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Tarjeta 2 -->
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="card h-100 shadow-sm border hover-effect">
-        <div class="card-body text-center p-4 position-relative">
-          <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
-            <i class="bi bi-ticket-perforated fs-1 text-info"></i>
-          </div>
-          <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Diaria</span>
-          <h5 class="card-title fw-bold mb-3">Vaucher, Depositos y Transferencias</h5>
-          <p class="card-text text-muted mb-4">Gestión de vouchers reportados por coordinación</p>
-          <a routerLink="/baucher" class="btn btn-gradient px-4 rounded-pill text-white">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Tarjeta 3 -->
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="card h-100 shadow-sm border hover-effect">
-        <div class="card-body text-center p-4 position-relative">
-          <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
-            <i class="bi bi-bank fs-1 text-info"></i>
-          </div>
-          <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Diaria</span>
-          <h5 class="card-title fw-bold mb-3">Verificacion de Depositos Diarios</h5>
-          <p class="card-text text-muted mb-4">Gestión de depósitos reportados diariamente por ACC&COP</p>
-          <a routerLink="/depositos" class="btn btn-gradient px-4 rounded-pill text-white">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Tarjeta 4 -->
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="card h-100 shadow-sm border hover-effect">
-        <div class="card-body text-center p-4 position-relative">
-          <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
-            <i class="bi bi-people-fill fs-1 text-info"></i>
-          </div>
-          <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Diaria</span>
-          <h5 class="card-title fw-bold mb-3">Seguimiento Ejecutivas</h5>
-          <p class="card-text text-muted mb-4">Gestion de actividades diarias y semanales</p>
-          <a routerLink="/ejecutivas" class="btn btn-gradient px-4 rounded-pill text-white">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Tarjeta 5 -->
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="card h-100 shadow-sm border hover-effect">
-        <div class="card-body text-center p-4 position-relative">
-          <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
-            <i class="bi bi-graph-up-arrow fs-1 text-info"></i>
-          </div>
-          <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Semanal</span>
-          <h5 class="card-title fw-bold mb-3">Cumplimiento de Objetivo</h5>
-          <p class="card-text text-muted mb-4">Gestión de actividades reportadas</p>
-          <a routerLink="/cumplimientoobjetivo" class="btn btn-gradient px-4 rounded-pill text-white">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="card h-100 shadow-sm border hover-effect">
-        <div class="card-body text-center p-4 position-relative">
-          <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
-            <i class="bi bi-file-earmark-bar-graph fs-1 text-info"></i>
-          </div>
-          <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Mensual</span>
-          <h5 class="card-title fw-bold mb-3">Reporte de fichas cerradas al día</h5>
-          <p class="card-text text-muted mb-4">Generar reporte de fichas mensual</p>
-          <a routerLink="/reportefichas" class="btn btn-gradient px-4 rounded-pill text-white">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Tarjeta  6-->
-    <div class="container my-5" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="row justify-content-center">
-
-        <!-- Tarjeta 7 -->
-        <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-          <div class="card h-100 shadow-sm border hover-effect">
-            <div class="card-body text-center p-4 position-relative">
-              <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
-                <i class="bi bi-graph-up-arrow fs-1 text-info"></i>
-              </div>
-              <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Mensual</span>
-              <h5 class="card-title fw-bold mb-3">Supervisión de Proyecciones</h5>
-              <p class="card-text text-muted mb-4">Gestión de creditos Proyectados</p>
-              <a routerLink="/seg-proyecciones" class="btn btn-gradient px-4 rounded-pill text-white">
-                Acceder <i class="bi bi-arrow-right ms-2"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tarjeta 8-->
-        <div class="col-md-4" *ngIf="rolUsuario === 'admin'">
-          <div class="card h-100 shadow-sm border hover-effect">
-            <div class="card-body text-center p-4 position-relative">
-              <div class="icon-container mb-3 bg-info bg-opacity-10 rounded-3">
-                <i class="bi bi-graph-up-arrow fs-1 text-info"></i>
-              </div>
-              <span class="badge bg-info text-white position-absolute top-0 end-0 m-2">Actividad Mensual</span>
-              <h5 class="card-title fw-bold mb-3">Seguimiento de colocación mensual</h5>
-              <p class="card-text text-muted mb-4">Gestión de resultados de colocaciones</p>
-              <a routerLink="/dir-seg-proyeccion" class="btn btn-gradient px-4 rounded-pill text-white">
-                Acceder <i class="bi bi-arrow-right ms-2"></i>
-              </a>
-            </div>
-          </div>
         </div>
       </div>
     </div>
 
-    <div class="container text-center my-2">
-      <div class="row align-items-center">
-        <div class="col" *ngIf="rolUsuario === 'asesor'">
-          <div class=" card h-100 shadow-sm border hover-effect mb-2">
-            <div class="card-body text-center p-4 position-relative">
-              <div class="icon-container mb-3 bg-success bg-opacity-10 rounded-3">
-                <i class="bi bi-calendar-check fs-1 text-success"></i>
-              </div>
-              <span class="badge bg-success text-white position-absolute top-0 end-0 m-2">Actividad Semanal</span>
-              <h5 class="card-title fw-bold mb-3">Registrar Agenda</h5>
-              <p class="card-text text-muted mb-4">Captura de actividades diarias</p>
-              <a routerLink="/registrar-agenda-asesor" class="btn btn-success px-4 rounded-pill text-white">
-                Acceder <i class="bi bi-arrow-right ms-2"></i>
-              </a>
-            </div>
+    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+      <div class="card border-0 hover-card h-100">
+        <div class="card-body text-center p-4">
+          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
+            <i class="bi bi-calendar-check fs-1 text-white"></i>
           </div>
-        </div>
-        <div class="col" *ngIf="rolUsuario === 'asesor' || rolUsuario === 'coordinador'">
-          <div class="card h-100 shadow-sm border hover-effect mb-2">
-            <div class="card-body text-center p-4 position-relative">
-              <div class="icon-container mb-3 bg-success bg-opacity-10 rounded-3">
-                <i class="bi bi-list-check fs-1 text-success"></i>
-              </div>
-              <span class="badge bg-success text-white position-absolute top-0 end-0 m-2">Actividad Diaria</span>
-              <h5 class="card-title fw-bold mb-3">Seguimiento Agenda Asesores</h5>
-              <p class="card-text text-muted mb-4">Captura de actividades diarias</p>
-              <a routerLink="/seguimiento-agenda-asesor" class="btn btn-success px-4 rounded-pill text-white">
-                Acceder <i class="bi bi-arrow-right ms-2"></i>
-              </a>
-            </div>
-          </div>
+          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
+          <h5 class="card-title fw-semibold mb-3">Agendas</h5>
+          <p class="card-text text-secondary mb-4">Gestión de agendas</p>
+          <a routerLink="/recorrido-agenda" class="btn btn-primary rounded-pill px-4">
+            Acceder <i class="bi bi-arrow-right ms-2"></i>
+          </a>
         </div>
       </div>
-      <div class="col" *ngIf="rolUsuario === 'asesor'">
-        <div class="card h-100 shadow-sm border hover-effect">
-          <div class="card-body text-center p-4 position-relative">
-            <div class="icon-container mb-3 bg-success bg-opacity-10 rounded-3">
-              <i class="bi bi-journal-check fs-1 text-success"></i>
-            </div>
-            <span class="badge bg-success text-white position-absolute top-0 end-0 m-2">Actividad Diaria</span>
-            <h5 class="card-title fw-bold mb-3">Registrar Ficha</h5>
-            <p class="card-text text-muted mb-4">Captura de actividades del día</p>
-            <a routerLink="/fichas-asesor" class="btn btn-success px-4 rounded-pill text-white">
-              Acceder <i class="bi bi-arrow-right ms-2"></i>
-            </a>
+    </div>
+
+    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+      <div class="card border-0 hover-card h-100">
+        <div class="card-body text-center p-4">
+          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
+            <i class="bi bi-ticket-perforated fs-1 text-white"></i>
           </div>
+          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
+          <h5 class="card-title fw-semibold mb-3">Vaucher, Depositos y Transferencias</h5>
+          <p class="card-text text-secondary mb-4">Gestión de vouchers reportados por coordinación</p>
+          <a routerLink="/baucher" class="btn btn-primary rounded-pill px-4">
+            Acceder <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+      <div class="card border-0 hover-card h-100">
+        <div class="card-body text-center p-4">
+          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
+            <i class="bi bi-bank fs-1 text-white"></i>
+          </div>
+          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
+          <h5 class="card-title fw-semibold mb-3">Verificacion de Depositos Diarios</h5>
+          <p class="card-text text-secondary mb-4">Gestión de depósitos reportados diariamente por ACC&COP</p>
+          <a routerLink="/depositos" class="btn btn-primary rounded-pill px-4">
+            Acceder <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+      <div class="card border-0 hover-card h-100">
+        <div class="card-body text-center p-4">
+          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
+            <i class="bi bi-people-fill fs-1 text-white"></i>
+          </div>
+          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
+          <h5 class="card-title fw-semibold mb-3">Seguimiento Ejecutivas</h5>
+          <p class="card-text text-secondary mb-4">Gestion de actividades diarias y semanales</p>
+          <a routerLink="/ejecutivas" class="btn btn-primary rounded-pill px-4">
+            Acceder <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+      <div class="card border-0 hover-card h-100">
+        <div class="card-body text-center p-4">
+          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
+            <i class="bi bi-graph-up-arrow fs-1 text-white"></i>
+          </div>
+          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Semanal</span>
+          <h5 class="card-title fw-semibold mb-3">Cumplimiento de Objetivo</h5>
+          <p class="card-text text-secondary mb-4">Gestión de actividades reportadas</p>
+          <a routerLink="/cumplimientoobjetivo" class="btn btn-primary rounded-pill px-4">
+            Acceder <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+      <div class="card border-0 hover-card h-100">
+        <div class="card-body text-center p-4">
+          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
+            <i class="bi bi-file-earmark-bar-graph fs-1 text-white"></i>
+          </div>
+          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Mensual</span>
+          <h5 class="card-title fw-semibold mb-3">Reporte de fichas cerradas al día</h5>
+          <p class="card-text text-secondary mb-4">Generar reporte de fichas mensual</p>
+          <a routerLink="/reportefichas" class="btn btn-primary rounded-pill px-4">
+            Acceder <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+      <div class="card border-0 hover-card h-100">
+        <div class="card-body text-center p-4">
+          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
+            <i class="bi bi-graph-up-arrow fs-1 text-white"></i>
+          </div>
+          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Mensual</span>
+          <h5 class="card-title fw-semibold mb-3">Supervisión de Proyecciones</h5>
+          <p class="card-text text-secondary mb-4">Gestión de creditos Proyectados</p>
+          <a routerLink="/seg-proyecciones" class="btn btn-primary rounded-pill px-4">
+            Acceder <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4" *ngIf="rolUsuario === 'admin'">
+      <div class="card border-0 hover-card h-100">
+        <div class="card-body text-center p-4">
+          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
+            <i class="bi bi-graph-up-arrow fs-1 text-white"></i>
+          </div>
+          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Mensual</span>
+          <h5 class="card-title fw-semibold mb-3">Seguimiento de colocación mensual</h5>
+          <p class="card-text text-secondary mb-4">Gestión de resultados de colocaciones</p>
+          <a routerLink="/dir-seg-proyeccion" class="btn btn-primary rounded-pill px-4">
+            Acceder <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mx-auto" *ngIf="rolUsuario === 'asesor'">
+      <div class="card border-0 hover-card h-100">
+        <div class="card-body text-center p-4">
+          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-success">
+            <i class="bi bi-calendar-check fs-1 text-white"></i>
+          </div>
+          <span class="badge bg-soft-success rounded-pill px-3 py-2 mb-3">Actividad Semanal</span>
+          <h5 class="card-title fw-semibold mb-3">Registrar Agenda</h5>
+          <p class="card-text text-secondary mb-4">Captura de actividades diarias</p>
+          <a routerLink="/registrar-agenda-asesor" class="btn btn-success rounded-pill px-4">
+            Acceder <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6" *ngIf="rolUsuario === 'asesor' || rolUsuario === 'coordinador'">
+      <div class="card border-0 hover-card h-100">
+        <div class="card-body text-center p-4">
+          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-success">
+            <i class="bi bi-list-check fs-1 text-white"></i>
+          </div>
+          <span class="badge bg-soft-success rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
+          <h5 class="card-title fw-semibold mb-3">Seguimiento Agenda Asesores</h5>
+          <p class="card-text text-secondary mb-4">Captura de actividades diarias</p>
+          <a routerLink="/seguimiento-agenda-asesor" class="btn btn-success rounded-pill px-4">
+            Acceder <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mx-auto" *ngIf="rolUsuario === 'asesor'">
+      <div class="card border-0 hover-card h-100">
+        <div class="card-body text-center p-4">
+          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-success">
+            <i class="bi bi-journal-check fs-1 text-white"></i>
+          </div>
+          <span class="badge bg-soft-success rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
+          <h5 class="card-title fw-semibold mb-3">Registrar Ficha</h5>
+          <p class="card-text text-secondary mb-4">Captura de actividades del día</p>
+          <a routerLink="/fichas-asesor" class="btn btn-success rounded-pill px-4">
+            Acceder <i class="bi bi-arrow-right ms-2"></i>
+          </a>
         </div>
       </div>
     </div>

@@ -50,8 +50,8 @@ export class RecorridoAgendaComponent implements OnInit {
   domicilios: string[] = ["NA"];
   rendimientosCoordinadores: { [nombre: string]: number } = {};
 
-  meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 
@@ -69,12 +69,22 @@ export class RecorridoAgendaComponent implements OnInit {
   codigoSeleccionado: string = '';
   codigoReportadoSeleccionado: string = '';
   estadoSeleccionado: string = '';
+
+  // Filtros de rango de fecha
+  fechaInicio: string = '';
+  fechaFin: string = '';
   //Variables de las graficas
   chart: any;
   chartCodigo: any;
   mostrarContenedorGraficas: boolean = false;
   codigosReportados: any;
   chartProductividad: any;
+
+  // Variables para Drag to Scroll
+  @ViewChild('tableContainer') tableContainer!: ElementRef;
+  isDown = false;
+  startX = 0;
+  scrollLeft = 0;
 
 
   constructor(
@@ -89,8 +99,27 @@ export class RecorridoAgendaComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const hoy = new Date();
+    const mesActualIdx = hoy.getMonth();
+    const diaActualIdx = hoy.getDay() - 1;
+
+    this.mesSeleccionado = this.meses[mesActualIdx];
+
+    if (diaActualIdx >= 0 && diaActualIdx < this.diasSemana.length) {
+      this.diaSeleccionado = this.diasSemana[diaActualIdx];
+    } else {
+      this.diaSeleccionado = '';
+    }
+
+    const year = hoy.getFullYear();
+    const month = (hoy.getMonth() + 1).toString().padStart(2, '0');
+    const day = hoy.getDate().toString().padStart(2, '0');
+    const fechaHoy = `${year}-${month}-${day}`;
+
+    this.fechaInicio = fechaHoy;
+    this.fechaFin = fechaHoy;
+
     this.loadCoordinaciones();
-    this.loadAgendas();
   }
 
 
@@ -110,18 +139,45 @@ export class RecorridoAgendaComponent implements OnInit {
   // Cargar datos iniciales
   private loadCoordinaciones(): void {
     this._coordinacionService.obtenerCoordinacion().subscribe(data => {
-      this.coordinaciones = data;
-      this.setRendimientos(data);
+      this.coordinaciones = data.filter(c => c.coordinador != 'Martha');
+      this.setRendimientos(this.coordinaciones);
+      if (this.coordinaciones.length > 0 && !this.coordinadorVisible) {
+        this.coordinadorVisible = this.coordinaciones[0].coordinador;
+      }
+      this.loadAgendas();
     });
   }
 
   private loadAgendas(): void {
-    this._coordinacionService.obtenerAgendas1(1, 315).subscribe({
+    this.fetchAgendas();
+  }
+
+  fetchAgendas(): void {
+    const filtros = {
+      coordinador: this.coordinadorVisible,
+      mes: this.mesSeleccionado,
+      semana: this.semanaSeleccionada,
+      dia: this.diaSeleccionado,
+      codigo: this.codigoSeleccionado,
+      codigoReportado: this.codigoReportadoSeleccionado,
+      estado: this.estadoSeleccionado,
+      fechaInicio: this.fechaInicio,
+      fechaFin: this.fechaFin,
+      page: 1,
+      limit: 5000 // A high limit for now to render charts correctly without true pagination UX
+    };
+
+    this._coordinacionService.obtenerAgendas1(filtros).subscribe({
       next: response => {
-        this.agendas = response.agendas.map((agenda: { fecha: string }) => ({
+        // Map and fix dates from the paginated response structure
+        const mappedAgendas = (response.agendas || response).map((agenda: { fecha: string }) => ({
           ...agenda,
           fecha: this.fixUTCDateToLocal(agenda.fecha)
         }));
+        this.agendas = mappedAgendas;
+        this.agendasFiltradasPorCoordinador = mappedAgendas; // Assuming server filters did the job, but we could also run the client filter just in case for complex date ones
+
+        // Since we still need to filter by month/day (which is hard in MongoDB), we'll do the client side filtering on the returned set for those
         this.filtrarAgendas();
       },
       error: err => {
@@ -132,18 +188,18 @@ export class RecorridoAgendaComponent implements OnInit {
 
 
 
-    private setRendimientos(coordinaciones: Coordinacion[]): void {
-      this.rendimientosCoordinadores = coordinaciones.reduce((acc, coord) => {
-        acc[coord.coordinador] = coord.rendimiento ?? RENDIMIENTO_POR_DEFECTO;
-        return acc;
-      }, {} as { [nombre: string]: number });
-    }
+  private setRendimientos(coordinaciones: Coordinacion[]): void {
+    this.rendimientosCoordinadores = coordinaciones.reduce((acc, coord) => {
+      acc[coord.coordinador] = coord.rendimiento ?? RENDIMIENTO_POR_DEFECTO;
+      return acc;
+    }, {} as { [nombre: string]: number });
+  }
 
 
-    mostrarDiv(nombre: string): void {
-      this.coordinadorVisible = nombre;
-      this.filtrarAgendas(); // Filtro inmediato al cambiar de coordinador
-    }
+  mostrarDiv(nombre: string): void {
+    this.coordinadorVisible = nombre;
+    this.fetchAgendas(); // Fetch from server with new coordinator filter
+  }
 
 
 
@@ -174,68 +230,63 @@ export class RecorridoAgendaComponent implements OnInit {
   }
 
 
-    refrescarAgendas(): void {
-      this._coordinacionService.obtenerAgendas1().subscribe(data => {
-        this.agendas = data.map((agenda: { fecha: string }) => ({
-          ...agenda,
-          fecha: this.fixUTCDateToLocal(agenda.fecha)
-        }));
-        this.filtrarAgendas(); // Aplicar filtros después de cargar
-      });
-    }
+  refrescarAgendas(): void {
+    this.fetchAgendas();
+  }
 
-    filtrarAgendas(): void {
-      this.agendasFiltradasPorCoordinador = this.agendas.filter(agenda => {
-        if (!agenda.coordinador) return false;
+  filtrarAgendas(): void {
+    this.agendasFiltradasPorCoordinador = this.agendas.filter(agenda => {
+      if (!agenda.coordinador) return false;
 
-        const fechaObj = new Date(agenda.fecha);
-        if (isNaN(fechaObj.getTime())) return false;
+      const fechaObj = new Date(agenda.fecha);
+      if (isNaN(fechaObj.getTime())) return false;
 
-        const mesNombre = fechaObj.toLocaleString('es-MX', { month: 'long' });
-        const diaNombre = fechaObj.toLocaleString('es-MX', { weekday: 'long' });
-        const semanaTrimmed = agenda.semana?.trim() || '';
+      const mesNombre = fechaObj.toLocaleString('es-MX', { month: 'long' });
+      const diaNombre = fechaObj.toLocaleString('es-MX', { weekday: 'long' });
+      const semanaTrimmed = agenda.semana?.trim() || '';
 
-        const cumpleCoordinador = this.coordinadorVisible
-          ? agenda.coordinador.toLowerCase() === this.coordinadorVisible.toLowerCase()
-          : true;
+      const cumpleCoordinador = this.coordinadorVisible
+        ? agenda.coordinador.toLowerCase() === this.coordinadorVisible.toLowerCase()
+        : true;
 
-        const cumpleMes = this.mesSeleccionado
-          ? mesNombre.toLowerCase() === this.mesSeleccionado.toLowerCase()
-          : true;
+      const cumpleMes = this.mesSeleccionado
+        ? mesNombre.toLowerCase() === this.mesSeleccionado.toLowerCase()
+        : true;
 
-        const cumpleSemana = this.semanaSeleccionada
-          ? semanaTrimmed === this.semanaSeleccionada
-          : true;
+      const cumpleSemana = this.semanaSeleccionada
+        ? semanaTrimmed === this.semanaSeleccionada
+        : true;
 
-        const cumpleDia = this.diaSeleccionado
-          ? diaNombre.toLowerCase() === this.diaSeleccionado.toLowerCase()
-          : true;
+      const cumpleDia = this.diaSeleccionado
+        ? diaNombre.toLowerCase() === this.diaSeleccionado.toLowerCase()
+        : true;
 
-        const cumpleCodigo = this.codigoSeleccionado
-          ? agenda.codigo === this.codigoSeleccionado
-          : true;
+      const cumpleCodigo = this.codigoSeleccionado
+        ? agenda.codigo === this.codigoSeleccionado
+        : true;
 
-        const cumpleCodigoReportado = this.codigoReportadoSeleccionado
-          ? agenda.codigoReportado === this.codigoReportadoSeleccionado
-          : true;
+      const cumpleCodigoReportado = this.codigoReportadoSeleccionado
+        ? agenda.codigoReportado === this.codigoReportadoSeleccionado
+        : true;
 
-        const cumpleEstado = this.estadoSeleccionado
-          ? (this.estadoSeleccionado === 'reportado' ? agenda.reportado === true : agenda.reportado === false)
-          : true;
+      const cumpleEstado = this.estadoSeleccionado
+        ? (this.estadoSeleccionado === 'reportado' ? agenda.reportado === true : agenda.reportado === false)
+        : true;
 
-        return cumpleCoordinador &&
-          cumpleMes &&
-          cumpleSemana &&
-          cumpleDia &&
-          cumpleCodigo &&
-          cumpleCodigoReportado &&
-          cumpleEstado;
-      });
-    }
+      return cumpleCoordinador &&
+        cumpleMes &&
+        cumpleSemana &&
+        cumpleDia &&
+        cumpleCodigo &&
+        cumpleCodigoReportado &&
+        cumpleEstado;
+    });
+  }
 
 
 
   aplicarFiltros(): void {
+    this.fetchAgendas();
     // Actualizar métricas y gráficos si es necesario
     if (this.mostrarContenedorGraficas) {
       this.dibujarGraficaPorCodigo();
@@ -251,6 +302,8 @@ export class RecorridoAgendaComponent implements OnInit {
     this.codigoSeleccionado = '';
     this.codigoReportadoSeleccionado = '';
     this.estadoSeleccionado = '';
+    this.fechaInicio = '';
+    this.fechaFin = '';
     this.aplicarFiltros();
   }
 
@@ -280,7 +333,7 @@ export class RecorridoAgendaComponent implements OnInit {
     });
   }
 
-// Métricas de reporte
+  // Métricas de reporte
   get totalKmRecorridos(): number {
     return +this.agendasFiltradasPorCoordinador
       .reduce((acc, curr) => acc + (curr.kmRecorrido || 0), 0)
@@ -298,60 +351,60 @@ export class RecorridoAgendaComponent implements OnInit {
     return +(this.litrosGasolina * this.precioPorLitro).toFixed(2);
   }
 
-      // Normaliza "9:00", "09:30", "9 am", "9 a.m.", "03:15 PM", "15:30", etc. -> "HH" (00–23)
-    private toHourKey(hora: string): string {
-      if (!hora) return '';
-      const s = hora.trim().toLowerCase();
+  // Normaliza "9:00", "09:30", "9 am", "9 a.m.", "03:15 PM", "15:30", etc. -> "HH" (00–23)
+  private toHourKey(hora: string): string {
+    if (!hora) return '';
+    const s = hora.trim().toLowerCase();
 
-      // extrae hh, mm y am/pm opcional (soporta "am", "a.m.", "pm", "p.m.")
-      const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?$/);
-      if (!m) {
-        // si no coincide, intenta quedarte con los dos primeros dígitos como hora
-        const h2 = parseInt(s.slice(0, 2), 10);
-        return isNaN(h2) ? '' : String(Math.max(0, Math.min(23, h2))).padStart(2, '0');
-      }
-
-      let h = parseInt(m[1], 10);
-      const ampm = m[3]?.replace(/\./g, ''); // "am" | "pm" | undefined
-
-      // Si trae am/pm y es formato 12h válido (1..12), conviértelo.
-      // Si trae am/pm pero la hora es >12, asumimos que ya venía en 24h y lo dejamos.
-      if (ampm && h >= 1 && h <= 12) {
-        if (ampm === 'pm' && h !== 12) h += 12;
-        if (ampm === 'am' && h === 12) h = 0;
-      }
-
-      // Normaliza a 00–23
-      h = Math.max(0, Math.min(23, h));
-      return String(h).padStart(2, '0');
+    // extrae hh, mm y am/pm opcional (soporta "am", "a.m.", "pm", "p.m.")
+    const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?$/);
+    if (!m) {
+      // si no coincide, intenta quedarte con los dos primeros dígitos como hora
+      const h2 = parseInt(s.slice(0, 2), 10);
+      return isNaN(h2) ? '' : String(Math.max(0, Math.min(23, h2))).padStart(2, '0');
     }
 
-get horasAgendadas(): number {
-  const claves = new Set<string>();
-  for (const a of this.agendasFiltradasPorCoordinador) {
-    if (!a?.fecha || !a?.hora) continue;
+    let h = parseInt(m[1], 10);
+    const ampm = m[3]?.replace(/\./g, ''); // "am" | "pm" | undefined
 
-    // Normaliza actividad y domicilio
-    const actividad = (a.actividad || '').trim().toLowerCase();
-    const domicilio = (a.domicilio || '').trim().toLowerCase();
-
-    // Regla 1: Si es "comida" y no está reportado → no cuenta
-    if ((actividad.includes('comida') || domicilio.includes('comida')) && !a.reportado) {
-      continue;
+    // Si trae am/pm y es formato 12h válido (1..12), conviértelo.
+    // Si trae am/pm pero la hora es >12, asumimos que ya venía en 24h y lo dejamos.
+    if (ampm && h >= 1 && h <= 12) {
+      if (ampm === 'pm' && h !== 12) h += 12;
+      if (ampm === 'am' && h === 12) h = 0;
     }
 
-    const hourKey = this.toHourKey(a.hora);
-    if (!hourKey) continue;
-
-    // Regla 2: Excluir horas después de 17:30
-    const [h, m] = a.hora.split(':').map(Number);
-    const minutos = h * 60 + (m || 0);
-    if (minutos > 17 * 60 + 30) continue;
-
-    claves.add(`${a.fecha}#${hourKey}`);
+    // Normaliza a 00–23
+    h = Math.max(0, Math.min(23, h));
+    return String(h).padStart(2, '0');
   }
-  return claves.size;
-}
+
+  get horasAgendadas(): number {
+    const claves = new Set<string>();
+    for (const a of this.agendasFiltradasPorCoordinador) {
+      if (!a?.fecha || !a?.hora) continue;
+
+      // Normaliza actividad y domicilio
+      const actividad = (a.actividad || '').trim().toLowerCase();
+      const domicilio = (a.domicilio || '').trim().toLowerCase();
+
+      // Regla 1: Si es "comida" y no está reportado → no cuenta
+      if ((actividad.includes('comida') || domicilio.includes('comida')) && !a.reportado) {
+        continue;
+      }
+
+      const hourKey = this.toHourKey(a.hora);
+      if (!hourKey) continue;
+
+      // Regla 2: Excluir horas después de 17:30
+      const [h, m] = a.hora.split(':').map(Number);
+      const minutos = h * 60 + (m || 0);
+      if (minutos > 17 * 60 + 30) continue;
+
+      claves.add(`${a.fecha}#${hourKey}`);
+    }
+    return claves.size;
+  }
 
   get horasReportadas(): number {
     const claves = new Set<string>();
@@ -376,26 +429,26 @@ get horasAgendadas(): number {
 
   /////////////////////////////////////////////////////////////////////////////////////
   get horasEntregas(): number {
-	  return this.agendasFiltradasPorCoordinador.filter(
-		a => a.hora && a.codigo === 'E'
-	  ).length;
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'E'
+    ).length;
   }
 
   get horasEntregasNoAgendadas(): number {
-	return this.agendasFiltradasPorCoordinador.filter(
-	  a => a.horaReporte && a.reportado === true && a.codigoReportado === 'E' && a.codigo != 'E'
-	).length;
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigoReportado === 'E' && a.codigo != 'E'
+    ).length;
   }
   get horasEntregasReportadas(): number {
-	return this.agendasFiltradasPorCoordinador.filter(
-	  a => a.horaReporte && a.reportado === true && a.codigo === 'E'
-	).length;
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'E'
+    ).length;
   }
 
   get horasEntregasNoReportadas(): number {
     return this.horasEntregas - this.horasEntregasReportadas;
   }
-	// DOS
+  // DOS
   get horasPagos(): number {
     return this.agendasFiltradasPorCoordinador.filter(
       a => a.hora && a.codigo === 'R'
@@ -407,7 +460,7 @@ get horasAgendadas(): number {
       a => a.horaReporte && a.reportado === true && a.codigo === 'R'
     ).length;
   }
-	// TRES
+  // TRES
 
   get horasRP(): number {
     return this.agendasFiltradasPorCoordinador.filter(
@@ -433,7 +486,7 @@ get horasAgendadas(): number {
       a => a.horaReporte && a.reportado === true && a.codigo === 'C'
     ).length;
   }
-	// CINCO
+  // CINCO
   get horasVentas(): number {
     return this.agendasFiltradasPorCoordinador.filter(
       a => a.hora && a.codigo === 'E'
@@ -445,7 +498,7 @@ get horasAgendadas(): number {
       a => a.horaReporte && a.reportado === true && a.codigo === 'E'
     ).length;
   }
-	// SEIS
+  // SEIS
   get horasGrupoN(): number {
     return this.agendasFiltradasPorCoordinador.filter(
       a => a.hora && a.codigo === 'E'
@@ -458,7 +511,7 @@ get horasAgendadas(): number {
     ).length;
   }
 
-	// SIETE
+  // SIETE
   get horasSup(): number {
     return this.agendasFiltradasPorCoordinador.filter(
       a => a.hora && a.codigo === 'Sup'
@@ -471,7 +524,7 @@ get horasAgendadas(): number {
     ).length;
   }
 
-	// OCHO
+  // OCHO
   get horasAten(): number {
     return this.agendasFiltradasPorCoordinador.filter(
       a => a.hora && a.codigo === 'Aten'
@@ -484,7 +537,7 @@ get horasAgendadas(): number {
     ).length;
   }
 
-	// NUEVE
+  // NUEVE
   get horasReA(): number {
     return this.agendasFiltradasPorCoordinador.filter(
       a => a.hora && a.codigo === 'R/A'
@@ -497,7 +550,7 @@ get horasAgendadas(): number {
     ).length;
   }
 
-	// DIEZ
+  // DIEZ
   get horasDomiciliar(): number {
     return this.agendasFiltradasPorCoordinador.filter(
       a => a.hora && a.codigo === 'R/A'
@@ -510,7 +563,7 @@ get horasAgendadas(): number {
     ).length;
   }
 
-	// ONCE
+  // ONCE
   get horasSC(): number {
     return this.agendasFiltradasPorCoordinador.filter(
       a => a.hora && a.codigo === 'Sin Codigo'
@@ -522,8 +575,8 @@ get horasAgendadas(): number {
       a => a.horaReporte && a.reportado === true && a.codigo === 'Sin Codigo'
     ).length;
   }
-  
-	// DOCE
+
+  // DOCE
   get horasAM(): number {
     return this.agendasFiltradasPorCoordinador.filter(
       a => a.hora && a.codigo === 'GA'
@@ -536,7 +589,7 @@ get horasAgendadas(): number {
     ).length;
   }
 
-	// TRECE
+  // TRECE
   get horasReunion(): number {
     return this.agendasFiltradasPorCoordinador.filter(
       a => a.hora && a.codigo === 'RM' && 'RS'
@@ -548,27 +601,27 @@ get horasAgendadas(): number {
       a => a.horaReporte && a.reportado === true && a.codigo === 'RM' && 'RS'
     ).length;
   }
-	// CATORCE
-	get horasRenov(): number {
-		return this.agendasFiltradasPorCoordinador.filter(
-			a => a.hora && a.codigo === 'S/Renov'
-		).length;
-	}
+  // CATORCE
+  get horasRenov(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.hora && a.codigo === 'S/Renov'
+    ).length;
+  }
 
-	get horasRenovReportadas(): number {
-		return this.agendasFiltradasPorCoordinador.filter(
-			a => a.horaReporte && a.reportado === true && a.codigo === 'S/Renov'
-		).length;
-	}
-		
+  get horasRenovReportadas(): number {
+    return this.agendasFiltradasPorCoordinador.filter(
+      a => a.horaReporte && a.reportado === true && a.codigo === 'S/Renov'
+    ).length;
+  }
 
-	get horasProductividad(): number {
-		return this.horasAgendadas > 0
-			? parseFloat(((this.horasReportadas / this.horasTrabajo)*100).toFixed(2))
-			: 0;
-	}
 
-//REPORTE MENSUAL
+  get horasProductividad(): number {
+    return this.horasAgendadas > 0
+      ? parseFloat(((this.horasReportadas / this.horasTrabajo) * 100).toFixed(2))
+      : 0;
+  }
+
+  //REPORTE MENSUAL
   opcionesCodigo = [
     { value: 'AG', texto: 'AG | Aseo General' },
     { value: 'GA', texto: 'GA | Gestión Administrativa' },
@@ -588,59 +641,59 @@ get horasAgendadas(): number {
     { value: 'Sin Codigo', texto: 'Sin Codigo' },
     { value: '', texto: '' }
   ];
-  
+
   dibujarGraficaProductividad(): void {
-  if (!this.graficaProductividad) return;
+    if (!this.graficaProductividad) return;
 
-  if (this.chartProductividad) this.chartProductividad.destroy();
+    if (this.chartProductividad) this.chartProductividad.destroy();
 
-  const productividad = this.horasProductividad;
-  const restante = 100 - productividad;
+    const productividad = this.horasProductividad;
+    const restante = 100 - productividad;
 
-  const ctx = this.graficaProductividad.nativeElement.getContext('2d');
-  if (!ctx) return;
+    const ctx = this.graficaProductividad.nativeElement.getContext('2d');
+    if (!ctx) return;
 
-  this.chartProductividad = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Productividad (%)', 'Resto'],
-      datasets: [{
-        data: [productividad, restante],
-        backgroundColor: ['#4caf50', '#e0e0e0'],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'bottom'
-        },
-        title: {
-          display: true,
-          text: 'Porcentaje de Productividad'
-        },
-        tooltip: {
-          callbacks: {
-            label: context => `${context.label}: ${context.parsed.toFixed(2)}%`
-          }
-        },
-        datalabels: {
-          display: true,
-          color: '#000',
-          formatter: (value, ctx) => {
-            const label = ctx.chart.data.labels?.[ctx.dataIndex];
-            return `${label}: ${value.toFixed(1)}%`;
+    this.chartProductividad = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Productividad (%)', 'Resto'],
+        datasets: [{
+          data: [productividad, restante],
+          backgroundColor: ['#4caf50', '#e0e0e0'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom'
           },
-          font: {
-            weight: 'bold',
-            size: 12
+          title: {
+            display: true,
+            text: 'Porcentaje de Productividad'
+          },
+          tooltip: {
+            callbacks: {
+              label: context => `${context.label}: ${context.parsed.toFixed(2)}%`
+            }
+          },
+          datalabels: {
+            display: true,
+            color: '#000',
+            formatter: (value, ctx) => {
+              const label = ctx.chart.data.labels?.[ctx.dataIndex];
+              return `${label}: ${value.toFixed(1)}%`;
+            },
+            font: {
+              weight: 'bold',
+              size: 12
+            }
           }
         }
-      }
-    },
-    plugins: [ChartDataLabels]
-  });
+      },
+      plugins: [ChartDataLabels]
+    });
   }
 
 
@@ -675,7 +728,7 @@ get horasAgendadas(): number {
         }
       }
     });
-  }  
+  }
 
   // Chart methods
   mostrarGraficas(): void {
@@ -904,5 +957,36 @@ get horasAgendadas(): number {
     });
 
     Toast.fire({ icon, title });
+  }
+
+  // Métodos para Drag to Scroll
+  onMouseDown(e: MouseEvent) {
+    if (!this.tableContainer) return;
+    this.isDown = true;
+    this.tableContainer.nativeElement.classList.add('active');
+    this.startX = e.pageX - this.tableContainer.nativeElement.offsetLeft;
+    this.scrollLeft = this.tableContainer.nativeElement.scrollLeft;
+  }
+
+  onMouseLeave() {
+    this.isDown = false;
+    if (this.tableContainer) {
+      this.tableContainer.nativeElement.classList.remove('active');
+    }
+  }
+
+  onMouseUp() {
+    this.isDown = false;
+    if (this.tableContainer) {
+      this.tableContainer.nativeElement.classList.remove('active');
+    }
+  }
+
+  onMouseMove(e: MouseEvent) {
+    if (!this.isDown || !this.tableContainer) return;
+    e.preventDefault();
+    const x = e.pageX - this.tableContainer.nativeElement.offsetLeft;
+    const walk = (x - this.startX) * 1.5; // Velocidad de arrastre
+    this.tableContainer.nativeElement.scrollLeft = this.scrollLeft - walk;
   }
 }
