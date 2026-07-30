@@ -1286,6 +1286,10 @@
                       [(ngModel)]="actividadSeleccionada.actividad">
                   </div>
                   <div class="form-group mb-3">
+                    <label for="domicilio">Domicilio</label>
+                    <input type="text" class="form-control" id="domicilio"
+                      [(ngModel)]="actividadSeleccionada.domicilio">
+                  <div class="form-group mb-3">
                     <label for="codigo">Código</label>
                     <select class="form-control" id="codigo" [(ngModel)]="actividadSeleccionada.codigo">
                       <option *ngFor="let opcion of opcionesCodigo" [value]="opcion.value">{{ opcion.texto }}</option>
