@@ -629,7 +629,7 @@ export class TestAgendaComponent {
       return;
     }
     // Validar que haya al menos un cambio
-    if (!agenda.resultado && !agenda.fecha && !agenda.hora && !agenda.actividad && !(agenda as any).archivoEvidencia) {
+    if (!agenda.resultado && !agenda.fecha && !agenda.hora && !agenda.domicilio && !agenda.codigo && !agenda.actividad && !(agenda as any).archivoEvidencia) {
       this.mostrarAlerta(
         'Sin cambios',
         'No se detectaron cambios para guardar.',
@@ -652,6 +652,12 @@ export class TestAgendaComponent {
     }
     if (agenda.resultado) {
       formData.append('resultado', agenda.resultado);
+    }
+    if (agenda.domicilio) {
+      formData.append('domicilio', agenda.domicilio);
+    }
+    if (agenda.codigo) {
+      formData.append('codigo', agenda.codigo);
     }
 
     // Evidencia (archivo)
