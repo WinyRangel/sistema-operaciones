@@ -66,6 +66,16 @@
         <li class="nav-item" *ngIf="rolUsuario === 'coordinador'">
           <a class="nav-link nav-link-custom" routerLink="/mi-agenda" routerLinkActive="active">Mi Agenda</a>
         </li>
+        <li class="nav-item"
+          *ngIf="rolUsuario === 'mercadotecnia' || rolUsuario === 'auditoria' || rolUsuario === 'rh'">
+          <a class="nav-link nav-link-custom" routerLink="/registrar-agenda-admin" routerLinkActive=" active">Registrar
+            agenda</a>
+        </li>
+        <li class="nav-item"
+          *ngIf="rolUsuario === 'mercadotecnia' || rolUsuario === 'auditoria' || rolUsuario === 'rh'">
+          <a class="nav-link nav-link-custom" routerLink="/listar-agenda" routerLinkActive=" active">Listar
+            agenda</a>
+        </li>
         <li class="nav-item ms-lg-2">
           <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1 d-flex align-items-center gap-2"
             (click)="cerrarSesion()">

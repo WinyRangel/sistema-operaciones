@@ -1,0 +1,328 @@
+<div class="agenda-wrapper">
+    <div class="container-fluid px-2 px-md-4">
+        <!-- FORMULARIO PRINCIPAL -->
+        <form [formGroup]="formulario" (ngSubmit)="guardarAgenda()" class="needs-validation">
+            <div class="agenda-main-card">
+
+                <!-- HEADER HERO -->
+                <div
+                    class="agenda-hero-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="hero-icon-box text-white">
+                            <i class="bi bi-calendar2-week-fill"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0 fw-bold text-white fs-5 fs-md-4">Registro de Agenda Diaria</h4>
+                            <small class="text-white-50">Planificación organizada y cronológica de actividades</small>
+                        </div>
+                    </div>
+
+                    <div class="date-pill-badge">
+                        <i class="bi bi-calendar-event"></i>
+                        <span class="text-capitalize">{{ fechaActual | date:'fullDate' }}</span>
+                    </div>
+                </div>
+
+                <!-- CUERPO DE LA AGENDA -->
+                <div class="p-3 p-md-4">
+
+                    <!-- FILA 1: CONTEXTO Y SELECCIÓN (FECHA, SEMANA Y PERFIL) -->
+                    <div class="row g-3 mb-4">
+                        <!-- FECHA Y SEMANA -->
+                        <div class="col-12 col-lg-7">
+                            <div class="meta-panel-card h-100">
+                                <div class="row g-3 align-items-center">
+                                    <!-- FECHA -->
+                                    <div class="col-12 col-sm-6">
+                                        <label class="form-label-custom">
+                                            <i class="bi bi-calendar-date text-primary"></i> Fecha de la Agenda
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0 text-primary">
+                                                <i class="bi bi-calendar3"></i>
+                                            </span>
+                                            <input type="date"
+                                                class="form-control form-control-custom border-start-0 ps-0"
+                                                formControlName="fecha" id="fecha"
+                                                [class.is-invalid]="formulario.get('fecha')?.invalid && formulario.get('fecha')?.touched">
+                                        </div>
+                                        <small class="text-muted d-block mt-1">
+                                            <i class="bi bi-info-circle me-1"></i>Selecciona el día a planificar
+                                        </small>
+                                    </div>
+
+                                    <!-- SEMANA (AUTOMÁTICA Y PREDECIBLE) -->
+                                    <div class="col-12 col-sm-6">
+                                        <label class="form-label-custom">
+                                            <i class="bi bi-calendar-range text-primary"></i> Semana Correspondiente
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0 text-muted">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+                                            <input type="text"
+                                                class="form-control form-control-custom border-start-0 ps-0 bg-light fw-bold text-primary"
+                                                [value]="formulario.get('semana')?.value || 'Calculando semana...'"
+                                                readonly>
+                                        </div>
+                                        <small class="text-muted d-block mt-1">
+                                            <i class="bi bi-check-circle-fill text-success me-1"></i>Calculada
+                                            automáticamente
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PERFIL DEL USUARIO -->
+                        <div class="col-12 col-lg-5">
+                            <div class="meta-panel-card h-100 d-flex align-items-center">
+                                <div class="user-profile-badge w-100">
+                                    <div class="avatar-circle flex-shrink-0">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
+                                    <div class="flex-grow-1 min-width-0">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge bg-primary-subtle text-primary fw-semibold px-2 py-1"
+                                                style="font-size: 0.75rem;">
+                                                {{ rol ? (rol | uppercase) : 'USUARIO' }}
+                                            </span>
+                                            <!-- <span *ngIf="coordinacion"
+                                                class="badge bg-secondary-subtle text-secondary fw-normal px-2 py-1"
+                                                style="font-size: 0.75rem;">
+                                                <i class="bi bi-geo me-1"></i>{{ coordinacion }}
+                                            </span> -->
+                                        </div>
+                                        <h6 class="mb-0 fw-bold text-dark text-truncate mt-1"
+                                            title="{{ asesorNombre }}">
+                                            {{ asesorNombre || 'Usuario no identificado' }}
+                                        </h6>
+                                        <small class="text-muted">Responsable del cronograma</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FILA 2: BARÓMETRO / RESUMEN RÁPIDO DEL DÍA -->
+                    <div class="kpi-ribbon d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <span class="kpi-chip highlight">
+                                <i class="bi bi-list-check text-primary"></i>
+                                <span><strong>{{ actividades.length }}</strong> {{ actividades.length === 1 ?
+                                    'actividad' : 'actividades' }}</span>
+                            </span>
+
+                            <span class="kpi-chip">
+                                <i class="bi bi-clock-history text-secondary"></i>
+                                <span>Horario: <strong>{{ getRangoHorario() }}</strong></span>
+                            </span>
+
+                            <span class="kpi-chip" [class.success]="formulario.valid"
+                                [class.warning]="formulario.invalid">
+                                <i class="bi"
+                                    [ngClass]="formulario.valid ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'"></i>
+                                <span>{{ formulario.valid ? 'Formulario listo' : 'Horas o campos pendientes' }}</span>
+                            </span>
+                        </div>
+
+                        <div class="d-none d-md-block text-muted small">
+                            <i class="bi bi-lightbulb me-1 text-warning"></i>
+                            Cada nueva actividad sugiere la siguiente hora automáticamente.
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN: CRONOGRAMA DE ACTIVIDADES -->
+                    <div class="mb-4">
+                        <div
+                            class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3 pb-2 border-bottom">
+                            <div>
+                                <h5 class="fw-bold mb-0 text-dark">
+                                    <i class="bi bi-clock-fill text-primary me-2"></i>Cronograma del Día
+                                </h5>
+                                <small class="text-muted">Define los tiempos, el tipo de actividad y las
+                                    ubicaciones</small>
+                            </div>
+
+                            <button type="button"
+                                class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 d-inline-flex align-items-center gap-2 fw-semibold"
+                                (click)="agregarActividad()">
+                                <i class="bi bi-plus-circle-fill"></i>
+                                <span>Agregar Actividad</span>
+                            </button>
+                        </div>
+
+                        <!-- TIMELINE LIST -->
+                        <div class="timeline-track" formArrayName="actividades">
+                            <div *ngFor="let actividad of actividades.controls; let i = index" [formGroupName]="i"
+                                class="activity-node">
+
+                                <!-- EJE VERTICAL (NÚMERO + LÍNEA) -->
+                                <div class="timeline-axis">
+                                    <div class="step-marker" title="Paso {{ i + 1 }}">
+                                        {{ i + 1 }}
+                                    </div>
+                                    <div *ngIf="i < actividades.length - 1" class="timeline-connector"></div>
+                                </div>
+
+                                <!-- TARJETA DE LA ACTIVIDAD -->
+                                <div class="activity-card">
+                                    <!-- HEADER DE LA ACTIVIDAD -->
+                                    <div class="activity-card-header">
+                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                                            <span class="activity-badge-num">
+                                                Actividad #{{ i + 1 }}
+                                            </span>
+                                        </div>
+
+                                        <!-- BOTONES DE ACCIÓN RÁPIDA -->
+                                        <div class="action-btn-group">
+                                            <button type="button" class="btn-icon-soft" (click)="duplicarActividad(i)"
+                                                title="Duplicar actividad con +1 hora">
+                                                <i class="fa-regular fa-clone"></i>
+                                            </button>
+
+                                            <button type="button" class="btn-icon-soft delete"
+                                                (click)="eliminarActividad(i)" [disabled]="actividades.length <= 1"
+                                                [attr.title]="actividades.length <= 1 ? 'Debe haber al menos una actividad' : 'Eliminar actividad'">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- CUERPO DE LA ACTIVIDAD (INPUTS CLAROS Y PREDECIBLES) -->
+                                    <div class="activity-card-body">
+                                        <div class="row g-3">
+
+                                            <!-- 1. HORA -->
+                                            <div class="col-12 col-md-3">
+                                                <label class="form-label-custom">
+                                                    <i class="bi bi-clock text-primary"></i> Hora
+                                                </label>
+                                                <div class="time-input-container">
+                                                    <div class="time-input-group"
+                                                        [class.border-danger]="actividad.get('hora')?.invalid && actividad.get('hora')?.touched">
+                                                        <div class="time-icon-addon">
+                                                            <i class="bi bi-alarm"></i>
+                                                        </div>
+                                                        <input type="time" class="time-field" formControlName="hora"
+                                                            min="08:00" max="19:00" required>
+                                                    </div>
+                                                    <!-- MENSAJE DE VALIDACIÓN INLINE -->
+                                                    <div *ngIf="actividad.get('hora')?.invalid && actividad.get('hora')?.touched"
+                                                        class="text-danger small mt-1 fw-semibold">
+                                                        <span *ngIf="actividad.get('hora')?.hasError('required')">
+                                                            <i class="bi bi-exclamation-triangle me-1"></i>La hora es
+                                                            requerida
+                                                        </span>
+                                                        <span *ngIf="actividad.get('hora')?.hasError('horaInvalida')">
+                                                            <i class="bi bi-exclamation-triangle me-1"></i>Horario
+                                                            laboral: 8am - 7pm
+                                                        </span>
+                                                    </div>
+                                                    <div *ngIf="!actividad.get('hora')?.invalid" class="time-hint">
+                                                        Permitido: 08:00 a 19:00
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 2. TIPO DE ACTIVIDAD (SELECTOR SELECT) -->
+
+                                            <!-- 3. UBICACIÓN / DOMICILIO -->
+                                            <div class="col-12 col-md-5">
+                                                <label class="form-label-custom">
+                                                    <i class="bi bi-geo-alt text-primary"></i> Ubicación / Domicilio
+                                                </label>
+                                                <input type="text" class="form-control form-control-custom"
+                                                    formControlName="domicilio"
+                                                    placeholder="Ej. Sucursal Matriz, Domicilio de cliente...">
+                                                <div class="time-hint">
+                                                    Lugar físico o referencia
+                                                </div>
+                                            </div>
+
+                                            <!-- 4. DESCRIPCIÓN DE LA ACTIVIDAD -->
+                                            <div class="col-12 mt-2">
+                                                <label class="form-label-custom">
+                                                    <i class="bi bi-card-text text-primary"></i> Descripción Detallada
+                                                </label>
+                                                <textarea class="form-control form-control-custom"
+                                                    formControlName="actividad" rows="2"
+                                                    placeholder="Describe brevemente las tareas clave, personas involucradas o resultados esperados..."></textarea>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BOTÓN DASHED PARA AGREGAR OTRA ACTIVIDAD FÁCILMENTE -->
+                        <div class="mt-3">
+                            <button type="button" class="add-activity-dashed-btn" (click)="agregarActividad()">
+                                <i class="bi bi-plus-circle fs-5"></i>
+                                <span>Agregar siguiente actividad (auto-incrementa +1 hora)</span>
+                            </button>
+                        </div>
+
+                        <!-- ESTADO VACÍO EN CASO DE LIMPIARSE -->
+                        <div *ngIf="actividades.length === 0" class="empty-timeline-state">
+                            <div class="empty-state-icon">
+                                <i class="bi bi-calendar-x"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-1">No hay actividades programadas</h5>
+                            <p class="text-muted mb-3">Comienza agregando tu primera actividad del día laboral</p>
+                            <button type="button" class="btn btn-primary rounded-pill px-4 py-2"
+                                (click)="agregarActividad()">
+                                <i class="bi bi-plus-lg me-1"></i>Crear primera actividad
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- FOOTER STICKY FIJO -->
+                <div
+                    class="agenda-sticky-footer d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+                    <!-- INFORMACIÓN RESUMIDA -->
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fs-7">
+                            <i class="bi bi-check2-square text-primary me-1"></i>
+                            {{ actividades.length }} {{ actividades.length === 1 ? 'actividad' : 'actividades' }}
+                        </span>
+                        <span class="text-muted small d-none d-sm-inline">
+                            <i class="bi bi-info-circle me-1"></i>Los cambios se guardan por actividad
+                        </span>
+                    </div>
+
+                    <!-- BOTONES DE ACCIÓN -->
+                    <div class="d-flex align-items-center gap-2 w-100 w-sm-auto justify-content-end">
+                        <button type="button"
+                            class="btn btn-outline-secondary rounded-pill px-3 py-2 flex-fill flex-sm-grow-0"
+                            (click)="limpiarFormulario()">
+                            <i class="bi bi-eraser me-1"></i>
+                            <span>Limpiar</span>
+                        </button>
+
+                        <button type="button"
+                            class="btn btn-outline-primary rounded-pill px-3 py-2 flex-fill flex-sm-grow-0"
+                            (click)="agregarActividad()">
+                            <i class="bi bi-plus-lg me-1"></i>
+                            <span>+ Actividad</span>
+                        </button>
+
+                        <button type="submit" class="btn-primary-gradient flex-fill flex-sm-grow-0"
+                            [disabled]="formulario.invalid || actividades.length === 0">
+                            <i class="bi bi-cloud-arrow-up-fill fs-6"></i>
+                            <span>Guardar Agenda</span>
+                            <span *ngIf="actividades.length > 0" class="badge bg-white text-dark ms-1">
+                                {{ actividades.length }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>

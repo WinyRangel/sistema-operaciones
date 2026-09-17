@@ -10,7 +10,7 @@ export class AuthService {
     throw new Error('Method not implemented.');
   }
   private apiUrl = 'https://servidor-operaciones.onrender.com/login';
-  //private apiUrl = 'http://localhost:4000/login';
+  // private apiUrl = 'http://localhost:4000/login';
   private autenticadoSubject = new BehaviorSubject<boolean>(this.tieneToken());
   autenticado$ = this.autenticadoSubject.asObservable();
 
@@ -30,8 +30,11 @@ export class AuthService {
         if (res.token) {
           localStorage.setItem('token', res.token);
           localStorage.setItem('usuario', res.usuario);
+          if (res.nombre) {
+            localStorage.setItem('nombre', res.nombre);
+          }
           localStorage.setItem('rol', res.rol);
-          localStorage.setItem('coordinacion', res.coordinacion)
+          localStorage.setItem('coordinacion', res.coordinacion);
           this.autenticadoSubject.next(true); // 🔄 notifica login
         }
       })
@@ -43,11 +46,35 @@ export class AuthService {
     return localStorage.getItem('usuario');
   }
 
+  getNombre(): string | null {
+    const localNombre = localStorage.getItem('nombre');
+    if (localNombre) return localNombre;
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.nombre) return payload.nombre;
+      } catch (e) { }
+    }
+
+    try {
+      const u = localStorage.getItem('usuario');
+      if (u && u.startsWith('{')) {
+        const parsed = JSON.parse(u);
+        if (parsed.nombre) return parsed.nombre;
+      }
+    } catch (e) { }
+
+    return null;
+  }
 
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
+    localStorage.removeItem('nombre');
     localStorage.removeItem('rol');
+    localStorage.removeItem('coordinacion');
     this.autenticadoSubject.next(false); // 🔄 notifica logout
   }
 

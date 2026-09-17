@@ -60,6 +60,8 @@ import { TestAgendaComponent } from './components/test-agenda/test-agenda.compon
 import { TruncatePipe } from './pipes/truncate.pipe';
 import { SidebarComponent } from './components/Shared/layout/sidebar/sidebar.component';
 import { Error404Component } from './components/Shared/error404/error404.component';
+import { ListarAgendaComponent } from './components/agenda-admin/listar-agenda/listar-agenda.component';
+import { RegistrarAgendaAdminComponent } from './components/agenda-admin/registrar-agenda/registrar-agenda.component';
 
 registerLocaleData(localeEs);
 
@@ -109,7 +111,9 @@ const MyPreset = definePreset(Aura, {
     TestAgendaComponent,
     TruncatePipe,
     SidebarComponent,
-    Error404Component
+    Error404Component,
+    ListarAgendaComponent,
+    RegistrarAgendaAdminComponent
   ],
   imports: [
     BrowserModule,

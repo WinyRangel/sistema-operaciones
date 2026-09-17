@@ -1,0 +1,351 @@
+<div class="agenda-list-wrapper">
+  <div class="container-fluid px-2 px-md-4">
+    <div class="agenda-list-card">
+
+      <!-- CABECERA HERO -->
+      <div
+        class="agenda-list-header d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="hero-icon-box text-white">
+            <i class="bi bi-journal-text"></i>
+          </div>
+          <div>
+            <h4 class="mb-0 fw-bold text-white fs-5 fs-md-4">Actividades Agendadas</h4>
+            <small class="text-white-50">Consulta, seguimiento y exportación de cronogramas administrativos</small>
+          </div>
+        </div>
+
+        <!-- BOTONES DE EXPORTACIÓN Y ACCIONES -->
+        <div
+          class="d-flex flex-wrap align-items-center gap-2 w-100 w-lg-auto justify-content-start justify-content-lg-end">
+          <button type="button" class="btn-enviar-correo" (click)="enviarResumenPorCorreo()"
+            [disabled]="cargando || enviandoCorreo" title="Enviar actividades filtradas por correo">
+            <i class="bi bi-envelope-paper-fill fs-6"></i>
+            <span class="d-none d-sm-inline">Enviar por Correo</span>
+          </button>
+
+          <button type="button" class="btn-export-excel" (click)="exportarExcel()"
+            [disabled]="agendasFiltradas.length === 0 || cargando" title="Exportar listado a Excel (.xlsx)">
+            <i class="bi bi-file-earmark-excel-fill fs-6"></i>
+            <span class="d-none d-sm-inline">Exportar Excel</span>
+          </button>
+
+          <button type="button" class="btn-export-pdf" (click)="exportarPDF()"
+            [disabled]="agendasFiltradas.length === 0 || cargando" title="Exportar reporte a PDF (.pdf)">
+            <i class="bi bi-file-earmark-pdf-fill fs-6"></i>
+            <span class="d-none d-sm-inline">Exportar PDF</span>
+          </button>
+
+          <a routerLink="/registrar-agenda-admin"
+            class="btn btn-light rounded-pill px-3 py-2 fw-semibold text-primary d-inline-flex align-items-center gap-1 shadow-sm fs-7">
+            <i class="bi bi-plus-circle-fill"></i>
+            <span class="d-none d-sm-inline">Nueva Agenda</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- CUERPO PRINCIPAL -->
+      <div class="p-3 p-md-4">
+
+        <!-- PANEL DE FILTROS -->
+        <div class="filters-panel">
+          <div class="row g-3 align-items-end">
+
+            <!-- 1. INPUT BUSCADOR GLOBAL -->
+            <div [ngClass]="puedeFiltrarRol ? 'col-12 col-md-4' : 'col-12 col-md-6'">
+              <label class="filter-label">
+                <i class="bi bi-search text-primary"></i> Buscador de actividades
+              </label>
+              <div class="input-search-custom">
+                <i class="bi bi-search search-icon-inside"></i>
+                <input type="text" class="form-control search-input-field w-100"
+                  placeholder="Buscar por usuario, actividad, lugar..." [(ngModel)]="busqueda"
+                  (input)="aplicarFiltros()">
+              </div>
+            </div>
+
+            <!-- 2. RANGO DE FECHAS: FECHA INICIO -->
+            <div class="col-12 col-sm-6 col-md-2">
+              <label class="filter-label">
+                <i class="bi bi-calendar-event text-primary"></i> Desde
+              </label>
+              <input type="date" class="form-control" [(ngModel)]="fechaInicio" (change)="aplicarFiltros()">
+            </div>
+
+            <!-- 3. RANGO DE FECHAS: FECHA FIN -->
+            <div class="col-12 col-sm-6 col-md-2">
+              <label class="filter-label">
+                <i class="bi bi-calendar-check text-primary"></i> Hasta
+              </label>
+              <input type="date" class="form-control" [(ngModel)]="fechaFin" (change)="aplicarFiltros()">
+            </div>
+
+            <!-- 4. FILTRO POR ROL / ÁREA (SOLO VISIBLE PARA ADMIN Y SUPERVISIÓN) -->
+            <div class="col-12 col-sm-6 col-md-2" *ngIf="puedeFiltrarRol">
+              <label class="filter-label">
+                <i class="bi bi-people text-primary"></i> Área / Rol
+              </label>
+              <select class="form-select" [(ngModel)]="rolSeleccionado" (change)="aplicarFiltros()">
+                <option value="">Todos los roles</option>
+                <option *ngFor="let r of rolesDisponibles" [value]="r.valor">
+                  {{ r.label }}
+                </option>
+              </select>
+            </div>
+
+            <!-- 5. FILTRO POR SEMANA -->
+            <div class="col-12 col-sm-6 col-md-2">
+              <label class="filter-label">
+                <i class="bi bi-calendar3-range text-primary"></i> Semana
+              </label>
+              <select class="form-select" [(ngModel)]="semanaSeleccionada" (change)="aplicarFiltros()">
+                <option value="">Todas las semanas</option>
+                <option *ngFor="let s of semanas" [value]="s">
+                  {{ s }}
+                </option>
+              </select>
+            </div>
+
+          </div>
+
+          <!-- BOTONES RÁPIDOS DE FECHA Y RESET -->
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 pt-2 border-top">
+            <div class="d-flex flex-wrap align-items-center gap-1">
+              <span class="text-muted small me-1">Atajos de fecha:</span>
+              <button type="button" class="quick-filter-btn" (click)="establecerFiltroHoy()">
+                <i class="bi bi-calendar-day me-1"></i>Hoy
+              </button>
+              <button type="button" class="quick-filter-btn" (click)="establecerFiltroMesActual()">
+                <i class="bi bi-calendar-month me-1"></i>Este Mes
+              </button>
+            </div>
+
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              <button type="button"
+                class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1"
+                (click)="limpiarFiltros()">
+                <i class="bi bi-x-circle"></i>
+                <span>Restablecer Filtros</span>
+              </button>
+
+              <button type="button"
+                class="btn btn-sm btn-enviar-correo-mini rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1 shadow-sm"
+                (click)="enviarResumenPorCorreo()" [disabled]="enviandoCorreo || cargando"
+                title="Enviar por correo las actividades del rango seleccionado">
+                <i class="bi bi-send-fill"></i>
+                <span>Enviar por Correo</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIBBON DE RESUMEN / KPIS -->
+        <div class="kpi-bar">
+          <div class="kpi-item">
+            <i class="bi bi-list-task text-primary"></i>
+            <span>Total actividades: <strong>{{ agendasFiltradas.length }}</strong> de {{ agendas.length }}</span>
+          </div>
+
+          <div *ngIf="fechaInicio || fechaFin" class="kpi-item">
+            <i class="bi bi-calendar-range text-info"></i>
+            <span>Rango: <strong>{{ fechaInicio || 'Inicio' }}</strong> al <strong>{{ fechaFin || 'Fin'
+                }}</strong></span>
+          </div>
+
+          <div *ngIf="rolSeleccionado" class="kpi-item">
+            <i class="bi bi-person-badge text-warning"></i>
+            <span>Área: <strong class="text-uppercase">{{ rolSeleccionado }}</strong></span>
+          </div>
+
+          <div *ngIf="semanaSeleccionada" class="kpi-item">
+            <i class="bi bi-bookmark-star text-success"></i>
+            <span>Semana: <strong>{{ semanaSeleccionada }}</strong></span>
+          </div>
+        </div>
+
+        <!-- INDICADOR DE CARGA -->
+        <div *ngIf="cargando" class="text-center py-5">
+          <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Cargando actividades...</span>
+          </div>
+          <h6 class="text-muted">Cargando actividades agendadas...</h6>
+        </div>
+
+        <!-- TABLA DE ACTIVIDADES (SI NO ESTÁ CARGANDO) -->
+        <div *ngIf="!cargando">
+          <div *ngIf="agendasFiltradas.length > 0; else sinActividades" class="table-responsive-custom shadow-sm">
+            <table class="table agenda-table">
+              <thead>
+                <tr>
+                  <th class="text-center" style="width: 45px;">#</th>
+                  <th>Responsable</th>
+                  <th class="text-center">Área / Rol</th>
+                  <th class="text-center">Semana</th>
+                  <th class="text-center">Fecha</th>
+                  <th class="text-center">Hora</th>
+                  <th>Ubicación / Domicilio</th>
+                  <th>Descripción de la Actividad</th>
+                  <th class="text-center" style="width: 70px;">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of agendasPaginadas; let i = index">
+                  <!-- ÍNDICE CONTINUO SEGÚN PÁGINA -->
+                  <td class="text-center fw-bold text-muted">
+                    {{ (paginaActual - 1) * elementosPorPagina + i + 1 }}
+                  </td>
+
+                  <!-- RESPONSABLE / NOMBRE -->
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div
+                        class="avatar-circle-sm bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                        style="width: 32px; height: 32px; font-size: 0.8rem;">
+                        {{ (item.nombre || item.usuario || 'U').substring(0, 2).toUpperCase() }}
+                      </div>
+                      <span class="fw-semibold text-dark text-truncate" style="max-width: 160px;"
+                        title="{{ item.nombre || item.usuario }}">
+                        {{ item.nombre || item.usuario || 'Sin asignar' }}
+                      </span>
+                    </div>
+                  </td>
+
+                  <!-- ROL / ÁREA -->
+                  <td class="text-center">
+                    <span class="badge-role" [ngClass]="getRoleBadgeColor(item.rol)">
+                      {{ item.rol ? item.rol : 'GENERAL' }}
+                    </span>
+                  </td>
+
+                  <!-- SEMANA -->
+                  <td class="text-center">
+                    <span class="badge bg-light text-primary border px-2 py-1 fw-semibold">
+                      {{ item.semana || '-' }}
+                    </span>
+                  </td>
+
+                  <!-- FECHA -->
+                  <td class="text-center fw-semibold text-secondary">
+                    {{ getFechaFormateada(item.fecha) }}
+                  </td>
+
+                  <!-- HORA -->
+                  <td class="text-center">
+                    <span class="badge bg-primary-subtle text-primary fw-bold px-2 py-1">
+                      <i class="bi bi-clock me-1"></i>{{ item.hora || '--:--' }}
+                    </span>
+                  </td>
+
+                  <!-- DOMICILIO / UBICACIÓN -->
+                  <td>
+                    <div class="d-flex align-items-center text-muted" title="{{ item.domicilio }}">
+                      <i class="bi bi-geo-alt text-danger me-1 flex-shrink-0"></i>
+                      <span class="text-truncate" style="max-width: 180px;">
+                        {{ item.domicilio || 'No especificada' }}
+                      </span>
+                    </div>
+                  </td>
+
+                  <!-- ACTIVIDAD -->
+                  <td>
+                    <div class="text-dark" title="{{ item.actividad }}" style="max-width: 320px;">
+                      {{ item.actividad || 'Sin descripción detallada' }}
+                    </div>
+                  </td>
+
+                  <!-- ACCIONES (ELIMINAR) -->
+                  <td class="text-center">
+                    <button type="button" class="btn-delete-action" (click)="eliminarActividad(item)"
+                      title="Eliminar actividad">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ESTADO VACÍO (SIN RESULTADOS) -->
+          <ng-template #sinActividades>
+            <div class="empty-state-box">
+              <div class="empty-state-icon">
+                <i class="bi bi-clipboard-x"></i>
+              </div>
+              <h5 class="fw-bold text-dark mb-1">No se encontraron actividades</h5>
+              <p class="text-muted mb-3">
+                No hay registros que coincidan con los criterios de búsqueda o filtros aplicados.
+              </p>
+              <button type="button" class="btn btn-outline-primary rounded-pill px-4 py-2" (click)="limpiarFiltros()">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Restablecer todos los filtros
+              </button>
+            </div>
+          </ng-template>
+
+          <!-- PAGINACIÓN Y CONTROL DE ELEMENTOS POR PÁGINA -->
+          <div *ngIf="agendasFiltradas.length > 0" class="pagination-container">
+            <div class="d-flex align-items-center gap-2 text-muted small">
+              <span>Mostrar</span>
+              <select class="form-select form-select-sm" style="width: 75px;" [(ngModel)]="elementosPorPagina"
+                (change)="paginaActual = 1">
+                <option *ngFor="let tam of tamanosPagina" [value]="tam">{{ tam }}</option>
+              </select>
+              <span>por página (Total: <strong>{{ agendasFiltradas.length }}</strong> registros)</span>
+            </div>
+
+            <!-- CONTROLES DE PÁGINA -->
+            <div class="d-flex align-items-center gap-1">
+              <button type="button" class="btn-pagination" [disabled]="paginaActual === 1" (click)="cambiarPagina(1)"
+                title="Primera página">
+                <i class="bi bi-chevron-double-left"></i>
+              </button>
+
+              <button type="button" class="btn-pagination" [disabled]="paginaActual === 1"
+                (click)="cambiarPagina(paginaActual - 1)" title="Página anterior">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+
+              <span class="mx-2 text-muted small">
+                Página <strong>{{ paginaActual }}</strong> de <strong>{{ totalPaginas }}</strong>
+              </span>
+
+              <button type="button" class="btn-pagination" [disabled]="paginaActual === totalPaginas"
+                (click)="cambiarPagina(paginaActual + 1)" title="Página siguiente">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+
+              <button type="button" class="btn-pagination" [disabled]="paginaActual === totalPaginas"
+                (click)="cambiarPagina(totalPaginas)" title="Última página">
+                <i class="bi bi-chevron-double-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- BARRA DE ACCIÓN AL FINAL: ENVIAR ACTIVIDADES POR CORREO -->
+          <div
+            class="send-email-banner mt-4 p-3 p-md-4 rounded-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+              <div class="send-email-icon-box">
+                <i class="bi bi-envelope-check-fill fs-3 text-primary"></i>
+              </div>
+              <div>
+                <h6 class="mb-1 fw-bold text-dark">Enviar actividades filtradas por correo</h6>
+                <p class="mb-0 text-muted small">
+                  Envía el listado consolidado de actividades de <strong>Auditoría, Mercadotecnia y RH</strong>
+                  correspondiente al rango de fechas seleccionado en un solo correo.
+                </p>
+              </div>
+            </div>
+            <button type="button"
+              class="btn btn-primary rounded-pill px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm text-nowrap align-self-stretch align-self-md-center justify-content-center"
+              (click)="enviarResumenPorCorreo()" [disabled]="cargando || enviandoCorreo">
+              <i class="bi bi-send-fill"></i>
+              <span>{{ enviandoCorreo ? 'Enviando...' : 'Enviar actividades por correo' }}</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>

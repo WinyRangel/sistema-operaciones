@@ -1,228 +1,378 @@
-<div id="mainCarousel" class="carousel slide carousel-fade shadow-lg" data-bs-ride="carousel">
-  <div class="carousel-inner rounded-4 overflow-hidden">
-    <div class="carousel-item active">
-      <div class="carousel-image-container position-relative">
-        <img src="assets/home.png" class="d-block w-100" alt="Imagen principal"
-          style="object-fit: cover; height: 500px;">
-        <div class="image-overlay position-absolute top-0 start-0 w-100 h-100"
-          style="background: linear-gradient(135deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 100%);"></div>
-      </div>
-      <div class="carousel-caption d-none d-md-block text-start pb-5">
-        <h2 class="display-4 fw-bold mb-3 animate-fade-in">Bienvenido</h2>
-        <p class="lead fs-3 mb-4 animate-slide-up">Sistema de Supervisión Área Operativa</p>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="inicio-page-wrapper">
+  <div class="container-xl py-4 py-md-5">
 
-<div class="container-fluid px-4 mt-5 mb-5">
-  <div class="row g-4">
-    <div class="col-md-6" *ngIf="rolUsuario === 'coordinador'">
-      <div class="card border-0 hover-card h-100">
-        <div class="card-body text-center p-4">
-          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-info">
-            <i class="bi bi-calendar-check fs-1 text-white"></i>
-          </div>
-          <span class="badge bg-soft-info rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
-          <h5 class="card-title fw-semibold mb-3">Agendas</h5>
-          <p class="card-text text-secondary mb-4">Registrar Agenda</p>
-          <a routerLink="/registrar-agenda" class="btn btn-outline-primary rounded-pill px-4">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
+    <!-- HERO WELCOME BANNER -->
+    <div class="welcome-hero-card mb-4 mb-md-5">
+      <div
+        class="welcome-hero-content d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-4">
 
-    <div class="col-md-6" *ngIf="rolUsuario === 'coordinador'">
-      <div class="card border-0 hover-card h-100">
-        <div class="card-body text-center p-4">
-          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-info">
-            <i class="fa-solid fa-calendar-days fs-1 text-white"></i>
+        <!-- SALUDO Y DATOS DE USUARIO -->
+        <div class="d-flex align-items-center gap-3">
+          <div class="user-avatar-box">
+            <i class="bi bi-person-circle"></i>
           </div>
-          <span class="badge bg-soft-info rounded-pill px-3 py-2 mb-3">Actividad Semanal</span>
-          <h5 class="card-title fw-semibold mb-3">Ver Agenda</h5>
-          <p class="card-text text-secondary mb-4">Descargar mi agenda</p>
-          <a routerLink="/mi-agenda" class="btn btn-outline-primary rounded-pill px-4">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
+          <div>
+            <span class="greeting-subtitle text-white-50 small text-uppercase fw-semibold tracking-wider">
+              Sistema VAM Operaciones
+            </span>
+            <h1 class="greeting-title text-white mb-1">
+              {{ saludoHora }}, <span class="highlight-name">{{ nombreUsuario || usuarioActual || 'Bienvenido' }}</span>
+            </h1>
+            <p class="greeting-desc text-white-50 mb-0 small">
+              Accede a tus herramientas de planificación, consulta y seguimiento administrativo.
+            </p>
+          </div>
         </div>
+
+        <!-- BADGES INFORMATIVOS -->
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <div class="hero-pill-badge">
+            <i class="bi bi-calendar-check text-info"></i>
+            <span>{{ fechaHoy }}</span>
+          </div>
+
+          <div class="hero-pill-badge role-badge">
+            <i class="bi bi-shield-lock-fill text-warning"></i>
+            <span class="text-uppercase fw-bold">{{ rolEtiqueta }}</span>
+          </div>
+        </div>
+
       </div>
     </div>
 
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="card border-0 hover-card h-100">
-        <div class="card-body text-center p-4">
-          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
-            <i class="bi bi-calendar-check fs-1 text-white"></i>
-          </div>
-          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
-          <h5 class="card-title fw-semibold mb-3">Agendas</h5>
-          <p class="card-text text-secondary mb-4">Gestión de agendas</p>
-          <a routerLink="/recorrido-agenda" class="btn btn-primary rounded-pill px-4">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
+    <!-- SECCIÓN DE MÓDULOS -->
+    <div class="section-heading mb-4 text-center text-md-start d-flex justify-content-between align-items-end">
+      <div>
+        <h4
+          class="fw-bold text-dark mb-1 d-flex align-items-center gap-2 justify-content-center justify-content-md-start">
+          <i class="bi bi-grid-fill text-primary fs-5"></i>
+          <span>Módulos de Trabajo</span>
+        </h4>
+        <p class="text-muted small mb-0">Selecciona el módulo al que deseas ingresar hoy</p>
       </div>
     </div>
 
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="card border-0 hover-card h-100">
-        <div class="card-body text-center p-4">
-          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
-            <i class="bi bi-ticket-perforated fs-1 text-white"></i>
+    <!-- CUADRÍCULA DE TARJETAS -->
+    <div class="row g-4 justify-content-center">
+
+      <!-- ================================================================ -->
+      <!-- 1. ROLES RH, AUDITORIA, MERCADOTECNIA (Y ADMIN/SUP) -->
+      <!-- ================================================================ -->
+
+      <!-- REGISTRAR AGENDA ADMIN -->
+      <div class="col-12 col-md-6 col-lg-5"
+        *ngIf="rolUsuario === 'rh' || rolUsuario === 'auditoria' || rolUsuario === 'mercadotecnia' || rolUsuario === 'admin' || rolUsuario === 'sup'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-blue shadow-blue">
+                  <i class="bi bi-calendar2-plus-fill"></i>
+                </div>
+                <span class="module-chip chip-blue">Captura Semanal</span>
+              </div>
+              <h5 class="module-title mb-2">Registrar Agenda</h5>
+              <p class="module-text text-muted mb-4">
+                Programa tus actividades diarias, horarios específicos y visitas domiciliarias para cada semana.
+              </p>
+            </div>
+            <a routerLink="/registrar-agenda-admin" class="btn btn-module-action btn-blue w-100">
+              <span>Registrar Actividades</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
           </div>
-          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
-          <h5 class="card-title fw-semibold mb-3">Vaucher, Depositos y Transferencias</h5>
-          <p class="card-text text-secondary mb-4">Gestión de vouchers reportados por coordinación</p>
-          <a routerLink="/baucher" class="btn btn-primary rounded-pill px-4">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
         </div>
       </div>
+
+      <!-- VER AGENDAS ADMIN -->
+      <div class="col-12 col-md-6 col-lg-5"
+        *ngIf="rolUsuario === 'rh' || rolUsuario === 'auditoria' || rolUsuario === 'mercadotecnia' || rolUsuario === 'admin' || rolUsuario === 'sup'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-teal shadow-teal">
+                  <i class="bi bi-journal-bookmark-fill"></i>
+                </div>
+                <span class="module-chip chip-teal">Consulta y Reportes</span>
+              </div>
+              <h5 class="module-title mb-2">Ver y Gestionar Agendas</h5>
+              <p class="module-text text-muted mb-4">
+                Consulta cronogramas, filtra por rango de fechas, exporta a Excel/PDF y envía reportes consolidados por
+                correo.
+              </p>
+            </div>
+            <a routerLink="/listar-agenda" class="btn btn-module-action btn-teal w-100">
+              <span>Consultar Agendas</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- 2. MÓDULOS ESPECÍFICOS DE ADMIN Y SUP -->
+      <!-- ================================================================ -->
+      <div class="col-12 col-sm-6 col-lg-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-purple shadow-purple">
+                  <i class="bi bi-receipt-cutoff"></i>
+                </div>
+                <span class="module-chip chip-purple">Finanzas</span>
+              </div>
+              <h5 class="module-title mb-2">Vouchers y Depósitos</h5>
+              <p class="module-text text-muted mb-4">
+                Gestión y validación de vouchers reportados por coordinación y transferencias.
+              </p>
+            </div>
+            <a routerLink="/baucher" class="btn btn-module-action btn-purple w-100">
+              <span>Acceder</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-lg-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-amber shadow-amber">
+                  <i class="bi bi-bank2"></i>
+                </div>
+                <span class="module-chip chip-amber">Validación Diaria</span>
+              </div>
+              <h5 class="module-title mb-2">Verificación de Depósitos</h5>
+              <p class="module-text text-muted mb-4">
+                Control de depósitos reportados diariamente por ACC&COP.
+              </p>
+            </div>
+            <a routerLink="/depositos" class="btn btn-module-action btn-amber w-100">
+              <span>Acceder</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-lg-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-rose shadow-rose">
+                  <i class="bi bi-people-fill"></i>
+                </div>
+                <span class="module-chip chip-rose">Supervisión</span>
+              </div>
+              <h5 class="module-title mb-2">Seguimiento Ejecutivas</h5>
+              <p class="module-text text-muted mb-4">
+                Control y seguimiento de actividades diarias y semanales de las ejecutivas.
+              </p>
+            </div>
+            <a routerLink="/ejecutivas" class="btn btn-module-action btn-rose w-100">
+              <span>Acceder</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-lg-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-indigo shadow-indigo">
+                  <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <span class="module-chip chip-indigo">Objetivos</span>
+              </div>
+              <h5 class="module-title mb-2">Cumplimiento de Objetivo</h5>
+              <p class="module-text text-muted mb-4">
+                Evaluación semanal de metas y actividades reportadas por el equipo.
+              </p>
+            </div>
+            <a routerLink="/cumplimientoobjetivo" class="btn btn-module-action btn-indigo w-100">
+              <span>Acceder</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-lg-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-cyan shadow-cyan">
+                  <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                </div>
+                <span class="module-chip chip-cyan">Reportes Mensuales</span>
+              </div>
+              <h5 class="module-title mb-2">Reporte de Fichas</h5>
+              <p class="module-text text-muted mb-4">
+                Generación y consulta de fichas cerradas al día y consolidados mensuales.
+              </p>
+            </div>
+            <a routerLink="/reportefichas" class="btn btn-module-action btn-cyan w-100">
+              <span>Acceder</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-lg-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-emerald shadow-emerald">
+                  <i class="bi bi-bullseye"></i>
+                </div>
+                <span class="module-chip chip-emerald">Proyecciones</span>
+              </div>
+              <h5 class="module-title mb-2">Supervisión Proyecciones</h5>
+              <p class="module-text text-muted mb-4">
+                Gestión y seguimiento de créditos proyectados en las coordinaciones.
+              </p>
+            </div>
+            <a routerLink="/seg-proyecciones" class="btn btn-module-action btn-emerald w-100">
+              <span>Acceder</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- 3. MÓDULOS DE COORDINADOR -->
+      <!-- ================================================================ -->
+      <div class="col-12 col-md-6 col-lg-5" *ngIf="rolUsuario === 'coordinador'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-blue shadow-blue">
+                  <i class="bi bi-calendar-check-fill"></i>
+                </div>
+                <span class="module-chip chip-blue">Actividad Diaria</span>
+              </div>
+              <h5 class="module-title mb-2">Registrar Agenda</h5>
+              <p class="module-text text-muted mb-4">
+                Captura de actividades operativas y visitas de coordinación.
+              </p>
+            </div>
+            <a routerLink="/registrar-agenda" class="btn btn-module-action btn-blue w-100">
+              <span>Acceder</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-5" *ngIf="rolUsuario === 'coordinador'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-teal shadow-teal">
+                  <i class="bi bi-calendar3-week-fill"></i>
+                </div>
+                <span class="module-chip chip-teal">Cronograma</span>
+              </div>
+              <h5 class="module-title mb-2">Ver Mi Agenda</h5>
+              <p class="module-text text-muted mb-4">
+                Descarga y consulta tus actividades semanales programadas.
+              </p>
+            </div>
+            <a routerLink="/mi-agenda" class="btn btn-module-action btn-teal w-100">
+              <span>Acceder</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- 4. MÓDULOS DE ASESOR -->
+      <!-- ================================================================ -->
+      <div class="col-12 col-sm-6 col-lg-4" *ngIf="rolUsuario === 'asesor'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-emerald shadow-emerald">
+                  <i class="bi bi-calendar-check-fill"></i>
+                </div>
+                <span class="module-chip chip-emerald">Actividad Semanal</span>
+              </div>
+              <h5 class="module-title mb-2">Registrar Agenda</h5>
+              <p class="module-text text-muted mb-4">
+                Captura de actividades diarias y rutas en campo.
+              </p>
+            </div>
+            <a routerLink="/registrar-agenda-asesor" class="btn btn-module-action btn-emerald w-100">
+              <span>Acceder</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-lg-4" *ngIf="rolUsuario === 'asesor'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-blue shadow-blue">
+                  <i class="bi bi-card-checklist"></i>
+                </div>
+                <span class="module-chip chip-blue">Seguimiento</span>
+              </div>
+              <h5 class="module-title mb-2">Seguimiento de Agenda</h5>
+              <p class="module-text text-muted mb-4">
+                Revisión del avance de compromisos y actividades diarias.
+              </p>
+            </div>
+            <a routerLink="/seguimiento-agenda-asesor" class="btn btn-module-action btn-blue w-100">
+              <span>Acceder</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-lg-4" *ngIf="rolUsuario === 'asesor'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-cyan shadow-cyan">
+                  <i class="bi bi-journal-check"></i>
+                </div>
+                <span class="module-chip chip-cyan">Fichas</span>
+              </div>
+              <h5 class="module-title mb-2">Registrar Ficha</h5>
+              <p class="module-text text-muted mb-4">
+                Captura de fichas de crédito y seguimiento diario de colocaciones.
+              </p>
+            </div>
+            <a routerLink="/fichas-asesor" class="btn btn-module-action btn-cyan w-100">
+              <span>Acceder</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="card border-0 hover-card h-100">
-        <div class="card-body text-center p-4">
-          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
-            <i class="bi bi-bank fs-1 text-white"></i>
-          </div>
-          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
-          <h5 class="card-title fw-semibold mb-3">Verificacion de Depositos Diarios</h5>
-          <p class="card-text text-secondary mb-4">Gestión de depósitos reportados diariamente por ACC&COP</p>
-          <a routerLink="/depositos" class="btn btn-primary rounded-pill px-4">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="card border-0 hover-card h-100">
-        <div class="card-body text-center p-4">
-          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
-            <i class="bi bi-people-fill fs-1 text-white"></i>
-          </div>
-          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
-          <h5 class="card-title fw-semibold mb-3">Seguimiento Ejecutivas</h5>
-          <p class="card-text text-secondary mb-4">Gestion de actividades diarias y semanales</p>
-          <a routerLink="/ejecutivas" class="btn btn-primary rounded-pill px-4">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="card border-0 hover-card h-100">
-        <div class="card-body text-center p-4">
-          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
-            <i class="bi bi-graph-up-arrow fs-1 text-white"></i>
-          </div>
-          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Semanal</span>
-          <h5 class="card-title fw-semibold mb-3">Cumplimiento de Objetivo</h5>
-          <p class="card-text text-secondary mb-4">Gestión de actividades reportadas</p>
-          <a routerLink="/cumplimientoobjetivo" class="btn btn-primary rounded-pill px-4">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="card border-0 hover-card h-100">
-        <div class="card-body text-center p-4">
-          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
-            <i class="bi bi-file-earmark-bar-graph fs-1 text-white"></i>
-          </div>
-          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Mensual</span>
-          <h5 class="card-title fw-semibold mb-3">Reporte de fichas cerradas al día</h5>
-          <p class="card-text text-secondary mb-4">Generar reporte de fichas mensual</p>
-          <a routerLink="/reportefichas" class="btn btn-primary rounded-pill px-4">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin' || rolUsuario === 'sup'">
-      <div class="card border-0 hover-card h-100">
-        <div class="card-body text-center p-4">
-          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
-            <i class="bi bi-graph-up-arrow fs-1 text-white"></i>
-          </div>
-          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Mensual</span>
-          <h5 class="card-title fw-semibold mb-3">Supervisión de Proyecciones</h5>
-          <p class="card-text text-secondary mb-4">Gestión de creditos Proyectados</p>
-          <a routerLink="/seg-proyecciones" class="btn btn-primary rounded-pill px-4">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4" *ngIf="rolUsuario === 'admin'">
-      <div class="card border-0 hover-card h-100">
-        <div class="card-body text-center p-4">
-          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-primary">
-            <i class="bi bi-graph-up-arrow fs-1 text-white"></i>
-          </div>
-          <span class="badge bg-soft-primary rounded-pill px-3 py-2 mb-3">Actividad Mensual</span>
-          <h5 class="card-title fw-semibold mb-3">Seguimiento de colocación mensual</h5>
-          <p class="card-text text-secondary mb-4">Gestión de resultados de colocaciones</p>
-          <a routerLink="/dir-seg-proyeccion" class="btn btn-primary rounded-pill px-4">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6 mx-auto" *ngIf="rolUsuario === 'asesor'">
-      <div class="card border-0 hover-card h-100">
-        <div class="card-body text-center p-4">
-          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-success">
-            <i class="bi bi-calendar-check fs-1 text-white"></i>
-          </div>
-          <span class="badge bg-soft-success rounded-pill px-3 py-2 mb-3">Actividad Semanal</span>
-          <h5 class="card-title fw-semibold mb-3">Registrar Agenda</h5>
-          <p class="card-text text-secondary mb-4">Captura de actividades diarias</p>
-          <a routerLink="/registrar-agenda-asesor" class="btn btn-success rounded-pill px-4">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6" *ngIf="rolUsuario === 'asesor' || rolUsuario === 'coordinador'">
-      <div class="card border-0 hover-card h-100">
-        <div class="card-body text-center p-4">
-          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-success">
-            <i class="bi bi-list-check fs-1 text-white"></i>
-          </div>
-          <span class="badge bg-soft-success rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
-          <h5 class="card-title fw-semibold mb-3">Seguimiento Agenda Asesores</h5>
-          <p class="card-text text-secondary mb-4">Captura de actividades diarias</p>
-          <a routerLink="/seguimiento-agenda-asesor" class="btn btn-success rounded-pill px-4">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6 mx-auto" *ngIf="rolUsuario === 'asesor'">
-      <div class="card border-0 hover-card h-100">
-        <div class="card-body text-center p-4">
-          <div class="icon-wrapper mb-3 mx-auto rounded-3 bg-gradient-success">
-            <i class="bi bi-journal-check fs-1 text-white"></i>
-          </div>
-          <span class="badge bg-soft-success rounded-pill px-3 py-2 mb-3">Actividad Diaria</span>
-          <h5 class="card-title fw-semibold mb-3">Registrar Ficha</h5>
-          <p class="card-text text-secondary mb-4">Captura de actividades del día</p>
-          <a routerLink="/fichas-asesor" class="btn btn-success rounded-pill px-4">
-            Acceder <i class="bi bi-arrow-right ms-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
   </div>
 </div>

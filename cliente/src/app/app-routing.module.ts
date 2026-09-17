@@ -22,6 +22,8 @@ import { FichasAsesorComponent } from './components/Shared/fichas-asesor/fichas-
 import { FichasComponent } from './components/Shared/fichas/fichas.component';
 import { TestComponent } from './components/registrar-agenda-asesor/test.component';
 import { TestAgendaComponent } from './components/test-agenda/test-agenda.component';
+import { ListarAgendaComponent } from './components/agenda-admin/listar-agenda/listar-agenda.component';
+import { RegistrarAgendaAdminComponent } from './components/agenda-admin/registrar-agenda/registrar-agenda.component';
 import { Error404Component } from './components/Shared/error404/error404.component';
 
 
@@ -41,11 +43,16 @@ const routes: Routes = [
   { path: 'iniciar-sesion', component: IniciarSesionComponent },
   { path: 'ejecutivas', component: EjecutivasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup'] } },
   { path: 'depositos', component: DepositosComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup'] } },
-  { path: 'inicio', component: InicioComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'coordinador', 'asesor'] } },
+  { path: 'inicio', component: InicioComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'coordinador', 'asesor', 'mercadotecnia', 'auditoria', 'rh'] } },
   { path: 'reportefichas', component: ReporteFichasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup'] } },
   { path: 'fichas-asesor', component: FichasAsesorComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'asesor'] } },
   { path: 'proyecciones', component: ProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup'] } },
+  { path: 'agendas-admin', component: RegistrarAgendaAdminComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'mercadotecnia', 'auditoria', 'rh'] } },
+  { path: 'listar-agenda', component: ListarAgendaComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'mercadotecnia', 'auditoria', 'rh'] } },
+  { path: 'registrar-agenda', component: RegistrarAgendaComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup'] } },
   { path: 'seg-proyecciones', component: SeguimientoProyeccionesComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup'] } },
+  { path: 'registrar-agenda-admin', component: RegistrarAgendaAdminComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'mercadotecnia', 'auditoria', 'rh'] } },
+  { path: 'listar-agendas-admin', component: ListarAgendaComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'mercadotecnia', 'auditoria', 'rh'] } },
   { path: 'dir-seg-proyeccion', component: DirSegProyeccionComponent, canActivate: [AuthGuard], data: { roles: ['admin'] } },
 
   { path: 'error404', component: Error404Component },
