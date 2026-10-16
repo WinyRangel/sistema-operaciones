@@ -1,0 +1,737 @@
+/* ==========================================================================
+   LISTAR AGENDA ADMIN - STYLES
+   ========================================================================== */
+
+:host {
+    display: block;
+    --agenda-primary: #3d52a0;
+    --agenda-primary-dark: #2b3a67;
+    --agenda-primary-light: #7091e6;
+    --agenda-bg: #f4f6fb;
+    --agenda-border: #e2e8f0;
+    --agenda-card-shadow: 0 4px 16px rgba(43, 58, 103, 0.06);
+    --agenda-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.agenda-list-wrapper {
+    background: var(--agenda-bg);
+    min-height: calc(100vh - 70px);
+    padding: 0.75rem 0 2.5rem 0;
+}
+
+@media (min-width: 768px) {
+    .agenda-list-wrapper {
+        padding: 1.25rem 0 2.5rem 0;
+    }
+}
+
+/* Card Principal */
+.agenda-list-card {
+    background: #ffffff;
+    border: 1px solid var(--agenda-border);
+    border-radius: 1rem;
+    box-shadow: var(--agenda-card-shadow);
+    overflow: hidden;
+}
+
+/* Cabecera Hero */
+.agenda-list-header {
+    background: linear-gradient(135deg, var(--agenda-primary-dark) 0%, var(--agenda-primary) 60%, #4e62b4 100%);
+    color: #ffffff;
+    padding: 1rem 1.15rem;
+}
+
+@media (min-width: 768px) {
+    .agenda-list-header {
+        padding: 1.25rem 1.75rem;
+    }
+}
+
+.hero-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Botones de Exportación */
+.btn-export-excel {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border: none;
+    font-weight: 600;
+    padding: 0.55rem 1.15rem;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
+    transition: var(--agenda-transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-export-excel:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(16, 185, 129, 0.35);
+    color: #ffffff;
+}
+
+.btn-export-pdf {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
+    border: none;
+    font-weight: 600;
+    padding: 0.55rem 1.15rem;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25);
+    transition: var(--agenda-transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-export-pdf:hover:not(:disabled) {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(239, 68, 68, 0.35);
+    color: #ffffff;
+}
+
+/* Botón Enviar por Correo */
+.btn-enviar-correo {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    border: none;
+    font-weight: 600;
+    padding: 0.55rem 1.15rem;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
+    transition: var(--agenda-transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-enviar-correo:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(2, 132, 199, 0.35);
+    color: #ffffff;
+}
+
+.btn-enviar-correo:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-enviar-correo-mini {
+    background: #0284c7;
+    color: #ffffff;
+    border: none;
+    font-weight: 600;
+    transition: var(--agenda-transition);
+}
+
+.btn-enviar-correo-mini:hover:not(:disabled) {
+    background: #0369a1;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+/* Banner inferior de envío por correo */
+.send-email-banner {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+}
+
+.send-email-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15);
+    flex-shrink: 0;
+}
+
+/* Panel de Filtros */
+.filters-panel {
+    background: #f8fafc;
+    border: 1px solid var(--agenda-border);
+    border-radius: 0.85rem;
+    padding: 0.9rem;
+    margin-bottom: 1.25rem;
+}
+
+@media (min-width: 768px) {
+    .filters-panel {
+        padding: 1.15rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+.filter-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: #475569;
+    margin-bottom: 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.input-search-custom {
+    position: relative;
+}
+
+.search-input-field {
+    border-radius: 0.6rem;
+    border: 1.5px solid var(--agenda-border);
+    padding: 0.6rem 0.85rem 0.6rem 2.4rem;
+    font-size: 0.925rem;
+    transition: var(--agenda-transition);
+    background-color: #ffffff;
+}
+
+.search-icon-inside {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.search-input-field:focus {
+    border-color: var(--agenda-primary-light);
+    box-shadow: 0 0 0 3px rgba(112, 145, 230, 0.2);
+    outline: none;
+}
+
+.quick-filter-btn {
+    border: 1px solid var(--agenda-border);
+    background: #ffffff;
+    color: #475569;
+    font-size: 0.775rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    transition: var(--agenda-transition);
+}
+
+.quick-filter-btn:hover {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: var(--agenda-primary-dark);
+}
+
+/* Ribbon de Resumen / KPIs */
+.kpi-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.kpi-item {
+    background: #ffffff;
+    border: 1px solid var(--agenda-border);
+    padding: 0.45rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    color: #334155;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.kpi-item strong {
+    color: var(--agenda-primary);
+    font-weight: 700;
+}
+
+/* Tabla Estilizada */
+.table-responsive-custom {
+    border: 1px solid var(--agenda-border);
+    border-radius: 0.85rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    background: #ffffff;
+}
+
+/* Indicador scroll tabla en móvil */
+@media (max-width: 767.98px) {
+    .table-responsive-custom {
+        border-radius: 0.6rem;
+    }
+
+    .table-responsive-custom::before {
+        content: '← Desliza para ver más →';
+        display: block;
+        text-align: center;
+        font-size: 0.7rem;
+        color: #94a3b8;
+        padding: 0.3rem;
+        border-bottom: 1px solid var(--agenda-border);
+        background: #f8fafc;
+    }
+}
+
+.agenda-table {
+    margin-bottom: 0;
+    width: 100%;
+    vertical-align: middle;
+}
+
+.agenda-table thead {
+    background: #f1f5f9;
+    border-bottom: 2px solid var(--agenda-border);
+}
+
+.agenda-table th {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: #334155;
+    padding: 0.75rem 0.75rem;
+    white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+    .agenda-table th {
+        font-size: 0.825rem;
+        padding: 0.85rem 1rem;
+    }
+}
+
+.agenda-table td {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.875rem;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+@media (min-width: 768px) {
+    .agenda-table td {
+        padding: 0.85rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+.agenda-table tbody tr {
+    transition: var(--agenda-transition);
+}
+
+.agenda-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Badges de Roles */
+.badge-role {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    letter-spacing: 0.03em;
+}
+
+.badge-role-merca {
+    background: #fdf2f8;
+    color: #db2777;
+    border: 1px solid #fbcfe8;
+}
+
+.badge-role-audi {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+
+.badge-role-rh {
+    background: #ecfeff;
+    color: #0891b2;
+    border: 1px solid #a5f3fc;
+}
+
+.badge-role-admin {
+    background: #eef2ff;
+    color: #4f46e5;
+    border: 1px solid #c7d2fe;
+}
+
+.badge-role-sup {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+/* Botón de Acción */
+.btn-edit-action {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid #c7d2fe;
+    background: #eef2ff;
+    color: #4f46e5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--agenda-transition);
+}
+
+.btn-edit-action:hover {
+    background: #e0e7ff;
+    color: #3730a3;
+    transform: scale(1.05);
+}
+
+.btn-delete-action {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid #fee2e2;
+    background: #fff5f5;
+    color: #ef4444;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--agenda-transition);
+}
+
+.btn-delete-action:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+    transform: scale(1.05);
+}
+
+/* Paginación */
+.pagination-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding-top: 1rem;
+}
+
+@media (min-width: 576px) {
+    .pagination-container {
+        justify-content: space-between;
+        gap: 1rem;
+        padding-top: 1.25rem;
+    }
+}
+
+.btn-pagination {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--agenda-border);
+    background: #ffffff;
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: var(--agenda-transition);
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background: #f1f5f9;
+    color: var(--agenda-primary);
+    border-color: #cbd5e1;
+}
+
+.btn-pagination.active {
+    background: var(--agenda-primary);
+    color: #ffffff;
+    border-color: var(--agenda-primary);
+}
+
+.btn-pagination:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* Estado Vacío y Spinner */
+.empty-state-box {
+    text-align: center;
+    padding: 4rem 1.5rem;
+    background: #f8fafc;
+    border-radius: 0.85rem;
+    border: 2px dashed #cbd5e1;
+}
+
+.empty-state-icon {
+    font-size: 3.5rem;
+    color: #94a3b8;
+    margin-bottom: 1rem;
+}
+
+/* ==========================================================================
+   TABS DE NAVEGACIÓN
+   ========================================================================== */
+
+.agenda-tabs-nav {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--agenda-border);
+    padding-bottom: 0;
+    flex-wrap: wrap;
+}
+
+.agenda-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    border-radius: 6px 6px 0 0;
+    transition: var(--agenda-transition);
+    cursor: pointer;
+}
+
+.agenda-tab-btn:hover {
+    background: #f1f5f9;
+    color: var(--agenda-primary);
+}
+
+.agenda-tab-btn.active {
+    color: var(--agenda-primary);
+    border-bottom-color: var(--agenda-primary);
+    background: #eef2ff;
+}
+
+.tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #e2e8f0;
+    color: #475569;
+    transition: var(--agenda-transition);
+}
+
+.tab-count-active {
+    background: var(--agenda-primary);
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   BADGES DE ROLES FALTANTES
+   ========================================================================== */
+
+.badge-role-asesor {
+    background: #fefce8;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.badge-role-coord {
+    background: #ede9fe;
+    color: #5b21b6;
+    border: 1px solid #ddd6fe;
+}
+
+.badge-role-general {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+/* ==========================================================================
+   SUB-TABS: DIVISIÓN ADICIONAL POR COORDINADOR / ASESOR
+   ========================================================================== */
+
+.agenda-subtabs-wrapper {
+    background: #f8fafc;
+    border: 1px solid var(--agenda-border);
+    border-radius: 0.85rem;
+    padding: 0.85rem 1rem;
+    box-shadow: 0 2px 6px rgba(43, 58, 103, 0.03);
+    animation: fadeInSubTabs 0.25s ease-out;
+}
+
+@keyframes fadeInSubTabs {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.subtabs-title {
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+    color: #475569;
+}
+
+.agenda-subtabs-scroll {
+    display: flex;
+    gap: 0.55rem;
+    overflow-x: auto;
+    padding: 0.25rem 0.2rem 0.6rem 0.2rem;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar para los sub-tabs */
+.agenda-subtabs-scroll::-webkit-scrollbar {
+    height: 5px;
+}
+
+.agenda-subtabs-scroll::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.agenda-subtabs-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+    transition: var(--agenda-transition);
+}
+
+.agenda-subtabs-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.agenda-subtab-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.95rem;
+    border-radius: 50px;
+    border: 1.5px solid var(--agenda-border);
+    background: #ffffff;
+    color: #475569;
+    font-size: 0.835rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: var(--agenda-transition);
+    user-select: none;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.agenda-subtab-pill:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: var(--agenda-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(43, 58, 103, 0.06);
+}
+
+.agenda-subtab-pill.active {
+    background: linear-gradient(135deg, var(--agenda-primary-dark) 0%, var(--agenda-primary) 100%);
+    border-color: transparent;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(43, 58, 103, 0.25);
+    transform: translateY(-1px);
+}
+
+.subtab-icon-box {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    background: rgba(0, 0, 0, 0.05);
+    color: inherit;
+}
+
+.agenda-subtab-pill.active .subtab-icon-box {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.subtab-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: #e2e8f0;
+    color: #334155;
+    letter-spacing: -0.02em;
+    flex-shrink: 0;
+    transition: var(--agenda-transition);
+}
+
+.agenda-subtab-pill.active .subtab-avatar {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+.subtab-label {
+    letter-spacing: 0.01em;
+}
+
+.subtab-badge {
+    min-width: 22px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: #f1f5f9;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--agenda-transition);
+}
+
+.agenda-subtab-pill:hover .subtab-badge {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.subtab-badge-active {
+    background: rgba(255, 255, 255, 0.28) !important;
+    color: #ffffff !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}

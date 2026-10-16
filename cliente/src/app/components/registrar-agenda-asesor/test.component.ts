@@ -407,8 +407,8 @@ export class TestComponent implements OnInit {
   opcionesCodigo = [
     { value: 'R', texto: 'R | Recuperación' },
     { value: 'RP', texto: 'R/P | Recuperación / levantamiento de papelería' },
-    { value: 'LPI', texto: 'Levantamiento papelería individuales' },
-    { value: 'RPI', texto: 'Recuperación de levantaiento de papelería' },
+    { value: 'LPI', texto: 'LPI | Levantamiento papelería individuales' },
+    { value: 'RPI', texto: 'RPI | Recuperación de levantaiento de papelería' },
     { value: 'C', texto: 'C | Cobranza' },
     { value: 'VTA', texto: 'VTA | Promoción' },
     { value: 'REC', texto: 'R/EC | Recuperación / Entrega / Cambio ciclo' },

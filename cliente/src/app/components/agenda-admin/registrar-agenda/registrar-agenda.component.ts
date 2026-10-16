@@ -180,8 +180,9 @@ export class RegistrarAgendaAdminComponent implements OnInit {
       }
     });
 
-    // Establecer fecha actual por defecto
-    const today = new Date().toISOString().split('T')[0];
+    // Establecer fecha actual local por defecto
+    const d = new Date();
+    const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     this.formulario.patchValue({ fecha: today });
   }
 

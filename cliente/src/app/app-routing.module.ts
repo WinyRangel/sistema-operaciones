@@ -19,13 +19,12 @@ import { SubirAgendaComponent } from './components/Coordinadoras/subir-agenda/su
 import { MiAgendaComponent } from './components/Coordinadoras/mi-agenda/mi-agenda.component';
 import { RegistrarAgendaComponent } from './components/Coordinadoras/registrar-agenda/registrar-agenda.component';
 import { FichasAsesorComponent } from './components/Shared/fichas-asesor/fichas-asesor.component';
-import { FichasComponent } from './components/Shared/fichas/fichas.component';
 import { TestComponent } from './components/registrar-agenda-asesor/test.component';
 import { TestAgendaComponent } from './components/test-agenda/test-agenda.component';
 import { ListarAgendaComponent } from './components/agenda-admin/listar-agenda/listar-agenda.component';
 import { RegistrarAgendaAdminComponent } from './components/agenda-admin/registrar-agenda/registrar-agenda.component';
 import { Error404Component } from './components/Shared/error404/error404.component';
-
+import { ListarTodaAgendasComponent } from './components/admin/listar-toda-agendas/listar-toda-agendas.component';
 
 const routes: Routes = [
   { path: 'baucher', component: BauchersComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup'] } },
@@ -54,7 +53,7 @@ const routes: Routes = [
   { path: 'registrar-agenda-admin', component: RegistrarAgendaAdminComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'mercadotecnia', 'auditoria', 'rh'] } },
   { path: 'listar-agendas-admin', component: ListarAgendaComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'mercadotecnia', 'auditoria', 'rh'] } },
   { path: 'dir-seg-proyeccion', component: DirSegProyeccionComponent, canActivate: [AuthGuard], data: { roles: ['admin'] } },
-
+  { path: 'listar-todas-agendas', component: ListarTodaAgendasComponent, canActivate: [AuthGuard], data: { roles: ['admin', 'sup', 'mercadotecnia', 'auditoria', 'rh'] } },
   { path: 'error404', component: Error404Component },
   { path: '**', redirectTo: 'error404' }
 ];

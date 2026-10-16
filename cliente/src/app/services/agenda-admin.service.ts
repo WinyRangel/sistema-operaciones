@@ -9,8 +9,9 @@ import { ActividadPayload } from './coordinacion.service';
   providedIn: 'root'
 })
 export class AgendaAdminService {
-  private baseUrl = 'https://servidor-operaciones.onrender.com';
-  //private baseUrl = 'http://localhost:4000';
+  private baseUrl = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+    ? 'http://localhost:4000'
+    : 'https://servidor-operaciones.onrender.com';
 
   constructor(private http: HttpClient) { }
 
@@ -31,13 +32,20 @@ export class AgendaAdminService {
     return this.http.get<any>(`${this.baseUrl}/agenda-admin/`, { params });
   }
 
+  obtenerAllAgendas(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/agenda-admin/all`);
+  }
+
   eliminarAgendaAdmin(id: string): Observable<any> {
     return this.http.delete<any>(`${this.baseUrl}/agenda-admin/${id}`);
   }
 
-  enviarResumenAgenda(fechaInicio: string, fechaFin: string, rol?: string): Observable<any> {
-    const body: any = { fechaInicio, fechaFin };
+  enviarResumenAgenda(fechaInicio?: string, fechaFin?: string, rol?: string, usuario?: string): Observable<any> {
+    const body: any = {};
+    if (fechaInicio) body['fechaInicio'] = fechaInicio;
+    if (fechaFin) body['fechaFin'] = fechaFin;
     if (rol) body['rol'] = rol;
+    if (usuario) body['usuario'] = usuario;
     return this.http.post<any>(`${this.baseUrl}/agenda-admin/enviar-resumen`, body);
   }
 

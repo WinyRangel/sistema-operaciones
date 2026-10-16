@@ -110,6 +110,30 @@
         </div>
       </div>
 
+
+      <div class="col-12 col-md-6 col-lg-5" *ngIf="rolUsuario === 'auditoria'">
+        <div class="card module-card border-0 h-100 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="module-icon-box bg-gradient-orange shadow-orange">
+                  <i class="bi bi-people"></i>
+                </div>
+                <span class="module-chip chip-orange">Consulta de Agenda Operativa</span>
+              </div>
+              <h5 class="module-title mb-2">Visualización de agendas Asesores y Coordinadores</h5>
+              <p class="module-text text-muted mb-4">
+                Consulta cronogramas, filtra por rango de fechas, exporta a Excel/PDFo.
+              </p>
+            </div>
+            <a routerLink="/listar-todas-agendas" class="btn btn-module-action btn-orange w-100">
+              <span>Consultar Agendas</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
       <!-- ================================================================ -->
       <!-- 2. MÓDULOS ESPECÍFICOS DE ADMIN Y SUP -->
       <!-- ================================================================ -->

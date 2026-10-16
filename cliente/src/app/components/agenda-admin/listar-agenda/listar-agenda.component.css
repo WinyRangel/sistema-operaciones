@@ -386,6 +386,25 @@
 }
 
 /* Botón de Acción */
+.btn-edit-action {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #c7d2fe;
+  background: #eef2ff;
+  color: #4f46e5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--agenda-transition);
+}
+
+.btn-edit-action:hover {
+  background: #e0e7ff;
+  color: #3730a3;
+  transform: scale(1.05);
+}
+
 .btn-delete-action {
   width: 34px;
   height: 34px;

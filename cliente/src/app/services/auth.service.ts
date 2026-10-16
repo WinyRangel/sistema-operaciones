@@ -9,8 +9,9 @@ export class AuthService {
   setUsuarioActual(usuario: any) {
     throw new Error('Method not implemented.');
   }
-  private apiUrl = 'https://servidor-operaciones.onrender.com/login';
-  // private apiUrl = 'http://localhost:4000/login';
+  private apiUrl = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+    ? 'http://localhost:4000/login'
+    : 'https://servidor-operaciones.onrender.com/login';
   private autenticadoSubject = new BehaviorSubject<boolean>(this.tieneToken());
   autenticado$ = this.autenticadoSubject.asObservable();
 
